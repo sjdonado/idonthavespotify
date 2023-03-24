@@ -18,7 +18,7 @@ export default function Home() {
     setLoading(true);
 
     try {
-      const { title, description, image } = await spotifyService(formData.songLink);
+      const { title, description, ...rest } = await spotifyService(formData.songLink);
 
       const youtubeLink = await youtubeService(title, description);
       const appleMusicLink = appleMusicService(title);
@@ -28,7 +28,7 @@ export default function Home() {
       const searchedSong = {
         title,
         description,
-        image,
+        ...rest,
         links: {
           youtube: youtubeLink,
           appleMusic: appleMusicLink,
@@ -41,18 +41,17 @@ export default function Home() {
     } catch (err) {
       setError('Something went wrong, try again later');
     }
+
     setLoading(false);
   };
 
   return (
     <main class="bg-gray-900 text-white font-thin flex flex-col justify-start items-center p-4 h-screen overflow-auto">
-      <h1 class="text-center max-6-xs text-6xl uppercase my-16">
-        I don't have spotify
-      </h1>
+      <h1 class="text-center max-6-xs text-6xl uppercase my-16">I don't have spotify</h1>
       <SearchBar onSearch={handleOnSearch} isLoading={loading()} />
       {loading() && <p class="mt-8">Loading...</p>}
-      {song() && <SongCard song={song()!} />}
       {error() && <p class="mt-8">{error()}</p>}
+      {!loading() && !error() && song() && <SongCard song={song()!} />}
     </main>
   );
 }

@@ -1,9 +1,11 @@
-import type { Component } from 'solid-js';
+import { Component } from 'solid-js';
+import AudioPreview from './AudioPreview';
 
 export interface Song {
   title: string;
   description: string;
   image: string;
+  audio?: string;
   links: {
     youtube: string;
     appleMusic: string;
@@ -31,7 +33,11 @@ const SongLink = (props: { link: string, icon: string, label: string }) => (
 
 const SongCard: Component<SongCardProps> = (props) => (
   <div class="flex flex-wrap justify-start items-center border border-white w-5/6 lg:w-1/2 m-5">
-    <img class="w-full md:w-48 p-1" src={props.song.image} alt={props.song.title} />
+    <AudioPreview
+      title={props.song.title}
+      image={props.song.image}
+      audio={props.song.audio}
+    />
     <div class="flex flex-col items-start p-2">
       <div class="font-bold text-xl">{props.song.title}</div>
       <p class="text-sm"> {props.song.description} </p>

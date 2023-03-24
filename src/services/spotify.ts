@@ -6,6 +6,7 @@ interface SpotifyMetadata {
   title: string;
   description: string;
   image: string;
+  audio?: string;
 }
 
 function metaTagContent(doc: cheerio.CheerioAPI, type: string, attr: string) {
@@ -19,6 +20,7 @@ export default server$(async (songLink: string): Promise<SpotifyMetadata> => {
   const title = metaTagContent(doc, 'og:title', 'property');
   const description = metaTagContent(doc, 'og:description', 'property');
   const image = metaTagContent(doc, 'og:image', 'property');
+  const audio = metaTagContent(doc, 'og:audio', 'property');
 
   if (!title || !description || !image) {
     throw new Error('Could not parse Spotify metadata');
@@ -28,5 +30,6 @@ export default server$(async (songLink: string): Promise<SpotifyMetadata> => {
     title,
     description,
     image,
+    audio,
   };
 });
