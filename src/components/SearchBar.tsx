@@ -38,6 +38,7 @@ const SearchBar: Component<SearchBarProps> = (props) => {
         class="flex-1 bg-gray-700 border border-gray-600 placeholder-gray-400 p-2.5"
         placeholder="https://open.spotify.com/track/7A8MwSsu9efJXP6xvZfRN3?si=d4f1e2eb324c43df"
         onInput={handleInput}
+        pattern="https:\/\/open.spotify.com\/.*"
         required
       />
       <button

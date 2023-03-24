@@ -6,30 +6,41 @@ import SongCard, { Song } from '~/components/SongCard';
 import spotifyService from '~/services/spotify';
 import youtubeService from '~/services/youtube';
 import appleMusicService from '~/services/appleMusic';
+import tidalService from '~/services/tidal';
+import soundcloudService from '~/services/soundcloud';
 
 export default function Home() {
   const [song, setSong] = createSignal<Song | undefined>();
   const [loading, setLoading] = createSignal(false);
+  const [error, setError] = createSignal<string | undefined>();
 
   const handleOnSearch = async (formData: SearchForm) => {
     setLoading(true);
 
-    const { title, description, image } = await spotifyService(formData.songLink);
+    try {
+      const { title, description, image } = await spotifyService(formData.songLink);
 
-    const youtubeLink = await youtubeService(title, description);
-    const appleMusicLink = appleMusicService(title);
+      const youtubeLink = await youtubeService(title, description);
+      const appleMusicLink = appleMusicService(title);
+      const tidalLink = tidalService(title);
+      const soundcloudLink = soundcloudService(title);
 
-    const searchedSong = {
-      title,
-      description,
-      image,
-      links: {
-        youtube: youtubeLink,
-        appleMusic: appleMusicLink,
-      },
-    } as Song;
+      const searchedSong = {
+        title,
+        description,
+        image,
+        links: {
+          youtube: youtubeLink,
+          appleMusic: appleMusicLink,
+          tidal: tidalLink,
+          soundcloud: soundcloudLink,
+        },
+      } as Song;
 
-    setSong(searchedSong);
+      setSong(searchedSong);
+    } catch (err) {
+      setError('Something went wrong, try again later');
+    }
     setLoading(false);
   };
 
@@ -41,6 +52,7 @@ export default function Home() {
       <SearchBar onSearch={handleOnSearch} isLoading={loading()} />
       {loading() && <p class="mt-8">Loading...</p>}
       {song() && <SongCard song={song()!} />}
+      {error() && <p class="mt-8">{error()}</p>}
     </main>
   );
 }
