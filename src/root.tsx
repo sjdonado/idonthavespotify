@@ -33,22 +33,25 @@ export default function Root() {
       <Body>
         <Suspense>
           <ErrorBoundary>
-            <nav class="bg-sky-800">
-              <ul class="container flex items-center p-3 text-gray-200">
-                <li class={`border-b-2 ${active('/')} mx-1.5 sm:mx-6`}>
-                  <A href="/">Search</A>
-                </li>
-                <li class={`border-b-2 ${active('/stats')} mx-1.5 sm:mx-6`}>
-                  <A href="/stats">Statistics</A>
-                </li>
-              </ul>
-            </nav>
+            {
+              /* <nav class="bg-sky-800">
+                <ul class="container flex items-center p-3 text-gray-200">
+                  <li class={`border-b-2 ${active('/')} mx-1.5 sm:mx-6`}>
+                    <A href="/">Search</A>
+                  </li>
+                  <li class={`border-b-2 ${active('/stats')} mx-1.5 sm:mx-6`}>
+                    <A href="/stats">Statistics</A>
+                  </li>
+                </ul>
+              </nav> */
+            }
             <Routes>
               <FileRoutes />
             </Routes>
           </ErrorBoundary>
         </Suspense>
         <Scripts />
+        <script defer src="https://kit.fontawesome.com/f559975e2f.js" crossorigin="anonymous" />
       </Body>
     </Html>
   );

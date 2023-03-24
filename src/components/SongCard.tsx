@@ -12,15 +12,24 @@ interface SongCardProps {
 }
 
 const SongCard: Component<SongCardProps> = (props) => (
-  <div class="max-w-sm rounded overflow-hidden shadow-lg">
-    <img class="w-full" src={props.song.image} alt={props.song.title} />
-    <div class="px-6 py-4">
-      <div class="font-bold text-xl mb-2">{props.song.title}</div>
-      <p class="text-gray-700 text-base">
-        {props.song.description}
-      </p>
-      <ul class="list-disc pl-4">
-        <li><a href={props.song.youtubeLink} >{props.song.youtubeLink}</a></li>
+  <div class="flex flex-wrap justify-start items-center border border-white w-5/6 lg:w-1/2 m-5">
+    <img class="w-full md:w-48 p-1" src={props.song.image} alt={props.song.title} />
+    <div class="flex flex-col items-start p-2">
+      <div class="font-bold text-xl">{props.song.title}</div>
+      <p class="text-sm"> {props.song.description} </p>
+      <ul class="mt-2 text-base">
+        <li class="flex items-center">
+          <a
+            href={props.song.youtubeLink}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Listen on Youtube"
+            class="flex items-center hover:text-gray-300"
+          >
+            <i class="fab fa-youtube mr-1 text-xl" />
+            Listen on Youtube
+          </a>
+        </li>
       </ul>
     </div>
   </div>

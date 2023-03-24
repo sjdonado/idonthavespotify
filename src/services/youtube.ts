@@ -9,10 +9,11 @@ interface YoutubeSearchListResponse {
 }
 
 export default server$(async (query: string) => {
-  const response = await fetch(`${YOUTUBE_API_SEARCH_URL}?q=${query}&maxResults=1&key=${VITE_YOUTUBE_API_KEY}`)
-    .then((res) => res.json()) as YoutubeSearchListResponse;
+  const url = `${YOUTUBE_API_SEARCH_URL}?q=${query}&maxResults=1&key=${VITE_YOUTUBE_API_KEY as string}`;
 
-  const { videoId } = (response.items ?? [])[0].id ?? {};
+  const response = await fetch(url).then((res) => res.json()) as YoutubeSearchListResponse;
+
+  const { videoId } = (response.items || [])[0].id ?? {};
 
   if (!videoId) {
     return null;
