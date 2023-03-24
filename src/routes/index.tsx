@@ -3,30 +3,34 @@ import { createSignal } from 'solid-js';
 import SearchBar, { SearchForm } from '~/components/SearchBar';
 import SongCard, { Song } from '~/components/SongCard';
 
-import getSpotifyMetaData from '~/services/spotify';
-import getYoutubeLink from '~/services/youtube';
+import spotifyService from '~/services/spotify';
+import youtubeService from '~/services/youtube';
+import appleMusicService from '~/services/appleMusic';
 
 export default function Home() {
-  const [song, setSong] = createSignal<Song | undefined>({
-    title: "Fidjos d'Africa",
-    description: 'Cretcheu · Song · 2015',
-    image: 'https://i.scdn.co/image/ab67616d0000b27319ed0a2486009ff82606cb19',
-    youtubeLink: 'https://www.youtube.com/watch?v=F3MqfhzHJ60',
-  });
+  const [song, setSong] = createSignal<Song | undefined>();
+  const [loading, setLoading] = createSignal(false);
 
   const handleOnSearch = async (formData: SearchForm) => {
-    const { title, description, image } = await getSpotifyMetaData(formData.songLink);
+    setLoading(true);
 
-    const query = encodeURIComponent(`${title ?? ''} ${description?.includes('Song') ? description : ''}`);
+    const { title, description, image } = await spotifyService(formData.songLink);
 
-    const youtubeLink = await getYoutubeLink(query);
+    const youtubeLink = await youtubeService(title, description);
+    const appleMusicLink = appleMusicService(title);
 
-    setSong({
+    const searchedSong = {
       title,
       description,
       image,
-      youtubeLink,
-    } as Song);
+      links: {
+        youtube: youtubeLink,
+        appleMusic: appleMusicLink,
+      },
+    } as Song;
+
+    setSong(searchedSong);
+    setLoading(false);
   };
 
   return (
@@ -34,7 +38,8 @@ export default function Home() {
       <h1 class="text-center max-6-xs text-6xl uppercase my-16">
         I don't have spotify
       </h1>
-      <SearchBar onSearch={handleOnSearch} />
+      <SearchBar onSearch={handleOnSearch} isLoading={loading()} />
+      {loading() && <p class="mt-8">Loading...</p>}
       {song() && <SongCard song={song()!} />}
     </main>
   );

@@ -8,6 +8,7 @@ export interface SearchForm {
 
 interface SearchBarProps {
   onSearch: (formData: SearchForm) => void;
+  isLoading: boolean;
 }
 
 const SearchBar: Component<SearchBarProps> = (props) => {
@@ -42,6 +43,7 @@ const SearchBar: Component<SearchBarProps> = (props) => {
       <button
         type="submit"
         class="p-2.5 ml-2 text-sm font-medium bg-green-600 text-white border border-green-700 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-800"
+        disabled={props.isLoading}
       >
         <i class="fas fa-search p-1" />
         <span class="sr-only">Search</span>

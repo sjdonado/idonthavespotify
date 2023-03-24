@@ -4,7 +4,10 @@ export interface Song {
   title: string;
   description: string;
   image: string;
-  youtubeLink: string;
+  links: {
+    youtube: string;
+    appleMusic: string;
+  }
 }
 
 interface SongCardProps {
@@ -20,7 +23,7 @@ const SongCard: Component<SongCardProps> = (props) => (
       <ul class="mt-2 text-base">
         <li class="flex items-center">
           <a
-            href={props.song.youtubeLink}
+            href={props.song.links.youtube}
             target="_blank"
             rel="noreferrer"
             aria-label="Listen on Youtube"
@@ -28,6 +31,18 @@ const SongCard: Component<SongCardProps> = (props) => (
           >
             <i class="fab fa-youtube mr-1 text-xl" />
             Listen on Youtube
+          </a>
+        </li>
+        <li class="flex items-center">
+          <a
+            href={props.song.links.appleMusic}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Listen on Youtube"
+            class="flex items-center hover:text-gray-300"
+          >
+            <i class="fab fa-apple mr-1 text-xl" />
+            Listen on Apple Music
           </a>
         </li>
       </ul>
