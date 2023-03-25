@@ -3,11 +3,7 @@ import { createSignal } from 'solid-js';
 import SearchBar, { SearchForm } from '~/components/SearchBar';
 import SongCard, { Song } from '~/components/SongCard';
 
-import spotifyService from '~/services/spotify';
-import youtubeService from '~/services/youtube';
-import appleMusicService from '~/services/appleMusic';
-import tidalService from '~/services/tidal';
-import soundcloudService from '~/services/soundcloud';
+import { fetchSong } from '~/services/remote';
 
 export default function Home() {
   const [song, setSong] = createSignal<Song | undefined>();
@@ -18,26 +14,8 @@ export default function Home() {
     setLoading(true);
 
     try {
-      const { title, description, ...rest } = await spotifyService(formData.songLink);
-
-      const youtubeLink = await youtubeService(title, description);
-      const appleMusicLink = appleMusicService(title);
-      const tidalLink = tidalService(title);
-      const soundcloudLink = soundcloudService(title);
-
-      const searchedSong = {
-        title,
-        description,
-        ...rest,
-        links: {
-          youtube: youtubeLink,
-          appleMusic: appleMusicLink,
-          tidal: tidalLink,
-          soundcloud: soundcloudLink,
-        },
-      } as Song;
-
-      setSong(searchedSong);
+      const fetchedSong = await fetchSong(formData.songLink);
+      setSong(fetchedSong);
     } catch (err) {
       setError('Something went wrong, try again later');
     }
