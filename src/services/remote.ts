@@ -8,7 +8,15 @@ import { getAppleMusicLink } from '~/server/appleMusic';
 import { getTidalLink } from '~/server/tidal';
 import { getSoundcloudLink } from '~/server/soundcloud';
 
-export const fetchSong = server$(async (songLink: string): Promise<Song> => {
+import { verityCaptcha } from '~/utils/captcha';
+
+export const fetchSong = server$(async (songLink: string, token: string): Promise<Song> => {
+  const captchaSuccess = await verityCaptcha(token);
+
+  if (!captchaSuccess) {
+    throw new Error('Captcha failed');
+  }
+
   const metadata = await getSpotifyMetadata(songLink);
 
   const youtubeLink = await getYoutubeLink(metadata);

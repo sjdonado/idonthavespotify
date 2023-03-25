@@ -5,6 +5,8 @@ interface ImportMetaEnv {
   readonly VITE_APPLE_MUSIC_BASE_URL: string;
   readonly VITE_TIDAL_BASE_URL: string;
   readonly VITE_SOUNDCLOUD_BASE_URL: string;
+  readonly VITE_RECAPTCHA_SITE_KEY: string;
+  readonly VITE_RECAPTCHA_SECRET_KEY: string;
 }
 
 interface ImportMeta {

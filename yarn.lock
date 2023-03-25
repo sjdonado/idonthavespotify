@@ -3592,6 +3592,11 @@ readdirp@~3.6.0:
   dependencies:
     picomatch "^2.2.1"
 
+recaptcha-v3@^1.10.0:
+  version "1.10.0"
+  resolved "https://registry.yarnpkg.com/recaptcha-v3/-/recaptcha-v3-1.10.0.tgz#f966b5a0d8021fd2ed85ac4be832f6acb6ec1ed1"
+  integrity sha512-aGTxYSk3FFNKnXeKDbLpgRDRyIHRZNBF5HyaXXAN1Aj4TSyyZvmoAn9CylvpqLV3pYpIQavwc+2rzhNFn5SsLQ==
+
 regenerate-unicode-properties@^10.1.0:
   version "10.1.0"
   resolved "https://registry.yarnpkg.com/regenerate-unicode-properties/-/regenerate-unicode-properties-10.1.0.tgz#7c3192cab6dd24e21cb4461e5ddd7dd24fa8374c"

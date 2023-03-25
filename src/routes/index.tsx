@@ -1,9 +1,12 @@
 import { createSignal } from 'solid-js';
+import { load } from 'recaptcha-v3';
 
 import SearchBar, { SearchForm } from '~/components/SearchBar';
 import SongCard, { Song } from '~/components/SongCard';
 
 import { fetchSong } from '~/services/remote';
+
+const { VITE_RECAPTCHA_SITE_KEY } = import.meta.env;
 
 export default function Home() {
   const [song, setSong] = createSignal<Song | undefined>();
@@ -14,7 +17,10 @@ export default function Home() {
     setLoading(true);
 
     try {
-      const fetchedSong = await fetchSong(formData.songLink);
+      const recaptcha = await load(VITE_RECAPTCHA_SITE_KEY);
+      const token = await recaptcha.execute('submit');
+
+      const fetchedSong = await fetchSong(formData.songLink, token);
       setSong(fetchedSong);
     } catch (err) {
       setError('Something went wrong, try again later');
@@ -28,7 +34,7 @@ export default function Home() {
       <main class="flex flex-col justify-start items-center h-[96%]">
         <div class="text-center my-16">
           <h1 class="text-6xl uppercase">I don't have spotify</h1>
-          <h2 class="mt-6">Convert Spotify links to YouTube, Apple Music, Tidal, Soundcloud and more.</h2>
+          <h2 class="mt-6">Listen to Spotify links on YouTube, Apple Music, Tidal, Soundcloud and more</h2>
         </div>
         <SearchBar onSearch={handleOnSearch} isLoading={loading()} />
         {loading() && <p class="mt-8">Loading...</p>}
