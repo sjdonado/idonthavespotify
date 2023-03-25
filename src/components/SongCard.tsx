@@ -35,7 +35,7 @@ const SongLink = (props: { link: string, icon: string, label: string }) => (
 );
 
 const SongCard: Component<SongCardProps> = (props) => (
-  <div class="flex flex-wrap justify-start items-center border border-white w-5/6 lg:w-1/2 m-5">
+  <div class="flex flex-wrap justify-start items-center rounded-lg border border-white w-5/6 lg:w-1/2 m-5">
     <AudioPreview
       title={props.song.title}
       image={props.song.image}

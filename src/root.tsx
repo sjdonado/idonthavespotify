@@ -21,6 +21,8 @@ export default function Root() {
         <Title>I don't have spotify</Title>
         <Meta charset="utf-8" />
         <Meta name="viewport" content="width=device-width, initial-scale=1" />
+      // TODO: get favicon
+      // update metdata
       </Head>
       <Body>
         <Suspense>
