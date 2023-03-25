@@ -23,7 +23,7 @@ export default function Root() {
         <Meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta name="theme-color" content="#000000" />
 
-        <Meta name="description" content="Listen to Spotify links on YouTube, Apple Music, Tidal, Soundcloud and more" />
+        <Meta name="description" content="Find Spotify content on YouTube, Apple Music, Tidal, Soundcloud and more." />
         <Meta name="keywords" content="Spotify,Youtube,Apple Music,Tidal,Soundcloud,converter,search,listen" />
 
         <Meta property="og:title" content="I don't have Spotify" />
@@ -31,7 +31,7 @@ export default function Root() {
 
         <Meta property="og:url" content="https://idonthavespotify.sjdonado.de/" />
         <Meta property="og:site_name" content="I don't have Spotify" />
-        <Meta property="og:description" content="Listen to Spotify links on YouTube, Apple Music, Tidal, Soundcloud and more" />
+        <Meta property="og:description" content="Find Spotify content on YouTube, Apple Music, Tidal, Soundcloud and more." />
 
         <Meta property="og:image" content="https://avatars.githubusercontent.com/u/27580836" />
         <Meta property="og:image:secure_url" content="https://user-images.githubusercontent.com/27580836/227728799-8123c22e-7714-45e7-95b3-56f666d7ebcc.png" />
@@ -43,6 +43,7 @@ export default function Root() {
           // add tests e2e
           // ligthhouse audit
           // expose api with CORS
+          // recollect errors (sentry?)
         }
       </Head>
       <Body>

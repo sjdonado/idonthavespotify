@@ -34,7 +34,7 @@ export default function Home() {
       <main class="flex flex-col justify-start items-center h-[96%]">
         <div class="text-center my-16">
           <h1 class="text-6xl uppercase">I don't have spotify</h1>
-          <h2 class="mt-6">Listen to Spotify links on YouTube, Apple Music, Tidal, Soundcloud and more</h2>
+          <h2 class="mt-6">Find Spotify content on YouTube, Apple Music, Tidal, Soundcloud and more.</h2>
         </div>
         <SearchBar onSearch={handleOnSearch} isLoading={loading()} />
         {loading() && <p class="mt-8">Loading...</p>}

@@ -21,7 +21,12 @@ interface SongCardProps {
   song: Song;
 }
 
-const SongLink = (props: { link: string, icon: string, label: string }) => (
+const SongLink = (props: {
+  link: string,
+  icon: string,
+  label: string,
+  isRecommended?: boolean
+}) => (
   <a
     href={props.link}
     target="_blank"
@@ -31,6 +36,9 @@ const SongLink = (props: { link: string, icon: string, label: string }) => (
   >
     <i class={`${props.icon} w-6 mr-1`} />
     {props.label}
+    {props.isRecommended && (
+      <span class="inline-flex items-center ml-1 px-1 rounded-full text-[0.56rem] bg-green-500 text-black">Recommended</span>
+    )}
   </a>
 );
 
@@ -50,6 +58,7 @@ const SongCard: Component<SongCardProps> = (props) => (
             link={props.song.links.youtube}
             icon="fab fa-youtube"
             label="Listen on Youtube"
+            isRecommended
           />
           <SongLink
             link={props.song.links.appleMusic}

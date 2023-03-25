@@ -43,7 +43,7 @@ const SearchBar: Component<SearchBarProps> = (props) => {
       />
       <button
         type="submit"
-        class="p-2.5 ml-2 text-sm font-medium bg-green-600 text-white border border-green-500 rounded-lg focus:ring-1 focus:outline-none focus:ring-white"
+        class="p-2.5 ml-2 text-sm font-medium bg-green-500 text-white border border-green-500 rounded-lg focus:ring-1 focus:outline-none focus:ring-white"
         disabled={props.isLoading}
       >
         <i class="fas fa-search p-1 text-black" />
