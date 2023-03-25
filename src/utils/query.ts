@@ -19,5 +19,17 @@ export const getQueryFromMetadata = ({ title, description, type }: SpotifyMetada
     }
   }
 
+  if (type === MetadataType.Playlist) {
+    query = `${query.replace(/This is /, '')} Playlist`;
+  }
+
+  if (type === MetadataType.Podcast) {
+    const [, artist] = description.match(/from (.+?) on Spotify\./) ?? [];
+
+    if (artist) {
+      query += ` ${artist}`;
+    }
+  }
+
   return encodeURIComponent(query);
 };

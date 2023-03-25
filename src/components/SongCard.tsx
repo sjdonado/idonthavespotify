@@ -43,7 +43,7 @@ const SongCard: Component<SongCardProps> = (props) => (
     />
     <div class="flex flex-col items-start p-2">
       <div class="font-bold text-xl">{props.song.title}</div>
-      <p class="text-sm"> {props.song.description} </p>
+      <p class="text-sm w-52 sm:w-96 truncate">{props.song.description}</p>
       <ul class="mt-2 text-base">
         <li class="flex flex-col items-start">
           <SongLink

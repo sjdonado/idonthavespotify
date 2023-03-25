@@ -3,8 +3,10 @@ import * as cheerio from 'cheerio';
 export enum MetadataType {
   Song = 'music.song',
   Album = 'music.album',
-  Artist = 'profile',
   Playlist = 'music.playlist',
+  Artist = 'profile',
+  Podcast = 'music.episode',
+  Show = 'website',
 }
 
 export interface SpotifyMetadata {
@@ -25,9 +27,10 @@ export const getSpotifyMetadata = async (songLink: string): Promise<SpotifyMetad
 
   const title = metaTagContent(doc, 'og:title', 'property');
   const description = metaTagContent(doc, 'og:description', 'property');
-  const type = metaTagContent(doc, 'og:type', 'property');
   const image = metaTagContent(doc, 'og:image', 'property');
   const audio = metaTagContent(doc, 'og:audio', 'property');
+
+  const type = songLink.includes('episode') ? MetadataType.Podcast : metaTagContent(doc, 'og:type', 'property');
 
   if (!title || !description || !type || !image) {
     throw new Error('Could not parse Spotify metadata');

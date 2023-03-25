@@ -1,11 +1,11 @@
 import { SpotifyMetadata } from '~/server/spotify';
 import { getQueryFromMetadata } from '~/utils/query';
 
-const APPLE_MUSIC_BASE_URL = 'https://music.apple.com/search?term=';
+const { VITE_APPLE_MUSIC_BASE_URL } = import.meta.env;
 
 export const getAppleMusicLink = (metadata: SpotifyMetadata) => {
   const query = getQueryFromMetadata(metadata);
-  const url = `${APPLE_MUSIC_BASE_URL}${query}`;
+  const url = `${VITE_APPLE_MUSIC_BASE_URL}${query}`;
 
   return url;
 };
