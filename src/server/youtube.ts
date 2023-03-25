@@ -9,7 +9,13 @@ const {
 
 interface YoutubeSearchListResponse {
   error?: { message: string };
-  items: [{ id: { videoId: string, channelId: string } }];
+  items: [{
+    id: {
+      videoId: string,
+      channelId: string,
+      playlistId: string,
+    }
+  }];
 }
 
 export const getYoutubeLink = async (metadata: SpotifyMetadata) => {
@@ -22,10 +28,14 @@ export const getYoutubeLink = async (metadata: SpotifyMetadata) => {
     throw new Error(response.error.message);
   }
 
-  const { videoId, channelId } = response.items[0].id;
+  const { videoId, channelId, playlistId } = response.items[0].id;
 
   if (channelId) {
     return `${VITE_YOUTUBE_BASE_URL}/channel/${channelId}`;
+  }
+
+  if (playlistId) {
+    return `${VITE_YOUTUBE_BASE_URL}/playlist?list=${playlistId}`;
   }
 
   return `${VITE_YOUTUBE_BASE_URL}/watch?v=${videoId}`;
