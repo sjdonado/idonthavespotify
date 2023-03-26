@@ -1,6 +1,8 @@
 import { createSignal, onMount } from 'solid-js';
 import { load, ReCaptchaInstance } from 'recaptcha-v3';
 
+import { Song } from '~/@types/global';
+
 import SearchBar, { SearchForm } from '~/components/SearchBar';
 import SongCard from '~/components/SongCard';
 
