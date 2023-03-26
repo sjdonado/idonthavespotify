@@ -1,5 +1,7 @@
 import { Component } from 'solid-js';
 
+import type { Song } from '~/@types/global';
+
 import AudioPreview from './AudioPreview';
 
 interface SongCardProps {
@@ -17,7 +19,7 @@ const SongLink = (props: {
     target="_blank"
     rel="noreferrer"
     aria-label={props.label}
-    class="flex items-center hover:text-gray-300"
+    class="flex items-center hover:text-gray-300 text-sm sm:text-base"
   >
     <i class={`${props.icon} w-6 mr-1`} />
     {props.label}
