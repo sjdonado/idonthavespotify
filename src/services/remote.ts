@@ -9,6 +9,7 @@ import { getTidalLink } from '~/server/tidal';
 import { getSoundcloudLink } from '~/server/soundcloud';
 
 import { verityCaptcha } from '~/utils/captcha';
+import { getSearchCount, incrementSearchCount } from '~/server/cache';
 
 export const fetchSong = server$(async (songLink: string, token: string): Promise<Song> => {
   const captchaSuccess = await verityCaptcha(token);
@@ -34,5 +35,12 @@ export const fetchSong = server$(async (songLink: string, token: string): Promis
     },
   } as Song;
 
+  await incrementSearchCount();
+
   return song;
+});
+
+export const fetchSearchCount = server$(async (): Promise<number> => {
+  const searchCount = await getSearchCount();
+  return searchCount;
 });

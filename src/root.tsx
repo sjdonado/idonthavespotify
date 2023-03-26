@@ -38,12 +38,10 @@ export default function Root() {
         <Meta property="og:image:type" content="image/png" />
         <Meta property="og:image:alt" content="I don't have Spotify favicon" />
         {
-          // redis setup (cache searches) -> exp time 1 day
-          // redis counter for searches
           // add tests e2e
           // ligthhouse audit
           // expose api with CORS
-          // recollect errors (sentry?)
+          // collect errors (sentry?)
         }
       </Head>
       <Body>
