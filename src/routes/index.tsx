@@ -1,8 +1,6 @@
 import { createSignal, onMount } from 'solid-js';
 import { load, ReCaptchaInstance } from 'recaptcha-v3';
 
-import { Song } from '~/@types/global';
-
 import SearchBar, { SearchForm } from '~/components/SearchBar';
 import SongCard from '~/components/SongCard';
 
@@ -58,7 +56,7 @@ export default function Home() {
         {!loading() && !error() && song() && <SongCard song={song()!} />}
       </main>
       <footer class="text-center">
-        <p class="text-sm">{'Searches performed: '}
+        <p class="text-sm">{'Queries performed: '}
           <span class="font-bold">{searchCount()}</span>
         </p>
         <p class="text-sm">{'Made with ❤️ by '}

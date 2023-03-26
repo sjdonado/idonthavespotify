@@ -1,7 +1,5 @@
 import * as cheerio from 'cheerio';
 
-import { MetadataType } from '~/@types/global';
-
 export interface SpotifyMetadata {
   title: string;
   description: string;

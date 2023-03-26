@@ -33,16 +33,10 @@ export default function Root() {
         <Meta property="og:site_name" content="I don't have Spotify" />
         <Meta property="og:description" content="Find Spotify content on YouTube, Apple Music, Tidal, SoundCloud and more." />
 
-        <Meta property="og:image" content="https://avatars.githubusercontent.com/u/27580836" />
+        <Meta property="og:image" content="https://user-images.githubusercontent.com/27580836/227728799-8123c22e-7714-45e7-95b3-56f666d7ebcc.png" />
         <Meta property="og:image:secure_url" content="https://user-images.githubusercontent.com/27580836/227728799-8123c22e-7714-45e7-95b3-56f666d7ebcc.png" />
         <Meta property="og:image:type" content="image/png" />
         <Meta property="og:image:alt" content="I don't have Spotify favicon" />
-        {
-          // add tests e2e - cypress
-          // ligthhouse audit
-          // expose api with CORS
-          // collect errors (sentry?)
-        }
       </Head>
       <Body>
         <Suspense>

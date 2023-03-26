@@ -7,18 +7,13 @@ export const getQueryFromMetadata = ({ title, description, type }: SpotifyMetada
 
   if (type === MetadataType.Song) {
     const [, artist] = description.match(/^([^·]+) · Song · \d+$/) ?? [];
-
-    if (artist) {
-      query += ` ${artist}`;
-    }
+    query = artist ? `${query} ${artist}` : query;
   }
 
   if (type === MetadataType.Album) {
     const [, artist] = description.match(/^.*?\. (.+?) · Album · \d+ · \d+ songs\.$/) ?? [];
 
-    if (artist) {
-      query += ` ${artist}`;
-    }
+    query = artist ? `${query} ${artist}` : query;
   }
 
   if (type === MetadataType.Playlist) {
@@ -28,9 +23,7 @@ export const getQueryFromMetadata = ({ title, description, type }: SpotifyMetada
   if (type === MetadataType.Podcast) {
     const [, artist] = description.match(/from (.+?) on Spotify\./) ?? [];
 
-    if (artist) {
-      query += ` ${artist}`;
-    }
+    query = artist ? `${query} ${artist}` : query;
   }
 
   return encodeURIComponent(query);
