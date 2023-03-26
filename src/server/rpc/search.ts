@@ -1,5 +1,7 @@
 import server$ from 'solid-start/server';
 
+import type { Song } from '~/@types/global';
+
 import { getSpotifyMetadata } from '~/server/services/spotify';
 import { getYoutubeLink } from '~/server/services/youtube';
 import { getAppleMusicLink } from '~/server/services/appleMusic';
@@ -9,14 +11,14 @@ import { getSoundcloudLink } from '~/server/services/soundcloud';
 import { verityCaptcha } from '~/utils/captcha';
 import { getSearchCount, incrementSearchCount } from '~/server/services/searchCount';
 
-export const fetchSong = server$(async (songLink: string, token: string): Promise<Song> => {
+export const fetchSong = server$(async (spotifyLink: string, token: string): Promise<Song> => {
   const captchaSuccess = await verityCaptcha(token);
 
   if (!captchaSuccess) {
     throw new Error('Captcha failed');
   }
 
-  const metadata = await getSpotifyMetadata(songLink);
+  const metadata = await getSpotifyMetadata(spotifyLink);
 
   const youtubeLink = await getYoutubeLink(metadata);
   const appleMusicLink = getAppleMusicLink(metadata);

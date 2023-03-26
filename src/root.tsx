@@ -29,13 +29,11 @@ export default function Root() {
         <Meta property="og:title" content="I don't have Spotify" />
         <Meta property="og:type" content="website" />
 
-        <Meta property="og:url" content="https://idonthavespotify.sjdonado.de/" />
+        <Meta property="og:url" content="https://idonthavespotify.sjdonado.de" />
         <Meta property="og:site_name" content="I don't have Spotify" />
         <Meta property="og:description" content="Find Spotify content on YouTube, Apple Music, Tidal, SoundCloud and more." />
 
-        <Meta property="og:image" content="https://user-images.githubusercontent.com/27580836/227728799-8123c22e-7714-45e7-95b3-56f666d7ebcc.png" />
-        <Meta property="og:image:secure_url" content="https://user-images.githubusercontent.com/27580836/227728799-8123c22e-7714-45e7-95b3-56f666d7ebcc.png" />
-        <Meta property="og:image:type" content="image/png" />
+        <Meta property="og:image" content="https://user-images.githubusercontent.com/27580836/227801051-a71d389e-2510-4965-a23e-d7478fe28f13.jpeg" />
         <Meta property="og:image:alt" content="I don't have Spotify favicon" />
       </Head>
       <Body>

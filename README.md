@@ -1,5 +1,5 @@
 # I don't have Spotify
 
-![android-chrome-512x512](https://user-images.githubusercontent.com/27580836/227728799-8123c22e-7714-45e7-95b3-56f666d7ebcc.png)
+![1dc03098-0db2-4124-bc4c-5ada9a3531a5](https://user-images.githubusercontent.com/27580836/227801051-a71d389e-2510-4965-a23e-d7478fe28f13.jpeg)
 
 Powered by Solid Start ❤️

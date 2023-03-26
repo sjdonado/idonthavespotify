@@ -1,10 +1,12 @@
 import { createSignal, onMount } from 'solid-js';
 import { load, ReCaptchaInstance } from 'recaptcha-v3';
 
+import type { Song, Error } from '~/@types/global';
+
 import SearchBar, { SearchForm } from '~/components/SearchBar';
 import SongCard from '~/components/SongCard';
 
-import { fetchSong, fetchSearchCount } from '~/server/rpc/song';
+import { fetchSong, fetchSearchCount } from '~/server/rpc/search';
 
 import * as ENV from '~/config/env/client';
 
@@ -32,11 +34,13 @@ export default function Home() {
 
     try {
       const token = await recaptcha()!.execute('submit');
-      const fetchedSong = await fetchSong(formData.songLink, token);
+      const fetchedSong = await fetchSong(formData.spotifyLink, token);
 
       setSong(fetchedSong);
       setSearchCount(searchCount() + 1);
     } catch (err) {
+      const { message } = err as Error;
+      console.error(message);
       setError('Something went wrong, try again later');
     }
 

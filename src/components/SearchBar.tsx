@@ -3,7 +3,7 @@ import { createStore } from 'solid-js/store';
 import type { Component } from 'solid-js';
 
 export interface SearchForm {
-  songLink: string
+  spotifyLink: string
 }
 
 interface SearchBarProps {
@@ -13,7 +13,7 @@ interface SearchBarProps {
 
 const SearchBar: Component<SearchBarProps> = (props) => {
   const [fields, setFields] = createStore<SearchForm>({
-    songLink: '',
+    spotifyLink: '',
   });
 
   const handleSubmit = (event: Event) => {
@@ -34,7 +34,7 @@ const SearchBar: Component<SearchBarProps> = (props) => {
       <input
         type="text"
         id="song-link"
-        name="songLink"
+        name="spotifyLink"
         class="flex-1 bg-white text-black border placeholder-gray-400 rounded-lg p-2.5"
         placeholder="https://open.spotify.com/track/7A8MwSsu9efJXP6xvZfRN3?si=d4f1e2eb324c43df"
         onInput={handleInput}

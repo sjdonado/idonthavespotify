@@ -20,3 +20,7 @@ export interface Song {
     soundcloud: string;
   }
 }
+
+export interface Error {
+  message: string;
+}
