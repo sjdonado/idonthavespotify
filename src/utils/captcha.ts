@@ -1,4 +1,4 @@
-const { VITE_RECAPTCHA_SECRET_KEY } = import.meta.env;
+import * as ENV from '~/config/env/server';
 
 interface CaptchaResponse {
   success: boolean;
@@ -13,7 +13,7 @@ export const verityCaptcha = async (token: string): Promise<boolean> => {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: new URLSearchParams({
-      secret: VITE_RECAPTCHA_SECRET_KEY,
+      secret: ENV.recapcha.secretKey,
       response: token,
     }),
   }).then((res) => res.json()) as CaptchaResponse;

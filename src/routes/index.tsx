@@ -2,11 +2,11 @@ import { createSignal, onMount } from 'solid-js';
 import { load, ReCaptchaInstance } from 'recaptcha-v3';
 
 import SearchBar, { SearchForm } from '~/components/SearchBar';
-import SongCard, { Song } from '~/components/SongCard';
+import SongCard from '~/components/SongCard';
 
-import { fetchSong, fetchSearchCount } from '~/services/remote';
+import { fetchSong, fetchSearchCount } from '~/server/rpc/song';
 
-const { VITE_RECAPTCHA_SITE_KEY } = import.meta.env;
+import * as ENV from '~/config/env/client';
 
 export default function Home() {
   const [recaptcha, setRecaptcha] = createSignal<ReCaptchaInstance>();
@@ -19,7 +19,7 @@ export default function Home() {
 
   onMount(async () => {
     const [recaptchaInstance, count] = await Promise.all([
-      load(VITE_RECAPTCHA_SITE_KEY),
+      load(ENV.recaptcha.siteKey),
       fetchSearchCount(),
     ]);
 
@@ -48,7 +48,7 @@ export default function Home() {
       <main class="flex flex-col justify-start items-center h-[95%]">
         <div class="text-center my-16">
           <h1 class="text-6xl uppercase">I don't have spotify</h1>
-          <h2 class="mt-6">Find Spotify content on YouTube, Apple Music, Tidal, Soundcloud and more.</h2>
+          <h2 class="mt-6">Find Spotify content on YouTube, Apple Music, Tidal, SoundCloud and more.</h2>
         </div>
         <SearchBar onSearch={handleOnSearch} isLoading={loading()} />
         {loading() && <p class="mt-8">Loading...</p>}

@@ -1,11 +1,13 @@
-import { SpotifyMetadata } from '~/server/spotify';
+import { SpotifyMetadata } from '~/server/services/spotify';
 import { getQueryFromMetadata } from '~/utils/query';
 
+import * as ENV from '~/config/env/server';
+
 const {
-  VITE_YOUTUBE_API_KEY,
-  VITE_YOUTUBE_API_SEARCH_URL,
-  VITE_YOUTUBE_BASE_URL,
-} = import.meta.env;
+  apiSearchUrl,
+  apiKey,
+  baseUrl,
+} = ENV.services.youtube;
 
 interface YoutubeSearchListResponse {
   error?: { message: string };
@@ -20,7 +22,7 @@ interface YoutubeSearchListResponse {
 
 export const getYoutubeLink = async (metadata: SpotifyMetadata) => {
   const query = getQueryFromMetadata(metadata);
-  const url = `${VITE_YOUTUBE_API_SEARCH_URL}?q=${query}&maxResults=1&key=${VITE_YOUTUBE_API_KEY}`;
+  const url = `${apiSearchUrl}?q=${query}&maxResults=1&key=${apiKey}`;
 
   const response = await fetch(url).then((res) => res.json()) as YoutubeSearchListResponse;
 
@@ -31,12 +33,12 @@ export const getYoutubeLink = async (metadata: SpotifyMetadata) => {
   const { videoId, channelId, playlistId } = response.items[0].id;
 
   if (channelId) {
-    return `${VITE_YOUTUBE_BASE_URL}/channel/${channelId}`;
+    return `${baseUrl}/channel/${channelId}`;
   }
 
   if (playlistId) {
-    return `${VITE_YOUTUBE_BASE_URL}/playlist?list=${playlistId}`;
+    return `${baseUrl}/playlist?list=${playlistId}`;
   }
 
-  return `${VITE_YOUTUBE_BASE_URL}/watch?v=${videoId}`;
+  return `${baseUrl}/watch?v=${videoId}`;
 };

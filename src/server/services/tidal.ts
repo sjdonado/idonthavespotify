@@ -1,11 +1,11 @@
-import { SpotifyMetadata } from '~/server/spotify';
+import { SpotifyMetadata } from '~/server/services/spotify';
 import { getQueryFromMetadata } from '~/utils/query';
 
-const { VITE_TIDAL_BASE_URL } = import.meta.env;
+import * as ENV from '~/config/env/server';
 
 export const getTidalLink = (metadata: SpotifyMetadata) => {
   const query = getQueryFromMetadata(metadata);
-  const url = `${VITE_TIDAL_BASE_URL}${query}`;
+  const url = `${ENV.services.tidal.baseUrl}${query}`;
 
   return url;
 };

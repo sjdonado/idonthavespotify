@@ -1,15 +1,13 @@
 import server$ from 'solid-start/server';
 
-import { Song } from '~/components/SongCard';
-
-import { getSpotifyMetadata } from '~/server/spotify';
-import { getYoutubeLink } from '~/server/youtube';
-import { getAppleMusicLink } from '~/server/appleMusic';
-import { getTidalLink } from '~/server/tidal';
-import { getSoundcloudLink } from '~/server/soundcloud';
+import { getSpotifyMetadata } from '~/server/services/spotify';
+import { getYoutubeLink } from '~/server/services/youtube';
+import { getAppleMusicLink } from '~/server/services/appleMusic';
+import { getTidalLink } from '~/server/services/tidal';
+import { getSoundcloudLink } from '~/server/services/soundcloud';
 
 import { verityCaptcha } from '~/utils/captcha';
-import { getSearchCount, incrementSearchCount } from '~/server/cache';
+import { getSearchCount, incrementSearchCount } from '~/server/services/searchCount';
 
 export const fetchSong = server$(async (songLink: string, token: string): Promise<Song> => {
   const captchaSuccess = await verityCaptcha(token);

@@ -4,7 +4,7 @@
 
 @font-face {
   font-family: 'Gotham Light';
-  src: url('./fonts/Gotham-Light.otf') format('opentype');
+  src: url('./assets/fonts/Gotham-Light.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
 }

@@ -1,13 +1,6 @@
 import * as cheerio from 'cheerio';
 
-export enum MetadataType {
-  Song = 'music.song',
-  Album = 'music.album',
-  Playlist = 'music.playlist',
-  Artist = 'profile',
-  Podcast = 'music.episode',
-  Show = 'website',
-}
+import { MetadataType } from '~/@types/global';
 
 export interface SpotifyMetadata {
   title: string;

@@ -1,21 +1,6 @@
 import { Component } from 'solid-js';
 
-import { MetadataType } from '~/server/spotify';
 import AudioPreview from './AudioPreview';
-
-export interface Song {
-  title: string;
-  description: string;
-  type: MetadataType;
-  image: string;
-  audio?: string;
-  links: {
-    youtube: string;
-    appleMusic: string;
-    tidal: string;
-    soundcloud: string;
-  }
-}
 
 interface SongCardProps {
   song: Song;

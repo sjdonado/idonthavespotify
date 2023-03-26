@@ -1,4 +1,6 @@
-import { MetadataType, SpotifyMetadata } from '~/server/spotify';
+import { MetadataType } from '~/@types/global';
+
+import { SpotifyMetadata } from '~/server/services/spotify';
 
 export const getQueryFromMetadata = ({ title, description, type }: SpotifyMetadata) => {
   let query = title;

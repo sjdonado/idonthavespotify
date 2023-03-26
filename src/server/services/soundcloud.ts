@@ -1,11 +1,11 @@
-import { SpotifyMetadata } from '~/server/spotify';
+import { SpotifyMetadata } from '~/server/services/spotify';
 import { getQueryFromMetadata } from '~/utils/query';
 
-const { VITE_SOUNDCLOUD_BASE_URL } = import.meta.env;
+import * as ENV from '~/config/env/server';
 
 export const getSoundcloudLink = (metadata: SpotifyMetadata) => {
   const query = getQueryFromMetadata(metadata);
-  const url = `${VITE_SOUNDCLOUD_BASE_URL}${query}`;
+  const url = `${ENV.services.soundcloud.baseUrl}${query}`;
 
   return url;
 };

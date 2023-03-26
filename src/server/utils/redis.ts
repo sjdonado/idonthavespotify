@@ -1,8 +1,8 @@
 import { Redis } from 'ioredis';
 
-const { VITE_REDIS_URL } = import.meta.env;
+import * as ENV from '~/config/env/server';
 
-const redis = new Redis(VITE_REDIS_URL);
+const redis = new Redis(ENV.redis.url);
 
 export const setKey = async (key: string, value: string) => {
   await redis.set(key, value);
