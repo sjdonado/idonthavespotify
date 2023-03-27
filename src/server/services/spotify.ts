@@ -1,11 +1,11 @@
 import * as cheerio from 'cheerio';
 
-import { MetadataType } from '~/@types/global';
+import { SpotifyMetadataType } from '~/@types/global';
 
 export interface SpotifyMetadata {
   title: string;
   description: string;
-  type: MetadataType;
+  type: SpotifyMetadataType;
   image: string;
   audio?: string;
 }
@@ -23,7 +23,7 @@ export const getSpotifyMetadata = async (spotifyLink: string): Promise<SpotifyMe
   const image = metaTagContent(doc, 'og:image', 'property');
   const audio = metaTagContent(doc, 'og:audio', 'property');
 
-  const type = spotifyLink.includes('episode') ? MetadataType.Podcast : metaTagContent(doc, 'og:type', 'property');
+  const type = spotifyLink.includes('episode') ? SpotifyMetadataType.Podcast : metaTagContent(doc, 'og:type', 'property') as SpotifyMetadataType;
 
   if (!title || !description || !type || !image) {
     throw new Error('Could not parse Spotify metadata');
@@ -32,7 +32,7 @@ export const getSpotifyMetadata = async (spotifyLink: string): Promise<SpotifyMe
   return {
     title,
     description,
-    type: type as MetadataType,
+    type,
     image,
     audio,
   };

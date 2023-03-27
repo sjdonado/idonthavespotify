@@ -1,19 +1,20 @@
 import { createSignal, onMount } from 'solid-js';
 import { load, ReCaptchaInstance } from 'recaptcha-v3';
 
-import type { Song, Error } from '~/@types/global';
+import type { SpotifyContent, Error } from '~/@types/global';
 
 import SearchBar, { SearchForm } from '~/components/SearchBar';
-import SongCard from '~/components/SongCard';
+import SearchCard from '~/components/SearchCard';
 
-import { fetchSong, fetchSearchCount } from '~/server/rpc/search';
+import fetchSpotifyContent from '~/server/rpc/spotifyContent';
+import fetchSearchCount from '~/server/rpc/searchCount';
 
 import * as ENV from '~/config/env/client';
 
 export default function Home() {
   const [recaptcha, setRecaptcha] = createSignal<ReCaptchaInstance>();
 
-  const [song, setSong] = createSignal<Song | undefined>();
+  const [spotifyContent, setSpotifyContent] = createSignal<SpotifyContent | undefined>();
   const [loading, setLoading] = createSignal(false);
   const [error, setError] = createSignal<string | undefined>();
 
@@ -34,9 +35,9 @@ export default function Home() {
 
     try {
       const token = await recaptcha()!.execute('submit');
-      const fetchedSong = await fetchSong(formData.spotifyLink, token);
+      const response = await fetchSpotifyContent(formData.spotifyLink, token);
 
-      setSong(fetchedSong);
+      setSpotifyContent(response);
       setSearchCount(searchCount() + 1);
 
       window.scrollTo({
@@ -62,7 +63,7 @@ export default function Home() {
         <SearchBar onSearch={handleOnSearch} isLoading={loading()} />
         {loading() && <p class="mt-8">Loading...</p>}
         {error() && <p class="mt-8">{error()}</p>}
-        {!loading() && !error() && song() && <SongCard song={song()!} />}
+        {!loading() && !error() && spotifyContent() && <SearchCard spotifyContent={spotifyContent()!} />}
       </main>
       <footer class="text-center">
         <p class="text-sm">{'Queries performed: '}

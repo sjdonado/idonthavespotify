@@ -24,7 +24,7 @@ export const getYoutubeLink = async (metadata: SpotifyMetadata) => {
   const query = getQueryFromMetadata(metadata);
   const url = `${apiSearchUrl}?q=${query}&maxResults=1&key=${apiKey}`;
 
-  const response = await fetch(url).then((res) => res.json()) as YoutubeSearchListResponse;
+  const response: YoutubeSearchListResponse = await fetch(url).then((res) => res.json());
 
   if (response.error) {
     throw new Error(response.error.message);

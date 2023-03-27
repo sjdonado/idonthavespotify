@@ -1,14 +1,14 @@
 import { Component } from 'solid-js';
 
-import type { Song } from '~/@types/global';
+import type { SpotifyContent } from '~/@types/global';
 
 import AudioPreview from './AudioPreview';
 
-interface SongCardProps {
-  song: Song;
+interface SearchCardProps {
+  spotifyContent: SpotifyContent;
 }
 
-const SongLink = (props: {
+const SpotifyContentLink = (props: {
   link: string,
   icon: string,
   label: string,
@@ -29,38 +29,38 @@ const SongLink = (props: {
   </a>
 );
 
-const SongCard: Component<SongCardProps> = (props) => (
+const SearchCard: Component<SearchCardProps> = (props) => (
   <div class="flex flex-wrap justify-start items-center rounded-lg border border-white w-5/6 lg:w-1/2 m-5">
     <AudioPreview
-      title={props.song.title}
-      image={props.song.image}
-      audio={props.song.audio}
+      title={props.spotifyContent.title}
+      image={props.spotifyContent.image}
+      audio={props.spotifyContent.audio}
     />
     <div class="flex flex-col items-start p-2">
-      <div class="font-bold text-xl">{props.song.title}</div>
-      <p class="text-sm w-52 sm:w-96 truncate">{props.song.description}</p>
+      <div class="font-bold text-xl">{props.spotifyContent.title}</div>
+      <p class="text-sm w-52 sm:w-96 truncate">{props.spotifyContent.description}</p>
       <ul class="mt-2 text-base">
         <li class="flex flex-col items-start">
-          <SongLink
-            link={props.song.links.youtube}
+          <SpotifyContentLink
+            link={props.spotifyContent.links.youtube}
             icon="fab fa-youtube"
             label="Listen on Youtube"
             isRecommended
           />
-          <SongLink
-            link={props.song.links.appleMusic}
+          <SpotifyContentLink
+            link={props.spotifyContent.links.appleMusic}
             icon="fab fa-apple"
             label="Listen on Apple Music"
           />
-          <SongLink
-            link={props.song.links.tidal}
+          <SpotifyContentLink
+            link={props.spotifyContent.links.tidal}
             icon="fa fa-music"
             label="Listen on Tidal"
           />
-          <SongLink
-            link={props.song.links.soundcloud}
+          <SpotifyContentLink
+            link={props.spotifyContent.links.soundcloud}
             icon="fab fa-soundcloud"
-            label="Listen on Soundcloud"
+            label="Listen on SoundCloud"
           />
         </li>
       </ul>
@@ -68,4 +68,4 @@ const SongCard: Component<SongCardProps> = (props) => (
   </div>
 );
 
-export default SongCard;
+export default SearchCard;

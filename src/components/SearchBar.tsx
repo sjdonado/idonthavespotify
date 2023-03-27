@@ -1,6 +1,7 @@
 import { createStore } from 'solid-js/store';
 
 import type { Component } from 'solid-js';
+import { SPOTIFY_LINK_REGEX } from '~/constants';
 
 export interface SearchForm {
   spotifyLink: string
@@ -38,7 +39,7 @@ const SearchBar: Component<SearchBarProps> = (props) => {
         class="flex-1 bg-white text-black border placeholder-gray-400 rounded-lg p-2.5"
         placeholder="https://open.spotify.com/track/7A8MwSsu9efJXP6xvZfRN3?si=d4f1e2eb324c43df"
         onInput={handleInput}
-        pattern="https:\/\/open.spotify.com\/.*"
+        pattern={SPOTIFY_LINK_REGEX.source}
         required
       />
       <button

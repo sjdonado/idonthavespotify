@@ -1,6 +1,6 @@
 import server$ from 'solid-start/server';
 
-import type { Song } from '~/@types/global';
+import type { SpotifyContent } from '~/@types/global';
 
 import { getSpotifyMetadata } from '~/server/services/spotify';
 import { getYoutubeLink } from '~/server/services/youtube';
@@ -9,9 +9,9 @@ import { getTidalLink } from '~/server/services/tidal';
 import { getSoundcloudLink } from '~/server/services/soundcloud';
 
 import { verityCaptcha } from '~/utils/captcha';
-import { getSearchCount, incrementSearchCount } from '~/server/services/searchCount';
+import { incrementSearchCount } from '~/server/services/searchCount';
 
-export const fetchSong = server$(async (spotifyLink: string, token: string): Promise<Song> => {
+export default server$(async (spotifyLink: string, token: string): Promise<SpotifyContent> => {
   const captchaSuccess = await verityCaptcha(token);
 
   if (!captchaSuccess) {
@@ -25,7 +25,7 @@ export const fetchSong = server$(async (spotifyLink: string, token: string): Pro
   const tidalLink = getTidalLink(metadata);
   const soundcloudLink = getSoundcloudLink(metadata);
 
-  const song = {
+  const song: SpotifyContent = {
     ...metadata,
     links: {
       youtube: youtubeLink,
@@ -33,14 +33,9 @@ export const fetchSong = server$(async (spotifyLink: string, token: string): Pro
       tidal: tidalLink,
       soundcloud: soundcloudLink,
     },
-  } as Song;
+  };
 
   await incrementSearchCount();
 
   return song;
-});
-
-export const fetchSearchCount = server$(async (): Promise<number> => {
-  const searchCount = await getSearchCount();
-  return searchCount;
 });

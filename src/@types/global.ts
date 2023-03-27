@@ -1,4 +1,4 @@
-export enum MetadataType {
+export enum SpotifyMetadataType {
   Song = 'music.song',
   Album = 'music.album',
   Playlist = 'music.playlist',
@@ -7,10 +7,10 @@ export enum MetadataType {
   Show = 'website',
 }
 
-export interface Song {
+export interface SpotifyContent {
   title: string;
   description: string;
-  type: MetadataType;
+  type: SpotifyMetadataType;
   image: string;
   audio?: string;
   links: {

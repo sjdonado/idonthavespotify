@@ -7,7 +7,9 @@ interface CaptchaResponse {
 }
 
 export const verityCaptcha = async (token: string): Promise<boolean> => {
-  const captchaResponse = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+  const recaptchaURL = 'https://www.google.com/recaptcha/api/siteverify';
+
+  const captchaResponse: CaptchaResponse = await fetch(recaptchaURL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -16,7 +18,7 @@ export const verityCaptcha = async (token: string): Promise<boolean> => {
       secret: ENV.recapcha.secretKey,
       response: token,
     }),
-  }).then((res) => res.json()) as CaptchaResponse;
+  }).then((res) => res.json());
 
   return captchaResponse.success;
 };
