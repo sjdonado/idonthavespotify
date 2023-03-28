@@ -4,7 +4,11 @@ import * as ENV from '~/config/env/server';
 
 const redis = new Redis(ENV.redis.url);
 
-export const setKey = async (key: string, value: string) => {
+export const setKey = async (key: string, value: string, expire?: boolean) => {
+  if (expire) {
+    return redis.set(key, value, 'EX', 60 * 60 * 24);
+  }
+
   await redis.set(key, value);
 };
 

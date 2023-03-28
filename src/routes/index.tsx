@@ -1,24 +1,28 @@
+import { useSearchParams } from 'solid-start';
 import { createSignal, onMount } from 'solid-js';
+
 import { load, ReCaptchaInstance } from 'recaptcha-v3';
 
-import type { SpotifyContent, Error } from '~/@types/global';
+import type { SpotifyContent } from '~/@types/global';
 
 import SearchBar, { SearchForm } from '~/components/SearchBar';
 import SearchCard from '~/components/SearchCard';
 
-import fetchSpotifyContent from '~/server/rpc/spotifyContent';
+import { fetchSpotifyContent, fetchSpotifyContentFromCache } from '~/server/rpc/spotifyContent';
 import fetchSearchCount from '~/server/rpc/searchCount';
 
 import * as ENV from '~/config/env/client';
 
 export default function Home() {
+  const [searchParams, setSearchParams] = useSearchParams<{ id?: string }>();
+
   const [recaptcha, setRecaptcha] = createSignal<ReCaptchaInstance>();
 
   const [spotifyContent, setSpotifyContent] = createSignal<SpotifyContent | undefined>();
+  const [searchCount, setSearchCount] = createSignal(0);
+
   const [loading, setLoading] = createSignal(false);
   const [error, setError] = createSignal<string | undefined>();
-
-  const [searchCount, setSearchCount] = createSignal(0);
 
   onMount(async () => {
     const [recaptchaInstance, count] = await Promise.all([
@@ -28,6 +32,14 @@ export default function Home() {
 
     setRecaptcha(recaptchaInstance);
     setSearchCount(count);
+
+    if (searchParams.id) {
+      const spotifyContent = await fetchSpotifyContentFromCache(searchParams.id);
+
+      if (spotifyContent) {
+        setSpotifyContent(spotifyContent);
+      }
+    }
   });
 
   const handleOnSearch = async (formData: SearchForm) => {
@@ -38,15 +50,10 @@ export default function Home() {
       const response = await fetchSpotifyContent(formData.spotifyLink, token);
 
       setSpotifyContent(response);
+      setSearchParams({ id: response.id });
       setSearchCount(searchCount() + 1);
-
-      window.scrollTo({
-        top: document.body.scrollHeight,
-        behavior: 'smooth',
-      });
     } catch (err) {
-      const { message } = err as Error;
-      console.error(message);
+      console.error((err as Error).message);
       setError('Something went wrong, try again later');
     }
 
@@ -60,7 +67,11 @@ export default function Home() {
           <h1 class="text-6xl uppercase">I don't have spotify</h1>
           <h2 class="mt-6">Find Spotify content on YouTube, Apple Music, Tidal, SoundCloud and more.</h2>
         </div>
-        <SearchBar onSearch={handleOnSearch} isLoading={loading()} />
+        <SearchBar
+          onSearch={handleOnSearch}
+          isLoading={loading()}
+          spotifyLink={spotifyContent() ? spotifyContent()!.source : undefined}
+        />
         {loading() && <p class="mt-8">Loading...</p>}
         {error() && <p class="mt-8">{error()}</p>}
         {!loading() && !error() && spotifyContent() && <SearchCard spotifyContent={spotifyContent()!} />}
@@ -69,14 +80,15 @@ export default function Home() {
         <p class="text-sm">{'Queries performed: '}
           <span class="font-bold">{searchCount()}</span>
         </p>
-        <p class="text-sm">{'Made with ❤️ by '}
+        <p class="text-sm">
           <a
-            href="https://sjdonado.de"
+            href="https://github.com/sjdonado/idonthavespotify"
             class="text-green-500 hover:underline"
             target="_blank"
             rel="noreferrer"
           >
-            Juan Rodriguez
+            <i class="fab fa-github mr-2" />
+            View on Github
           </a>
         </p>
       </footer>

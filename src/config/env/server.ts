@@ -32,7 +32,7 @@ export const services = {
   tidal: {
     baseUrl: TIDAL_BASE_URL,
   },
-  soundcloud: {
+  soundCloud: {
     baseUrl: SOUNDCLOUD_BASE_URL,
   },
 };

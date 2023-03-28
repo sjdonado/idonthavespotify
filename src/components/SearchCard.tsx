@@ -58,7 +58,7 @@ const SearchCard: Component<SearchCardProps> = (props) => (
             label="Listen on Tidal"
           />
           <SpotifyContentLink
-            link={props.spotifyContent.links.soundcloud}
+            link={props.spotifyContent.links.soundCloud}
             icon="fab fa-soundcloud"
             label="Listen on SoundCloud"
           />
