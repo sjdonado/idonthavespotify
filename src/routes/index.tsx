@@ -12,6 +12,7 @@ import { fetchSpotifyContent, fetchSpotifyContentFromCache } from '~/server/rpc/
 import fetchSearchCount from '~/server/rpc/searchCount';
 
 import * as ENV from '~/config/env/client';
+import { SPOTIFY_LINK_REGEX } from '~/constants';
 
 export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams<{ id?: string }>();
@@ -33,6 +34,13 @@ export default function Home() {
     setRecaptcha(recaptchaInstance);
     setSearchCount(count);
 
+    const spotifyLink = await getSpotifyLinkFromClipboard();
+
+    if (spotifyLink) {
+      handleOnSearch({ spotifyLink });
+      return;
+    }
+
     if (searchParams.id) {
       const spotifyContent = await fetchSpotifyContentFromCache(searchParams.id);
 
@@ -41,6 +49,14 @@ export default function Home() {
       }
     }
   });
+
+  const getSpotifyLinkFromClipboard = async () => {
+    const clipboardText = await navigator.clipboard.readText();
+
+    if (SPOTIFY_LINK_REGEX.test(clipboardText)) {
+      return clipboardText;
+    }
+  };
 
   const handleOnSearch = async (formData: SearchForm) => {
     setLoading(true);

@@ -6,7 +6,7 @@ import { getSpotifyMetadata } from '~/server/services/spotify';
 import { getYoutubeLink } from '~/server/services/youtube';
 import { getAppleMusicLink } from '~/server/services/appleMusic';
 import { getTidalLink } from '~/server/services/tidal';
-import { getSoundCloudLink } from '~/server/services/soundCloud';
+import { getSoundCloudLink } from '~/server/services/soundcloud';
 
 import { incrementSearchCount } from '~/server/services/searchCount';
 import { cacheSpotifyContent, getSpotifyContentFromCache } from '../services/cache';
