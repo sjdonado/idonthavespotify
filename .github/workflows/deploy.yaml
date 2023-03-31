@@ -1,0 +1,22 @@
+---
+name: "deploy to sjdonado.de"
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cloning repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Push to dokku
+        uses: dokku/github-action@master
+        with:
+          git_remote_url: "ssh://dokku@sjdonado.de/idonthavespotify"
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
