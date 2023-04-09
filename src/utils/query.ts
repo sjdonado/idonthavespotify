@@ -11,7 +11,7 @@ export const getQueryFromMetadata = ({ title, description, type }: SpotifyMetada
   }
 
   if (type === SpotifyMetadataType.Album) {
-    const [, artist] = description.match(/^.*?\. (.+?) · Album · \d+ · \d+ songs\.$/) ?? [];
+    const [, artist] = description.match(/(.+?) · Album ·/) ?? [];
 
     query = artist ? `${query} ${artist}` : query;
   }
