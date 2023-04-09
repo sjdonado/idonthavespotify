@@ -15,10 +15,12 @@
   "dependencies": {
     "@solidjs/meta": "^0.28.2",
     "@solidjs/router": "^0.8.2",
+    "@types/string-similarity": "^4.0.0",
     "cheerio": "^1.0.0-rc.12",
     "ioredis": "^5.3.1",
     "solid-js": "^1.6.11",
     "solid-start": "^0.2.26",
+    "string-similarity": "^4.0.4",
     "undici": "^5.15.1"
   },
   "devDependencies": {

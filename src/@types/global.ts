@@ -7,11 +7,16 @@ export enum SpotifyMetadataType {
   Show = 'website',
 }
 
-export enum SpotifyContentLink {
+export enum SpotifyContentLinkType {
   Youtube = 'youtube',
   AppleMusic = 'appleMusic',
   Tidal = 'tidal',
   SoundCloud = 'soundCloud',
+}
+
+export interface SpotifyContentLink {
+  type: SpotifyContentLinkType;
+  url: string;
 }
 
 export interface SpotifyContent {
@@ -22,10 +27,5 @@ export interface SpotifyContent {
   image: string;
   audio?: string;
   source: string;
-  links: {
-    [SpotifyContentLink.Youtube]: string;
-    [SpotifyContentLink.AppleMusic]: string;
-    [SpotifyContentLink.Tidal]: string;
-    [SpotifyContentLink.SoundCloud]: string;
-  };
+  links: SpotifyContentLink[];
 }
