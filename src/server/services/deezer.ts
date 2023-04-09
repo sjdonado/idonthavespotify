@@ -30,6 +30,7 @@ export const getDeezerLink = async (metadata: SpotifyMetadata) => {
   const response = (await fetch(url).then((res) => res.json()) as DeezerSearchResponse);
 
   if (response.total === 0) {
+    console.error('No results found', query);
     return undefined;
   }
 

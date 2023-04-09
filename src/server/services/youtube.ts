@@ -9,7 +9,6 @@ import * as ENV from '~/config/env/server';
 import { SpotifyMetadata } from '~/server/services/spotify';
 
 import { getQueryFromMetadata } from '~/utils/query';
-import { getCheerioDoc, metaTagContent } from '~/utils/metaContent';
 import { compareResponseWithQuery } from '~/utils/compare';
 
 const {
@@ -25,7 +24,10 @@ interface YoutubeSearchListResponse {
       videoId: string,
       channelId: string,
       playlistId: string,
-    }
+    },
+    snippet: {
+      title: string,
+    },
   }];
 }
 
@@ -38,15 +40,16 @@ export const getYoutubeLink = async (metadata: SpotifyMetadata) => {
     encodedQuery = encodeURIComponent(`${query} official channel`);
   }
 
-  const url = `${apiSearchUrl}?q=${encodedQuery}&maxResults=1&key=${apiKey}`;
+  const url = `${apiSearchUrl}?part=snippet&q=${encodedQuery}&maxResults=1&key=${apiKey}`;
 
   const response = (await fetch(url).then((res) => res.json()) as YoutubeSearchListResponse);
 
   if (response.error) {
+    console.error(response.error.message);
     return undefined;
   }
 
-  const { videoId, channelId, playlistId } = response.items[0].id;
+  const [{ id: { videoId, channelId, playlistId }, snippet }] = response.items;
 
   let youtubeLink = '';
 
@@ -62,12 +65,7 @@ export const getYoutubeLink = async (metadata: SpotifyMetadata) => {
     youtubeLink = `${baseUrl}/playlist?list=${playlistId}`;
   }
 
-  const html = await fetch(youtubeLink).then((res) => res.text());
-  const doc = getCheerioDoc(html);
-
-  const youtubeVideoTitle = metaTagContent(doc, 'og:title', 'property') ?? '';
-
-  if (compareResponseWithQuery(youtubeVideoTitle, query)) {
+  if (compareResponseWithQuery(snippet.title, query)) {
     return undefined;
   }
 
