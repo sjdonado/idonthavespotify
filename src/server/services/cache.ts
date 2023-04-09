@@ -7,7 +7,11 @@ import { cacheKey } from '~/config/redis';
 export const getSpotifyContentFromCache = async (id: string) => {
   const cache = await getKey(`${cacheKey}${id}`);
 
-  return cache ? JSON.parse(cache) : undefined;
+  if (!cache) {
+    return undefined;
+  }
+
+  return JSON.parse(cache) as SpotifyContent;
 };
 
 export const cacheSpotifyContent = async (spotifyContent: SpotifyContent) => {

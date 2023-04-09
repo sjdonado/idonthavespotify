@@ -1,6 +1,6 @@
-import * as cheerio from 'cheerio';
-
 import { SpotifyMetadataType } from '~/@types/global';
+
+import { getCheerioDoc, metaTagContent } from '~/utils/metaContent';
 
 export interface SpotifyMetadata {
   title: string;
@@ -10,20 +10,16 @@ export interface SpotifyMetadata {
   audio?: string;
 }
 
-function metaTagContent(doc: cheerio.CheerioAPI, type: string, attr: string) {
-  return doc(`meta[${attr}='${type}']`).attr('content');
-}
-
 export const getSpotifyMetadata = async (spotifyLink: string): Promise<SpotifyMetadata> => {
   const html = await fetch(spotifyLink).then((res) => res.text());
-  const doc = cheerio.load(html);
+  const doc = getCheerioDoc(html);
 
   const title = metaTagContent(doc, 'og:title', 'property');
   const description = metaTagContent(doc, 'og:description', 'property');
   const image = metaTagContent(doc, 'og:image', 'property');
   const audio = metaTagContent(doc, 'og:audio', 'property');
 
-  const type = spotifyLink.includes('episode') ? SpotifyMetadataType.Podcast : metaTagContent(doc, 'og:type', 'property') as SpotifyMetadataType;
+  const type = spotifyLink.includes('episode') ? SpotifyMetadataType.Podcast : metaTagContent(doc, 'og:type', 'property');
 
   if (!title || !description || !type || !image) {
     throw new Error('Could not parse Spotify metadata');
@@ -32,7 +28,7 @@ export const getSpotifyMetadata = async (spotifyLink: string): Promise<SpotifyMe
   return {
     title,
     description,
-    type,
+    type: type as SpotifyMetadataType,
     image,
     audio,
   };

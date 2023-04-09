@@ -21,6 +21,29 @@ test.describe('Search Tests', () => {
     expect(searchCardText).toContain('Listen on Apple Music');
     expect(searchCardText).toContain('Listen on Tidal');
     expect(searchCardText).toContain('Listen on SoundCloud');
+
+    const youtubeLink = await page.getByText('Listen on Youtube').getAttribute('href');
+    const appleMusicLink = await page.getByText('Listen on Apple Music').getAttribute('href');
+    const tidalLink = await page.getByText('Listen on Tidal').getAttribute('href');
+    const soundcloudLink = await page.getByText('Listen on SoundCloud').getAttribute('href');
+
+    expect(youtubeLink).toBe('https://www.youtube.com/watch?v=zhY_0DoQCQs');
+    expect(appleMusicLink).toBe('https://music.apple.com/search?term=Do%20Not%20Disturb%20Drake');
+    expect(tidalLink).toBe('https://listen.tidal.com/search?q=Do%20Not%20Disturb%20Drake');
+    expect(soundcloudLink).toBe('https://soundcloud.com/search/sounds?q=Do%20Not%20Disturb%20Drake');
+  });
+
+  test('should return "No links found" with a valid spotifyLink - Spotify exclusive content', async ({ page }) => {
+    const searchCard = page.getByTestId('search-card');
+
+    const exclusiveContentSpotifyLink = 'https://open.spotify.com/episode/5dNTXSZtkQLm6HuVdboFtx';
+
+    await page.fill('#song-link', exclusiveContentSpotifyLink);
+    await page.press('#song-link', 'Enter');
+
+    const searchCardText = await searchCard.textContent() ?? '';
+
+    expect(searchCardText).toContain('No Links found');
   });
 
   test('should return an error with an invalid spotifyLink', async ({ page }) => {

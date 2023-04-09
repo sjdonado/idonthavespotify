@@ -16,12 +16,18 @@ import { SPOTIFY_ID_REGEX } from '~/constants';
 export const buildSpotifyContent = server$(async (spotifyLink: string): Promise<SpotifyContent> => {
   const metadata = await getSpotifyMetadata(spotifyLink);
 
-  const id = spotifyLink.match(SPOTIFY_ID_REGEX)?.[0]!;
+  const id = (spotifyLink.match(SPOTIFY_ID_REGEX) ?? [])[0]!;
+
+  const links = [];
 
   const youtubeLink = await getYoutubeLink(metadata);
   const appleMusicLink = getAppleMusicLink(metadata);
   const tidalLink = getTidalLink(metadata);
   const soundcloudLink = getSoundCloudLink(metadata);
+
+  if (youtubeLink) {
+    links.push(youtubeLink, appleMusicLink, tidalLink, soundcloudLink);
+  }
 
   const spotifyContent: SpotifyContent = {
     id,
@@ -31,12 +37,7 @@ export const buildSpotifyContent = server$(async (spotifyLink: string): Promise<
     image: metadata.image,
     audio: metadata.audio,
     source: spotifyLink,
-    links: {
-      youtube: youtubeLink,
-      appleMusic: appleMusicLink,
-      tidal: tidalLink,
-      soundCloud: soundcloudLink,
-    },
+    links,
   };
 
   await Promise.all([
