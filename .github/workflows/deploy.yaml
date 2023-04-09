@@ -1,18 +1,16 @@
 ---
 name: "deploy to sjdonado.de"
 
-# yamllint disable-line rule:truthy
 on:
   push:
-    branches:
-      - master
+    branches: [master]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Cloning repo
-      - uses: actions/checkout@v3
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Push to dokku
