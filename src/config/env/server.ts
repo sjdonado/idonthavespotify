@@ -1,6 +1,7 @@
 interface ServerEnv {
   YOUTUBE_API_KEY: string;
   YOUTUBE_API_SEARCH_URL: string;
+  DEEZER_API_URL: string;
   YOUTUBE_BASE_URL: string;
   APPLE_MUSIC_BASE_URL: string;
   TIDAL_BASE_URL: string;
@@ -12,11 +13,11 @@ interface ServerEnv {
 const {
   YOUTUBE_API_KEY,
   YOUTUBE_API_SEARCH_URL,
+  DEEZER_API_URL,
   YOUTUBE_BASE_URL,
   APPLE_MUSIC_BASE_URL,
   TIDAL_BASE_URL,
   SOUNDCLOUD_BASE_URL,
-  RECAPTCHA_SECRET_KEY,
   REDIS_URL,
 } = process.env as NodeJS.ProcessEnv & ServerEnv;
 
@@ -25,6 +26,9 @@ export const services = {
     apiKey: YOUTUBE_API_KEY,
     apiSearchUrl: YOUTUBE_API_SEARCH_URL,
     baseUrl: YOUTUBE_BASE_URL,
+  },
+  deezer: {
+    apiUrl: DEEZER_API_URL,
   },
   appleMusic: {
     baseUrl: APPLE_MUSIC_BASE_URL,
@@ -35,10 +39,6 @@ export const services = {
   soundCloud: {
     baseUrl: SOUNDCLOUD_BASE_URL,
   },
-};
-
-export const recapcha = {
-  secretKey: RECAPTCHA_SECRET_KEY,
 };
 
 export const redis = {
