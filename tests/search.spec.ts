@@ -4,7 +4,7 @@ test.describe('Search Tests', () => {
   const spotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000');
+    await page.goto('/');
   });
 
   test('should return a song with a valid spotifyLink', async ({ page }) => {
@@ -43,7 +43,11 @@ test.describe('Search Tests', () => {
 
     const searchCardText = await searchCard.textContent() ?? '';
 
-    expect(searchCardText).toContain('No Links found');
+    expect(searchCardText).toContain('No links found');
+    expect(searchCardText).not.toContain('Listen on Youtube');
+    expect(searchCardText).not.toContain('Listen on Apple Music');
+    expect(searchCardText).not.toContain('Listen on Tidal');
+    expect(searchCardText).not.toContain('Listen on SoundCloud');
   });
 
   test('should return an error with an invalid spotifyLink', async ({ page }) => {
@@ -60,6 +64,7 @@ test.describe('Search Tests', () => {
   test('should increment the queries performed counter', async ({ page }) => {
     const searchCount = page.getByTestId('search-count');
 
+    await page.waitForTimeout(1000);
     const previousSearchCount = Number(await searchCount.textContent());
 
     await page.fill('#song-link', spotifyLink);

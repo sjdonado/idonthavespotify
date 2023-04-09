@@ -56,7 +56,7 @@ export const getYoutubeLink = async (metadata: SpotifyMetadata) => {
 
   const youtubeVideoTitle = metaTagContent(doc, 'og:title', 'property') ?? '';
 
-  if (compareTwoStrings(youtubeVideoTitle, query) < 0.4) {
+  if (compareTwoStrings(youtubeVideoTitle, query) < 0.5) {
     return undefined;
   }
 
