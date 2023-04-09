@@ -1,12 +1,16 @@
-import { compareTwoStrings } from 'string-similarity';
-
-import { SpotifyContentLink, SpotifyContentLinkType } from '~/@types/global';
-
-import { SpotifyMetadata } from '~/server/services/spotify';
-import { getQueryFromMetadata } from '~/utils/query';
+import {
+  type SpotifyContentLink,
+  SpotifyContentLinkType,
+  SpotifyMetadataType,
+} from '~/@types/global';
 
 import * as ENV from '~/config/env/server';
+
+import { SpotifyMetadata } from '~/server/services/spotify';
+
+import { getQueryFromMetadata } from '~/utils/query';
 import { getCheerioDoc, metaTagContent } from '~/utils/metaContent';
+import { compareResponseWithQuery } from '~/utils/compare';
 
 const {
   apiSearchUrl,
@@ -27,12 +31,19 @@ interface YoutubeSearchListResponse {
 
 export const getYoutubeLink = async (metadata: SpotifyMetadata) => {
   const query = getQueryFromMetadata(metadata);
-  const url = `${apiSearchUrl}?q=${encodeURIComponent(query)}&maxResults=1&key=${apiKey}`;
+
+  let encodedQuery = encodeURIComponent(query);
+
+  if (metadata.type === SpotifyMetadataType.Artist) {
+    encodedQuery = encodeURIComponent(`${query} channel official`);
+  }
+
+  const url = `${apiSearchUrl}?q=${encodedQuery}&maxResults=1&key=${apiKey}`;
 
   const response = (await fetch(url).then((res) => res.json()) as YoutubeSearchListResponse);
 
   if (response.error) {
-    throw new Error(response.error.message);
+    return undefined;
   }
 
   const { videoId, channelId, playlistId } = response.items[0].id;
@@ -56,7 +67,7 @@ export const getYoutubeLink = async (metadata: SpotifyMetadata) => {
 
   const youtubeVideoTitle = metaTagContent(doc, 'og:title', 'property') ?? '';
 
-  if (compareTwoStrings(youtubeVideoTitle, query) < 0.5) {
+  if (compareResponseWithQuery(youtubeVideoTitle, query)) {
     return undefined;
   }
 

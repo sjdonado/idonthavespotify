@@ -7,9 +7,10 @@ import { getYoutubeLink } from '~/server/services/youtube';
 import { getAppleMusicLink } from '~/server/services/appleMusic';
 import { getTidalLink } from '~/server/services/tidal';
 import { getSoundCloudLink } from '~/server/services/soundcloud';
+import { getDeezerLink } from '~/server/services/deezer';
 
 import { incrementSearchCount } from '~/server/services/searchCount';
-import { cacheSpotifyContent, getSpotifyContentFromCache } from '../services/cache';
+import { cacheSpotifyContent, getSpotifyContentFromCache } from '~/server/services/cache';
 
 import { SPOTIFY_ID_REGEX } from '~/constants';
 
@@ -21,12 +22,22 @@ export const buildSpotifyContent = server$(async (spotifyLink: string): Promise<
   const links = [];
 
   const youtubeLink = await getYoutubeLink(metadata);
+  const deezerLink = await getDeezerLink(metadata);
   const appleMusicLink = getAppleMusicLink(metadata);
   const tidalLink = getTidalLink(metadata);
   const soundcloudLink = getSoundCloudLink(metadata);
 
   if (youtubeLink) {
-    links.push(youtubeLink, appleMusicLink, tidalLink, soundcloudLink);
+    links.push(youtubeLink);
+  }
+
+  if (deezerLink) {
+    links.push(deezerLink);
+  }
+
+  // if at least one verified link is found, add the rest
+  if (links.length > 0) {
+    links.push(appleMusicLink, tidalLink, soundcloudLink);
   }
 
   const spotifyContent: SpotifyContent = {

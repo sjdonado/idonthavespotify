@@ -13,6 +13,10 @@ const SPOTIFY_CONTENT_LINK_DICT = {
     icon: 'fab fa-youtube',
     label: 'Listen on Youtube',
     isRecommended: true,
+  [SpotifyContentLinkType.Deezer]: {
+    icon: 'fab fa-deezer',
+    label: 'Listen on Deezer',
+    isVerified: true,
   },
   [SpotifyContentLinkType.AppleMusic]: {
     icon: 'fab fa-apple',
