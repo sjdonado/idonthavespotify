@@ -12,7 +12,8 @@ const SPOTIFY_CONTENT_LINK_DICT = {
   [SpotifyContentLinkType.Youtube]: {
     icon: 'fab fa-youtube',
     label: 'Listen on Youtube',
-    isRecommended: true,
+    isVerified: true,
+  },
   [SpotifyContentLinkType.Deezer]: {
     icon: 'fab fa-deezer',
     label: 'Listen on Deezer',
@@ -21,17 +22,17 @@ const SPOTIFY_CONTENT_LINK_DICT = {
   [SpotifyContentLinkType.AppleMusic]: {
     icon: 'fab fa-apple',
     label: 'Listen on Apple Music',
-    isRecommended: false,
+    isVerified: false,
   },
   [SpotifyContentLinkType.Tidal]: {
     icon: 'fa fa-music',
     label: 'Listen on Tidal',
-    isRecommended: false,
+    isVerified: false,
   },
   [SpotifyContentLinkType.SoundCloud]: {
     icon: 'fab fa-soundcloud',
     label: 'Listen on SoundCloud',
-    isRecommended: false,
+    isVerified: false,
   },
 };
 
@@ -39,7 +40,7 @@ const SpotifyContentLink = (props: {
   type: SpotifyContentLinkType,
   url: string,
 }) => {
-  const { label, icon, isRecommended } = SPOTIFY_CONTENT_LINK_DICT[props.type];
+  const { label, icon, isVerified } = SPOTIFY_CONTENT_LINK_DICT[props.type];
 
   return (
     <a
@@ -51,8 +52,13 @@ const SpotifyContentLink = (props: {
     >
       <i class={`${icon} w-6 mr-1`} />
       {label}
-      {isRecommended && (
-        <span class="inline-flex items-center ml-1 px-1 rounded-full text-[0.56rem] bg-green-500 text-black">Recommended</span>
+      {isVerified && (
+        <span
+          class="inline-flex items-center justify-center ml-1 p-1 rounded-full text-[0.56rem] bg-green-500"
+          aria-label="Verified"
+        >
+          <i class="fas fa-check" />
+        </span>
       )}
     </a>
   );
