@@ -35,7 +35,7 @@ export const getYoutubeLink = async (metadata: SpotifyMetadata) => {
   let encodedQuery = encodeURIComponent(query);
 
   if (metadata.type === SpotifyMetadataType.Artist) {
-    encodedQuery = encodeURIComponent(`${query} channel official`);
+    encodedQuery = encodeURIComponent(`${query} official channel`);
   }
 
   const url = `${apiSearchUrl}?q=${encodedQuery}&maxResults=1&key=${apiKey}`;
