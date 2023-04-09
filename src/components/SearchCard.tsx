@@ -30,7 +30,10 @@ const SpotifyContentLink = (props: {
 );
 
 const SearchCard: Component<SearchCardProps> = (props) => (
-  <div class="flex flex-wrap justify-start items-center rounded-lg border border-white w-5/6 lg:w-1/2 m-5">
+  <div
+    data-testid="search-card"
+    class="flex flex-wrap justify-start items-center rounded-lg border border-white w-5/6 lg:w-1/2 m-5"
+  >
     <AudioPreview
       title={props.spotifyContent.title}
       image={props.spotifyContent.image}

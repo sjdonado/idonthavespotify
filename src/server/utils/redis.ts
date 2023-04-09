@@ -9,7 +9,7 @@ export const setKey = async (key: string, value: string, expire?: boolean) => {
     return redis.set(key, value, 'EX', 60 * 60 * 24);
   }
 
-  await redis.set(key, value);
+  return redis.set(key, value);
 };
 
 export const getKey = async (key: string) => redis.get(key);

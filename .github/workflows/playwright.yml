@@ -1,0 +1,46 @@
+name: e2e tests
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+env:
+  YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+  YOUTUBE_API_SEARCH_URL: ${{ vars.YOUTUBE_API_SEARCH_URL }}
+  YOUTUBE_BASE_URL: ${{ vars.YOUTUBE_BASE_URL }}
+  APPLE_MUSIC_BASE_URL: ${{ vars.APPLE_MUSIC_BASE_URL }}
+  TIDAL_BASE_URL: ${{ vars.TIDAL_BASE_URL }}
+  SOUNDCLOUD_BASE_URL: ${{ vars.SOUNDCLOUD_BASE_URL }}
+  REDIS_URL: redis://localhost:6379
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Install dependencies
+        run: yarn install
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      - name: Run Playwright tests
+        run: yarn e2e
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30

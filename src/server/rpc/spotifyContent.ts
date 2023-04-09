@@ -11,8 +11,6 @@ import { getSoundCloudLink } from '~/server/services/soundcloud';
 import { incrementSearchCount } from '~/server/services/searchCount';
 import { cacheSpotifyContent, getSpotifyContentFromCache } from '../services/cache';
 
-import { verityCaptcha } from '~/utils/captcha';
-
 import { SPOTIFY_ID_REGEX } from '~/constants';
 
 export const buildSpotifyContent = server$(async (spotifyLink: string): Promise<SpotifyContent> => {
@@ -49,13 +47,7 @@ export const buildSpotifyContent = server$(async (spotifyLink: string): Promise<
   return spotifyContent;
 });
 
-export const fetchSpotifyContent = server$(async (spotifyLink: string, token: string): Promise<SpotifyContent> => {
-  const captchaSuccess = await verityCaptcha(token);
-
-  if (!captchaSuccess) {
-    throw new Error('Captcha failed');
-  }
-
+export const fetchSpotifyContent = server$(async (spotifyLink: string): Promise<SpotifyContent> => {
   const spotifyContent = await buildSpotifyContent(spotifyLink);
 
   return spotifyContent;

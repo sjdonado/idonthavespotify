@@ -1,8 +1,6 @@
 import { useSearchParams } from 'solid-start';
 import { createSignal, onMount } from 'solid-js';
 
-import { load, ReCaptchaInstance } from 'recaptcha-v3';
-
 import type { SpotifyContent } from '~/@types/global';
 
 import SearchBar, { SearchForm } from '~/components/SearchBar';
@@ -11,13 +9,10 @@ import SearchCard from '~/components/SearchCard';
 import { fetchSpotifyContent, fetchSpotifyContentFromCache } from '~/server/rpc/spotifyContent';
 import fetchSearchCount from '~/server/rpc/searchCount';
 
-import * as ENV from '~/config/env/client';
 import { SPOTIFY_LINK_REGEX } from '~/constants';
 
 export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams<{ id?: string }>();
-
-  const [recaptcha, setRecaptcha] = createSignal<ReCaptchaInstance>();
 
   const [spotifyContent, setSpotifyContent] = createSignal<SpotifyContent | undefined>();
   const [searchCount, setSearchCount] = createSignal(0);
@@ -25,45 +20,21 @@ export default function Home() {
   const [loading, setLoading] = createSignal(false);
   const [error, setError] = createSignal<string | undefined>();
 
-  onMount(async () => {
-    const [recaptchaInstance, count] = await Promise.all([
-      load(ENV.recaptcha.siteKey),
-      fetchSearchCount(),
-    ]);
-
-    setRecaptcha(recaptchaInstance);
-    setSearchCount(count);
-
-    const spotifyLink = await getSpotifyLinkFromClipboard();
-
-    if (spotifyLink) {
-      handleOnSearch({ spotifyLink });
-      return;
-    }
-
-    if (searchParams.id) {
-      const spotifyContent = await fetchSpotifyContentFromCache(searchParams.id);
-
-      if (spotifyContent) {
-        setSpotifyContent(spotifyContent);
-      }
-    }
-  });
-
   const getSpotifyLinkFromClipboard = async () => {
     const clipboardText = await navigator.clipboard.readText();
 
-    if (SPOTIFY_LINK_REGEX.test(clipboardText)) {
-      return clipboardText;
+    if (!SPOTIFY_LINK_REGEX.test(clipboardText)) {
+      return undefined;
     }
+
+    return clipboardText;
   };
 
   const handleOnSearch = async (formData: SearchForm) => {
     setLoading(true);
 
     try {
-      const token = await recaptcha()!.execute('submit');
-      const response = await fetchSpotifyContent(formData.spotifyLink, token);
+      const response = await fetchSpotifyContent(formData.spotifyLink);
 
       setSpotifyContent(response);
       setSearchParams({ id: response.id });
@@ -76,11 +47,31 @@ export default function Home() {
     setLoading(false);
   };
 
+  onMount(async () => {
+    const count = await fetchSearchCount();
+    setSearchCount(count);
+
+    const spotifyLink = await getSpotifyLinkFromClipboard();
+
+    if (spotifyLink) {
+      await handleOnSearch({ spotifyLink });
+      return;
+    }
+
+    if (searchParams.id) {
+      const cachedSpotifyContent = await fetchSpotifyContentFromCache(searchParams.id);
+
+      if (cachedSpotifyContent) {
+        setSpotifyContent(cachedSpotifyContent);
+      }
+    }
+  });
+
   return (
     <div class="bg-black text-white flex flex-col h-screen overflow-auto p-4">
       <main class="flex-1 flex flex-col justify-start items-center">
         <div class="text-center my-8 sm:my-16">
-          <h1 class="text-6xl uppercase">I don't have spotify</h1>
+          <h1 class="text-6xl uppercase">I don't have Spotify</h1>
           <h2 class="mt-6">Paste a Spotify link and get the content on other platforms.</h2>
         </div>
         <SearchBar
@@ -90,11 +81,13 @@ export default function Home() {
         />
         {loading() && <p class="mt-8">Loading...</p>}
         {error() && <p class="mt-8">{error()}</p>}
-        {!loading() && !error() && spotifyContent() && <SearchCard spotifyContent={spotifyContent()!} />}
+        {!loading() && !error() && spotifyContent() && (
+          <SearchCard spotifyContent={spotifyContent()!} />
+        )}
       </main>
       <footer class="text-center">
         <p>{'Queries performed: '}
-          <span class="font-bold">{searchCount()}</span>
+          <span class="font-bold" data-testid="search-count">{searchCount()}</span>
         </p>
         <p class="flex flex-wrap justify-center items-center w-1/2 m-auto text-sm">
           <a
@@ -103,7 +96,14 @@ export default function Home() {
             target="_blank"
             rel="noreferrer"
           >
-            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4"><path fill-rule="evenodd" clip-rule="evenodd" d="M4.703 9.92v1.377L1.402 7.995l.691-.686 2.61 2.611Zm1.377 1.377H4.703l3.301 3.301.69-.688-2.614-2.613Zm7.83-2.61L14.598 8 8.002 1.401l-.688.688L9.92 4.7H8.344l-1.82-1.818-.688.688 1.133 1.133H6.18v5.12h5.12V9.03l1.133 1.133.689-.688L11.3 7.654V6.078l2.61 2.61ZM5.047 4.356l-.688.688.739.739.688-.69-.739-.737Zm5.86 5.858-.687.688.739.739.688-.69-.74-.737ZM3.57 5.833l-.69.689 1.822 1.82V6.966L3.571 5.833Zm5.464 5.464H7.657l1.821 1.821.689-.689-1.132-1.132Z" fill="currentColor"></path></svg>
+            <svg
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-4 mr-1"
+            >
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M4.703 9.92v1.377L1.402 7.995l.691-.686 2.61 2.611Zm1.377 1.377H4.703l3.301 3.301.69-.688-2.614-2.613Zm7.83-2.61L14.598 8 8.002 1.401l-.688.688L9.92 4.7H8.344l-1.82-1.818-.688.688 1.133 1.133H6.18v5.12h5.12V9.03l1.133 1.133.689-.688L11.3 7.654V6.078l2.61 2.61ZM5.047 4.356l-.688.688.739.739.688-.69-.739-.737Zm5.86 5.858-.687.688.739.739.688-.69-.74-.737ZM3.57 5.833l-.69.689 1.822 1.82V6.966L3.571 5.833Zm5.464 5.464H7.657l1.821 1.821.689-.689-1.132-1.132Z" fill="currentColor" />
+            </svg>
             <span>Raycast Extension</span>
           </a>
           <span class="text-gray-500 mx-2 hidden sm:block">|</span>
@@ -113,7 +113,7 @@ export default function Home() {
             target="_blank"
             rel="noreferrer"
           >
-            <i class="fab fa-github mr-2" />
+            <i class="fab fa-github mr-1" />
             View on Github
           </a>
         </p>
