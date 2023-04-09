@@ -87,7 +87,7 @@ export default function Home() {
       </main>
       <footer class="text-center">
         <p>{'Queries performed: '}
-          <span class="font-bold">{searchCount()}</span>
+          <span class="font-bold" data-testid="search-count">{searchCount()}</span>
         </p>
         <p class="flex flex-wrap justify-center items-center w-1/2 m-auto text-sm">
           <a

@@ -1,11 +1,8 @@
 FROM node:19-alpine
 
-ARG VITE_RECAPTCHA_SITE_KEY=''
-ENV VITE_RECAPTCHA_SITE_KEY ${VITE_RECAPTCHA_SITE_KEY}
-
 EXPOSE 5000
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
 COPY package.json ./
 COPY yarn.lock ./

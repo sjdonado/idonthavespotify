@@ -24,3 +24,6 @@ gitignore
 Thumbs.db
 
 .env
+/test-results/
+/playwright-report/
+/playwright/.cache/
