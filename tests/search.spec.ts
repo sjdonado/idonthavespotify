@@ -187,7 +187,7 @@ test.describe('Search Tests', () => {
     expect(soundcloudLink).toBe('https://soundcloud.com/search/sounds?q=Waveform%3A%20The%20MKBHD%20Podcast');
   });
 
-  test('should return "No links found" with a valid spotifyLink - Spotify exclusive content', async ({ page }) => {
+  test('should return "Not available on other platforms" with a valid spotifyLink - Spotify exclusive content', async ({ page }) => {
     const searchCard = page.getByTestId('search-card');
 
     const exclusiveContentSpotifyLink = 'https://open.spotify.com/episode/5dNTXSZtkQLm6HuVdboFtx';
@@ -197,7 +197,7 @@ test.describe('Search Tests', () => {
 
     const searchCardText = await searchCard.textContent() ?? '';
 
-    expect(searchCardText).toContain('No links found');
+    expect(searchCardText).toContain('Not available on other platforms');
     expect(searchCardText).not.toContain('Listen on Youtube');
     expect(searchCardText).not.toContain('Listen on Deezer');
     expect(searchCardText).not.toContain('Listen on Apple Music');

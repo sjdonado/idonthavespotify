@@ -1,4 +1,6 @@
-import { Component, For } from 'solid-js';
+import {
+  Component, createSignal, For, onMount,
+} from 'solid-js';
 
 import { SpotifyContentLinkType, type SpotifyContent } from '~/@types/global';
 
@@ -36,18 +38,26 @@ const SpotifyContentLink = (props: {
   url: string,
   isVerified?: boolean,
 }) => {
-  const { label, icon } = SPOTIFY_CONTENT_LINK_DICT[props.type];
+  const [label, setLabel] = createSignal('');
+  const [icon, setIcon] = createSignal('');
+
+  onMount(() => {
+    const spotifyContent = SPOTIFY_CONTENT_LINK_DICT[props.type];
+
+    setIcon(spotifyContent.icon);
+    setLabel(spotifyContent.label);
+  });
 
   return (
     <a
       href={props.url}
       target="_blank"
       rel="noreferrer"
-      aria-label={label}
+      aria-label={label()}
       class="flex items-center hover:text-gray-300 text-sm sm:text-base"
     >
-      <i class={`${icon} w-6 mr-1`} />
-      {label}
+      <i class={`${icon()} w-6 mr-1`} />
+      {label()}
       {props.isVerified && (
         <span
           class="inline-flex items-center justify-center ml-1 p-1 rounded-full text-[0.56rem] bg-green-500"
@@ -74,7 +84,7 @@ const SearchCard: Component<SearchCardProps> = (props) => (
       <div class="font-bold text-xl">{props.spotifyContent.title}</div>
       <p class="text-sm">{props.spotifyContent.description}</p>
       {props.spotifyContent.links.length === 0 && (
-        <p class="my-12 text-sm text-center w-full">No links found</p>
+        <p class="my-12 text-sm text-center w-full">Not available on other platforms</p>
       )}
       {props.spotifyContent.links.length > 0 && (
         <ul class="mt-2 text-base">
