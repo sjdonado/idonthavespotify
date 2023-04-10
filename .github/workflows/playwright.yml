@@ -4,20 +4,20 @@ on:
     branches: [master]
 env:
   YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
-  YOUTUBE_API_SEARCH_URL: ${{ vars.YOUTUBE_API_SEARCH_URL }}
-  YOUTUBE_BASE_URL: ${{ vars.YOUTUBE_BASE_URL }}
-  APPLE_MUSIC_BASE_URL: ${{ vars.APPLE_MUSIC_BASE_URL }}
-  TIDAL_BASE_URL: ${{ vars.TIDAL_BASE_URL }}
-  SOUNDCLOUD_BASE_URL: ${{ vars.SOUNDCLOUD_BASE_URL }}
+  YOUTUBE_API_SEARCH_URL: https://www.googleapis.com/youtube/v3/search
+  DEEZER_API_URL: https://api.deezer.com/search
+  YOUTUBE_BASE_URL: https://www.youtube.com
+  APPLE_MUSIC_BASE_URL: https://music.apple.com/search?term=
+  TIDAL_BASE_URL: https://listen.tidal.com/search?q=
+  SOUNDCLOUD_BASE_URL: https://soundcloud.com/search/sounds?q=
   REDIS_URL: redis://localhost:6379
-
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     services:
       redis:
-        image: redis
+        image: redis:7.0-alpine
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s

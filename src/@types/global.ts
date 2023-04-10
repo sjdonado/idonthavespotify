@@ -12,11 +12,13 @@ export enum SpotifyContentLinkType {
   AppleMusic = 'appleMusic',
   Tidal = 'tidal',
   SoundCloud = 'soundCloud',
+  Deezer = 'deezer',
 }
 
 export interface SpotifyContentLink {
   type: SpotifyContentLinkType;
   url: string;
+  isVerified?: boolean;
 }
 
 export interface SpotifyContent {

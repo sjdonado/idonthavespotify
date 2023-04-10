@@ -7,7 +7,7 @@ import * as ENV from '~/config/env/server';
 
 export const getSoundCloudLink = (metadata: SpotifyMetadata) => {
   const query = getQueryFromMetadata(metadata);
-  const url = `${ENV.services.soundCloud.baseUrl}${encodeURIComponent(query)}`;
+  const url = `${ENV.services.soundCloud.baseUrl}${query}`;
 
   return { type: SpotifyContentLinkType.SoundCloud, url } as SpotifyContentLink;
 };

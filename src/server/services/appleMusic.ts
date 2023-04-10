@@ -7,7 +7,7 @@ import * as ENV from '~/config/env/server';
 
 export const getAppleMusicLink = (metadata: SpotifyMetadata) => {
   const query = getQueryFromMetadata(metadata);
-  const url = `${ENV.services.appleMusic.baseUrl}${encodeURIComponent(query)}`;
+  const url = `${ENV.services.appleMusic.baseUrl}${query}`;
 
   return { type: SpotifyContentLinkType.AppleMusic, url } as SpotifyContentLink;
 };
