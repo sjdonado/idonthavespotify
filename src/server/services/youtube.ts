@@ -32,7 +32,7 @@ interface YoutubeSearchListResponse {
 }
 
 export const getYoutubeLink = async (metadata: SpotifyMetadata): Promise<SpotifyContentLink | undefined> => {
-  const query = getQueryFromMetadata(metadata);
+  let query = getQueryFromMetadata(metadata);
 
   const searchTypes = {
     [SpotifyMetadataType.Song]: 'video',
@@ -42,6 +42,10 @@ export const getYoutubeLink = async (metadata: SpotifyMetadata): Promise<Spotify
     [SpotifyMetadataType.Podcast]: 'video',
     [SpotifyMetadataType.Show]: 'channel',
   };
+
+  if (metadata.type === SpotifyMetadataType.Artist) {
+    query = `${query} official`;
+  }
 
   const url = `${apiSearchUrl}?part=snippet&&type=${searchTypes[metadata.type]}&q=${query}&maxResults=1&key=${apiKey}`;
 
@@ -67,7 +71,6 @@ export const getYoutubeLink = async (metadata: SpotifyMetadata): Promise<Spotify
     [SpotifyMetadataType.Podcast]: `${baseUrl}/watch?v=${videoId}`,
     [SpotifyMetadataType.Show]: `${baseUrl}/channel/${channelId}`,
   };
-
 
   if (compareResponseWithQuery(snippet.title, query)) {
     return undefined;
