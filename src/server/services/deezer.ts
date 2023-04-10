@@ -5,7 +5,7 @@ import * as ENV from '~/config/env/server';
 import { SpotifyMetadata } from '~/server/services/spotify';
 
 import { getQueryFromMetadata } from '~/utils/query';
-import { compareResponseWithQuery } from '~/utils/compare';
+import { responseMatchesQuery } from '~/utils/compare';
 
 interface DeezerSearchResponse {
   total: number;
@@ -16,19 +16,21 @@ interface DeezerSearchResponse {
   }];
 }
 
-export const getDeezerLink = async (metadata: SpotifyMetadata): Promise<SpotifyContentLink | undefined> => {
-  const query = getQueryFromMetadata(metadata);
+export async function getDeezerLink(
+  metadata: SpotifyMetadata,
+): Promise<SpotifyContentLink | undefined> {
+  const query = getQueryFromMetadata(metadata.title, metadata.description, metadata.type);
 
   const searchTypes = {
-    [SpotifyMetadataType.Song]: 'track',
-    [SpotifyMetadataType.Album]: 'album',
-    [SpotifyMetadataType.Playlist]: 'playlist',
-    [SpotifyMetadataType.Artist]: 'artist',
-    [SpotifyMetadataType.Podcast]: 'podcast',
-    [SpotifyMetadataType.Show]: 'radio',
+    [SpotifyMetadataType.Song]: '/track',
+    [SpotifyMetadataType.Album]: '/album',
+    [SpotifyMetadataType.Playlist]: '/playlist',
+    [SpotifyMetadataType.Artist]: '/artist',
+    [SpotifyMetadataType.Show]: '/podcast',
+    [SpotifyMetadataType.Podcast]: '',
   };
 
-  const url = `${ENV.services.deezer.apiUrl}/${searchTypes[metadata.type]}?q=${query}&limit=1`;
+  const url = `${ENV.services.deezer.apiUrl}${searchTypes[metadata.type]}?q=${query}&limit=1`;
   const response = (await fetch(url).then((res) => res.json()) as DeezerSearchResponse);
 
   if (response.total === 0) {
@@ -38,7 +40,7 @@ export const getDeezerLink = async (metadata: SpotifyMetadata): Promise<SpotifyC
 
   const [{ title, name, link }] = response.data;
 
-  if (compareResponseWithQuery(title ?? name ?? '', query)) {
+  if (!responseMatchesQuery(title ?? name ?? '', query)) {
     return undefined;
   }
 
@@ -47,4 +49,4 @@ export const getDeezerLink = async (metadata: SpotifyMetadata): Promise<SpotifyC
     url: link,
     isVerified: true,
   };
-};
+}
