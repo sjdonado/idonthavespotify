@@ -5,7 +5,7 @@ import * as ENV from '~/config/env/server';
 import { APPLE_MUSIC_LINK_SELECTOR } from '~/constants';
 
 import { SpotifyMetadata } from '~/server/services/spotify';
-import { compareResponseWithQuery } from '~/utils/compare';
+import { responseMatchesQuery } from '~/utils/compare';
 
 import { getQueryFromMetadata } from '~/utils/query';
 import { getCheerioDoc } from '~/utils/scraper';
@@ -13,8 +13,8 @@ import { getCheerioDoc } from '~/utils/scraper';
 export async function getAppleMusicLink(
   metadata: SpotifyMetadata,
 ): Promise<SpotifyContentLink | undefined> {
+  const query = getQueryFromMetadata(metadata.title, metadata.description, metadata.type);
 
-  const query = getQueryFromMetadata(metadata);
   const url = `${ENV.services.appleMusic.baseUrl}${query}`;
   const html = await fetch(url).then((res) => res.text());
   const doc = getCheerioDoc(html);
@@ -46,7 +46,7 @@ export async function getAppleMusicLink(
 
   const { title, href, isVerified } = appleMusicDataByType[metadata.type] ?? {};
 
-  if (compareResponseWithQuery(title ?? '', query)) {
+  if (!responseMatchesQuery(title ?? '', query)) {
     return undefined;
   }
 

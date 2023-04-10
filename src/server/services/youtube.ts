@@ -9,7 +9,7 @@ import * as ENV from '~/config/env/server';
 import { SpotifyMetadata } from '~/server/services/spotify';
 
 import { getQueryFromMetadata } from '~/utils/query';
-import { compareResponseWithQuery } from '~/utils/compare';
+import { responseMatchesQuery } from '~/utils/compare';
 
 const {
   apiSearchUrl,
@@ -31,8 +31,10 @@ interface YoutubeSearchListResponse {
   }];
 }
 
-export const getYoutubeLink = async (metadata: SpotifyMetadata): Promise<SpotifyContentLink | undefined> => {
-  let query = getQueryFromMetadata(metadata);
+export async function getYoutubeLink(
+  metadata: SpotifyMetadata,
+): Promise<SpotifyContentLink | undefined> {
+  let query = getQueryFromMetadata(metadata.title, metadata.description, metadata.type);
 
   const searchTypes = {
     [SpotifyMetadataType.Song]: 'video',
@@ -48,7 +50,6 @@ export const getYoutubeLink = async (metadata: SpotifyMetadata): Promise<Spotify
   }
 
   const url = `${apiSearchUrl}?part=snippet&&type=${searchTypes[metadata.type]}&q=${query}&maxResults=1&key=${apiKey}`;
-
   const response = (await fetch(url).then((res) => res.json()) as YoutubeSearchListResponse);
 
   if (response.error) {
@@ -72,7 +73,7 @@ export const getYoutubeLink = async (metadata: SpotifyMetadata): Promise<Spotify
     [SpotifyMetadataType.Show]: `${baseUrl}/channel/${channelId}`,
   };
 
-  if (compareResponseWithQuery(snippet.title, query)) {
+  if (!responseMatchesQuery(snippet.title, query)) {
     return undefined;
   }
 
@@ -81,4 +82,4 @@ export const getYoutubeLink = async (metadata: SpotifyMetadata): Promise<Spotify
     url: youtubeLinkByType[metadata.type],
     isVerified: true,
   };
-};
+}
