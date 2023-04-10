@@ -99,7 +99,7 @@ test.describe('Search Tests', () => {
   });
 
   test('should return a song with a valid spotifyLink - Playlist', async ({ page }) => {
-    const spotifyLinkPlaylist = 'https://open.spotify.com/playlist/37i9dQZF1DWWQRwui0ExPn';
+    const spotifyLinkPlaylist = 'https://open.spotify.com/playlist/37i9dQZF1DX10zKzsJ2jva';
 
     const searchCard = page.getByTestId('search-card');
 
@@ -108,8 +108,8 @@ test.describe('Search Tests', () => {
 
     const searchCardText = await searchCard.textContent() ?? '';
 
-    expect(searchCardText).toContain('lofi beats');
-    expect(searchCardText).toContain('lofi beats · Playlist · 800 songs · 5M likes');
+    expect(searchCardText).toContain('Viva Latino');
+    expect(searchCardText).toContain('Viva Latino · Playlist · 50 songs · 13.6M likes');
     expect(searchCardText).toContain('Listen on Youtube');
     expect(searchCardText).toContain('Listen on Deezer');
     expect(searchCardText).toContain('Listen on Apple Music');
@@ -122,11 +122,11 @@ test.describe('Search Tests', () => {
     const tidalLink = await page.getByText('Listen on Tidal').getAttribute('href');
     const soundcloudLink = await page.getByText('Listen on SoundCloud').getAttribute('href');
 
-    expect(youtubeLink).toBe('https://www.youtube.com/playlist?list=PLuDoiEqVUgejiZy0AOEEOLY2YFFXncwEA');
-    expect(deezerLink).toBe('https://www.deezer.com/playlist/7584355422');
-    expect(appleMusicLink).toBe('https://music.apple.com/search?term=lofi%20beats%20Playlist');
-    expect(tidalLink).toBe('https://music.apple.com/search?term=lofi%20beats%20Playlist');
-    expect(soundcloudLink).toBe('https://soundcloud.com/search/sounds?q=lofi%20beats%20Playlist');
+    expect(youtubeLink).toBe('https://www.youtube.com/playlist?list=PLgzTt0k8mXzEwr38NTt-4CgJBAAdhTtOD');
+    expect(deezerLink).toBe('https://www.deezer.com/playlist/1948184026');
+    expect(appleMusicLink).toBe('https://music.apple.com/search?term=Viva%20Latino%20Playlist');
+    expect(tidalLink).toBe('https://listen.tidal.com/search?q=Viva%20Latino%20Playlist');
+    expect(soundcloudLink).toBe('https://soundcloud.com/search/sounds?q=Viva%20Latino%20Playlist');
   });
 
   test('should return a song with a valid spotifyLink - Podcast', async ({ page }) => {

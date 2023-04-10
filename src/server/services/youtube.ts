@@ -59,19 +59,15 @@ export const getYoutubeLink = async (metadata: SpotifyMetadata): Promise<Spotify
 
   const [{ id: { videoId, channelId, playlistId }, snippet }] = response.items;
 
-  let youtubeLink = '';
+  const youtubeLinkByType = {
+    [SpotifyMetadataType.Song]: `${baseUrl}/watch?v=${videoId}`,
+    [SpotifyMetadataType.Album]: `${baseUrl}/playlist?list=${playlistId}`,
+    [SpotifyMetadataType.Playlist]: `${baseUrl}/playlist?list=${playlistId}`,
+    [SpotifyMetadataType.Artist]: `${baseUrl}/channel/${channelId}`,
+    [SpotifyMetadataType.Podcast]: `${baseUrl}/watch?v=${videoId}`,
+    [SpotifyMetadataType.Show]: `${baseUrl}/channel/${channelId}`,
+  };
 
-  if (videoId) {
-    youtubeLink = `${baseUrl}/watch?v=${videoId}`;
-  }
-
-  if (channelId) {
-    youtubeLink = `${baseUrl}/channel/${channelId}`;
-  }
-
-  if (playlistId) {
-    youtubeLink = `${baseUrl}/playlist?list=${playlistId}`;
-  }
 
   if (compareResponseWithQuery(snippet.title, query)) {
     return undefined;
@@ -79,7 +75,7 @@ export const getYoutubeLink = async (metadata: SpotifyMetadata): Promise<Spotify
 
   return {
     type: SpotifyContentLinkType.Youtube,
-    url: youtubeLink,
+    url: youtubeLinkByType[metadata.type],
     isVerified: true,
   };
 };
