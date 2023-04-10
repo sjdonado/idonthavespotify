@@ -1,16 +1,16 @@
 # I don't have Spotify
 
-solid-start + tailwindcss ❤️
+More links coming soon :)
 
 ## Web
 <div align="center">
-  <img alt="Website screenshot" src="https://user-images.githubusercontent.com/27580836/228323167-2e66cd34-c2c4-4d92-8b16-accb4705ebe3.png">
+  <img alt="Website screenshot" src="https://user-images.githubusercontent.com/27580836/230793484-391e76e8-39bc-49fc-9fbb-1505be3bff6b.png">
 </div>
 
 ## Raycast Extension
 <a href="https://raycast.com/sjdonado/idonthavespotify" target="_blank">
   <div align="center">
-    <img alt="Raycast Extension screenshot3" src="https://user-images.githubusercontent.com/27580836/228768419-cd0f4e45-d676-4b5c-9f83-be4e3ab71f4c.png">
+    <img alt="Raycast Extension screenshot" src="https://user-images.githubusercontent.com/27580836/230833330-9759063b-04d4-4559-b3b2-859e4a13f947.png">
   </div>
 </a>
 
