@@ -33,7 +33,7 @@ jobs:
       - name: Install dependencies
         run: yarn install
       - name: Install Playwright Browsers
-        run: npx playwright install --with-chromium
+        run: npx playwright install-deps chromium
       - name: Run Playwright tests
         run: yarn e2e
       - uses: actions/upload-artifact@v2
