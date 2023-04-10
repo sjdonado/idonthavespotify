@@ -9,7 +9,8 @@
     "dev": "solid-start dev",
     "build": "solid-start build",
     "start": "solid-start start",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "lint": "eslint ."
   },
   "type": "module",
   "dependencies": {
