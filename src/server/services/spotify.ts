@@ -1,6 +1,6 @@
 import { SpotifyMetadataType } from '~/@types/global';
 
-import { getCheerioDoc, metaTagContent } from '~/utils/metaContent';
+import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
 
 export interface SpotifyMetadata {
   title: string;

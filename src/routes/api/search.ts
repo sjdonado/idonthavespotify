@@ -14,10 +14,14 @@ const apiError = (error: string, status: number): Response => new Response(
 );
 
 function parseSpotifyContentV1(spotifyContent: SpotifyContent) {
-  const youtube = spotifyContent.links.find((link) => link.type === SpotifyContentLinkType.Youtube);
-  const appleMusic = spotifyContent.links.find((link) => link.type === SpotifyContentLinkType.AppleMusic);
-  const tidal = spotifyContent.links.find((link) => link.type === SpotifyContentLinkType.Tidal);
-  const soundcloud = spotifyContent.links.find((link) => link.type === SpotifyContentLinkType.SoundCloud);
+  const youtube = spotifyContent.links
+    .find((link) => link.type === SpotifyContentLinkType.Youtube);
+  const appleMusic = spotifyContent.links
+    .find((link) => link.type === SpotifyContentLinkType.AppleMusic);
+  const tidal = spotifyContent.links
+    .find((link) => link.type === SpotifyContentLinkType.Tidal);
+  const soundcloud = spotifyContent.links
+    .find((link) => link.type === SpotifyContentLinkType.SoundCloud);
 
   return {
     ...spotifyContent,
