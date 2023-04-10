@@ -7,7 +7,7 @@ import * as ENV from '~/config/env/server';
 
 export const getTidalLink = (metadata: SpotifyMetadata) => {
   const query = getQueryFromMetadata(metadata);
-  const url = `${ENV.services.tidal.baseUrl}${encodeURIComponent(query)}`;
+  const url = `${ENV.services.tidal.baseUrl}${query}`;
 
   return { type: SpotifyContentLinkType.Tidal, url } as SpotifyContentLink;
 };

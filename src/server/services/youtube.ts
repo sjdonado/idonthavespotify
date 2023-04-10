@@ -31,21 +31,24 @@ interface YoutubeSearchListResponse {
   }];
 }
 
-export const getYoutubeLink = async (metadata: SpotifyMetadata) => {
+export const getYoutubeLink = async (metadata: SpotifyMetadata): Promise<SpotifyContentLink | undefined> => {
   const query = getQueryFromMetadata(metadata);
 
-  let encodedQuery = encodeURIComponent(query);
+  const searchTypes = {
+    [SpotifyMetadataType.Song]: 'video',
+    [SpotifyMetadataType.Album]: 'playlist',
+    [SpotifyMetadataType.Playlist]: 'playlist',
+    [SpotifyMetadataType.Artist]: 'channel',
+    [SpotifyMetadataType.Podcast]: 'video',
+    [SpotifyMetadataType.Show]: 'channel',
+  };
 
-  if (metadata.type === SpotifyMetadataType.Artist) {
-    encodedQuery = encodeURIComponent(`${query} official channel`);
-  }
-
-  const url = `${apiSearchUrl}?part=snippet&q=${encodedQuery}&maxResults=1&key=${apiKey}`;
+  const url = `${apiSearchUrl}?part=snippet&type=${searchTypes[metadata.type]}&q=${query}&maxResults=1&key=${apiKey}`;
 
   const response = (await fetch(url).then((res) => res.json()) as YoutubeSearchListResponse);
 
   if (response.error) {
-    console.error(response.error.message);
+    console.error('[Youtube]', response.error.message);
     return undefined;
   }
 
@@ -69,5 +72,9 @@ export const getYoutubeLink = async (metadata: SpotifyMetadata) => {
     return undefined;
   }
 
-  return { type: SpotifyContentLinkType.Youtube, url: youtubeLink } as SpotifyContentLink;
+  return {
+    type: SpotifyContentLinkType.Youtube,
+    url: youtubeLink,
+    isVerified: true,
+  };
 };

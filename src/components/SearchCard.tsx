@@ -12,35 +12,31 @@ const SPOTIFY_CONTENT_LINK_DICT = {
   [SpotifyContentLinkType.Youtube]: {
     icon: 'fab fa-youtube',
     label: 'Listen on Youtube',
-    isVerified: true,
   },
   [SpotifyContentLinkType.Deezer]: {
     icon: 'fab fa-deezer',
     label: 'Listen on Deezer',
-    isVerified: true,
   },
   [SpotifyContentLinkType.AppleMusic]: {
     icon: 'fab fa-apple',
     label: 'Listen on Apple Music',
-    isVerified: false,
   },
   [SpotifyContentLinkType.Tidal]: {
     icon: 'fa fa-music',
     label: 'Listen on Tidal',
-    isVerified: false,
   },
   [SpotifyContentLinkType.SoundCloud]: {
     icon: 'fab fa-soundcloud',
     label: 'Listen on SoundCloud',
-    isVerified: false,
   },
 };
 
 const SpotifyContentLink = (props: {
   type: SpotifyContentLinkType,
   url: string,
+  isVerified?: boolean,
 }) => {
-  const { label, icon, isVerified } = SPOTIFY_CONTENT_LINK_DICT[props.type];
+  const { label, icon } = SPOTIFY_CONTENT_LINK_DICT[props.type];
 
   return (
     <a
@@ -52,7 +48,7 @@ const SpotifyContentLink = (props: {
     >
       <i class={`${icon} w-6 mr-1`} />
       {label}
-      {isVerified && (
+      {props.isVerified && (
         <span
           class="inline-flex items-center justify-center ml-1 p-1 rounded-full text-[0.56rem] bg-green-500"
           aria-label="Verified"
@@ -84,7 +80,13 @@ const SearchCard: Component<SearchCardProps> = (props) => (
         <ul class="mt-2 text-base">
           <li class="flex flex-col items-start">
             <For each={props.spotifyContent.links}>
-              {({ type, url }) => <SpotifyContentLink type={type} url={url} />}
+              {({ type, url, isVerified }) => (
+                <SpotifyContentLink
+                  type={type}
+                  url={url}
+                  isVerified={isVerified}
+                />
+              )}
             </For>
           </li>
         </ul>

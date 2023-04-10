@@ -26,5 +26,5 @@ export const getQueryFromMetadata = ({ title, description, type }: SpotifyMetada
     query = artist ? `${query} ${artist}` : query;
   }
 
-  return query;
+  return encodeURIComponent(query);
 };

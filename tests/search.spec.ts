@@ -68,7 +68,7 @@ test.describe('Search Tests', () => {
   });
 
   test('should return a song with a valid spotifyLink - Artist', async ({ page }) => {
-    const spotifyLinkAlbum = 'https://open.spotify.com/album/1lXY618HWkwYKJWBRYR4MK';
+    const spotifyLinkAlbum = 'https://open.spotify.com/artist/3TVXtAsR1Inumwj472S9r4';
 
     const searchCard = page.getByTestId('search-card');
 
@@ -77,8 +77,8 @@ test.describe('Search Tests', () => {
 
     const searchCardText = await searchCard.textContent() ?? '';
 
-    expect(searchCardText).toContain('More Life');
-    expect(searchCardText).toContain('Drake · Album · 2017 · 22 songs');
+    expect(searchCardText).toContain('Drake');
+    expect(searchCardText).toContain('Artist · 68.5M monthly listeners');
     expect(searchCardText).toContain('Listen on Youtube');
     expect(searchCardText).toContain('Listen on Deezer');
     expect(searchCardText).toContain('Listen on Apple Music');

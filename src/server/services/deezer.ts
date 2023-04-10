@@ -23,14 +23,14 @@ interface DeezerSearchResponse {
   }];
 }
 
-export const getDeezerLink = async (metadata: SpotifyMetadata) => {
+export const getDeezerLink = async (metadata: SpotifyMetadata): Promise<SpotifyContentLink | undefined> => {
   const query = getQueryFromMetadata(metadata);
-  const url = `${ENV.services.deezer.apiUrl}?q=${encodeURIComponent(query)}&limit=1`;
+  const url = `${ENV.services.deezer.apiUrl}?q=${query}&limit=1`;
 
   const response = (await fetch(url).then((res) => res.json()) as DeezerSearchResponse);
 
   if (response.total === 0) {
-    console.error('No results found', query);
+    console.error('[Deezer] No results found', query);
     return undefined;
   }
 
@@ -53,5 +53,9 @@ export const getDeezerLink = async (metadata: SpotifyMetadata) => {
     return undefined;
   }
 
-  return { type: SpotifyContentLinkType.Deezer, url: deezerData.link } as SpotifyContentLink;
+  return {
+    type: SpotifyContentLinkType.Deezer,
+    url: deezerData.link,
+    isVerified: true,
+  };
 };

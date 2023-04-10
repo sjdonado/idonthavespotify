@@ -18,6 +18,7 @@ export enum SpotifyContentLinkType {
 export interface SpotifyContentLink {
   type: SpotifyContentLinkType;
   url: string;
+  isVerified?: boolean;
 }
 
 export interface SpotifyContent {
