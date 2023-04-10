@@ -10,52 +10,41 @@ import { compareResponseWithQuery } from '~/utils/compare';
 interface DeezerSearchResponse {
   total: number;
   data: [{
-    title: string,
+    title?: string,
+    name?: string,
     link: string,
-    album: {
-      title: string,
-      link: string,
-    },
-    artist: {
-      name: string,
-      link: string,
-    },
   }];
 }
 
 export const getDeezerLink = async (metadata: SpotifyMetadata): Promise<SpotifyContentLink | undefined> => {
   const query = getQueryFromMetadata(metadata);
-  const url = `${ENV.services.deezer.apiUrl}?q=${query}&limit=1`;
 
+  const searchTypes = {
+    [SpotifyMetadataType.Song]: 'track',
+    [SpotifyMetadataType.Album]: 'album',
+    [SpotifyMetadataType.Playlist]: 'playlist',
+    [SpotifyMetadataType.Artist]: 'artist',
+    [SpotifyMetadataType.Podcast]: 'podcast',
+    [SpotifyMetadataType.Show]: 'radio',
+  };
+
+  const url = `${ENV.services.deezer.apiUrl}/${searchTypes[metadata.type]}?q=${query}&limit=1`;
   const response = (await fetch(url).then((res) => res.json()) as DeezerSearchResponse);
 
   if (response.total === 0) {
-    console.error('[Deezer] No results found', query);
+    console.error('[Deezer] No results found', url);
     return undefined;
   }
 
-  const [{ album, artist, ...track }] = response.data;
+  const [{ title, name, link }] = response.data;
 
-  const deezerData = { title: track.title, link: track.link };
-
-  if (metadata.type === SpotifyMetadataType.Album) {
-    Object.assign(deezerData, album);
-  }
-
-  if (metadata.type === SpotifyMetadataType.Artist) {
-    Object.assign(deezerData, {
-      title: artist.name,
-      link: artist.link,
-    });
-  }
-
-  if (compareResponseWithQuery(deezerData.title, query)) {
+  if (compareResponseWithQuery(title ?? name ?? '', query)) {
     return undefined;
   }
 
   return {
     type: SpotifyContentLinkType.Deezer,
-    url: deezerData.link,
+    url: link,
     isVerified: true,
   };
 };

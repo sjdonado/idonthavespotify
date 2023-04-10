@@ -19,7 +19,7 @@ const {
 
 interface YoutubeSearchListResponse {
   error?: { message: string };
-  items: [{
+  items?: [{
     id: {
       videoId: string,
       channelId: string,
@@ -43,12 +43,17 @@ export const getYoutubeLink = async (metadata: SpotifyMetadata): Promise<Spotify
     [SpotifyMetadataType.Show]: 'channel',
   };
 
-  const url = `${apiSearchUrl}?part=snippet&type=${searchTypes[metadata.type]}&q=${query}&maxResults=1&key=${apiKey}`;
+  const url = `${apiSearchUrl}?part=snippet&&type=${searchTypes[metadata.type]}&q=${query}&maxResults=1&key=${apiKey}`;
 
   const response = (await fetch(url).then((res) => res.json()) as YoutubeSearchListResponse);
 
   if (response.error) {
     console.error('[Youtube]', response.error.message);
+    return undefined;
+  }
+
+  if (!response.items?.length) {
+    console.error('[Youtube] No results found', url);
     return undefined;
   }
 

@@ -37,7 +37,7 @@ test.describe('Search Tests', () => {
   });
 
   test('should return a song with a valid spotifyLink - Album', async ({ page }) => {
-    const spotifyLinkAlbum = 'https://open.spotify.com/album/1lXY618HWkwYKJWBRYR4MK';
+    const spotifyLinkAlbum = 'https://open.spotify.com/album/1gDqOyL8NmU2LQPtFutRng';
 
     const searchCard = page.getByTestId('search-card');
 
@@ -46,8 +46,8 @@ test.describe('Search Tests', () => {
 
     const searchCardText = await searchCard.textContent() ?? '';
 
-    expect(searchCardText).toContain('More Life');
-    expect(searchCardText).toContain('Drake · Album · 2017 · 22 songs');
+    expect(searchCardText).toContain('MultiViral');
+    expect(searchCardText).toContain('Calle 13 · Album · 2014 · 15 songs');
     expect(searchCardText).toContain('Listen on Youtube');
     expect(searchCardText).toContain('Listen on Deezer');
     expect(searchCardText).toContain('Listen on Apple Music');
@@ -60,25 +60,25 @@ test.describe('Search Tests', () => {
     const tidalLink = await page.getByText('Listen on Tidal').getAttribute('href');
     const soundcloudLink = await page.getByText('Listen on SoundCloud').getAttribute('href');
 
-    expect(youtubeLink).toBe('https://www.youtube.com/playlist?list=PLGxQs-Q59UneXtjndClk4s5T108T8fD5S');
-    expect(deezerLink).toBe('https://www.deezer.com/track/144572210');
-    expect(appleMusicLink).toBe('https://music.apple.com/search?term=More%20Life%20Drake');
-    expect(tidalLink).toBe('https://listen.tidal.com/search?q=More%20Life%20Drake');
-    expect(soundcloudLink).toBe('https://soundcloud.com/search/sounds?q=More%20Life%20Drake');
+    expect(youtubeLink).toBe('https://www.youtube.com/playlist?list=PLDUEjoBVMbh_-FtCOppxPRktZX5Q2xdGE');
+    expect(deezerLink).toBe('https://www.deezer.com/album/7482049');
+    expect(appleMusicLink).toBe('https://music.apple.com/search?term=MultiViral%20Calle%2013');
+    expect(tidalLink).toBe('https://listen.tidal.com/search?q=MultiViral%20Calle%2013');
+    expect(soundcloudLink).toBe('https://soundcloud.com/search/sounds?q=MultiViral%20Calle%2013');
   });
 
   test('should return a song with a valid spotifyLink - Artist', async ({ page }) => {
-    const spotifyLinkAlbum = 'https://open.spotify.com/artist/3TVXtAsR1Inumwj472S9r4';
+    const spotifyLinkArtist = 'https://open.spotify.com/artist/0EmeFodog0BfCgMzAIvKQp';
 
     const searchCard = page.getByTestId('search-card');
 
-    await page.fill('#song-link', spotifyLinkAlbum);
+    await page.fill('#song-link', spotifyLinkArtist);
     await page.press('#song-link', 'Enter');
 
     const searchCardText = await searchCard.textContent() ?? '';
 
-    expect(searchCardText).toContain('Drake');
-    expect(searchCardText).toContain('Artist · 68.5M monthly listeners');
+    expect(searchCardText).toContain('Shakira');
+    expect(searchCardText).toContain('Artist · 79.4M monthly listeners');
     expect(searchCardText).toContain('Listen on Youtube');
     expect(searchCardText).toContain('Listen on Deezer');
     expect(searchCardText).toContain('Listen on Apple Music');
@@ -91,15 +91,15 @@ test.describe('Search Tests', () => {
     const tidalLink = await page.getByText('Listen on Tidal').getAttribute('href');
     const soundcloudLink = await page.getByText('Listen on SoundCloud').getAttribute('href');
 
-    expect(youtubeLink).toBe('https://www.youtube.com/channel/UCByOQJjav0CUDwxCk-jVNRQ');
-    expect(deezerLink).toBe('https://www.deezer.com/artist/246791');
-    expect(appleMusicLink).toBe('https://music.apple.com/search?term=Drake');
-    expect(tidalLink).toBe('https://listen.tidal.com/search?q=Drake');
-    expect(soundcloudLink).toBe('https://soundcloud.com/search/sounds?q=Drake');
+    expect(youtubeLink).toBe('https://www.youtube.com/channel/UCYLNGLIzMhRTi6ZOLjAPSmw');
+    expect(deezerLink).toBe('https://www.deezer.com/artist/160');
+    expect(appleMusicLink).toBe('https://music.apple.com/search?term=Shakira');
+    expect(tidalLink).toBe('https://listen.tidal.com/search?q=Shakira');
+    expect(soundcloudLink).toBe('https://soundcloud.com/search/sounds?q=Shakira');
   });
 
   test('should return a song with a valid spotifyLink - Playlist', async ({ page }) => {
-    const spotifyLinkPlaylist = 'https://open.spotify.com/playlist/37i9dQZF1DX7QOv5kjbU68';
+    const spotifyLinkPlaylist = 'https://open.spotify.com/playlist/37i9dQZF1DWWQRwui0ExPn';
 
     const searchCard = page.getByTestId('search-card');
 
@@ -108,23 +108,25 @@ test.describe('Search Tests', () => {
 
     const searchCardText = await searchCard.textContent() ?? '';
 
-    expect(searchCardText).toContain('This Is Drake');
-    expect(searchCardText).toContain('This Is Drake · Playlist · 118 songs · 3.8M likes');
+    expect(searchCardText).toContain('lofi beats');
+    expect(searchCardText).toContain('lofi beats · Playlist · 800 songs · 5M likes');
     expect(searchCardText).toContain('Listen on Youtube');
-    expect(searchCardText).not.toContain('Listen on Deezer');
+    expect(searchCardText).toContain('Listen on Deezer');
     expect(searchCardText).toContain('Listen on Apple Music');
     expect(searchCardText).toContain('Listen on Tidal');
     expect(searchCardText).toContain('Listen on SoundCloud');
 
     const youtubeLink = await page.getByText('Listen on Youtube').getAttribute('href');
+    const deezerLink = await page.getByText('Listen on Deezer').getAttribute('href');
     const appleMusicLink = await page.getByText('Listen on Apple Music').getAttribute('href');
     const tidalLink = await page.getByText('Listen on Tidal').getAttribute('href');
     const soundcloudLink = await page.getByText('Listen on SoundCloud').getAttribute('href');
 
-    expect(youtubeLink).toBe('https://www.youtube.com/playlist?list=PLvWhOwZCUiGVYWXZ5JgzU7rWnSoaN_4sK');
-    expect(appleMusicLink).toBe('https://music.apple.com/search?term=This%20Is%20Drake%20Playlist');
-    expect(tidalLink).toBe('https://listen.tidal.com/search?q=This%20Is%20Drake%20Playlist');
-    expect(soundcloudLink).toBe('https://soundcloud.com/search/sounds?q=This%20Is%20Drake%20Playlist');
+    expect(youtubeLink).toBe('https://www.youtube.com/playlist?list=PLuDoiEqVUgejiZy0AOEEOLY2YFFXncwEA');
+    expect(deezerLink).toBe('https://www.deezer.com/playlist/7584355422');
+    expect(appleMusicLink).toBe('https://music.apple.com/search?term=lofi%20beats%20Playlist');
+    expect(tidalLink).toBe('https://music.apple.com/search?term=lofi%20beats%20Playlist');
+    expect(soundcloudLink).toBe('https://soundcloud.com/search/sounds?q=lofi%20beats%20Playlist');
   });
 
   test('should return a song with a valid spotifyLink - Podcast', async ({ page }) => {
