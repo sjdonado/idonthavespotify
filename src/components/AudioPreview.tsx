@@ -37,12 +37,13 @@ const AudioPreview: Component<AudioPreviewProps> = (props) => {
       fallback={<img class="w-full md:w-48 p-1" src={props.image} alt={props.title} />}
     >
       <div
-        class="relative inline-block"
+        class="relative inline-block w-full md:max-w-[15rem]"
+        dir="ltr"
         onMouseOver={() => setShowPlayIcon(!isPlaying())}
         onMouseOut={() => setShowPlayIcon(isPlaying())}
         onClick={() => (isPlaying() ? pauseSong() : playSong())}
       >
-        <img class="rounded-lg w-full md:w-48 p-1" src={props.image} alt={props.title} />
+        <img class="rounded-lg w-full" src={props.image} alt={props.title} />
         <div class={`rounded-lg absolute inset-0 flex justify-center items-center transition duration-200 ease-in-out bg-black bg-opacity-50 ${showPlayIcon() || isPlaying() ? 'opacity-100' : 'opacity-0'}`}>
           <svg class="w-16 h-16 text-white transition duration-200 ease-in-out" viewBox="0 0 24 24">
             <path fill="currentColor" d={isPlaying() ? 'M6 19h4V5H6v14zm8-14v14h4V5h-4z' : 'M8 5v14l11-7z'} />

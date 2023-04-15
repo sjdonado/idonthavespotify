@@ -70,39 +70,47 @@ const SpotifyContentLink = (props: {
   );
 };
 
-const SearchCard: Component<SearchCardProps> = (props) => (
-  <div
-    data-testid="search-card"
-    class="flex flex-wrap justify-start items-center rounded-lg border border-white w-5/6 lg:w-1/2 m-5"
-  >
-    <AudioPreview
-      title={props.spotifyContent.title}
-      image={props.spotifyContent.image}
-      audio={props.spotifyContent.audio}
-    />
-    <div class="flex flex-col items-start p-2 w-52 sm:w-2/3 truncate">
-      <div class="font-bold text-xl">{props.spotifyContent.title}</div>
-      <p class="text-sm">{props.spotifyContent.description}</p>
-      {props.spotifyContent.links.length === 0 && (
-        <p class="my-12 text-sm text-center w-full">Not available on other platforms</p>
-      )}
-      {props.spotifyContent.links.length > 0 && (
-        <ul class="mt-2 text-base">
-          <li class="flex flex-col items-start">
-            <For each={props.spotifyContent.links}>
-              {({ type, url, isVerified }) => (
-                <SpotifyContentLink
-                  type={type}
-                  url={url}
-                  isVerified={isVerified}
-                />
-              )}
-            </For>
-          </li>
-        </ul>
-      )}
+const SearchCard: Component<SearchCardProps> = (props) => {
+  const getTruncatedDescription = () => {
+    const { description } = props.spotifyContent;
+
+    return description.length > 280 ? `${description.slice(0, 280)}...` : description;
+  };
+
+  return (
+    <div
+      data-testid="search-card"
+      class="flex flex-wrap justify-start items-center rounded-lg border border-white max-w-3xl m-5"
+    >
+      <AudioPreview
+        title={props.spotifyContent.title}
+        image={props.spotifyContent.image}
+        audio={props.spotifyContent.audio}
+      />
+      <div class="flex-1 flex-col items-start p-2">
+        <div class="font-bold text-xl mb-2">{props.spotifyContent.title}</div>
+        <p class="text-sm">{getTruncatedDescription()}</p>
+        {props.spotifyContent.links.length === 0 && (
+          <p class="my-12 text-sm text-center w-full">Not available on other platforms</p>
+        )}
+        {props.spotifyContent.links.length > 0 && (
+          <ul class="mt-2 text-base">
+            <li class="flex flex-col items-start">
+              <For each={props.spotifyContent.links}>
+                {({ type, url, isVerified }) => (
+                  <SpotifyContentLink
+                    type={type}
+                    url={url}
+                    isVerified={isVerified}
+                  />
+                )}
+              </For>
+            </li>
+          </ul>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default SearchCard;

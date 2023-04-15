@@ -32,7 +32,7 @@ const SearchBar: Component<SearchBarProps> = (props) => {
   };
 
   return (
-    <form class="flex justify-center items-center w-full lg:w-1/2" onSubmit={handleSubmit}>
+    <form class="flex justify-center items-center w-full max-w-3xl" onSubmit={handleSubmit}>
       <label for="song-link" class="sr-only">Search</label>
       <input
         type="text"

@@ -23,15 +23,15 @@ export default function Root() {
         <Meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta name="theme-color" content="#000000" />
 
-        <Meta name="description" content="Find Spotify content on YouTube, Apple Music, Tidal, SoundCloud and more." />
-        <Meta name="keywords" content="Spotify,Youtube,Apple Music,Tidal,SoundCloud,converter,search,listen" />
+        <Meta name="description" content="Find Spotify content on YouTube, Deezer, Apple Music, Tidal, SoundCloud and more." />
+        <Meta name="keywords" content="Spotify,Youtube,Deezer,Apple Music,Tidal,SoundCloud,converter,search,listen" />
 
         <Meta property="og:title" content="I don't have Spotify" />
         <Meta property="og:type" content="website" />
 
         <Meta property="og:url" content="https://idonthavespotify.sjdonado.de" />
         <Meta property="og:site_name" content="I don't have Spotify" />
-        <Meta property="og:description" content="Find Spotify content on YouTube, Apple Music, Tidal, SoundCloud and more." />
+        <Meta property="og:description" content="Find Spotify content on YouTube, Deezer, Apple Music, Tidal, SoundCloud and more." />
 
         <Meta property="og:image" content="https://user-images.githubusercontent.com/27580836/227801051-a71d389e-2510-4965-a23e-d7478fe28f13.jpeg" />
         <Meta property="og:image:alt" content="I don't have Spotify favicon" />
