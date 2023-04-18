@@ -5,7 +5,7 @@ interface FooterProps {
 }
 
 const Footer: Component<FooterProps> = (props) => (
-  <footer class="text-center">
+  <footer class="text-center text-sm mt-2">
     {props.searchCount && (
       <p>{'Queries performed: '}
         <span class="font-bold" data-testid="search-count">{props.searchCount}</span>
