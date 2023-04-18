@@ -24,7 +24,8 @@ test.describe('Landing Page', () => {
   test('should has footer links', async ({ page }) => {
     const footerText = await page.locator('footer').textContent();
 
-    expect(footerText).toContain('Raycast Extension');
+    expect(footerText).toContain('Status');
+    expect(footerText).toContain('View on Raycast');
     expect(footerText).toContain('View on Github');
   });
 });

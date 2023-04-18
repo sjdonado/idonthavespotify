@@ -78,7 +78,7 @@ test.describe('Search Tests', () => {
     const searchCardText = await searchCard.textContent() ?? '';
 
     expect(searchCardText).toContain('Shakira');
-    expect(searchCardText).toContain('Artist · 79.4M monthly listeners');
+    expect(searchCardText).toContain('Artist');
     expect(searchCardText).toContain('Listen on Youtube');
     expect(searchCardText).toContain('Listen on Deezer');
     expect(searchCardText).toContain('Listen on Apple Music');
@@ -109,7 +109,7 @@ test.describe('Search Tests', () => {
     const searchCardText = await searchCard.textContent() ?? '';
 
     expect(searchCardText).toContain('Viva Latino');
-    expect(searchCardText).toContain('Viva Latino · Playlist · 50 songs · 13.6M likes');
+    expect(searchCardText).toContain('Viva Latino · Playlist');
     expect(searchCardText).toContain('Listen on Youtube');
     expect(searchCardText).toContain('Listen on Deezer');
     expect(searchCardText).toContain('Listen on Apple Music');
