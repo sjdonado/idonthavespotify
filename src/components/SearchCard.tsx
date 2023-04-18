@@ -73,14 +73,14 @@ const SpotifyContentLink = (props: {
 const SearchCard: Component<SearchCardProps> = (props) => (
   <div
     data-testid="search-card"
-    class="flex flex-wrap items-start rounded-lg border border-white w-5/6 max-w-xl m-5"
+    class="flex flex-wrap items-start rounded-lg border border-white w-5/6 max-w-2xl m-5"
   >
     <AudioPreview
       title={props.spotifyContent.title}
       image={props.spotifyContent.image}
       audio={props.spotifyContent.audio}
     />
-    <div class="flex-1 flex-col items-start p-2">
+    <div class="flex-1 flex-col items-start h-full p-2">
       <div class="font-bold text-xl hyphens-auto mb-2">{props.spotifyContent.title}</div>
       <p class="text-sm h-10 max-h-10 overflow-clip" >{props.spotifyContent.description}</p>
       {props.spotifyContent.links.length === 0 && (

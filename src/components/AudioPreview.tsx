@@ -37,7 +37,7 @@ const AudioPreview: Component<AudioPreviewProps> = (props) => {
       fallback={<img class="w-full md:w-48 p-1" src={props.image} alt={props.title} />}
     >
       <div
-        class="relative inline-block w-full md:max-w-[15rem]"
+        class="relative inline-block w-full md:max-w-[16rem]"
         dir="ltr"
         onMouseOver={() => setShowPlayIcon(!isPlaying())}
         onMouseOut={() => setShowPlayIcon(isPlaying())}
