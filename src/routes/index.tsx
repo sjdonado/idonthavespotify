@@ -10,12 +10,13 @@ import { fetchSpotifyContent, fetchSpotifyContentFromCache } from '~/server/rpc/
 import fetchSearchCount from '~/server/rpc/searchCount';
 
 import { SPOTIFY_LINK_REGEX } from '~/constants';
+import Footer from '~/components/Footer';
 
 export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams<{ id?: string }>();
 
   const [spotifyContent, setSpotifyContent] = createSignal<SpotifyContent | undefined>();
-  const [searchCount, setSearchCount] = createSignal(0);
+  const [searchCount, setSearchCount] = createSignal<number | undefined>();
 
   const [loading, setLoading] = createSignal(false);
   const [error, setError] = createSignal<string | undefined>();
@@ -38,7 +39,7 @@ export default function Home() {
 
       setSpotifyContent(response);
       setSearchParams({ id: response.id });
-      setSearchCount(searchCount() + 1);
+      setSearchCount((searchCount() ?? 0) + 1);
     } catch (err) {
       console.error((err as Error).message);
       setError('Something went wrong, try again later');
@@ -85,39 +86,7 @@ export default function Home() {
           <SearchCard spotifyContent={spotifyContent()!} />
         )}
       </main>
-      <footer class="text-center">
-        <p>{'Queries performed: '}
-          <span class="font-bold" data-testid="search-count">{searchCount()}</span>
-        </p>
-        <p class="flex flex-wrap justify-center items-center w-1/2 m-auto text-sm">
-          <a
-            href="https://raycast.com/sjdonado/idonthavespotify"
-            class="flex justify-center text-green-500 hover:underline"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <svg
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-4 mr-1"
-            >
-              <path fill-rule="evenodd" clip-rule="evenodd" d="M4.703 9.92v1.377L1.402 7.995l.691-.686 2.61 2.611Zm1.377 1.377H4.703l3.301 3.301.69-.688-2.614-2.613Zm7.83-2.61L14.598 8 8.002 1.401l-.688.688L9.92 4.7H8.344l-1.82-1.818-.688.688 1.133 1.133H6.18v5.12h5.12V9.03l1.133 1.133.689-.688L11.3 7.654V6.078l2.61 2.61ZM5.047 4.356l-.688.688.739.739.688-.69-.739-.737Zm5.86 5.858-.687.688.739.739.688-.69-.74-.737ZM3.57 5.833l-.69.689 1.822 1.82V6.966L3.571 5.833Zm5.464 5.464H7.657l1.821 1.821.689-.689-1.132-1.132Z" fill="currentColor" />
-            </svg>
-            <span>Raycast Extension</span>
-          </a>
-          <span class="text-gray-500 mx-2 hidden sm:block">|</span>
-          <a
-            href="https://github.com/sjdonado/idonthavespotify"
-            class="text-green-500 hover:underline"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <i class="fab fa-github mr-1" />
-            View on Github
-          </a>
-        </p>
-      </footer>
+      < Footer searchCount={searchCount()} />
     </div>
   );
 }
