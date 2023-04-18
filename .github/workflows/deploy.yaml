@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    needs: test
     steps:
       - name: Cloning repo
         uses: actions/checkout@v3
@@ -16,6 +17,5 @@ jobs:
       - name: Push to dokku
         uses: dokku/github-action@master
         with:
-          git_remote_url: "ssh://dokku@3.220.173.4:22/idonthavespotify"
-          ssh_host_key: ${{ secrets.SSH_HOST_KEY }}
+          git_remote_url: "ssh://dokku@ssh.sjdonado.de:22/idonthavespotify"
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
