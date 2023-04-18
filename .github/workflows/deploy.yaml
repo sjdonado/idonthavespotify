@@ -8,7 +8,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    needs: test
     steps:
       - name: Cloning repo
         uses: actions/checkout@v3

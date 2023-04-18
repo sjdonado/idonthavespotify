@@ -3,8 +3,6 @@ name: e2e tests
 on:
   pull_request:
     branches: [master]
-  push:
-    branches: [master]
 
 env:
   YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
