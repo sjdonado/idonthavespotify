@@ -1,10 +1,13 @@
 # I don't have Spotify
+> More links coming soon :)
 
-More links coming soon :)
+| Raycast API  | Web Page  |
+| -------------| --------- |
+| ![Uptime Badge](https://uptime.sjdonado.de/api/badge/3/uptime/24?labelPrefix=API%20&labelSuffix=h) ![Uptime Badge](https://uptime.sjdonado.de/api/badge/3/ping/24?labelPrefix=API%20) | ![Uptime Badge](https://uptime.sjdonado.de/api/badge/2/uptime/24?labelPrefix=Web%20Page%20&labelSuffix=h) ![Uptime Badge](https://uptime.sjdonado.de/api/badge/2/ping/24?labelPrefix=Web%20Page%20) |
 
 ## Web
 <div align="center">
-  <img alt="Website screenshot" src="https://user-images.githubusercontent.com/27580836/230793484-391e76e8-39bc-49fc-9fbb-1505be3bff6b.png">
+  <img alt="Website screenshot" src="https://user-images.githubusercontent.com/27580836/232951519-e536c69d-0207-4c40-806c-5772f62f1377.png">
 </div>
 
 ## Raycast Extension
