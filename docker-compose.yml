@@ -4,15 +4,6 @@ services:
     image: redis:7.0-alpine
     ports:
       - 6379:6379
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile.test
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
-    env_file:
-      - .env
     environment:
       REDIS_URL: redis://redis:6379
     command: yarn e2e
