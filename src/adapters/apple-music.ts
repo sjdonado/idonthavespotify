@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 import { getCheerioDoc } from '~/utils/scraper';
 import { APPLE_MUSIC_LINK_SELECTOR } from '~/config/constants';
 import { responseMatchesQuery } from '~/utils/compare';
@@ -14,7 +16,7 @@ export async function getAppleMusicLink(
   const query = getQueryFromMetadata(metadata.title, metadata.description, metadata.type);
 
   const url = `${config.services.appleMusic.baseUrl}${query}`;
-  const html = await fetch(url).then(res => res.text());
+  const { data: html } = await axios.get(url);
   const doc = getCheerioDoc(html);
 
   const appleMusicDataByType = {

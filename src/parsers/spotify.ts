@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
 
 export enum SpotifyMetadataType {
@@ -20,7 +22,7 @@ export type SpotifyMetadata = {
 export const parseSpotifyMetadata = async (
   spotifyLink: string
 ): Promise<SpotifyMetadata> => {
-  const html = await fetch(spotifyLink).then(async res => res.text());
+  const { data: html } = await axios.get(spotifyLink);
   const doc = getCheerioDoc(html);
 
   const title = metaTagContent(doc, 'og:title', 'property');

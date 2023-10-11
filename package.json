@@ -2,11 +2,11 @@
   "name": "idonthavespotify",
   "version": "1.0.50",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun run --watch src/index.ts"
+    "dev": "bun run --watch www/bin.ts"
   },
   "dependencies": {
     "@bogeychan/elysia-logger": "^0.0.11",
+    "axios": "^1.5.1",
     "cheerio": "^1.0.0-rc.12",
     "elysia": "latest",
     "ioredis": "^5.3.2",
@@ -16,6 +16,7 @@
   "devDependencies": {
     "@types/string-similarity": "^4.0.0",
     "@typescript-eslint/eslint-plugin": "^6.7.4",
+    "axios-mock-adapter": "^1.22.0",
     "bun-types": "latest",
     "eslint": "^8.50.0",
     "eslint-config-prettier": "^9.0.0",
@@ -25,5 +26,5 @@
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },
-  "module": "src/index.js"
+  "module": "www/bin.js"
 }

@@ -8,7 +8,7 @@ const stream = pretty({
   colorize: true,
 });
 
-const app = new Elysia()
+export const app = new Elysia()
   .use(logger({ stream, level: 'info' }))
   .on('afterHandle', ctx => {
     ctx.log.info(ctx.request, 'Request');
@@ -21,7 +21,4 @@ const app = new Elysia()
       message: error.message,
     };
   })
-  .use(apiRouter)
-  .listen(Bun.env.PORT ?? 3000);
-
-console.log(`Server is running at ${app.server?.hostname}:${app.server?.port}`);
+  .use(apiRouter);
