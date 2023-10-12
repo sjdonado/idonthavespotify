@@ -1,7 +1,9 @@
-import { getAppleMusicLink } from '~/adapters/apple-music';
 import { SPOTIFY_ID_REGEX } from '~/config/constants';
 
 import { SpotifyMetadataType, parseSpotifyMetadata } from '~/parsers/spotify';
+
+import { getAppleMusicLink } from '~/adapters/apple-music';
+import { getYoutubeLink } from '~/adapters/youtube';
 
 export enum SpotifyContentLinkType {
   Youtube = 'youtube',
@@ -28,14 +30,15 @@ export interface SpotifyContent {
   links: SpotifyContentLink[];
 }
 
-export const getSpotifyContent = async (spotifyLink: string): Promise<SpotifyContent> => {
+export const spotifySearch = async (spotifyLink: string): Promise<SpotifyContent> => {
   const metadata = await parseSpotifyMetadata(spotifyLink);
 
   const id = (spotifyLink.match(SPOTIFY_ID_REGEX) ?? [])[0]!;
 
   const appleMusicLink = await getAppleMusicLink(metadata);
+  const youtubeLink = await getYoutubeLink(metadata);
 
-  const links = [appleMusicLink].filter(Boolean) as SpotifyContentLink[];
+  const links = [appleMusicLink, youtubeLink].filter(Boolean) as SpotifyContentLink[];
 
   // if at least one verified link is found, add to the rest
   // if (links.length > 0) {

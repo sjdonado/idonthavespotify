@@ -1,14 +1,14 @@
 import axios from 'axios';
 
+import * as config from '~/config/default';
 import { getCheerioDoc } from '~/utils/scraper';
-import { APPLE_MUSIC_LINK_SELECTOR } from '~/config/constants';
 import { responseMatchesQuery } from '~/utils/compare';
 import { getQueryFromMetadata } from '~/utils/query';
 
 import { SpotifyMetadata, SpotifyMetadataType } from '~/parsers/spotify';
-import { SpotifyContentLink, SpotifyContentLinkType } from '~/services/spotify';
+import { SpotifyContentLink, SpotifyContentLinkType } from '~/services/search';
 
-import * as config from '~/config/default';
+export const APPLE_MUSIC_LINK_SELECTOR = 'a[href^="https://music.apple.com/"]';
 
 export async function getAppleMusicLink(
   metadata: SpotifyMetadata

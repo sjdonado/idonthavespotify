@@ -1,11 +1,12 @@
 import { Elysia, t } from 'elysia';
+
 import { SPOTIFY_ID_REGEX } from '~/config/constants';
-import { getSpotifyContent } from '~/services/spotify';
+import { spotifySearch } from '~/services/search';
 
 export const apiRouter = new Elysia({ prefix: '/api' }).get(
   '/search',
   async ({ query: { spotifyLink } }) => {
-    const spotifyContent = await getSpotifyContent(spotifyLink);
+    const spotifyContent = await spotifySearch(spotifyLink);
 
     return spotifyContent;
   },

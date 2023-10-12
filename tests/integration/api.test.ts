@@ -17,6 +17,10 @@ const appleMusicResponseMock = await Bun.file(
   'tests/fixtures/appleMusicResponseMock.html'
 ).text();
 
+const youtubeResponseMock = await Bun.file(
+  'tests/fixtures/youtubeResponseMock.json'
+).text();
+
 describe('Api router', () => {
   let mock: AxiosMockAdapter;
 
@@ -29,13 +33,15 @@ describe('Api router', () => {
     const spotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
     const query = 'Do%20Not%20Disturb%20Drake';
 
-    it('should return 200', async () => {
+    const appleMusicQuery = `${config.services.appleMusic.baseUrl}${query}`;
+    const youtubeQuery = `${config.services.youtube.apiSearchUrl}${query}&type=video&key=${config.services.youtube.apiKey}`;
+
+    it.only('should return 200', async () => {
       const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
 
       mock.onGet(spotifyLink).reply(200, spotifyHeadResponseMock);
-      mock
-        .onGet(`${config.services.appleMusic.baseUrl}${query}`)
-        .reply(200, appleMusicResponseMock);
+      mock.onGet(appleMusicQuery).reply(200, appleMusicResponseMock);
+      mock.onGet(youtubeQuery).reply(200, youtubeResponseMock);
 
       const response = await app.handle(request).then(res => res.json());
 
@@ -51,6 +57,11 @@ describe('Api router', () => {
           {
             type: 'appleMusic',
             url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
+            isVerified: true,
+          },
+          {
+            type: 'youtube',
+            url: 'https://www.youtube.com/watch?v=zhY_0DoQCQs',
             isVerified: true,
           },
         ],
