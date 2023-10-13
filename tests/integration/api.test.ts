@@ -5,6 +5,9 @@ import AxiosMockAdapter from 'axios-mock-adapter';
 
 import * as config from '~/config/default';
 
+import youtubeResponseMock from '../fixtures/youtubeResponseMock.json';
+import deezerResponseMock from '../fixtures/deezerResponseMock.json';
+
 import { app } from '~/index';
 
 const API_ENDPOINT = 'http://localhost/api';
@@ -15,10 +18,6 @@ const spotifyHeadResponseMock = await Bun.file(
 
 const appleMusicResponseMock = await Bun.file(
   'tests/fixtures/appleMusicResponseMock.html'
-).text();
-
-const youtubeResponseMock = await Bun.file(
-  'tests/fixtures/youtubeResponseMock.json'
 ).text();
 
 describe('Api router', () => {
@@ -35,13 +34,15 @@ describe('Api router', () => {
 
     const appleMusicQuery = `${config.services.appleMusic.baseUrl}${query}`;
     const youtubeQuery = `${config.services.youtube.apiSearchUrl}${query}&type=video&key=${config.services.youtube.apiKey}`;
+    const deezerQuery = `${config.services.deezer.apiUrl}/track?q=${query}&limit=1`;
 
-    it.only('should return 200', async () => {
+    it('should return 200', async () => {
       const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
 
       mock.onGet(spotifyLink).reply(200, spotifyHeadResponseMock);
       mock.onGet(appleMusicQuery).reply(200, appleMusicResponseMock);
       mock.onGet(youtubeQuery).reply(200, youtubeResponseMock);
+      mock.onGet(deezerQuery).reply(200, deezerResponseMock);
 
       const response = await app.handle(request).then(res => res.json());
 
@@ -62,6 +63,11 @@ describe('Api router', () => {
           {
             type: 'youtube',
             url: 'https://www.youtube.com/watch?v=zhY_0DoQCQs',
+            isVerified: true,
+          },
+          {
+            type: 'deezer',
+            url: 'https://www.deezer.com/track/144572248',
             isVerified: true,
           },
         ],
