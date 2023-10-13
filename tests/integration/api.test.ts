@@ -74,6 +74,10 @@ describe('Api router', () => {
             type: 'soundCloud',
             url: 'https://soundcloud.com/search/sounds?q=Do%20Not%20Disturb%20Drake',
           },
+          {
+            type: 'tidal',
+            url: 'https://listen.tidal.com/search?q=Do%20Not%20Disturb%20Drake',
+          },
         ],
       });
     });
