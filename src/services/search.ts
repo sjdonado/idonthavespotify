@@ -5,6 +5,7 @@ import { SpotifyMetadataType, parseSpotifyMetadata } from '~/parsers/spotify';
 import { getAppleMusicLink } from '~/adapters/apple-music';
 import { getYoutubeLink } from '~/adapters/youtube';
 import { getDeezerLink } from '~/adapters/deezer';
+import { getSoundCloudLink } from '~/adapters/soundcloud';
 
 export enum SpotifyContentLinkType {
   Youtube = 'youtube',
@@ -40,14 +41,16 @@ export const spotifySearch = async (spotifyLink: string): Promise<SpotifyContent
   const youtubeLink = await getYoutubeLink(metadata);
   const deezerLink = await getDeezerLink(metadata);
 
+  const soundcloudLink = getSoundCloudLink(metadata);
+
   const links = [appleMusicLink, youtubeLink, deezerLink].filter(
     Boolean
   ) as SpotifyContentLink[];
 
   // if at least one verified link is found, add to the rest
-  // if (links.length > 0) {
-  //   links.push(tidalLink, soundcloudLink);
-  // }
+  if (links.length > 0) {
+    links.push(soundcloudLink);
+  }
 
   const spotifyContent: SpotifyContent = {
     id,

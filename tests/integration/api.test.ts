@@ -70,6 +70,10 @@ describe('Api router', () => {
             url: 'https://www.deezer.com/track/144572248',
             isVerified: true,
           },
+          {
+            type: 'soundCloud',
+            url: 'https://soundcloud.com/search/sounds?q=Do%20Not%20Disturb%20Drake',
+          },
         ],
       });
     });
