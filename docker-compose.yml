@@ -4,9 +4,3 @@ services:
     image: redis:7.0-alpine
     ports:
       - 6379:6379
-    environment:
-      REDIS_URL: redis://redis:6379
-    command: yarn e2e
-    ports:
-      - 3000:3000
-      - 9323:9323

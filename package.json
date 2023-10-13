@@ -2,7 +2,8 @@
   "name": "idonthavespotify",
   "version": "1.0.50",
   "scripts": {
-    "dev": "bun run --watch www/bin.ts"
+    "dev": "bun run --watch www/bin.ts",
+    "test": "bun test --coverage"
   },
   "dependencies": {
     "@bogeychan/elysia-logger": "^0.0.11",
@@ -23,6 +24,7 @@
     "eslint-plugin-import": "^2.28.1",
     "eslint-plugin-jsx": "^0.1.0",
     "eslint-plugin-prettier": "^5.0.0",
+    "ioredis-mock": "^8.9.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },

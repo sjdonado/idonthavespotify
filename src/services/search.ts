@@ -2,6 +2,9 @@ import { SPOTIFY_ID_REGEX } from '~/config/constants';
 
 import { SpotifyMetadataType, parseSpotifyMetadata } from '~/parsers/spotify';
 
+import { cacheSpotifySearch } from './cache';
+import { incrementSearchCount } from './statistics';
+
 import { getAppleMusicLink } from '~/adapters/apple-music';
 import { getYoutubeLink } from '~/adapters/youtube';
 import { getDeezerLink } from '~/adapters/deezer';
@@ -65,7 +68,7 @@ export const spotifySearch = async (spotifyLink: string): Promise<SpotifyContent
     links,
   };
 
-  // await Promise.all([incrementSearchCount(), cacheSpotifyContent(spotifyContent)]);
+  await Promise.all([incrementSearchCount(), cacheSpotifySearch(spotifyContent)]);
 
   return spotifyContent;
 };

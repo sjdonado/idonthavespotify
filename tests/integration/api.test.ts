@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from 'bun:test';
+import { beforeAll, describe, expect, it, jest, spyOn, jest } from 'bun:test';
 
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
@@ -9,6 +9,7 @@ import youtubeResponseMock from '../fixtures/youtubeResponseMock.json';
 import deezerResponseMock from '../fixtures/deezerResponseMock.json';
 
 import { app } from '~/index';
+import Redis from 'ioredis';
 
 const API_ENDPOINT = 'http://localhost/api';
 
@@ -22,9 +23,14 @@ const appleMusicResponseMock = await Bun.file(
 
 describe('Api router', () => {
   let mock: AxiosMockAdapter;
+  let redisSetMock: jest.Mock;
+  let redisGetMock: jest.Mock;
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
+
+    redisSetMock = spyOn(Redis.prototype, 'set');
+    redisGetMock = spyOn(Redis.prototype, 'get');
   });
 
   describe('GET /search', () => {
@@ -43,6 +49,9 @@ describe('Api router', () => {
       mock.onGet(appleMusicQuery).reply(200, appleMusicResponseMock);
       mock.onGet(youtubeQuery).reply(200, youtubeResponseMock);
       mock.onGet(deezerQuery).reply(200, deezerResponseMock);
+
+      redisGetMock.mockResolvedValue(0);
+      redisSetMock.mockResolvedValue('');
 
       const response = await app.handle(request).then(res => res.json());
 
@@ -80,6 +89,9 @@ describe('Api router', () => {
           },
         ],
       });
+
+      expect(redisSetMock).toHaveBeenCalledTimes(2);
+      expect(redisGetMock).toHaveBeenCalledTimes(1);
     });
 
     it('should return bad request', async () => {
