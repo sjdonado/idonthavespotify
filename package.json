@@ -7,6 +7,8 @@
   },
   "dependencies": {
     "@bogeychan/elysia-logger": "^0.0.11",
+    "@elysiajs/html": "^0.7.3",
+    "@elysiajs/static": "^0.7.1",
     "axios": "^1.5.1",
     "cheerio": "^1.0.0-rc.12",
     "elysia": "latest",

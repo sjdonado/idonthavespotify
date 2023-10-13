@@ -1,8 +1,12 @@
 import { Elysia } from 'elysia';
+import { html } from '@elysiajs/html';
+import { staticPlugin } from '@elysiajs/static';
+
 import { logger } from '@bogeychan/elysia-logger';
 import pretty from 'pino-pretty';
 
 import { apiRouter } from './routes/api';
+import { pageRouter } from './routes/page';
 
 const stream = pretty({
   colorize: true,
@@ -10,15 +14,18 @@ const stream = pretty({
 
 export const app = new Elysia()
   .use(logger({ stream, level: 'info' }))
-  .on('afterHandle', ctx => {
-    ctx.log.info(ctx.request, 'Request');
+  .use(html())
+  .use(staticPlugin({ prefix: '' }))
+  .on('afterHandle', ({ log, request }) => {
+    log.info(request, 'Request');
   })
-  .on('error', ({ code, error, log }) => {
-    log.error(error);
+  .on('error', ({ code, error }) => {
+    console.error(error);
 
     return {
       code,
       message: error.message,
     };
   })
-  .use(apiRouter);
+  .use(apiRouter)
+  .use(pageRouter);

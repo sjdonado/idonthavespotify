@@ -1,0 +1,14 @@
+@font-face {
+  font-family: 'Gotham Light';
+  src: url('./fonts/Gotham-Light.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+html {
+  font-family: 'Gotham Light', sans-serif;
+}
+
+.bg-green-500 {
+  background-color: #22c55e !important;
+}
