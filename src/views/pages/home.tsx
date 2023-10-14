@@ -11,6 +11,7 @@ export default function Home() {
           </h2>
         </div>
         <SearchBar />
+        <div id="search-results"></div>
       </main>
     </div>
   );

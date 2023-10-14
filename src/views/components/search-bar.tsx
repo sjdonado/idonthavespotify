@@ -2,7 +2,12 @@ import { SPOTIFY_LINK_REGEX } from '~/config/constants';
 
 export default function SearchBar() {
   return (
-    <form class="flex justify-center items-center w-full max-w-3xl">
+    <form
+      hx-post="/search"
+      hx-target="#search-results"
+      hx-swap="afterbegin"
+      class="flex justify-center items-center w-full max-w-3xl"
+    >
       <label for="song-link" class="sr-only">
         Search
       </label>

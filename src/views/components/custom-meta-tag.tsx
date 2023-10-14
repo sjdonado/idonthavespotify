@@ -1,7 +1,5 @@
-const CustomMetaTag = (props: { property: string; content: string }) => (
+export default function CustomMetaTag(props: { property: string; content: string }) {
   // eslint-disable-next-line
   // @ts-ignore
-  <meta property={props.property} content={props.content} />
-);
-
-export default CustomMetaTag;
+  return <meta property={props.property} content={props.content} />;
+}

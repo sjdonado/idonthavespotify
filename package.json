@@ -2,7 +2,7 @@
   "name": "idonthavespotify",
   "version": "1.0.50",
   "scripts": {
-    "dev": "bun run --watch www/bin.ts",
+    "dev": "bun run build.ts && bun run --watch www/bin.ts",
     "test": "bun test --coverage"
   },
   "dependencies": {
