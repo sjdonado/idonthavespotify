@@ -20,8 +20,6 @@ export const app = new Elysia()
     log.info(request, 'Request');
   })
   .on('error', ({ code, error }) => {
-    console.error(error);
-
     return {
       code,
       message: error.message,

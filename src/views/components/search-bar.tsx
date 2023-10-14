@@ -5,7 +5,8 @@ export default function SearchBar() {
     <form
       hx-post="/search"
       hx-target="#search-results"
-      hx-swap="afterbegin"
+      hx-swap="innerHTML"
+      hx-indicator="#loading-indicator"
       class="flex justify-center items-center w-full max-w-3xl"
     >
       <label for="song-link" class="sr-only">
