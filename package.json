@@ -3,7 +3,7 @@
   "version": "1.0.50",
   "scripts": {
     "dev": "bun run build.ts && bun run --watch www/bin.ts",
-    "test": "bun test --coverage"
+    "test": "REDIS_URL=redis://null:6379 bun test --coverage"
   },
   "dependencies": {
     "@bogeychan/elysia-logger": "^0.0.11",

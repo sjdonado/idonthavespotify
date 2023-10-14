@@ -12,7 +12,7 @@ env:
   APPLE_MUSIC_BASE_URL: https://music.apple.com/us/search?term=
   TIDAL_BASE_URL: https://listen.tidal.com/search?q=
   SOUNDCLOUD_BASE_URL: https://soundcloud.com/search/sounds?q=
-  REDIS_URL: redis://localhost:6379
+  REDIS_URL: redis://127.0.0.1:6379
 jobs:
   test:
     timeout-minutes: 60
@@ -32,5 +32,5 @@ jobs:
       - uses: oven-sh/setup-bun@v1
       - name: Install dependencies
         run: bun install
-      - name: Run tests
-        run: bun test
+      - name: Run integration tests
+        run: bun run test

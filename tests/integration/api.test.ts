@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it, jest, spyOn, jest } from 'bun:test';
+import { beforeAll, afterAll, describe, expect, it, spyOn, jest } from 'bun:test';
 
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
@@ -31,6 +31,12 @@ describe('Api router', () => {
 
     redisSetMock = spyOn(Redis.prototype, 'set');
     redisGetMock = spyOn(Redis.prototype, 'get');
+  });
+
+  afterAll(() => {
+    mock.restore();
+    redisGetMock.mockClear();
+    redisSetMock.mockClear();
   });
 
   describe('GET /search', () => {
