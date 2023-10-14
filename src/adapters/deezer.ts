@@ -36,8 +36,6 @@ export async function getDeezerLink(
     searchTypes[metadata.type]
   }?q=${query}&limit=1`;
 
-  console.log(url);
-
   const response = (await axios.get(url)).data as DeezerSearchResponse;
 
   if (response.total === 0) {

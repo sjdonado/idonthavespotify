@@ -30,8 +30,6 @@ const render = () => {
   const playIcon = audioPreview.querySelector('#play-icon');
   const svgPathElem = playIcon.querySelector('svg > path');
 
-  console.log(isAudioAvailable, isPlaying);
-
   if (isAudioAvailable) {
     playIcon.classList.remove('opacity-0');
     playIcon.classList.add('opacity-100');

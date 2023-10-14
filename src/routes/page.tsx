@@ -7,6 +7,7 @@ import MainLayout from '~/views/layouts/main';
 import Home from '~/views/pages/home';
 
 import SearchCard from '~/views/components/search-card';
+import ErrorMessage from '~/views/components/error-message';
 
 export const pageRouter = new Elysia()
   .get('/', async () => {
@@ -19,9 +20,14 @@ export const pageRouter = new Elysia()
   .post(
     '/search',
     async ({ body: { spotifyLink } }) => {
-      const spotifyContent = await spotifySearch(spotifyLink);
+      try {
+        const spotifyContent = await spotifySearch(spotifyLink);
 
-      return <SearchCard spotifyContent={spotifyContent} />;
+        return <SearchCard spotifyContent={spotifyContent} />;
+      } catch (error) {
+        console.error(error);
+        return <ErrorMessage />;
+      }
     },
     {
       body: t.Object({

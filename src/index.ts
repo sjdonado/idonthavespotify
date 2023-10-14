@@ -19,11 +19,5 @@ export const app = new Elysia()
   .on('afterHandle', ({ log, request }) => {
     log.info(request, 'Request');
   })
-  .on('error', ({ code, error }) => {
-    return {
-      code,
-      message: error.message,
-    };
-  })
   .use(apiRouter)
   .use(pageRouter);
