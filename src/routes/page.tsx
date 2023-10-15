@@ -2,6 +2,7 @@ import { Elysia, t } from 'elysia';
 
 import { SPOTIFY_ID_REGEX } from '~/config/constants';
 import { spotifySearch } from '~/services/search';
+import { getSearchCount } from '~/services/statistics';
 
 import MainLayout from '~/views/layouts/main';
 import Home from '~/views/pages/home';
@@ -11,9 +12,11 @@ import ErrorMessage from '~/views/components/error-message';
 
 export const pageRouter = new Elysia()
   .get('/', async () => {
+    const searchCount = await getSearchCount();
+
     return (
       <MainLayout>
-        <Home />
+        <Home searchCount={searchCount} />
       </MainLayout>
     );
   })

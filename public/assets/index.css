@@ -13,6 +13,10 @@ html {
   background-color: #22c55e !important;
 }
 
+.text-green-500 {
+  color: #22c55e !important;
+}
+
 .text-\[0\.56rem\] {
   font-size: 0.56rem;
 }
