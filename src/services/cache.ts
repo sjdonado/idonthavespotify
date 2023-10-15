@@ -3,7 +3,7 @@ import * as config from '~/config/default';
 import { setWithKey, getByKey } from '~/utils/redis';
 import { SpotifyContent } from './search';
 
-export const spotifySearchFromCache = async (id: string) => {
+export const getSpotifySearchFromCache = async (id: string) => {
   const cache = await getByKey(`${config.redis.cacheKey}:${id}`);
 
   if (!cache) {

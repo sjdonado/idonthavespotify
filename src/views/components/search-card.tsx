@@ -6,7 +6,8 @@ import SearchLink from './search-link';
 export default function SearchCard(props: { spotifyContent: SpotifyContent }) {
   return (
     <div
-      data-testid="search-card"
+      id="search-card"
+      data-id={props.spotifyContent.id}
       class="flex flex-wrap items-start justify-center rounded-lg border border-white max-w-2xl m-4 md:p-12"
     >
       <AudioPreview

@@ -33,7 +33,6 @@ export default function MainLayout(props: { children: JSX.Element }) {
         <CustomMetaTag property="og:image:alt" content="I don't have Spotify favicon" />
 
         <script src="https://unpkg.com/htmx.org@1.9.6"></script>
-        <script src="https://unpkg.com/htmx.org/dist/ext/preload.js"></script>
         <meta name="htmx-config" content='{"defaultSwapStyle":"outerHTML"}' />
 
         <link
@@ -44,9 +43,7 @@ export default function MainLayout(props: { children: JSX.Element }) {
         <link href="/assets/index.css" rel="stylesheet" />
       </head>
 
-      <body hx-boost="true" hx-ext="preload">
-        {props.children}
-      </body>
+      <body>{props.children}</body>
 
       <script
         defer
