@@ -26,6 +26,14 @@ const pauseSong = () => {
   render();
 };
 
+const togglePlay = () => {
+  if (isPlaying) {
+    pauseSong();
+  } else {
+    playSong();
+  }
+};
+
 const render = () => {
   const playIcon = audioPreview.querySelector('#play-icon');
   const svgPathElem = playIcon.querySelector('svg > path');
@@ -46,12 +54,14 @@ const render = () => {
 };
 
 audioPreview.addEventListener('click', () => {
-  if (isPlaying) {
-    pauseSong();
-  } else {
-    playSong();
-  }
+  togglePlay();
 });
+
+document.onkeydown = ({ code }) => {
+  if (code === 'Space') {
+    togglePlay();
+  }
+};
 
 audio.addEventListener('canplay', () => {
   isAudioAvailable = true;
