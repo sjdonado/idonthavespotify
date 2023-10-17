@@ -19,11 +19,15 @@ import youtubeSongResponseMock from '../fixtures/song/youtubeResponseMock.json';
 import youtubeAlbumResponseMock from '../fixtures/album/youtubeResponseMock.json';
 import youtubePlaylistResponseMock from '../fixtures/playlist/youtubeResponseMock.json';
 import youtubeArtistResponseMock from '../fixtures/artist/youtubeResponseMock.json';
+import youtubePodcastResponseMock from '../fixtures/podcast/youtubeResponseMock.json';
+import youtubeShowResponseMock from '../fixtures/show/youtubeResponseMock.json';
 
 import deezerSongResponseMock from '../fixtures/song/deezerResponseMock.json';
 import deezerAlbumResponseMock from '../fixtures/album/deezerResponseMock.json';
 import deezerPlaylistResponseMock from '../fixtures/playlist/deezerResponseMock.json';
 import deezerArtistResponseMock from '../fixtures/artist/deezerResponseMock.json';
+import deezerPodcastResponseMock from '../fixtures/podcast/deezerResponseMock.json';
+import deezerShowResponseMock from '../fixtures/show/deezerResponseMock.json';
 
 import { app } from '~/index';
 
@@ -34,11 +38,15 @@ const [
   spotifyAlbumHeadResponseMock,
   spotifyPlaylistHeadResponseMock,
   spotifyArtistHeadResponseMock,
+  spotifyPodcastHeadResponseMock,
+  spotifyShowHeadResponseMock,
 ] = await Promise.all([
   Bun.file('tests/fixtures/song/spotifyHeadResponseMock.html').text(),
   Bun.file('tests/fixtures/album/spotifyHeadResponseMock.html').text(),
   Bun.file('tests/fixtures/playlist/spotifyHeadResponseMock.html').text(),
   Bun.file('tests/fixtures/artist/spotifyHeadResponseMock.html').text(),
+  Bun.file('tests/fixtures/podcast/spotifyHeadResponseMock.html').text(),
+  Bun.file('tests/fixtures/show/spotifyHeadResponseMock.html').text(),
 ]);
 
 const [
@@ -46,11 +54,15 @@ const [
   appleMusicAlbumResponseMock,
   appleMusicPlaylistResponseMock,
   appleMusicArtistResponseMock,
+  appleMusicPodcastResponseMock,
+  appleMusicShowResponseMock,
 ] = await Promise.all([
   Bun.file('tests/fixtures/song/appleMusicResponseMock.html').text(),
   Bun.file('tests/fixtures/album/appleMusicResponseMock.html').text(),
   Bun.file('tests/fixtures/playlist/appleMusicResponseMock.html').text(),
   Bun.file('tests/fixtures/artist/appleMusicResponseMock.html').text(),
+  Bun.file('tests/fixtures/podcast/appleMusicResponseMock.html').text(),
+  Bun.file('tests/fixtures/show/appleMusicResponseMock.html').text(),
 ]);
 
 describe('Api router', () => {
@@ -297,6 +309,112 @@ describe('Api router', () => {
           {
             type: 'tidal',
             url: 'https://listen.tidal.com/search?q=J.%20Cole',
+          },
+        ],
+      });
+
+      expect(redisGetMock).toHaveBeenCalledTimes(2);
+      expect(redisSetMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('should return 200 - Podcast Episode', async () => {
+      const spotifyLink = 'https://open.spotify.com/episode/43TCrgmP23qkLcAXZQN8qT';
+      const query =
+        'The%20End%20of%20Twitter%20as%20We%20Know%20It%20Waveform%3A%20The%20MKBHD%20Podcast';
+
+      const appleMusicQuery = `${config.services.appleMusic.baseUrl}${query}`;
+      const youtubeQuery = `${config.services.youtube.apiSearchUrl}${query}&type=video&key=${config.services.youtube.apiKey}`;
+      const deezerQuery = `${config.services.deezer.apiUrl}?q=${query}&limit=1`;
+
+      const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
+
+      mock.onGet(spotifyLink).reply(200, spotifyPodcastHeadResponseMock);
+      mock.onGet(appleMusicQuery).reply(200, appleMusicPodcastResponseMock);
+      mock.onGet(youtubeQuery).reply(200, youtubePodcastResponseMock);
+      mock.onGet(deezerQuery).reply(200, deezerPodcastResponseMock);
+
+      redisGetMock.mockResolvedValue(0);
+      redisSetMock.mockResolvedValue('');
+
+      const response = await app.handle(request).then(res => res.json());
+
+      expect(response).toEqual({
+        id: '43TCrgmP23qkLcAXZQN8qT',
+        type: 'music.episode',
+        title: 'The End of Twitter as We Know It',
+        description:
+          'Listen to this episode from Waveform: The MKBHD Podcast on Spotify. So much happened this week! Not only did Twitter get renamed but Samsung Unpacked happened as well. First, Marques, Andrew, and David talk about base model pricing before talking all about Twitter getting renamed to X. Then they give their first impressions on the new Samsung products before we close it out with some trivia and tech show-and-tell too. Enjoy!  Links: Linus Base Models video: https://bit.ly/lttstartingprice Apple Insider Action Button article: https://bit.ly/appleinsiderrumors Lex Friedman interview with Zuck: https://bit.ly/lexvsmark  Shop products mentioned:  Google Pixel Fold at https://geni.us/zhOE5oh  Samsung Galaxy Z Fold 5 at https://geni.us/ofBYJ6J  Samsung Galaxy Z Flip 5 at https://geni.us/X7vim  Samsung Galaxy Tab S9 at https://geni.us/bBm1  Samsung Galaxy Watch 6 at https://geni.us/gOAk  Shop the merch: https://shop.mkbhd.com  Threads: Waveform: https://www.threads.net/@waveformpodcast Marques: https://www.threads.net/@mkbhd Andrew: https://www.threads.net/@andrew_manganelli David Imel: https://www.threads.net/@davidimel Adam: https:https://www.threads.net/@parmesanpapi17 Ellis: https://twitter.com/EllisRovin  Twitter: https://twitter.com/WVFRM  TikTok:  https://www.tiktok.com/@waveformpodcast  Join the Discord: https://discord.gg/mkbhd  Music by 20syl: https://bit.ly/2S53xlC  Waveform is part of the Vox Media Podcast Network. Learn more about your ad choices. Visit podcastchoices.com/adchoices',
+        image: 'https://i.scdn.co/image/ab6765630000ba8aa05ac56dbc44378f45ef693a',
+        audio:
+          'https://podz-content.spotifycdn.com/audio/clips/0Dijh26Vc2UoFrsXfkACQ8/clip_2900584_2965529.mp3',
+        source: 'https://open.spotify.com/episode/43TCrgmP23qkLcAXZQN8qT',
+        links: [
+          {
+            type: 'youtube',
+            url: 'https://www.youtube.com/watch?v=0atwuUWhKWs',
+            isVerified: true,
+          },
+          {
+            type: 'soundCloud',
+            url: 'https://soundcloud.com/search/sounds?q=The%20End%20of%20Twitter%20as%20We%20Know%20It%20Waveform%3A%20The%20MKBHD%20Podcast',
+          },
+          {
+            type: 'tidal',
+            url: 'https://listen.tidal.com/search?q=The%20End%20of%20Twitter%20as%20We%20Know%20It%20Waveform%3A%20The%20MKBHD%20Podcast',
+          },
+        ],
+      });
+
+      expect(redisGetMock).toHaveBeenCalledTimes(2);
+      expect(redisSetMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('should return 200 - Podcast Show', async () => {
+      const spotifyLink = 'https://open.spotify.com/show/6o81QuW22s5m2nfcXWjucc';
+      const query = 'Waveform%3A%20The%20MKBHD%20Podcast';
+
+      const appleMusicQuery = `${config.services.appleMusic.baseUrl}${query}`;
+      const youtubeQuery = `${config.services.youtube.apiSearchUrl}${query}&type=channel&key=${config.services.youtube.apiKey}`;
+      const deezerQuery = `${config.services.deezer.apiUrl}/podcast?q=${query}&limit=1`;
+
+      const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
+
+      mock.onGet(spotifyLink).reply(200, spotifyShowHeadResponseMock);
+      mock.onGet(appleMusicQuery).reply(200, appleMusicShowResponseMock);
+      mock.onGet(youtubeQuery).reply(200, youtubeShowResponseMock);
+      mock.onGet(deezerQuery).reply(200, deezerShowResponseMock);
+
+      redisGetMock.mockResolvedValue(0);
+      redisSetMock.mockResolvedValue('');
+
+      const response = await app.handle(request).then(res => res.json());
+
+      expect(response).toEqual({
+        id: '6o81QuW22s5m2nfcXWjucc',
+        type: 'website',
+        title: 'Waveform: The MKBHD Podcast',
+        description:
+          'Listen to Waveform: The MKBHD Podcast on Spotify. A tech podcast for the gadget lovers and tech heads among us from the mind of Marques Brownlee, better known as MKBHD. MKBHD has made a name for himself on YouTube reviewing everything from the newest smartphones to cameras to electric cars. Pulling from over 10 years of experience covering the tech industry, MKBHD and co-hosts Andrew Manganelli and David Imel will keep you informed and entertained as they take a deep dive into the latest and greatest in tech and what deserves your hard earned cash. New episodes every week. Waveform is part of the Vox Media Podcast Network. We wanna make the podcast even better, help us learn how we can: https://bit.ly/2EcYbu4 ',
+        image: 'https://i.scdn.co/image/ab6765630000ba8aa05ac56dbc44378f45ef693a',
+        source: 'https://open.spotify.com/show/6o81QuW22s5m2nfcXWjucc',
+        links: [
+          {
+            type: 'youtube',
+            url: 'https://www.youtube.com/channel/UCEcrRXW3oEYfUctetZTAWLw',
+            isVerified: true,
+          },
+          {
+            type: 'deezer',
+            url: 'https://www.deezer.com/show/1437252',
+            isVerified: true,
+          },
+          {
+            type: 'soundCloud',
+            url: 'https://soundcloud.com/search/sounds?q=Waveform%3A%20The%20MKBHD%20Podcast',
+          },
+          {
+            type: 'tidal',
+            url: 'https://listen.tidal.com/search?q=Waveform%3A%20The%20MKBHD%20Podcast',
           },
         ],
       });
