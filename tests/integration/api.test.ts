@@ -10,34 +10,42 @@ import {
 } from 'bun:test';
 
 import axios from 'axios';
+import Redis from 'ioredis';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
 import * as config from '~/config/default';
 
 import youtubeSongResponseMock from '../fixtures/song/youtubeResponseMock.json';
 import youtubeAlbumResponseMock from '../fixtures/album/youtubeResponseMock.json';
+import youtubePlaylistResponseMock from '../fixtures/playlist/youtubeResponseMock.json';
 
 import deezerSongResponseMock from '../fixtures/song/deezerResponseMock.json';
 import deezerAlbumResponseMock from '../fixtures/album/deezerResponseMock.json';
+import deezerPlaylistResponseMock from '../fixtures/playlist/deezerResponseMock.json';
 
 import { app } from '~/index';
-import Redis from 'ioredis';
 
 const API_ENDPOINT = 'http://localhost/api';
 
-const spotifySongHeadResponseMock = await Bun.file(
-  'tests/fixtures/song/spotifyHeadResponseMock.html'
-).text();
-const spotifyAlbumHeadResponseMock = await Bun.file(
-  'tests/fixtures/album/spotifyHeadResponseMock.html'
-).text();
+const [
+  spotifySongHeadResponseMock,
+  spotifyAlbumHeadResponseMock,
+  spotifyPlaylistHeadResponseMock,
+] = await Promise.all([
+  Bun.file('tests/fixtures/song/spotifyHeadResponseMock.html').text(),
+  Bun.file('tests/fixtures/album/spotifyHeadResponseMock.html').text(),
+  Bun.file('tests/fixtures/playlist/spotifyHeadResponseMock.html').text(),
+]);
 
-const appleMusicSongResponseMock = await Bun.file(
-  'tests/fixtures/song/appleMusicResponseMock.html'
-).text();
-const appleMusicAlbumResponseMock = await Bun.file(
-  'tests/fixtures/album/appleMusicResponseMock.html'
-).text();
+const [
+  appleMusicSongResponseMock,
+  appleMusicAlbumResponseMock,
+  appleMusicPlaylistResponseMock,
+] = await Promise.all([
+  Bun.file('tests/fixtures/song/appleMusicResponseMock.html').text(),
+  Bun.file('tests/fixtures/album/appleMusicResponseMock.html').text(),
+  Bun.file('tests/fixtures/playlist/appleMusicResponseMock.html').text(),
+]);
 
 describe('Api router', () => {
   let mock: AxiosMockAdapter;
@@ -172,6 +180,59 @@ describe('Api router', () => {
           {
             type: 'tidal',
             url: 'https://listen.tidal.com/search?q=For%20All%20The%20Dogs%20Drake',
+          },
+        ],
+      });
+
+      expect(redisGetMock).toHaveBeenCalledTimes(2);
+      expect(redisSetMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('should return 200 - Playlist', async () => {
+      const spotifyLink = 'https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ';
+      const query = 'This%20Is%20Bad%20Bunny%20Playlist';
+
+      const appleMusicQuery = `${config.services.appleMusic.baseUrl}${query}`;
+      const youtubeQuery = `${config.services.youtube.apiSearchUrl}${query}&type=playlist&key=${config.services.youtube.apiKey}`;
+      const deezerQuery = `${config.services.deezer.apiUrl}/playlist?q=${query}&limit=1`;
+
+      const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
+
+      mock.onGet(spotifyLink).reply(200, spotifyPlaylistHeadResponseMock);
+      mock.onGet(appleMusicQuery).reply(200, appleMusicPlaylistResponseMock);
+      mock.onGet(youtubeQuery).reply(200, youtubePlaylistResponseMock);
+      mock.onGet(deezerQuery).reply(200, deezerPlaylistResponseMock);
+
+      redisGetMock.mockResolvedValue(0);
+      redisSetMock.mockResolvedValue('');
+
+      const response = await app.handle(request).then(res => res.json());
+
+      expect(response).toEqual({
+        id: '37i9dQZF1DX2apWzyECwyZ',
+        type: 'music.playlist',
+        title: 'This Is Bad Bunny',
+        description: 'This Is Bad Bunny · Playlist · 109 songs · 5.2M likes',
+        image: 'https://i.scdn.co/image/ab67706f000000029c0eb2fdff534f803ea018e1',
+        source: 'https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ',
+        links: [
+          {
+            type: 'youtube',
+            url: 'https://www.youtube.com/playlist?list=PLIqoag_AY7ykvJKLrUzfvX7pXS-YMIDfR',
+            isVerified: true,
+          },
+          {
+            type: 'deezer',
+            url: 'https://www.deezer.com/playlist/3370896142',
+            isVerified: true,
+          },
+          {
+            type: 'soundCloud',
+            url: 'https://soundcloud.com/search/sounds?q=This%20Is%20Bad%20Bunny%20Playlist',
+          },
+          {
+            type: 'tidal',
+            url: 'https://listen.tidal.com/search?q=This%20Is%20Bad%20Bunny%20Playlist',
           },
         ],
       });
