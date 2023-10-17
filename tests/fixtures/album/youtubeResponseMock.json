@@ -1,0 +1,46 @@
+{
+  "kind": "youtube#searchListResponse",
+  "etag": "_Jz2JNDor7tioqVdQm9l4DwMG70",
+  "nextPageToken": "CAEQAA",
+  "regionCode": "CO",
+  "pageInfo": {
+    "totalResults": 18172,
+    "resultsPerPage": 1
+  },
+  "items": [
+    {
+      "kind": "youtube#searchResult",
+      "etag": "wh76nbSfe9_XlhkY3stCPH4x1CA",
+      "id": {
+        "kind": "youtube#playlist",
+        "playlistId": "PLF4zOU-_1sldqZIv8UEvE2ChFHLkkneT1"
+      },
+      "snippet": {
+        "publishedAt": "2023-10-06T18:19:13Z",
+        "channelId": "UCQznUf1SjfDqx65hX3zRDiA",
+        "title": "Drake &#39;For All The Dogs&#39; Album",
+        "description": "The eighth studio album by the Canadian superstar rapper and singer. It was released on 10.6.2023 with features from J. Cole, ...",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/VEW9E1EIQ1M/default.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/VEW9E1EIQ1M/mqdefault.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/VEW9E1EIQ1M/hqdefault.jpg",
+            "width": 480,
+            "height": 360
+          }
+        },
+        "channelTitle": "DrakeVEVO",
+        "liveBroadcastContent": "none",
+        "publishTime": "2023-10-06T18:19:13Z"
+      }
+    }
+  ]
+}
