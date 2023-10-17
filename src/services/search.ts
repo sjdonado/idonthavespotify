@@ -43,6 +43,7 @@ export const spotifySearch = async (spotifyLink: string): Promise<SpotifyContent
 
   const cache = await getSpotifySearchFromCache(id);
   if (cache) {
+    await incrementSearchCount();
     return cache;
   }
 
