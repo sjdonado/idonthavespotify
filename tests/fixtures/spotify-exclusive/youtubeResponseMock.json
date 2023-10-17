@@ -1,0 +1,11 @@
+{
+  "kind": "youtube#searchListResponse",
+  "etag": "1AYJRfZWJeAXqoCMHzN047k4DSI",
+  "nextPageToken": "CAEQAA",
+  "regionCode": "CO",
+  "pageInfo": {
+    "totalResults": 0,
+    "resultsPerPage": 0
+  },
+  "items": []
+}

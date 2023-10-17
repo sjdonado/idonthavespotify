@@ -21,6 +21,7 @@ import youtubePlaylistResponseMock from '../fixtures/playlist/youtubeResponseMoc
 import youtubeArtistResponseMock from '../fixtures/artist/youtubeResponseMock.json';
 import youtubePodcastResponseMock from '../fixtures/podcast/youtubeResponseMock.json';
 import youtubeShowResponseMock from '../fixtures/show/youtubeResponseMock.json';
+import youtubeExclusiveContentResponseMock from '../fixtures/spotify-exclusive/youtubeResponseMock.json';
 
 import deezerSongResponseMock from '../fixtures/song/deezerResponseMock.json';
 import deezerAlbumResponseMock from '../fixtures/album/deezerResponseMock.json';
@@ -28,6 +29,7 @@ import deezerPlaylistResponseMock from '../fixtures/playlist/deezerResponseMock.
 import deezerArtistResponseMock from '../fixtures/artist/deezerResponseMock.json';
 import deezerPodcastResponseMock from '../fixtures/podcast/deezerResponseMock.json';
 import deezerShowResponseMock from '../fixtures/show/deezerResponseMock.json';
+import deezerExclusiveContentResponseMock from '../fixtures/spotify-exclusive/deezerResponseMock.json';
 
 import { app } from '~/index';
 
@@ -40,6 +42,7 @@ const [
   spotifyArtistHeadResponseMock,
   spotifyPodcastHeadResponseMock,
   spotifyShowHeadResponseMock,
+  spotifyExclusiveContentHeadResponseMock,
 ] = await Promise.all([
   Bun.file('tests/fixtures/song/spotifyHeadResponseMock.html').text(),
   Bun.file('tests/fixtures/album/spotifyHeadResponseMock.html').text(),
@@ -47,6 +50,7 @@ const [
   Bun.file('tests/fixtures/artist/spotifyHeadResponseMock.html').text(),
   Bun.file('tests/fixtures/podcast/spotifyHeadResponseMock.html').text(),
   Bun.file('tests/fixtures/show/spotifyHeadResponseMock.html').text(),
+  Bun.file('tests/fixtures/spotify-exclusive/spotifyHeadResponseMock.html').text(),
 ]);
 
 const [
@@ -56,6 +60,7 @@ const [
   appleMusicArtistResponseMock,
   appleMusicPodcastResponseMock,
   appleMusicShowResponseMock,
+  appleMusicExclusiveContentResponseMock,
 ] = await Promise.all([
   Bun.file('tests/fixtures/song/appleMusicResponseMock.html').text(),
   Bun.file('tests/fixtures/album/appleMusicResponseMock.html').text(),
@@ -63,6 +68,7 @@ const [
   Bun.file('tests/fixtures/artist/appleMusicResponseMock.html').text(),
   Bun.file('tests/fixtures/podcast/appleMusicResponseMock.html').text(),
   Bun.file('tests/fixtures/show/appleMusicResponseMock.html').text(),
+  Bun.file('tests/fixtures/spotify-exclusive/appleMusicResponseMock.html').text(),
 ]);
 
 describe('Api router', () => {
@@ -417,6 +423,41 @@ describe('Api router', () => {
             url: 'https://listen.tidal.com/search?q=Waveform%3A%20The%20MKBHD%20Podcast',
           },
         ],
+      });
+
+      expect(redisGetMock).toHaveBeenCalledTimes(2);
+      expect(redisSetMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('should return 200 - Spotify Exclusive Content', async () => {
+      const spotifyLink = 'https://open.spotify.com/show/7LuQv400JFzzlJrOuMukRj';
+      const query = 'The%20Louis%20Theroux%20Podcast';
+
+      const appleMusicQuery = `${config.services.appleMusic.baseUrl}${query}`;
+      const youtubeQuery = `${config.services.youtube.apiSearchUrl}${query}&type=channel&key=${config.services.youtube.apiKey}`;
+      const deezerQuery = `${config.services.deezer.apiUrl}/podcast?q=${query}&limit=1`;
+
+      const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
+
+      mock.onGet(spotifyLink).reply(200, spotifyExclusiveContentHeadResponseMock);
+      mock.onGet(appleMusicQuery).reply(200, appleMusicExclusiveContentResponseMock);
+      mock.onGet(youtubeQuery).reply(200, youtubeExclusiveContentResponseMock);
+      mock.onGet(deezerQuery).reply(200, deezerExclusiveContentResponseMock);
+
+      redisGetMock.mockResolvedValue(0);
+      redisSetMock.mockResolvedValue('');
+
+      const response = await app.handle(request).then(res => res.json());
+
+      expect(response).toEqual({
+        id: '7LuQv400JFzzlJrOuMukRj',
+        type: 'website',
+        title: 'The Louis Theroux Podcast',
+        description:
+          'Listen to The Louis Theroux Podcast on Spotify. Join Louis Theroux as he embarks on a series of in-depth and freewheeling conversations with a curated collection of fascinating figures from across the globe. The Louis Theroux Podcast is a Spotify Exclusive podcast from Mindhouse.',
+        image: 'https://i.scdn.co/image/ab6765630000ba8a9f6908102653db4d1d168c59',
+        source: 'https://open.spotify.com/show/7LuQv400JFzzlJrOuMukRj',
+        links: [],
       });
 
       expect(redisGetMock).toHaveBeenCalledTimes(2);
