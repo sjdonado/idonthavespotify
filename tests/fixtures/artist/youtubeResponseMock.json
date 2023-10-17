@@ -1,0 +1,40 @@
+{
+  "kind": "youtube#searchListResponse",
+  "etag": "W27E4VlTWuxa8FdgMGU0GNnIS-4",
+  "nextPageToken": "CAEQAA",
+  "regionCode": "CO",
+  "pageInfo": {
+    "totalResults": 15609,
+    "resultsPerPage": 1
+  },
+  "items": [
+    {
+      "kind": "youtube#searchResult",
+      "etag": "LkN3b3FTesBYGd7y9P6iz8qXnI8",
+      "id": {
+        "kind": "youtube#channel",
+        "channelId": "UCnc6db-y3IU7CkT_yeVXdVg"
+      },
+      "snippet": {
+        "publishedAt": "2007-03-16T22:14:52Z",
+        "channelId": "UCnc6db-y3IU7CkT_yeVXdVg",
+        "title": "J. Cole",
+        "description": "Official YouTube Channel of J. Cole!",
+        "thumbnails": {
+          "default": {
+            "url": "https://yt3.ggpht.com/ytc/APkrFKYMAhGVde4ceCrk4ePjQSoLPDCFeoJhYIROWZ_jiw=s88-c-k-c0xffffffff-no-rj-mo"
+          },
+          "medium": {
+            "url": "https://yt3.ggpht.com/ytc/APkrFKYMAhGVde4ceCrk4ePjQSoLPDCFeoJhYIROWZ_jiw=s240-c-k-c0xffffffff-no-rj-mo"
+          },
+          "high": {
+            "url": "https://yt3.ggpht.com/ytc/APkrFKYMAhGVde4ceCrk4ePjQSoLPDCFeoJhYIROWZ_jiw=s800-c-k-c0xffffffff-no-rj-mo"
+          }
+        },
+        "channelTitle": "J. Cole",
+        "liveBroadcastContent": "upcoming",
+        "publishTime": "2007-03-16T22:14:52Z"
+      }
+    }
+  ]
+}

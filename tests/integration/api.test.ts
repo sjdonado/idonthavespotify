@@ -18,10 +18,12 @@ import * as config from '~/config/default';
 import youtubeSongResponseMock from '../fixtures/song/youtubeResponseMock.json';
 import youtubeAlbumResponseMock from '../fixtures/album/youtubeResponseMock.json';
 import youtubePlaylistResponseMock from '../fixtures/playlist/youtubeResponseMock.json';
+import youtubeArtistResponseMock from '../fixtures/artist/youtubeResponseMock.json';
 
 import deezerSongResponseMock from '../fixtures/song/deezerResponseMock.json';
 import deezerAlbumResponseMock from '../fixtures/album/deezerResponseMock.json';
 import deezerPlaylistResponseMock from '../fixtures/playlist/deezerResponseMock.json';
+import deezerArtistResponseMock from '../fixtures/artist/deezerResponseMock.json';
 
 import { app } from '~/index';
 
@@ -31,20 +33,24 @@ const [
   spotifySongHeadResponseMock,
   spotifyAlbumHeadResponseMock,
   spotifyPlaylistHeadResponseMock,
+  spotifyArtistHeadResponseMock,
 ] = await Promise.all([
   Bun.file('tests/fixtures/song/spotifyHeadResponseMock.html').text(),
   Bun.file('tests/fixtures/album/spotifyHeadResponseMock.html').text(),
   Bun.file('tests/fixtures/playlist/spotifyHeadResponseMock.html').text(),
+  Bun.file('tests/fixtures/artist/spotifyHeadResponseMock.html').text(),
 ]);
 
 const [
   appleMusicSongResponseMock,
   appleMusicAlbumResponseMock,
   appleMusicPlaylistResponseMock,
+  appleMusicArtistResponseMock,
 ] = await Promise.all([
   Bun.file('tests/fixtures/song/appleMusicResponseMock.html').text(),
   Bun.file('tests/fixtures/album/appleMusicResponseMock.html').text(),
   Bun.file('tests/fixtures/playlist/appleMusicResponseMock.html').text(),
+  Bun.file('tests/fixtures/artist/appleMusicResponseMock.html').text(),
 ]);
 
 describe('Api router', () => {
@@ -233,6 +239,64 @@ describe('Api router', () => {
           {
             type: 'tidal',
             url: 'https://listen.tidal.com/search?q=This%20Is%20Bad%20Bunny%20Playlist',
+          },
+        ],
+      });
+
+      expect(redisGetMock).toHaveBeenCalledTimes(2);
+      expect(redisSetMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('should return 200 - Artist', async () => {
+      const spotifyLink = 'https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5';
+      const query = 'J.%20Cole';
+
+      const appleMusicQuery = `${config.services.appleMusic.baseUrl}${query}`;
+      const youtubeQuery = `${config.services.youtube.apiSearchUrl}${query}%20official&type=channel&key=${config.services.youtube.apiKey}`;
+      const deezerQuery = `${config.services.deezer.apiUrl}/artist?q=${query}&limit=1`;
+
+      const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
+
+      mock.onGet(spotifyLink).reply(200, spotifyArtistHeadResponseMock);
+      mock.onGet(appleMusicQuery).reply(200, appleMusicArtistResponseMock);
+      mock.onGet(youtubeQuery).reply(200, youtubeArtistResponseMock);
+      mock.onGet(deezerQuery).reply(200, deezerArtistResponseMock);
+
+      redisGetMock.mockResolvedValue(0);
+      redisSetMock.mockResolvedValue('');
+
+      const response = await app.handle(request).then(res => res.json());
+
+      expect(response).toEqual({
+        id: '6l3HvQ5sa6mXTsMTB19rO5',
+        type: 'profile',
+        title: 'J. Cole',
+        description: 'Artist · 45.1M monthly listeners.',
+        image: 'https://i.scdn.co/image/ab6761610000e5ebadd503b411a712e277895c8a',
+        source: 'https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5',
+        links: [
+          {
+            type: 'appleMusic',
+            url: 'https://music.apple.com/us/artist/j-cole/73705833',
+            isVerified: true,
+          },
+          {
+            type: 'youtube',
+            url: 'https://www.youtube.com/channel/UCnc6db-y3IU7CkT_yeVXdVg',
+            isVerified: true,
+          },
+          {
+            type: 'deezer',
+            url: 'https://www.deezer.com/artist/339209',
+            isVerified: true,
+          },
+          {
+            type: 'soundCloud',
+            url: 'https://soundcloud.com/search/sounds?q=J.%20Cole',
+          },
+          {
+            type: 'tidal',
+            url: 'https://listen.tidal.com/search?q=J.%20Cole',
           },
         ],
       });

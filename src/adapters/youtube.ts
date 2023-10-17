@@ -38,7 +38,7 @@ export async function getYoutubeLink(
   };
 
   if (metadata.type === SpotifyMetadataType.Artist) {
-    query = `${query} official`;
+    query = `${query}%20official`;
   }
 
   const url = `${config.services.youtube.apiSearchUrl}${query}&type=${

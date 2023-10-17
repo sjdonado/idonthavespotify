@@ -1,0 +1,21 @@
+{
+  "data": [
+    {
+      "id": 339209,
+      "name": "J. Cole",
+      "link": "https://www.deezer.com/artist/339209",
+      "picture": "https://api.deezer.com/artist/339209/image",
+      "picture_small": "https://e-cdns-images.dzcdn.net/images/artist/48f25bd8beddbc4c07332ab8cab29317/56x56-000000-80-0-0.jpg",
+      "picture_medium": "https://e-cdns-images.dzcdn.net/images/artist/48f25bd8beddbc4c07332ab8cab29317/250x250-000000-80-0-0.jpg",
+      "picture_big": "https://e-cdns-images.dzcdn.net/images/artist/48f25bd8beddbc4c07332ab8cab29317/500x500-000000-80-0-0.jpg",
+      "picture_xl": "https://e-cdns-images.dzcdn.net/images/artist/48f25bd8beddbc4c07332ab8cab29317/1000x1000-000000-80-0-0.jpg",
+      "nb_album": 30,
+      "nb_fan": 2452603,
+      "radio": true,
+      "tracklist": "https://api.deezer.com/artist/339209/top?limit=50",
+      "type": "artist"
+    }
+  ],
+  "total": 46,
+  "next": "https://api.deezer.com/search/artist?q=J.%20Cole&limit=1&index=1"
+}
