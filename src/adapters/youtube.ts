@@ -1,6 +1,8 @@
 import axios from 'axios';
 
 import * as config from '~/config/default';
+
+import { logger } from '~/utils/logger';
 import { responseMatchesQuery } from '~/utils/compare';
 import { getQueryFromMetadata } from '~/utils/query';
 
@@ -48,7 +50,7 @@ export async function getYouTubeLink(
     const response = (await axios.get(url)).data as YoutubeSearchListResponse;
 
     if (!response.items?.length) {
-      console.error('[YouTube] No results found', url);
+      logger.error('[YouTube] No results found', url);
       return undefined;
     }
 
@@ -78,6 +80,6 @@ export async function getYouTubeLink(
       isVerified: true,
     };
   } catch (error) {
-    throw new Error(`[YouTube] ${error}`);
+    throw new Error(`[YouTube] (${query}) ${error}`);
   }
 }

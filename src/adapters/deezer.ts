@@ -1,6 +1,8 @@
 import axios from 'axios';
 
 import * as config from '~/config/default';
+
+import { logger } from '~/utils/logger';
 import { responseMatchesQuery } from '~/utils/compare';
 import { getQueryFromMetadata } from '~/utils/query';
 
@@ -40,7 +42,7 @@ export async function getDeezerLink(
     const response = (await axios.get(url)).data as DeezerSearchResponse;
 
     if (response.total === 0) {
-      console.error('[Deezer] No results found', url);
+      logger.error('[Deezer] No results found', url);
       return undefined;
     }
 
@@ -56,6 +58,6 @@ export async function getDeezerLink(
       isVerified: true,
     };
   } catch (error) {
-    throw new Error(`[Deezer] ${error}`);
+    throw new Error(`[Deezer] (${query}) ${error}`);
   }
 }

@@ -36,7 +36,9 @@ export const parseSpotifyMetadata = async (
       : metaTagContent(doc, 'og:type', 'property');
 
     if (!title || !description || !type || !image) {
-      throw new Error('Could not parse Spotify metadata');
+      throw new Error(
+        `Could not parse Spotify metadata. ${title} ${description} ${type} ${image}`
+      );
     }
 
     return {
@@ -47,6 +49,6 @@ export const parseSpotifyMetadata = async (
       audio,
     };
   } catch (err) {
-    throw new Error(`[Spotify Parser] ${err}`);
+    throw new Error(`[Spotify Parser] (${spotifyLink}) ${err}`);
   }
 };

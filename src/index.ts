@@ -2,22 +2,24 @@ import { Elysia } from 'elysia';
 import { html } from '@elysiajs/html';
 import { staticPlugin } from '@elysiajs/static';
 
-import { logger } from '@bogeychan/elysia-logger';
-import pretty from 'pino-pretty';
+import { logger } from './utils/logger';
 
 import { apiRouter } from './routes/api';
 import { pageRouter } from './routes/page';
 
-const stream = pretty({
-  colorize: true,
-});
-
 export const app = new Elysia()
-  .use(logger({ stream, level: 'info' }))
   .use(html())
   .use(staticPlugin({ prefix: '' }))
-  .on('afterHandle', ({ log, request }) => {
-    log.info(request, 'Request');
+  .on('beforeHandle', ({ request }) => {
+    logger.info({
+      url: request.url,
+      method: request.method,
+      headers: {
+        host: request.headers.get('host'),
+        'user-agent': request.headers.get('user-agent'),
+      },
+      body: request.body,
+    });
   })
   .use(apiRouter)
   .use(pageRouter);

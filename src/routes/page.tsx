@@ -1,5 +1,6 @@
 import { Elysia } from 'elysia';
 
+import { logger } from '~/utils/logger';
 import { searchPayloadValidator } from '~/validations/search';
 
 import { spotifySearch } from '~/services/search';
@@ -12,7 +13,9 @@ import SearchCard from '~/views/components/search-card';
 import ErrorMessage from '~/views/components/error-message';
 
 export const pageRouter = new Elysia()
-  .onError(() => {
+  .onError(({ error }) => {
+    logger.error(error);
+
     return <ErrorMessage />;
   })
   .get('/', async () => {

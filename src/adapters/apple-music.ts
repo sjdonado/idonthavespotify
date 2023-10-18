@@ -72,6 +72,6 @@ export async function getAppleMusicLink(
       isVerified,
     };
   } catch (err) {
-    throw new Error(`[Apple Music] ${err}`);
+    throw new Error(`[Apple Music] (${query}) ${err}`);
   }
 }

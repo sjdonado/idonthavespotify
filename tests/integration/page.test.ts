@@ -70,15 +70,13 @@ describe('Api router', () => {
     it('should return error message if searchCount returns error', async () => {
       const request = new Request(`${INDEX_ENDPOINT}`);
 
-      redisGetMock.mockImplementation(() =>
-        Promise.reject(new Error('Something went wrong'))
+      redisGetMock.mockRejectedValueOnce(new Error('Something went wrong'));
+
+      const response = app.handle(request).then(res => res.text());
+
+      expect(response).resolves.toEqual(
+        '<p class="mt-8">Something went wrong, try again later.</p>'
       );
-
-      const response = await app.handle(request).then(res => res.text());
-      const doc = getCheerioDoc(response);
-
-      const errorMessage = doc('p').text();
-      expect(errorMessage).toContain('Something went wrong, try again later.');
     });
   });
 

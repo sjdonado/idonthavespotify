@@ -577,7 +577,8 @@ describe('Api router', () => {
 
       expect(response).toEqual({
         code: 'UNKNOWN',
-        message: '[YouTube] Error: Request failed with status code 400',
+        message:
+          '[YouTube] (Do%20Not%20Disturb%20Drake) Error: Request failed with status code 400',
       });
 
       expect(redisGetMock).toHaveBeenCalledTimes(1);
@@ -606,7 +607,8 @@ describe('Api router', () => {
 
       expect(response).toEqual({
         code: 'UNKNOWN',
-        message: '[Deezer] Error: Request failed with status code 500',
+        message:
+          '[Deezer] (Do%20Not%20Disturb%20Drake) Error: Request failed with status code 500',
       });
 
       expect(redisGetMock).toHaveBeenCalledTimes(1);
