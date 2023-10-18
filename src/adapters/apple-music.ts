@@ -16,53 +16,62 @@ export async function getAppleMusicLink(
   const query = getQueryFromMetadata(metadata.title, metadata.description, metadata.type);
 
   const url = `${config.services.appleMusic.baseUrl}${query}`;
-  const { data: html } = await axios.get(url);
-  const doc = getCheerioDoc(html);
 
-  const appleMusicDataByType = {
-    [SpotifyMetadataType.Song]: {
-      href: doc(`div[aria-label="Songs"] ${APPLE_MUSIC_LINK_SELECTOR}`)
-        .first()
-        .attr('href'),
-      title: doc(`div[aria-label="Songs"] ${APPLE_MUSIC_LINK_SELECTOR}`).first().text(),
-      isVerified: true,
-    },
-    [SpotifyMetadataType.Album]: {
-      href: doc(`div[aria-label="Albums"] ${APPLE_MUSIC_LINK_SELECTOR}`)
-        .first()
-        .attr('href'),
-      title: doc(`div[aria-label="Albums"] ${APPLE_MUSIC_LINK_SELECTOR}`).first().text(),
-      isVerified: true,
-    },
-    [SpotifyMetadataType.Playlist]: {
-      href: doc(`div[aria-label="Playlists"] ${APPLE_MUSIC_LINK_SELECTOR}`)
-        .first()
-        .attr('href'),
-      title: doc(`div[aria-label="Playlists"] ${APPLE_MUSIC_LINK_SELECTOR}`)
-        .first()
-        .text(),
-      isVerified: true,
-    },
-    [SpotifyMetadataType.Artist]: {
-      href: doc(`div[aria-label="Artists"] ${APPLE_MUSIC_LINK_SELECTOR}`)
-        .first()
-        .attr('href'),
-      title: doc(`div[aria-label="Artists"] ${APPLE_MUSIC_LINK_SELECTOR}`).first().text(),
-      isVerified: true,
-    },
-    [SpotifyMetadataType.Podcast]: undefined,
-    [SpotifyMetadataType.Show]: undefined,
-  };
+  try {
+    const { data: html } = await axios.get(url);
+    const doc = getCheerioDoc(html);
 
-  const { title, href, isVerified } = appleMusicDataByType[metadata.type] ?? {};
+    const appleMusicDataByType = {
+      [SpotifyMetadataType.Song]: {
+        href: doc(`div[aria-label="Songs"] ${APPLE_MUSIC_LINK_SELECTOR}`)
+          .first()
+          .attr('href'),
+        title: doc(`div[aria-label="Songs"] ${APPLE_MUSIC_LINK_SELECTOR}`).first().text(),
+        isVerified: true,
+      },
+      [SpotifyMetadataType.Album]: {
+        href: doc(`div[aria-label="Albums"] ${APPLE_MUSIC_LINK_SELECTOR}`)
+          .first()
+          .attr('href'),
+        title: doc(`div[aria-label="Albums"] ${APPLE_MUSIC_LINK_SELECTOR}`)
+          .first()
+          .text(),
+        isVerified: true,
+      },
+      [SpotifyMetadataType.Playlist]: {
+        href: doc(`div[aria-label="Playlists"] ${APPLE_MUSIC_LINK_SELECTOR}`)
+          .first()
+          .attr('href'),
+        title: doc(`div[aria-label="Playlists"] ${APPLE_MUSIC_LINK_SELECTOR}`)
+          .first()
+          .text(),
+        isVerified: true,
+      },
+      [SpotifyMetadataType.Artist]: {
+        href: doc(`div[aria-label="Artists"] ${APPLE_MUSIC_LINK_SELECTOR}`)
+          .first()
+          .attr('href'),
+        title: doc(`div[aria-label="Artists"] ${APPLE_MUSIC_LINK_SELECTOR}`)
+          .first()
+          .text(),
+        isVerified: true,
+      },
+      [SpotifyMetadataType.Podcast]: undefined,
+      [SpotifyMetadataType.Show]: undefined,
+    };
 
-  if (!responseMatchesQuery(title ?? '', query)) {
-    return undefined;
+    const { title, href, isVerified } = appleMusicDataByType[metadata.type] ?? {};
+
+    if (!responseMatchesQuery(title ?? '', query)) {
+      return undefined;
+    }
+
+    return {
+      type: SpotifyContentLinkType.AppleMusic,
+      url: href ?? url,
+      isVerified,
+    };
+  } catch (err) {
+    throw new Error(`[Apple Music] ${err}`);
   }
-
-  return {
-    type: SpotifyContentLinkType.AppleMusic,
-    url: href ?? url,
-    isVerified,
-  };
 }

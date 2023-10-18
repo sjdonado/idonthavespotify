@@ -1,6 +1,7 @@
-import { Elysia, t } from 'elysia';
+import { Elysia } from 'elysia';
 
-import { SPOTIFY_ID_REGEX } from '~/config/constants';
+import { searchPayloadValidator } from '~/validations/search';
+
 import { spotifySearch } from '~/services/search';
 import { getSearchCount } from '~/services/statistics';
 
@@ -11,6 +12,9 @@ import SearchCard from '~/views/components/search-card';
 import ErrorMessage from '~/views/components/error-message';
 
 export const pageRouter = new Elysia()
+  .onError(() => {
+    return <ErrorMessage />;
+  })
   .get('/', async () => {
     const searchCount = await getSearchCount();
 
@@ -23,18 +27,11 @@ export const pageRouter = new Elysia()
   .post(
     '/search',
     async ({ body: { spotifyLink } }) => {
-      try {
-        const spotifyContent = await spotifySearch(spotifyLink);
+      const spotifyContent = await spotifySearch(spotifyLink);
 
-        return <SearchCard spotifyContent={spotifyContent} />;
-      } catch (error) {
-        console.error(error);
-        return <ErrorMessage />;
-      }
+      return <SearchCard spotifyContent={spotifyContent} />;
     },
     {
-      body: t.Object({
-        spotifyLink: t.RegExp(SPOTIFY_ID_REGEX),
-      }),
+      body: searchPayloadValidator,
     }
   );

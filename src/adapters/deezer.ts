@@ -36,22 +36,26 @@ export async function getDeezerLink(
     searchTypes[metadata.type]
   }?q=${query}&limit=1`;
 
-  const response = (await axios.get(url)).data as DeezerSearchResponse;
+  try {
+    const response = (await axios.get(url)).data as DeezerSearchResponse;
 
-  if (response.total === 0) {
-    console.error('[Deezer] No results found', url);
-    return undefined;
+    if (response.total === 0) {
+      console.error('[Deezer] No results found', url);
+      return undefined;
+    }
+
+    const [{ title, name, link }] = response.data;
+
+    if (!responseMatchesQuery(title ?? name ?? '', query)) {
+      return undefined;
+    }
+
+    return {
+      type: SpotifyContentLinkType.Deezer,
+      url: link,
+      isVerified: true,
+    };
+  } catch (error) {
+    throw new Error(`[Deezer] ${error}`);
   }
-
-  const [{ title, name, link }] = response.data;
-
-  if (!responseMatchesQuery(title ?? name ?? '', query)) {
-    return undefined;
-  }
-
-  return {
-    type: SpotifyContentLinkType.Deezer,
-    url: link,
-    isVerified: true,
-  };
 }
