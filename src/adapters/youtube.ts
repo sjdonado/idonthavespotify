@@ -23,7 +23,7 @@ interface YoutubeSearchListResponse {
   ];
 }
 
-export async function getYoutubeLink(
+export async function getYouTubeLink(
   metadata: SpotifyMetadata
 ): Promise<SpotifyContentLink | undefined> {
   let query = getQueryFromMetadata(metadata.title, metadata.description, metadata.type);
@@ -41,19 +41,19 @@ export async function getYoutubeLink(
     query = `${query}%20official`;
   }
 
-  const url = `${config.services.youtube.apiSearchUrl}${query}&type=${
+  const url = `${config.services.youTube.apiSearchUrl}${query}&type=${
     searchTypes[metadata.type]
-  }&key=${config.services.youtube.apiKey}`;
+  }&key=${config.services.youTube.apiKey}`;
 
   const response = (await axios.get(url)).data as YoutubeSearchListResponse;
 
   if (response.error) {
-    console.error('[Youtube]', response.error.message);
+    console.error('[YouTube]', response.error.message);
     return undefined;
   }
 
   if (!response.items?.length) {
-    console.error('[Youtube] No results found', url);
+    console.error('[YouTube] No results found', url);
     return undefined;
   }
 
@@ -65,12 +65,12 @@ export async function getYoutubeLink(
   ] = response.items;
 
   const youtubeLinkByType = {
-    [SpotifyMetadataType.Song]: `${config.services.youtube.baseUrl}watch?v=${videoId}`,
-    [SpotifyMetadataType.Album]: `${config.services.youtube.baseUrl}playlist?list=${playlistId}`,
-    [SpotifyMetadataType.Playlist]: `${config.services.youtube.baseUrl}playlist?list=${playlistId}`,
-    [SpotifyMetadataType.Artist]: `${config.services.youtube.baseUrl}channel/${channelId}`,
-    [SpotifyMetadataType.Podcast]: `${config.services.youtube.baseUrl}watch?v=${videoId}`,
-    [SpotifyMetadataType.Show]: `${config.services.youtube.baseUrl}channel/${channelId}`,
+    [SpotifyMetadataType.Song]: `${config.services.youTube.baseUrl}watch?v=${videoId}`,
+    [SpotifyMetadataType.Album]: `${config.services.youTube.baseUrl}playlist?list=${playlistId}`,
+    [SpotifyMetadataType.Playlist]: `${config.services.youTube.baseUrl}playlist?list=${playlistId}`,
+    [SpotifyMetadataType.Artist]: `${config.services.youTube.baseUrl}channel/${channelId}`,
+    [SpotifyMetadataType.Podcast]: `${config.services.youTube.baseUrl}watch?v=${videoId}`,
+    [SpotifyMetadataType.Show]: `${config.services.youTube.baseUrl}channel/${channelId}`,
   };
 
   if (!responseMatchesQuery(snippet.title, query)) {
@@ -78,7 +78,7 @@ export async function getYoutubeLink(
   }
 
   return {
-    type: SpotifyContentLinkType.Youtube,
+    type: SpotifyContentLinkType.YouTube,
     url: youtubeLinkByType[metadata.type],
     isVerified: true,
   };

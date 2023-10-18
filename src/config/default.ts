@@ -1,5 +1,5 @@
 export const services = {
-  youtube: {
+  youTube: {
     apiKey: Bun.env.YOUTUBE_API_KEY,
     apiSearchUrl: Bun.env.YOUTUBE_API_SEARCH_URL!,
     baseUrl: Bun.env.YOUTUBE_BASE_URL!,

@@ -6,13 +6,13 @@ import { cacheSpotifySearch, getSpotifySearchFromCache } from './cache';
 import { incrementSearchCount } from './statistics';
 
 import { getAppleMusicLink } from '~/adapters/apple-music';
-import { getYoutubeLink } from '~/adapters/youtube';
+import { getYouTubeLink } from '~/adapters/youtube';
 import { getDeezerLink } from '~/adapters/deezer';
 import { getSoundCloudLink } from '~/adapters/soundcloud';
 import { getTidalLink } from '~/adapters/tidal';
 
 export enum SpotifyContentLinkType {
-  Youtube = 'youtube',
+  YouTube = 'youTube',
   AppleMusic = 'appleMusic',
   Tidal = 'tidal',
   SoundCloud = 'soundCloud',
@@ -49,7 +49,7 @@ export const spotifySearch = async (spotifyLink: string): Promise<SpotifyContent
 
   const [appleMusicLink, youtubeLink, deezerLink] = await Promise.all([
     getAppleMusicLink(metadata),
-    getYoutubeLink(metadata),
+    getYouTubeLink(metadata),
     getDeezerLink(metadata),
   ]);
 

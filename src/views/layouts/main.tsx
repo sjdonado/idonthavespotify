@@ -15,7 +15,7 @@ export default function MainLayout(props: { children: JSX.Element }) {
         />
         <meta
           name="keywords"
-          content="Spotify,Youtube,Deezer,Apple Music,Tidal,SoundCloud,converter,search,listen"
+          content="Spotify,YouTube,Deezer,Apple Music,Tidal,SoundCloud,converter,search,listen"
         />
 
         <CustomMetaTag property="og:title" content="I don't have Spotify" />

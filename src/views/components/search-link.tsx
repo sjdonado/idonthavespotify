@@ -1,9 +1,9 @@
 import { SpotifyContentLinkType } from '~/services/search';
 
 const SEARCH_LINK_DICT = {
-  [SpotifyContentLinkType.Youtube]: {
+  [SpotifyContentLinkType.YouTube]: {
     icon: 'fab fa-youtube',
-    label: 'Listen on Youtube',
+    label: 'Listen on YouTube',
   },
   [SpotifyContentLinkType.Deezer]: {
     icon: 'fab fa-deezer',
