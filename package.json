@@ -2,17 +2,19 @@
   "name": "idonthavespotify",
   "version": "1.0.50",
   "scripts": {
-    "dev": "bun run build.ts && bun run --watch www/bin.ts",
-    "test": "REDIS_URL=redis://null:6379 bun test --coverage"
+    "dev": "bun run build:js && bun run build:css && bun run --watch www/bin.ts",
+    "test": "REDIS_URL=redis://null:6379 bun test --coverage",
+    "build:js": "bun run build.ts",
+    "build:css": "tailwindcss -i ./src/views/css/index.css -o ./public/assets/css/index.css"
   },
   "dependencies": {
-    "@bogeychan/elysia-logger": "^0.0.11",
     "@elysiajs/html": "^0.7.3",
     "@elysiajs/static": "^0.7.1",
     "axios": "^1.5.1",
     "cheerio": "^1.0.0-rc.12",
     "elysia": "latest",
     "ioredis": "^5.3.2",
+    "pino": "^8.16.0",
     "pino-pretty": "^10.2.3",
     "string-similarity": "^4.0.4"
   },
@@ -28,6 +30,7 @@
     "eslint-plugin-prettier": "^5.0.0",
     "ioredis-mock": "^8.9.0",
     "prettier": "^3.0.3",
+    "tailwindcss": "^3.3.3",
     "typescript": "^5.2.2"
   },
   "module": "www/bin.js"
