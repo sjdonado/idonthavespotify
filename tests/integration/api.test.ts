@@ -95,12 +95,49 @@ describe('Api router', () => {
   describe('GET /search', () => {
     const endpoint = `${API_ENDPOINT}/search`;
 
+    const cachedSpotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
+
+    const cachedResponse = {
+      id: '2KvHC9z14GSl4YpkNMX384',
+      type: 'music.song',
+      title: 'Do Not Disturb',
+      description: 'Drake · Song · 2017',
+      image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
+      audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
+      source: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
+      links: [
+        {
+          type: 'appleMusic',
+          url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
+          isVerified: true,
+        },
+        {
+          type: 'youTube',
+          url: 'https://www.youtube.com/watch?v=zhY_0DoQCQs',
+          isVerified: true,
+        },
+        {
+          type: 'deezer',
+          url: 'https://www.deezer.com/track/144572248',
+          isVerified: true,
+        },
+        {
+          type: 'soundCloud',
+          url: 'https://soundcloud.com/search/sounds?q=Do%20Not%20Disturb%20Drake',
+        },
+        {
+          type: 'tidal',
+          url: 'https://listen.tidal.com/search?q=Do%20Not%20Disturb%20Drake',
+        },
+      ],
+    };
+
     it('should return 200 - Song', async () => {
       const spotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
       const query = 'Do%20Not%20Disturb%20Drake';
 
       const appleMusicQuery = `${config.services.appleMusic.baseUrl}${query}`;
-      const youtubeQuery = `${config.services.youtube.apiSearchUrl}${query}&type=video&key=${config.services.youtube.apiKey}`;
+      const youtubeQuery = `${config.services.youTube.apiSearchUrl}${query}&type=video&key=${config.services.youTube.apiKey}`;
       const deezerQuery = `${config.services.deezer.apiUrl}/track?q=${query}&limit=1`;
 
       const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
@@ -130,7 +167,7 @@ describe('Api router', () => {
             isVerified: true,
           },
           {
-            type: 'youtube',
+            type: 'youTube',
             url: 'https://www.youtube.com/watch?v=zhY_0DoQCQs',
             isVerified: true,
           },
@@ -159,7 +196,7 @@ describe('Api router', () => {
       const query = 'For%20All%20The%20Dogs%20Drake';
 
       const appleMusicQuery = `${config.services.appleMusic.baseUrl}${query}`;
-      const youtubeQuery = `${config.services.youtube.apiSearchUrl}${query}&type=playlist&key=${config.services.youtube.apiKey}`;
+      const youtubeQuery = `${config.services.youTube.apiSearchUrl}${query}&type=playlist&key=${config.services.youTube.apiKey}`;
       const deezerQuery = `${config.services.deezer.apiUrl}/album?q=${query}&limit=1`;
 
       const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
@@ -188,7 +225,7 @@ describe('Api router', () => {
             isVerified: true,
           },
           {
-            type: 'youtube',
+            type: 'youTube',
             url: 'https://www.youtube.com/playlist?list=PLF4zOU-_1sldqZIv8UEvE2ChFHLkkneT1',
             isVerified: true,
           },
@@ -217,7 +254,7 @@ describe('Api router', () => {
       const query = 'This%20Is%20Bad%20Bunny%20Playlist';
 
       const appleMusicQuery = `${config.services.appleMusic.baseUrl}${query}`;
-      const youtubeQuery = `${config.services.youtube.apiSearchUrl}${query}&type=playlist&key=${config.services.youtube.apiKey}`;
+      const youtubeQuery = `${config.services.youTube.apiSearchUrl}${query}&type=playlist&key=${config.services.youTube.apiKey}`;
       const deezerQuery = `${config.services.deezer.apiUrl}/playlist?q=${query}&limit=1`;
 
       const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
@@ -241,7 +278,7 @@ describe('Api router', () => {
         source: 'https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ',
         links: [
           {
-            type: 'youtube',
+            type: 'youTube',
             url: 'https://www.youtube.com/playlist?list=PLIqoag_AY7ykvJKLrUzfvX7pXS-YMIDfR',
             isVerified: true,
           },
@@ -270,7 +307,7 @@ describe('Api router', () => {
       const query = 'J.%20Cole';
 
       const appleMusicQuery = `${config.services.appleMusic.baseUrl}${query}`;
-      const youtubeQuery = `${config.services.youtube.apiSearchUrl}${query}%20official&type=channel&key=${config.services.youtube.apiKey}`;
+      const youtubeQuery = `${config.services.youTube.apiSearchUrl}${query}%20official&type=channel&key=${config.services.youTube.apiKey}`;
       const deezerQuery = `${config.services.deezer.apiUrl}/artist?q=${query}&limit=1`;
 
       const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
@@ -299,7 +336,7 @@ describe('Api router', () => {
             isVerified: true,
           },
           {
-            type: 'youtube',
+            type: 'youTube',
             url: 'https://www.youtube.com/channel/UCnc6db-y3IU7CkT_yeVXdVg',
             isVerified: true,
           },
@@ -329,7 +366,7 @@ describe('Api router', () => {
         'The%20End%20of%20Twitter%20as%20We%20Know%20It%20Waveform%3A%20The%20MKBHD%20Podcast';
 
       const appleMusicQuery = `${config.services.appleMusic.baseUrl}${query}`;
-      const youtubeQuery = `${config.services.youtube.apiSearchUrl}${query}&type=video&key=${config.services.youtube.apiKey}`;
+      const youtubeQuery = `${config.services.youTube.apiSearchUrl}${query}&type=video&key=${config.services.youTube.apiKey}`;
       const deezerQuery = `${config.services.deezer.apiUrl}?q=${query}&limit=1`;
 
       const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
@@ -356,7 +393,7 @@ describe('Api router', () => {
         source: 'https://open.spotify.com/episode/43TCrgmP23qkLcAXZQN8qT',
         links: [
           {
-            type: 'youtube',
+            type: 'youTube',
             url: 'https://www.youtube.com/watch?v=0atwuUWhKWs',
             isVerified: true,
           },
@@ -380,7 +417,7 @@ describe('Api router', () => {
       const query = 'Waveform%3A%20The%20MKBHD%20Podcast';
 
       const appleMusicQuery = `${config.services.appleMusic.baseUrl}${query}`;
-      const youtubeQuery = `${config.services.youtube.apiSearchUrl}${query}&type=channel&key=${config.services.youtube.apiKey}`;
+      const youtubeQuery = `${config.services.youTube.apiSearchUrl}${query}&type=channel&key=${config.services.youTube.apiKey}`;
       const deezerQuery = `${config.services.deezer.apiUrl}/podcast?q=${query}&limit=1`;
 
       const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
@@ -405,7 +442,7 @@ describe('Api router', () => {
         source: 'https://open.spotify.com/show/6o81QuW22s5m2nfcXWjucc',
         links: [
           {
-            type: 'youtube',
+            type: 'youTube',
             url: 'https://www.youtube.com/channel/UCEcrRXW3oEYfUctetZTAWLw',
             isVerified: true,
           },
@@ -434,7 +471,7 @@ describe('Api router', () => {
       const query = 'The%20Louis%20Theroux%20Podcast';
 
       const appleMusicQuery = `${config.services.appleMusic.baseUrl}${query}`;
-      const youtubeQuery = `${config.services.youtube.apiSearchUrl}${query}&type=channel&key=${config.services.youtube.apiKey}`;
+      const youtubeQuery = `${config.services.youTube.apiSearchUrl}${query}&type=channel&key=${config.services.youTube.apiKey}`;
       const deezerQuery = `${config.services.deezer.apiUrl}/podcast?q=${query}&limit=1`;
 
       const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
@@ -465,54 +502,7 @@ describe('Api router', () => {
     });
 
     it('should return 200 from cache', async () => {
-      const spotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
-      const query = 'Do%20Not%20Disturb%20Drake';
-
-      const appleMusicQuery = `${config.services.appleMusic.baseUrl}${query}`;
-      const youtubeQuery = `${config.services.youtube.apiSearchUrl}${query}&type=video&key=${config.services.youtube.apiKey}`;
-      const deezerQuery = `${config.services.deezer.apiUrl}/track?q=${query}&limit=1`;
-
-      const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
-
-      mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
-      mock.onGet(appleMusicQuery).reply(200, appleMusicSongResponseMock);
-      mock.onGet(youtubeQuery).reply(200, youtubeSongResponseMock);
-      mock.onGet(deezerQuery).reply(200, deezerSongResponseMock);
-
-      const cachedResponse = {
-        id: '2KvHC9z14GSl4YpkNMX384',
-        type: 'music.song',
-        title: 'Do Not Disturb',
-        description: 'Drake · Song · 2017',
-        image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
-        audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
-        source: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
-        links: [
-          {
-            type: 'appleMusic',
-            url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
-            isVerified: true,
-          },
-          {
-            type: 'youtube',
-            url: 'https://www.youtube.com/watch?v=zhY_0DoQCQs',
-            isVerified: true,
-          },
-          {
-            type: 'deezer',
-            url: 'https://www.deezer.com/track/144572248',
-            isVerified: true,
-          },
-          {
-            type: 'soundCloud',
-            url: 'https://soundcloud.com/search/sounds?q=Do%20Not%20Disturb%20Drake',
-          },
-          {
-            type: 'tidal',
-            url: 'https://listen.tidal.com/search?q=Do%20Not%20Disturb%20Drake',
-          },
-        ],
-      };
+      const request = new Request(`${endpoint}?spotifyLink=${cachedSpotifyLink}`);
 
       redisGetMock.mockResolvedValueOnce(JSON.stringify(cachedResponse));
       redisGetMock.mockResolvedValue(1);
@@ -521,18 +511,127 @@ describe('Api router', () => {
       const response = await app.handle(request).then(res => res.json());
 
       expect(response).toEqual(cachedResponse);
+
       expect(redisGetMock).toHaveBeenCalledTimes(2);
+      expect(redisGetMock.mock.calls).toEqual([
+        ['idonthavespotify:cache::2KvHC9z14GSl4YpkNMX384'],
+        ['idonthavespotify:searchCount'],
+      ]);
       expect(redisSetMock).toHaveBeenCalledTimes(1);
     });
 
-    it('should return bad request', async () => {
-      const request = new Request(`${endpoint}?foo=bar`);
+    it('should return 200 from cache and increase search count', async () => {
+      const request = new Request(`${endpoint}?spotifyLink=${cachedSpotifyLink}`);
+      const searchCount = 2;
+
+      redisGetMock.mockResolvedValueOnce(JSON.stringify(cachedResponse));
+      redisGetMock.mockResolvedValue(searchCount);
+      redisSetMock.mockResolvedValue('');
+
+      const response = await app.handle(request).then(res => res.json());
+
+      expect(response).toEqual(cachedResponse);
+
+      expect(redisGetMock).toHaveBeenCalledTimes(2);
+      expect(redisGetMock.mock.calls).toEqual([
+        ['idonthavespotify:cache::2KvHC9z14GSl4YpkNMX384'],
+        ['idonthavespotify:searchCount'],
+      ]);
+      expect(redisSetMock).toHaveBeenCalledTimes(1);
+      expect(redisSetMock.mock.calls).toEqual([
+        ['idonthavespotify:searchCount', `${searchCount + 1}`],
+      ]);
+    });
+
+    it('should return 200 when adapter returns error - YouTube', async () => {
+      const spotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
+      const query = 'Do%20Not%20Disturb%20Drake';
+
+      const appleMusicQuery = `${config.services.appleMusic.baseUrl}${query}`;
+      const youtubeQuery = `${config.services.youTube.apiSearchUrl}${query}&type=video&key=${config.services.youTube.apiKey}`;
+      const deezerQuery = `${config.services.deezer.apiUrl}/track?q=${query}&limit=1`;
+
+      const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
+
+      mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
+      mock.onGet(appleMusicQuery).reply(200, appleMusicSongResponseMock);
+      mock.onGet(youtubeQuery).reply(400, {
+        error: {
+          errors: [
+            {
+              domain: 'youtube.parameter',
+              reason: 'invalidValue',
+              message: "Invalid value for parameter 'videoId'",
+            },
+          ],
+          code: 400,
+          message: "Invalid value for parameter 'videoId'",
+        },
+      });
+      mock.onGet(deezerQuery).reply(200, deezerSongResponseMock);
+
+      redisGetMock.mockResolvedValue(0);
+      redisSetMock.mockResolvedValue('');
+
       const response = await app.handle(request).then(res => res.json());
 
       expect(response).toEqual({
         code: 'UNKNOWN',
-        message:
-          'ValueCreate.String: String types with patterns must specify a default value',
+        message: '[YouTube] Error: Request failed with status code 400',
+      });
+
+      expect(redisGetMock).toHaveBeenCalledTimes(1);
+      expect(redisSetMock).toHaveBeenCalledTimes(0);
+    });
+
+    it('should return 200 when adapter returns error - Deezer', async () => {
+      const spotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
+      const query = 'Do%20Not%20Disturb%20Drake';
+
+      const appleMusicQuery = `${config.services.appleMusic.baseUrl}${query}`;
+      const youtubeQuery = `${config.services.youTube.apiSearchUrl}${query}&type=video&key=${config.services.youTube.apiKey}`;
+      const deezerQuery = `${config.services.deezer.apiUrl}/track?q=${query}&limit=1`;
+
+      const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
+
+      mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
+      mock.onGet(appleMusicQuery).reply(200, appleMusicSongResponseMock);
+      mock.onGet(youtubeQuery).reply(200, youtubeSongResponseMock);
+      mock.onGet(deezerQuery).reply(500);
+
+      redisGetMock.mockResolvedValue(0);
+      redisSetMock.mockResolvedValue('');
+
+      const response = await app.handle(request).then(res => res.json());
+
+      expect(response).toEqual({
+        code: 'UNKNOWN',
+        message: '[Deezer] Error: Request failed with status code 500',
+      });
+
+      expect(redisGetMock).toHaveBeenCalledTimes(1);
+      expect(redisSetMock).toHaveBeenCalledTimes(0);
+    });
+
+    it('should return bad request - invalid spotifyLink', async () => {
+      const spotifyLink = 'https://open.spotify.com/invalid';
+
+      const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
+      const response = await app.handle(request).then(res => res.json());
+
+      expect(response).toEqual({
+        code: 'VALIDATION',
+        message: 'Invalid spotify link',
+      });
+    });
+
+    it('should return bad request - unknown query param', async () => {
+      const request = new Request(`${endpoint}?foo=bar`);
+      const response = await app.handle(request).then(res => res.json());
+
+      expect(response).toEqual({
+        code: 'VALIDATION',
+        message: 'Invalid spotify link',
       });
     });
   });
