@@ -615,6 +615,20 @@ describe('Api router', () => {
       expect(redisSetMock).toHaveBeenCalledTimes(0);
     });
 
+    it('should return unknown error - could not parse Spotify metadata', async () => {
+      const request = new Request(`${endpoint}?spotifyLink=${cachedSpotifyLink}`);
+
+      mock.onGet(cachedSpotifyLink).reply(200, '<html></html>');
+
+      const response = await app.handle(request).then(res => res.json());
+
+      expect(response).toEqual({
+        code: 'UNKNOWN',
+        message:
+          '[Spotify Parser] (https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384) Error: Could not parse Spotify metadata.',
+      });
+    });
+
     it('should return bad request - invalid spotifyLink', async () => {
       const spotifyLink = 'https://open.spotify.com/invalid';
 
