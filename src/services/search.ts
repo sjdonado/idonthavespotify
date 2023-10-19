@@ -38,17 +38,17 @@ export interface SpotifyContent {
 }
 
 export const spotifySearch = async (spotifyLink: string): Promise<SpotifyContent> => {
-  const metadata = await parseSpotifyMetadata(spotifyLink);
+  const { metadata, url } = await parseSpotifyMetadata(spotifyLink);
 
-  const id = (spotifyLink.match(SPOTIFY_ID_REGEX) ?? [])[0]!;
+  const id = (url.match(SPOTIFY_ID_REGEX) ?? [])[0]!;
 
-  logger.info(`Searching for: ${id}`);
+  logger.info(`Searching for: ${url}`);
 
   const cache = await getSpotifySearchFromCache(id);
   if (cache) {
     await incrementSearchCount();
 
-    logger.info(`Found in cache: ${id}`);
+    logger.info(`Found in cache: ${url} - ${id}`);
 
     return cache;
   }
@@ -85,7 +85,7 @@ export const spotifySearch = async (spotifyLink: string): Promise<SpotifyContent
     description: metadata.description,
     image: metadata.image,
     audio: metadata.audio,
-    source: spotifyLink,
+    source: url,
     links,
   };
 
