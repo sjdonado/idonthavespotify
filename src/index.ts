@@ -10,11 +10,9 @@ import { pageRouter } from './routes/page';
 export const app = new Elysia()
   .use(html())
   .use(staticPlugin({ prefix: '' }))
-  .on('beforeHandle', ({ request }) => {
+  .on('beforeHandle', async ({ request }) => {
     logger.info(
-      `${request.method} ${request.url} - ${request.headers.get('user-agent')} - ${
-        request.body ? JSON.stringify(request.body) : 'no body'
-      }`
+      `${request.method} ${request.url} - ${request.headers.get('user-agent')}`
     );
   })
   .use(apiRouter)
