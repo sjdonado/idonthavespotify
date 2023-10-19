@@ -97,7 +97,7 @@ describe('Api router', () => {
   });
 
   describe('GET /search', () => {
-    const endpoint = `${API_ENDPOINT}/search`;
+    const endpoint = `${API_ENDPOINT}/search?v=1.3`;
 
     const cachedSpotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
 

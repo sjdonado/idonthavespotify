@@ -1,7 +1,8 @@
 import { Elysia } from 'elysia';
 
 import { logger } from '~/utils/logger';
-import { searchPayloadValidator } from '~/validations/search';
+
+import { apiVersionValidator, searchPayloadValidator } from '~/validations/search';
 
 import { spotifySearch } from '~/services/search';
 
@@ -24,6 +25,7 @@ export const apiRouter = new Elysia().group('/api', app =>
       },
       {
         body: searchPayloadValidator,
+        query: apiVersionValidator,
       }
     )
 );
