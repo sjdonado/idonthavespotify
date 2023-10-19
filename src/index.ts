@@ -11,15 +11,11 @@ export const app = new Elysia()
   .use(html())
   .use(staticPlugin({ prefix: '' }))
   .on('beforeHandle', ({ request }) => {
-    logger.info({
-      url: request.url,
-      method: request.method,
-      headers: {
-        host: request.headers.get('host'),
-        'user-agent': request.headers.get('user-agent'),
-      },
-      body: request.body,
-    });
+    logger.info(
+      `${request.method} ${request.url} - ${request.headers.get('user-agent')} - ${
+        request.body ? JSON.stringify(request.body) : 'no body'
+      }`
+    );
   })
   .use(apiRouter)
   .use(pageRouter);

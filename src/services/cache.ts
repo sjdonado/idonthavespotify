@@ -14,7 +14,7 @@ export const getSpotifySearchFromCache = async (id: string) => {
 };
 
 export const cacheSpotifySearch = async (spotifyContent: SpotifyContent) => {
-  await setWithKey(
+  return setWithKey(
     `${config.redis.cacheKey}:${spotifyContent.id}`,
     JSON.stringify(spotifyContent),
     true

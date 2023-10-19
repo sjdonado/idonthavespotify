@@ -10,6 +10,7 @@ import { getYouTubeLink } from '~/adapters/youtube';
 import { getDeezerLink } from '~/adapters/deezer';
 import { getSoundCloudLink } from '~/adapters/soundcloud';
 import { getTidalLink } from '~/adapters/tidal';
+import { logger } from '~/utils/logger';
 
 export enum SpotifyContentLinkType {
   YouTube = 'youTube',
@@ -41,9 +42,14 @@ export const spotifySearch = async (spotifyLink: string): Promise<SpotifyContent
 
   const id = (spotifyLink.match(SPOTIFY_ID_REGEX) ?? [])[0]!;
 
+  logger.info(`Searching for: ${id}`);
+
   const cache = await getSpotifySearchFromCache(id);
   if (cache) {
     await incrementSearchCount();
+
+    logger.info(`Found in cache: ${id}`);
+
     return cache;
   }
 
@@ -52,6 +58,13 @@ export const spotifySearch = async (spotifyLink: string): Promise<SpotifyContent
     getYouTubeLink(metadata),
     getDeezerLink(metadata),
   ]);
+
+  logger.info(
+    `Search results:
+      appleMusic: ${appleMusicLink !== undefined},
+      youtube: ${youtubeLink !== undefined},
+      deezer: ${deezerLink! !== undefined}`
+  );
 
   const soundcloudLink = getSoundCloudLink(metadata);
   const tidalLink = getTidalLink(metadata);
