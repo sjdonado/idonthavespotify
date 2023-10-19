@@ -28,7 +28,7 @@ export const parseSpotifyMetadata = async (
 ): Promise<{ metadata: SpotifyMetadata; url: string }> => {
   try {
     let url = spotifyLink;
-    let { data: html } = await axios.get(url);
+    let { data: html } = await axios.get(url, { maxRedirects: 3 });
 
     if (SPOTIFY_LINK_MOBILE_REGEX.test(spotifyLink)) {
       url = html.match(SPOTIFY_LINK_DESKTOP_REGEX)?.[0];

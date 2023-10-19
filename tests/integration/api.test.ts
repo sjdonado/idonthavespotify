@@ -15,6 +15,8 @@ import AxiosMockAdapter from 'axios-mock-adapter';
 
 import * as config from '~/config/default';
 
+import { JSONRequest } from '../utils/request';
+
 import youtubeSongResponseMock from '../fixtures/song/youtubeResponseMock.json';
 import youtubeAlbumResponseMock from '../fixtures/album/youtubeResponseMock.json';
 import youtubePlaylistResponseMock from '../fixtures/playlist/youtubeResponseMock.json';
@@ -43,6 +45,7 @@ const [
   spotifyPodcastHeadResponseMock,
   spotifyShowHeadResponseMock,
   spotifyExclusiveContentHeadResponseMock,
+  spotifyMobileHeadResponseMock,
 ] = await Promise.all([
   Bun.file('tests/fixtures/song/spotifyHeadResponseMock.html').text(),
   Bun.file('tests/fixtures/album/spotifyHeadResponseMock.html').text(),
@@ -51,6 +54,7 @@ const [
   Bun.file('tests/fixtures/podcast/spotifyHeadResponseMock.html').text(),
   Bun.file('tests/fixtures/show/spotifyHeadResponseMock.html').text(),
   Bun.file('tests/fixtures/spotify-exclusive/spotifyHeadResponseMock.html').text(),
+  Bun.file('tests/fixtures/spotify-mobile/spotifyHeadResponseMock.html').text(),
 ]);
 
 const [
@@ -140,7 +144,129 @@ describe('Api router', () => {
       const youtubeQuery = `${config.services.youTube.apiSearchUrl}${query}&type=video&key=${config.services.youTube.apiKey}`;
       const deezerQuery = `${config.services.deezer.apiUrl}/track?q=${query}&limit=1`;
 
-      const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
+      const request = JSONRequest(endpoint, { spotifyLink });
+
+      mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
+      mock.onGet(appleMusicQuery).reply(200, appleMusicSongResponseMock);
+      mock.onGet(youtubeQuery).reply(200, youtubeSongResponseMock);
+      mock.onGet(deezerQuery).reply(200, deezerSongResponseMock);
+
+      redisGetMock.mockResolvedValue(0);
+      redisSetMock.mockResolvedValue('');
+
+      const response = await app.handle(request).then(res => res.json());
+
+      expect(response).toEqual({
+        id: '2KvHC9z14GSl4YpkNMX384',
+        type: 'music.song',
+        title: 'Do Not Disturb',
+        description: 'Drake · Song · 2017',
+        image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
+        audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
+        source: spotifyLink,
+        links: [
+          {
+            type: 'appleMusic',
+            url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
+            isVerified: true,
+          },
+          {
+            type: 'youTube',
+            url: 'https://www.youtube.com/watch?v=zhY_0DoQCQs',
+            isVerified: true,
+          },
+          {
+            type: 'deezer',
+            url: 'https://www.deezer.com/track/144572248',
+            isVerified: true,
+          },
+          {
+            type: 'soundCloud',
+            url: 'https://soundcloud.com/search/sounds?q=Do%20Not%20Disturb%20Drake',
+          },
+          {
+            type: 'tidal',
+            url: 'https://listen.tidal.com/search?q=Do%20Not%20Disturb%20Drake',
+          },
+        ],
+      });
+
+      expect(redisGetMock).toHaveBeenCalledTimes(2);
+      expect(redisSetMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('should return 200 - Song with mobile link', async () => {
+      const mobileSpotifyLink = 'https://spotify.link/mOQKfqJZ1Db';
+      const desktopSpotifyLink = 'https://open.spotify.com/track/3eP13S8D5m2cweMEg3ZDed';
+      const query = 'Do%20Not%20Disturb%20Drake';
+
+      const appleMusicQuery = `${config.services.appleMusic.baseUrl}${query}`;
+      const youtubeQuery = `${config.services.youTube.apiSearchUrl}${query}&type=video&key=${config.services.youTube.apiKey}`;
+      const deezerQuery = `${config.services.deezer.apiUrl}/track?q=${query}&limit=1`;
+
+      const request = JSONRequest(endpoint, { spotifyLink: mobileSpotifyLink });
+
+      mock.onGet(mobileSpotifyLink).reply(200, spotifyMobileHeadResponseMock);
+      mock.onGet(desktopSpotifyLink).reply(200, spotifySongHeadResponseMock);
+
+      mock.onGet(appleMusicQuery).reply(200, appleMusicSongResponseMock);
+      mock.onGet(youtubeQuery).reply(200, youtubeSongResponseMock);
+      mock.onGet(deezerQuery).reply(200, deezerSongResponseMock);
+
+      redisGetMock.mockResolvedValue(0);
+      redisSetMock.mockResolvedValue('');
+
+      const response = await app.handle(request).then(res => res.json());
+
+      expect(response).toEqual({
+        id: '3eP13S8D5m2cweMEg3ZDed',
+        type: 'music.song',
+        title: 'Do Not Disturb',
+        description: 'Drake · Song · 2017',
+        image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
+        audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
+        source: desktopSpotifyLink,
+        links: [
+          {
+            type: 'appleMusic',
+            url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
+            isVerified: true,
+          },
+          {
+            type: 'youTube',
+            url: 'https://www.youtube.com/watch?v=zhY_0DoQCQs',
+            isVerified: true,
+          },
+          {
+            type: 'deezer',
+            url: 'https://www.deezer.com/track/144572248',
+            isVerified: true,
+          },
+          {
+            type: 'soundCloud',
+            url: 'https://soundcloud.com/search/sounds?q=Do%20Not%20Disturb%20Drake',
+          },
+          {
+            type: 'tidal',
+            url: 'https://listen.tidal.com/search?q=Do%20Not%20Disturb%20Drake',
+          },
+        ],
+      });
+
+      expect(redisGetMock).toHaveBeenCalledTimes(2);
+      expect(redisSetMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('should return 200 - Song with extra query params', async () => {
+      const spotifyLink =
+        'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384?si=NbEEVPZvTVuov_nA3ylJJQ&utm_source=copy-link&utm_medium=copy-link&context=spotify%3Aalbum%3A4czdORdCWP9umpbhFXK2aW&_branch_match_id=1238568162599463760&_branch_referrer=H2sIAAAAAAAAA8soKSkottLXLy7IL8lMq9TLyczL1q%2Fy8nHxLLXwM3RJAgDKC3LnIAAAAA%3D%3D';
+      const query = 'Do%20Not%20Disturb%20Drake';
+
+      const appleMusicQuery = `${config.services.appleMusic.baseUrl}${query}`;
+      const youtubeQuery = `${config.services.youTube.apiSearchUrl}${query}&type=video&key=${config.services.youTube.apiKey}`;
+      const deezerQuery = `${config.services.deezer.apiUrl}/track?q=${query}&limit=1`;
+
+      const request = JSONRequest(endpoint, { spotifyLink });
 
       mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
       mock.onGet(appleMusicQuery).reply(200, appleMusicSongResponseMock);
@@ -199,7 +325,7 @@ describe('Api router', () => {
       const youtubeQuery = `${config.services.youTube.apiSearchUrl}${query}&type=playlist&key=${config.services.youTube.apiKey}`;
       const deezerQuery = `${config.services.deezer.apiUrl}/album?q=${query}&limit=1`;
 
-      const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
+      const request = JSONRequest(endpoint, { spotifyLink });
 
       mock.onGet(spotifyLink).reply(200, spotifyAlbumHeadResponseMock);
       mock.onGet(appleMusicQuery).reply(200, appleMusicAlbumResponseMock);
@@ -257,7 +383,7 @@ describe('Api router', () => {
       const youtubeQuery = `${config.services.youTube.apiSearchUrl}${query}&type=playlist&key=${config.services.youTube.apiKey}`;
       const deezerQuery = `${config.services.deezer.apiUrl}/playlist?q=${query}&limit=1`;
 
-      const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
+      const request = JSONRequest(endpoint, { spotifyLink });
 
       mock.onGet(spotifyLink).reply(200, spotifyPlaylistHeadResponseMock);
       mock.onGet(appleMusicQuery).reply(200, appleMusicPlaylistResponseMock);
@@ -310,7 +436,7 @@ describe('Api router', () => {
       const youtubeQuery = `${config.services.youTube.apiSearchUrl}${query}%20official&type=channel&key=${config.services.youTube.apiKey}`;
       const deezerQuery = `${config.services.deezer.apiUrl}/artist?q=${query}&limit=1`;
 
-      const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
+      const request = JSONRequest(endpoint, { spotifyLink });
 
       mock.onGet(spotifyLink).reply(200, spotifyArtistHeadResponseMock);
       mock.onGet(appleMusicQuery).reply(200, appleMusicArtistResponseMock);
@@ -369,7 +495,7 @@ describe('Api router', () => {
       const youtubeQuery = `${config.services.youTube.apiSearchUrl}${query}&type=video&key=${config.services.youTube.apiKey}`;
       const deezerQuery = `${config.services.deezer.apiUrl}?q=${query}&limit=1`;
 
-      const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
+      const request = JSONRequest(endpoint, { spotifyLink });
 
       mock.onGet(spotifyLink).reply(200, spotifyPodcastHeadResponseMock);
       mock.onGet(appleMusicQuery).reply(200, appleMusicPodcastResponseMock);
@@ -420,7 +546,7 @@ describe('Api router', () => {
       const youtubeQuery = `${config.services.youTube.apiSearchUrl}${query}&type=channel&key=${config.services.youTube.apiKey}`;
       const deezerQuery = `${config.services.deezer.apiUrl}/podcast?q=${query}&limit=1`;
 
-      const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
+      const request = JSONRequest(endpoint, { spotifyLink });
 
       mock.onGet(spotifyLink).reply(200, spotifyShowHeadResponseMock);
       mock.onGet(appleMusicQuery).reply(200, appleMusicShowResponseMock);
@@ -474,7 +600,7 @@ describe('Api router', () => {
       const youtubeQuery = `${config.services.youTube.apiSearchUrl}${query}&type=channel&key=${config.services.youTube.apiKey}`;
       const deezerQuery = `${config.services.deezer.apiUrl}/podcast?q=${query}&limit=1`;
 
-      const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
+      const request = JSONRequest(endpoint, { spotifyLink });
 
       mock.onGet(spotifyLink).reply(200, spotifyExclusiveContentHeadResponseMock);
       mock.onGet(appleMusicQuery).reply(200, appleMusicExclusiveContentResponseMock);
@@ -502,7 +628,9 @@ describe('Api router', () => {
     });
 
     it('should return 200 from cache', async () => {
-      const request = new Request(`${endpoint}?spotifyLink=${cachedSpotifyLink}`);
+      const request = JSONRequest(endpoint, { spotifyLink: cachedSpotifyLink });
+
+      mock.onGet(cachedSpotifyLink).reply(200, spotifySongHeadResponseMock);
 
       redisGetMock.mockResolvedValueOnce(JSON.stringify(cachedResponse));
       redisGetMock.mockResolvedValue(1);
@@ -521,8 +649,10 @@ describe('Api router', () => {
     });
 
     it('should return 200 from cache and increase search count', async () => {
-      const request = new Request(`${endpoint}?spotifyLink=${cachedSpotifyLink}`);
+      const request = JSONRequest(endpoint, { spotifyLink: cachedSpotifyLink });
       const searchCount = 2;
+
+      mock.onGet(cachedSpotifyLink).reply(200, spotifySongHeadResponseMock);
 
       redisGetMock.mockResolvedValueOnce(JSON.stringify(cachedResponse));
       redisGetMock.mockResolvedValue(searchCount);
@@ -543,7 +673,7 @@ describe('Api router', () => {
       ]);
     });
 
-    it.only('should return 200 when adapter returns error - YouTube', async () => {
+    it('should return 200 when adapter returns error - YouTube', async () => {
       const spotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
       const query = 'Do%20Not%20Disturb%20Drake';
 
@@ -551,7 +681,7 @@ describe('Api router', () => {
       const youtubeQuery = `${config.services.youTube.apiSearchUrl}${query}&type=video&key=${config.services.youTube.apiKey}`;
       const deezerQuery = `${config.services.deezer.apiUrl}/track?q=${query}&limit=1`;
 
-      const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
+      const request = JSONRequest(endpoint, { spotifyLink });
 
       mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
       mock.onGet(appleMusicQuery).reply(200, appleMusicSongResponseMock);
@@ -617,7 +747,7 @@ describe('Api router', () => {
       const youtubeQuery = `${config.services.youTube.apiSearchUrl}${query}&type=video&key=${config.services.youTube.apiKey}`;
       const deezerQuery = `${config.services.deezer.apiUrl}/track?q=${query}&limit=1`;
 
-      const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
+      const request = JSONRequest(endpoint, { spotifyLink });
 
       mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
       mock.onGet(appleMusicQuery).reply(200, appleMusicSongResponseMock);
@@ -664,7 +794,7 @@ describe('Api router', () => {
     });
 
     it('should return unknown error - could not parse Spotify metadata', async () => {
-      const request = new Request(`${endpoint}?spotifyLink=${cachedSpotifyLink}`);
+      const request = JSONRequest(endpoint, { spotifyLink: cachedSpotifyLink });
 
       mock.onGet(cachedSpotifyLink).reply(200, '<html></html>');
 
@@ -680,7 +810,7 @@ describe('Api router', () => {
     it('should return bad request - invalid spotifyLink', async () => {
       const spotifyLink = 'https://open.spotify.com/invalid';
 
-      const request = new Request(`${endpoint}?spotifyLink=${spotifyLink}`);
+      const request = JSONRequest(endpoint, { spotifyLink });
       const response = await app.handle(request).then(res => res.json());
 
       expect(response).toEqual({
@@ -689,8 +819,8 @@ describe('Api router', () => {
       });
     });
 
-    it('should return bad request - unknown query param', async () => {
-      const request = new Request(`${endpoint}?foo=bar`);
+    it('should return bad request - unknown body param', async () => {
+      const request = JSONRequest(endpoint, { foo: 'bar' });
       const response = await app.handle(request).then(res => res.json());
 
       expect(response).toEqual({

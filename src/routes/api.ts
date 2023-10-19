@@ -15,15 +15,15 @@ export const apiRouter = new Elysia().group('/api', app =>
         message: error.message,
       };
     })
-    .get(
+    .post(
       '/search',
-      async ({ query: { spotifyLink } }) => {
+      async ({ body: { spotifyLink } }) => {
         const spotifyContent = await spotifySearch(spotifyLink);
 
         return spotifyContent;
       },
       {
-        query: searchPayloadValidator,
+        body: searchPayloadValidator,
       }
     )
 );
