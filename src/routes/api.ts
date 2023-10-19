@@ -1,7 +1,8 @@
 import { Elysia } from 'elysia';
 
 import { logger } from '~/utils/logger';
-import { searchPayloadValidator } from '~/validations/search';
+
+import { apiVersionValidator, searchPayloadValidator } from '~/validations/search';
 
 import { spotifySearch } from '~/services/search';
 
@@ -15,15 +16,16 @@ export const apiRouter = new Elysia().group('/api', app =>
         message: error.message,
       };
     })
-    .get(
+    .post(
       '/search',
-      async ({ query: { spotifyLink } }) => {
+      async ({ body: { spotifyLink } }) => {
         const spotifyContent = await spotifySearch(spotifyLink);
 
         return spotifyContent;
       },
       {
-        query: searchPayloadValidator,
+        body: searchPayloadValidator,
+        query: apiVersionValidator,
       }
     )
 );

@@ -1,4 +1,8 @@
 import axios from 'axios';
+import {
+  SPOTIFY_LINK_DESKTOP_REGEX,
+  SPOTIFY_LINK_MOBILE_REGEX,
+} from '~/config/constants';
 
 import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
 
@@ -21,9 +25,21 @@ export type SpotifyMetadata = {
 
 export const parseSpotifyMetadata = async (
   spotifyLink: string
-): Promise<SpotifyMetadata> => {
+): Promise<{ metadata: SpotifyMetadata; url: string }> => {
   try {
-    const { data: html } = await axios.get(spotifyLink);
+    let url = spotifyLink;
+    let { data: html } = await axios.get(url, { maxRedirects: 3 });
+
+    if (SPOTIFY_LINK_MOBILE_REGEX.test(spotifyLink)) {
+      url = html.match(SPOTIFY_LINK_DESKTOP_REGEX)?.[0];
+
+      if (!url) {
+        throw new Error(`Could not parse Spotify metadata. Desktop link not found.`);
+      }
+
+      html = (await axios.get(url)).data;
+    }
+
     const doc = getCheerioDoc(html);
 
     const title = metaTagContent(doc, 'og:title', 'property');
@@ -40,11 +56,14 @@ export const parseSpotifyMetadata = async (
     }
 
     return {
-      title,
-      description,
-      type: type as SpotifyMetadataType,
-      image,
-      audio,
+      metadata: {
+        title,
+        description,
+        type: type as SpotifyMetadataType,
+        image,
+        audio,
+      },
+      url,
     };
   } catch (err) {
     throw new Error(`[Spotify Parser] (${spotifyLink}) ${err}`);
