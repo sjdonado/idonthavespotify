@@ -219,7 +219,7 @@ describe('Api router', () => {
       const response = await app.handle(request).then(res => res.json());
 
       expect(response).toEqual({
-        id: '3eP13S8D5m2cweMEg3ZDed',
+        id: 'mOQKfqJZ1Db',
         type: 'music.song',
         title: 'Do Not Disturb',
         description: 'Drake · Song · 2017',

@@ -1,4 +1,4 @@
-import { SPOTIFY_ID_REGEX } from '~/config/constants';
+import { SPOTIFY_LINK_REGEX } from '~/config/constants';
 
 import { SpotifyMetadataType, parseSpotifyMetadata } from '~/parsers/spotify';
 
@@ -38,20 +38,17 @@ export interface SpotifyContent {
 }
 
 export const spotifySearch = async (spotifyLink: string): Promise<SpotifyContent> => {
-  const { metadata, url } = await parseSpotifyMetadata(spotifyLink);
-
-  const id = (url.match(SPOTIFY_ID_REGEX) ?? [])[0]!;
-
-  logger.info(`Searching for: ${url}`);
+  const id = spotifyLink.match(SPOTIFY_LINK_REGEX)?.[3] ?? '';
 
   const cache = await getSpotifySearchFromCache(id);
   if (cache) {
     await incrementSearchCount();
-
-    logger.info(`Found in cache: ${url} - ${id}`);
-
+    logger.info(`Found in cache: ${spotifyLink}`);
     return cache;
   }
+
+  const { metadata, url } = await parseSpotifyMetadata(spotifyLink);
+  logger.info(`Searching for: ${url}`);
 
   const [appleMusicLink, youtubeLink, deezerLink] = await Promise.all([
     getAppleMusicLink(metadata),
