@@ -14,6 +14,7 @@ import Redis from 'ioredis';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
 import { getCheerioDoc } from '~/utils/scraper';
+import { formDataRequest } from '../utils/request';
 
 import { app } from '~/index';
 
@@ -81,6 +82,7 @@ describe('Api router', () => {
   });
 
   describe('POST /search', () => {
+    const endpoint = `${INDEX_ENDPOINT}/search`;
     const spotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
 
     const cachedResponse = {
@@ -119,15 +121,7 @@ describe('Api router', () => {
     };
 
     it('should return search card with a valid spotifyLink', async () => {
-      const formData = new FormData();
-      formData.append('spotifyLink', spotifyLink);
-
-      const request = new Request(`${INDEX_ENDPOINT}/search`, {
-        method: 'POST',
-        // eslint-disable-next-line
-        // @ts-ignore
-        body: formData,
-      });
+      const request = formDataRequest(endpoint, { spotifyLink });
 
       mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
 
@@ -177,15 +171,7 @@ describe('Api router', () => {
         links: [],
       };
 
-      const formData = new FormData();
-      formData.append('spotifyLink', spotifyLink);
-
-      const request = new Request(`${INDEX_ENDPOINT}/search`, {
-        method: 'POST',
-        // eslint-disable-next-line
-        // @ts-ignore
-        body: formData,
-      });
+      const request = formDataRequest(endpoint, { spotifyLink });
 
       mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
 
@@ -212,14 +198,8 @@ describe('Api router', () => {
     });
 
     it('should return error message when sent an invalid spotifyLink', async () => {
-      const formData = new FormData();
-      formData.append('spotifyLink', 'https://open.spotify.com/invalid');
-
-      const request = new Request(`${INDEX_ENDPOINT}/search`, {
-        method: 'POST',
-        // eslint-disable-next-line
-        // @ts-ignore
-        body: formData,
+      const request = formDataRequest(endpoint, {
+        spotifyLink: 'https://open.spotify.com/invalid',
       });
 
       const response = await app.handle(request).then(res => res.text());
@@ -230,15 +210,7 @@ describe('Api router', () => {
     });
 
     it('should return error message when internal server error', async () => {
-      const formData = new FormData();
-      formData.append('spotifyLink', spotifyLink);
-
-      const request = new Request(`${INDEX_ENDPOINT}/search`, {
-        method: 'POST',
-        // eslint-disable-next-line
-        // @ts-ignore
-        body: formData,
-      });
+      const request = formDataRequest(endpoint, { spotifyLink });
 
       mock.onGet(spotifyLink).reply(500);
 
