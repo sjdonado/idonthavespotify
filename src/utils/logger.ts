@@ -5,4 +5,9 @@ export const stream = pretty({
   colorize: true,
 });
 
-export const logger = pino(stream);
+export const logger = pino(
+  {
+    level: process.env.NODE_ENV === 'test' ? 'fatal' : 'info',
+  },
+  stream
+);
