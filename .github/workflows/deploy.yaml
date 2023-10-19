@@ -16,5 +16,5 @@ jobs:
       - name: Push to dokku
         uses: dokku/github-action@master
         with:
-          git_remote_url: 'ssh://dokku@ssh.sjdonado.de:22/idonthavespotify'
+          git_remote_url: 'ssh://dokku@sjdonado.de:22/idonthavespotify'
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
