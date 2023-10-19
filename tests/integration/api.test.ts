@@ -828,5 +828,29 @@ describe('Api router', () => {
         message: 'Invalid spotify link',
       });
     });
+
+    it('should return bad request - unsupported API version', async () => {
+      const request = JSONRequest(`${API_ENDPOINT}/search?v=1`, {
+        spotifyLink: cachedSpotifyLink,
+      });
+      const response = await app.handle(request).then(res => res.json());
+
+      expect(response).toEqual({
+        code: 'VALIDATION',
+        message: 'Unsupported API version',
+      });
+    });
+
+    it('should return bad request - missing API version query param', async () => {
+      const request = JSONRequest(`${API_ENDPOINT}/search`, {
+        spotifyLink: cachedSpotifyLink,
+      });
+      const response = await app.handle(request).then(res => res.json());
+
+      expect(response).toEqual({
+        code: 'VALIDATION',
+        message: 'Unsupported API version',
+      });
+    });
   });
 });
