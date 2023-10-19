@@ -40,7 +40,7 @@ export default function MainLayout(props: { children: JSX.Element }) {
           rel="stylesheet"
         />
 
-        <link href="/assets/css/index.css" rel="stylesheet" />
+        <link href="/assets/css/index.min.css" rel="stylesheet" />
       </head>
 
       <body>{props.children}</body>
