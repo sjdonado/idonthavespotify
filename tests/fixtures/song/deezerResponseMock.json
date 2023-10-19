@@ -1,0 +1,46 @@
+{
+  "data": [
+    {
+      "id": 144572248,
+      "readable": true,
+      "title": "Do Not Disturb",
+      "title_short": "Do Not Disturb",
+      "title_version": "",
+      "link": "https://www.deezer.com/track/144572248",
+      "duration": 283,
+      "rank": 662053,
+      "explicit_lyrics": true,
+      "explicit_content_lyrics": 1,
+      "explicit_content_cover": 1,
+      "preview": "https://cdns-preview-2.dzcdn.net/stream/c-2023dac15054e4fdc3612db92f31ee8d-6.mp3",
+      "md5_image": "8f0187ad83cdd1f47f1c55420f9df227",
+      "artist": {
+        "id": 246791,
+        "name": "Drake",
+        "link": "https://www.deezer.com/artist/246791",
+        "picture": "https://api.deezer.com/artist/246791/image",
+        "picture_small": "https://e-cdns-images.dzcdn.net/images/artist/5d2fa7f140a6bdc2c864c3465a61fc71/56x56-000000-80-0-0.jpg",
+        "picture_medium": "https://e-cdns-images.dzcdn.net/images/artist/5d2fa7f140a6bdc2c864c3465a61fc71/250x250-000000-80-0-0.jpg",
+        "picture_big": "https://e-cdns-images.dzcdn.net/images/artist/5d2fa7f140a6bdc2c864c3465a61fc71/500x500-000000-80-0-0.jpg",
+        "picture_xl": "https://e-cdns-images.dzcdn.net/images/artist/5d2fa7f140a6bdc2c864c3465a61fc71/1000x1000-000000-80-0-0.jpg",
+        "tracklist": "https://api.deezer.com/artist/246791/top?limit=50",
+        "type": "artist"
+      },
+      "album": {
+        "id": 15685208,
+        "title": "More Life",
+        "cover": "https://api.deezer.com/album/15685208/image",
+        "cover_small": "https://e-cdns-images.dzcdn.net/images/cover/8f0187ad83cdd1f47f1c55420f9df227/56x56-000000-80-0-0.jpg",
+        "cover_medium": "https://e-cdns-images.dzcdn.net/images/cover/8f0187ad83cdd1f47f1c55420f9df227/250x250-000000-80-0-0.jpg",
+        "cover_big": "https://e-cdns-images.dzcdn.net/images/cover/8f0187ad83cdd1f47f1c55420f9df227/500x500-000000-80-0-0.jpg",
+        "cover_xl": "https://e-cdns-images.dzcdn.net/images/cover/8f0187ad83cdd1f47f1c55420f9df227/1000x1000-000000-80-0-0.jpg",
+        "md5_image": "8f0187ad83cdd1f47f1c55420f9df227",
+        "tracklist": "https://api.deezer.com/album/15685208/tracks",
+        "type": "album"
+      },
+      "type": "track"
+    }
+  ],
+  "total": 3,
+  "next": "https://api.deezer.com/search/track?q=Do%20Not%20Disturb%20Drake&limit=1&index=1"
+}

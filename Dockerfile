@@ -1,16 +1,26 @@
-FROM node:19-alpine
+FROM oven/bun
 
-EXPOSE 5000
+EXPOSE 3000
 
 WORKDIR /usr/src/app
 
-COPY package.json ./
-COPY yarn.lock ./
+ENV NODE_ENV production
 
-RUN yarn install
+COPY package.json .
+COPY bun.lockb .
 
-COPY . .
+RUN bun install
 
-RUN yarn build
+COPY src src
+COPY www www
 
-CMD ["node", "./dist/server.js"]
+COPY tsconfig.json .
+COPY build.ts .
+COPY tailwind.config.js .
+
+RUN bun run build:js
+RUN bun run build:css
+
+COPY public public
+
+CMD ["bun", "www/bin.ts"]
