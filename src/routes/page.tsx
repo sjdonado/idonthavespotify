@@ -13,8 +13,10 @@ import SearchCard from '~/views/components/search-card';
 import ErrorMessage from '~/views/components/error-message';
 
 export const pageRouter = new Elysia()
-  .onError(({ error }) => {
+  .onError(({ error, set }) => {
     logger.error(error);
+
+    set.status = 200;
 
     return <ErrorMessage />;
   })

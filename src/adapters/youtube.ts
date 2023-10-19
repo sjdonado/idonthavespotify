@@ -80,6 +80,7 @@ export async function getYouTubeLink(
       isVerified: true,
     };
   } catch (error) {
-    throw new Error(`[YouTube] (${query}) ${error}`);
+    logger.error(`[YouTube] (${query}) ${error}`);
+    return undefined;
   }
 }

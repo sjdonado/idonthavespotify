@@ -1,6 +1,8 @@
 name: run tests
 
 on:
+  push:
+    branches: [master]
   pull_request:
     branches: [master]
 
@@ -14,7 +16,7 @@ env:
   SOUNDCLOUD_BASE_URL: https://soundcloud.com/search/sounds?q=
   REDIS_URL: redis://127.0.0.1:6379
 jobs:
-  test:
+  tests:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     services:

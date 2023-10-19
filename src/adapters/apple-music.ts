@@ -1,6 +1,8 @@
 import axios from 'axios';
 
 import * as config from '~/config/default';
+
+import { logger } from '~/utils/logger';
 import { getCheerioDoc } from '~/utils/scraper';
 import { responseMatchesQuery } from '~/utils/compare';
 import { getQueryFromMetadata } from '~/utils/query';
@@ -72,6 +74,8 @@ export async function getAppleMusicLink(
       isVerified,
     };
   } catch (err) {
-    throw new Error(`[Apple Music] (${query}) ${err}`);
+    logger.error(`[Apple Music] (${query}) ${err}`);
+
+    return undefined;
   }
 }

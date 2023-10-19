@@ -58,6 +58,7 @@ export async function getDeezerLink(
       isVerified: true,
     };
   } catch (error) {
-    throw new Error(`[Deezer] (${query}) ${error}`);
+    logger.error(`[Deezer] (${query}) ${error}`);
+    return undefined;
   }
 }
