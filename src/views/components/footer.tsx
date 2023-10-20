@@ -1,6 +1,6 @@
 export default function Footer(props: { searchCount?: number }) {
   return (
-    <footer class="text-center text-sm mt-2">
+    <footer class="text-center mt-2 text-[0.7rem] md:text-sm">
       {props.searchCount && (
         <p>
           {'Queries performed: '}
@@ -9,7 +9,7 @@ export default function Footer(props: { searchCount?: number }) {
           </span>
         </p>
       )}
-      <p class="flex flex-wrap justify-center items-center m-auto text-sm">
+      <p class="flex flex-wrap justify-center items-center m-auto text-[0.7rem] md:text-sm">
         <a
           href="https://uptime.sjdonado.de/status/apps"
           class="text-green-500 hover:underline"

@@ -18,7 +18,7 @@ html {
 }
 
 .animate-loading-bar {
-  animation: loading 2s infinite;
+  animation: loading 2s linear infinite;
 }
 
 @keyframes loading {

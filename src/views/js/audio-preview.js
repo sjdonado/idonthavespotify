@@ -4,7 +4,7 @@ const audioURL = audioPreview.getAttribute('data-audio-url');
 const audio = new Audio(audioURL);
 
 let isPlaying = false;
-let isAudioAvailable = audio.readyState > 0;
+let isAudioAvailable = false;
 
 const playSong = async () => {
   try {

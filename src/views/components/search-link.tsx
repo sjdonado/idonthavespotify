@@ -39,7 +39,7 @@ export default function SearchLink(props: {
       class="flex items-center hover:text-gray-300 text-sm sm:text-base"
     >
       <i class={`${spotifyContent.icon} w-6 mr-1`} />
-      {spotifyContent.label}
+      <p class="underline decoration-1 underline-offset-2">{spotifyContent.label}</p>
       {props.isVerified && (
         <span
           class="inline-flex items-center justify-center ml-1 p-1 rounded-full text-[0.56rem] bg-green-500"
