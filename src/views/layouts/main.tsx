@@ -32,7 +32,7 @@ export default function MainLayout(props: { children: JSX.Element }) {
         />
         <CustomMetaTag property="og:image:alt" content="I don't have Spotify favicon" />
 
-        <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+        <script src="https://unpkg.com/htmx.org@1.9.8"></script>
         <meta name="htmx-config" content='{"defaultSwapStyle":"outerHTML"}' />
 
         <link

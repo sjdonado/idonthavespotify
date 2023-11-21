@@ -67,3 +67,10 @@ audio.addEventListener('canplay', () => {
   isAudioAvailable = true;
   render();
 });
+
+document.addEventListener('htmx:afterOnLoad', function () {
+  if (isAudioAvailable || isPlaying) {
+    audio.pause();
+    audio.currentTime = 0;
+  }
+});
