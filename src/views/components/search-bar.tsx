@@ -9,6 +9,7 @@ export default function SearchBar() {
         hx-target="#search-results"
         hx-swap="innerHTML"
         hx-indicator="#loading-indicator"
+        hx-request='\"timeout\":6000'
         class="flex justify-center items-center w-full max-w-3xl"
       >
         <label for="song-link" class="sr-only">
