@@ -9,9 +9,13 @@ redis.on('connect', () => {
   logger.info(`[redis] connected to ${config.redis.url}`);
 });
 
-export const setWithKey = async (key: string, value: string, expire?: boolean) => {
-  if (expire) {
-    return redis.set(key, value, 'EX', 60 * 60 * 24);
+export const setWithKey = async (
+  key: string,
+  value: string,
+  expiration: number = 60 * 60 * 24
+) => {
+  if (expiration > 0) {
+    return redis.set(key, value, 'EX', expiration);
   }
 
   return redis.set(key, value);

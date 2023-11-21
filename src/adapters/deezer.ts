@@ -1,6 +1,6 @@
 import * as config from '~/config/default';
 
-import type HttpClient from '~/utils/http-client';
+import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { responseMatchesQuery } from '~/utils/compare';
 import { getQueryFromMetadata } from '~/utils/query';
@@ -20,7 +20,6 @@ interface DeezerSearchResponse {
 }
 
 export async function getDeezerLink(
-  httpClient: HttpClient,
   metadata: SpotifyMetadata
 ): Promise<SpotifyContentLink | undefined> {
   const query = getQueryFromMetadata(metadata.title, metadata.description, metadata.type);
@@ -39,7 +38,7 @@ export async function getDeezerLink(
   }?q=${query}&limit=1`;
 
   try {
-    const response = (await httpClient.get(url)) as DeezerSearchResponse;
+    const response = (await HttpClient.get(url)) as DeezerSearchResponse;
 
     if (response.total === 0) {
       logger.error('[Deezer] No results found', url);
@@ -58,7 +57,7 @@ export async function getDeezerLink(
       isVerified: true,
     };
   } catch (error) {
-    logger.error(`[Deezer] (${query}) ${error}`);
+    logger.error(`[Deezer] (${url}) ${error}`);
     return undefined;
   }
 }

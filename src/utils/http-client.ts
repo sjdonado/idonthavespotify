@@ -1,26 +1,29 @@
 import axios from 'axios';
-import axiosRetry from 'axios-retry';
 import randUserAgent from 'rand-user-agent';
 
-axiosRetry(axios, { retries: 2, retryDelay: axiosRetry.exponentialDelay });
+import * as config from '~/config/default';
 
 export default class HttpClient {
   static defaultHeaders = {
     'Accept-Encoding': 'gzip',
+    'User-Agent': randUserAgent('desktop', 'chrome'),
   };
 
-  userAgent: string;
+  static async get(url: string, auth: boolean = false) {
+    const headers = {
+      ...HttpClient.defaultHeaders,
+      ...(auth
+        ? {
+            'User-Agent': `${config.services.spotify.clientVersion} (Macintosh; Apple Silicon)`,
+            // Authorization: `Bearer ${await getOrUpdateSpotifyAccessToken()}`,
+          }
+        : {}),
+    };
 
-  constructor() {
-    this.userAgent = randUserAgent('mobile');
-  }
-
-  async get(url: string) {
     const { data } = await axios.get(url, {
-      headers: {
-        ...HttpClient.defaultHeaders,
-        'User-Agent': this.userAgent,
-      },
+      headers,
+      timeout: 2000,
+      signal: AbortSignal.timeout(2000),
     });
 
     return data;

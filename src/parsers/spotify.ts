@@ -3,7 +3,7 @@ import {
   SPOTIFY_LINK_MOBILE_REGEX,
 } from '~/config/constants';
 
-import type HttpClient from '~/utils/http-client';
+import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
 
@@ -25,12 +25,11 @@ export type SpotifyMetadata = {
 };
 
 export const parseSpotifyMetadata = async (
-  httpClient: HttpClient,
   spotifyLink: string
 ): Promise<{ metadata: SpotifyMetadata; url: string }> => {
   try {
     let url = spotifyLink;
-    let html = await httpClient.get(url);
+    let html = await HttpClient.get(url, true);
     logger.info(`Parsing Spotify metadata: ${url}`);
 
     if (SPOTIFY_LINK_MOBILE_REGEX.test(spotifyLink)) {
@@ -43,7 +42,7 @@ export const parseSpotifyMetadata = async (
       // wait a random amount of time to avoid rate limiting
       await new Promise(res => setTimeout(res, Math.random() * 500));
 
-      html = await httpClient.get(url);
+      html = await HttpClient.get(url, true);
     }
 
     const doc = getCheerioDoc(html);

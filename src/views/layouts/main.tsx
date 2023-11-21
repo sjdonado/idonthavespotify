@@ -35,11 +35,6 @@ export default function MainLayout(props: { children: JSX.Element }) {
         <script src="https://unpkg.com/htmx.org@1.9.8"></script>
         <meta name="htmx-config" content='{"defaultSwapStyle":"outerHTML"}' />
 
-        <link
-          href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
-          rel="stylesheet"
-        />
-
         <link href="/assets/css/index.min.css" rel="stylesheet" />
       </head>
 

@@ -43,4 +43,9 @@ if (searchId) {
   submitSearch({ spotifyLink: `https://open.spotify.com/track/${searchId}` });
 }
 
+document.addEventListener('htmx:timeout', function () {
+  document.getElementById('search-results').innerHTML =
+    '<p class="mt-8 text-center">Something went wrong, try again later.</p>';
+});
+
 getSpotifyLinkFromClipboard();

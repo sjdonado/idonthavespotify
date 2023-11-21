@@ -1,4 +1,10 @@
 export const services = {
+  spotify: {
+    authUrl: Bun.env.SPOTIFY_AUTH_URL!,
+    clientId: Bun.env.SPOTIFY_CLIENT_ID!,
+    clientSecret: Bun.env.SPOTIFY_CLIENT_SECRET!,
+    clientVersion: Bun.env.SPOTIFY_CLIENT_VERSION!,
+  },
   youTube: {
     apiKey: Bun.env.YOUTUBE_API_KEY,
     apiSearchUrl: Bun.env.YOUTUBE_API_SEARCH_URL!,
