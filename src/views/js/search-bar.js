@@ -1,7 +1,6 @@
 import { SPOTIFY_LINK_REGEX } from '~/config/constants';
 
 const searchParams = new URLSearchParams(window.location.search);
-
 const searchForm = document.getElementById('search-form');
 
 searchForm.addEventListener('htmx:afterOnLoad', () => {
