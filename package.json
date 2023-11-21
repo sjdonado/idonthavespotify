@@ -16,6 +16,7 @@
     "ioredis": "^5.3.2",
     "pino": "^8.16.0",
     "pino-pretty": "^10.2.3",
+    "rand-user-agent": "^2.0.40",
     "string-similarity": "^4.0.4"
   },
   "devDependencies": {

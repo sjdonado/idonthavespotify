@@ -1,6 +1,6 @@
 import * as config from '~/config/default';
 
-import HttpClient from '~/utils/http-client';
+import type HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { getCheerioDoc } from '~/utils/scraper';
 import { responseMatchesQuery } from '~/utils/compare';
@@ -12,6 +12,7 @@ import { SpotifyContentLink, SpotifyContentLinkType } from '~/services/search';
 export const APPLE_MUSIC_LINK_SELECTOR = 'a[href^="https://music.apple.com/"]';
 
 export async function getAppleMusicLink(
+  httpClient: HttpClient,
   metadata: SpotifyMetadata
 ): Promise<SpotifyContentLink | undefined> {
   const query = getQueryFromMetadata(metadata.title, metadata.description, metadata.type);
@@ -19,7 +20,7 @@ export async function getAppleMusicLink(
   const url = `${config.services.appleMusic.baseUrl}${query}`;
 
   try {
-    const html = await HttpClient.get(url);
+    const html = await httpClient.get(url);
     const doc = getCheerioDoc(html);
 
     const appleMusicDataByType = {

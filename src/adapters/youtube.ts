@@ -1,6 +1,6 @@
 import * as config from '~/config/default';
 
-import HttpClient from '~/utils/http-client';
+import type HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { responseMatchesQuery } from '~/utils/compare';
 import { getQueryFromMetadata } from '~/utils/query';
@@ -24,6 +24,7 @@ interface YoutubeSearchListResponse {
 }
 
 export async function getYouTubeLink(
+  httpClient: HttpClient,
   metadata: SpotifyMetadata
 ): Promise<SpotifyContentLink | undefined> {
   let query = getQueryFromMetadata(metadata.title, metadata.description, metadata.type);
@@ -46,7 +47,7 @@ export async function getYouTubeLink(
   }&key=${config.services.youTube.apiKey}`;
 
   try {
-    const response = (await HttpClient.get(url)) as YoutubeSearchListResponse;
+    const response = (await httpClient.get(url)) as YoutubeSearchListResponse;
 
     if (!response.items?.length) {
       logger.error('[YouTube] No results found', url);

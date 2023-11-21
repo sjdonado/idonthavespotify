@@ -76,7 +76,7 @@ describe('Api router', () => {
       const response = app.handle(request).then(res => res.text());
 
       expect(response).resolves.toEqual(
-        '<p class="mt-8">Something went wrong, try again later.</p>'
+        '<p class="mt-8 text-center">Something went wrong, try again later.</p>'
       );
     });
   });
