@@ -1,7 +1,6 @@
-import axios from 'axios';
-
 import * as config from '~/config/default';
 
+import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { getCheerioDoc } from '~/utils/scraper';
 import { responseMatchesQuery } from '~/utils/compare';
@@ -20,7 +19,7 @@ export async function getAppleMusicLink(
   const url = `${config.services.appleMusic.baseUrl}${query}`;
 
   try {
-    const { data: html } = await axios.get(url);
+    const html = await HttpClient.get(url);
     const doc = getCheerioDoc(html);
 
     const appleMusicDataByType = {

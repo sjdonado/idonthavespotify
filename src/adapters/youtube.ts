@@ -1,7 +1,6 @@
-import axios from 'axios';
-
 import * as config from '~/config/default';
 
+import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { responseMatchesQuery } from '~/utils/compare';
 import { getQueryFromMetadata } from '~/utils/query';
@@ -47,7 +46,7 @@ export async function getYouTubeLink(
   }&key=${config.services.youTube.apiKey}`;
 
   try {
-    const response = (await axios.get(url)).data as YoutubeSearchListResponse;
+    const response = (await HttpClient.get(url)) as YoutubeSearchListResponse;
 
     if (!response.items?.length) {
       logger.error('[YouTube] No results found', url);

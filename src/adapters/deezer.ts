@@ -1,7 +1,6 @@
-import axios from 'axios';
-
 import * as config from '~/config/default';
 
+import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { responseMatchesQuery } from '~/utils/compare';
 import { getQueryFromMetadata } from '~/utils/query';
@@ -39,7 +38,7 @@ export async function getDeezerLink(
   }?q=${query}&limit=1`;
 
   try {
-    const response = (await axios.get(url)).data as DeezerSearchResponse;
+    const response = (await HttpClient.get(url)) as DeezerSearchResponse;
 
     if (response.total === 0) {
       logger.error('[Deezer] No results found', url);

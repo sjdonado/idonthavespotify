@@ -1,9 +1,9 @@
-import axios from 'axios';
 import {
   SPOTIFY_LINK_DESKTOP_REGEX,
   SPOTIFY_LINK_MOBILE_REGEX,
 } from '~/config/constants';
 
+import HttpClient from '~/utils/http-client';
 import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
 
 export enum SpotifyMetadataType {
@@ -28,7 +28,7 @@ export const parseSpotifyMetadata = async (
 ): Promise<{ metadata: SpotifyMetadata; url: string }> => {
   try {
     let url = spotifyLink;
-    let { data: html } = await axios.get(url);
+    let html = await HttpClient.get(url);
 
     if (SPOTIFY_LINK_MOBILE_REGEX.test(spotifyLink)) {
       url = html.match(SPOTIFY_LINK_DESKTOP_REGEX)?.[0];
@@ -40,7 +40,7 @@ export const parseSpotifyMetadata = async (
       // wait a random amount of time to avoid rate limiting
       await new Promise(res => setTimeout(res, Math.random() * 500));
 
-      html = (await axios.get(url)).data;
+      html = await HttpClient.get(url);
     }
 
     const doc = getCheerioDoc(html);
