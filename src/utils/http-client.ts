@@ -1,5 +1,8 @@
 import axios from 'axios';
+import axiosRetry from 'axios-retry';
 import randUserAgent from 'rand-user-agent';
+
+axiosRetry(axios, { retries: 2, retryDelay: axiosRetry.exponentialDelay });
 
 export default class HttpClient {
   static defaultHeaders = {
