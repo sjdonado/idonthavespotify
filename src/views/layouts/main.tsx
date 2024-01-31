@@ -20,7 +20,7 @@ export default function MainLayout(props: { children: JSX.Element }) {
 
         <CustomMetaTag property="og:title" content="I don't have Spotify" />
         <CustomMetaTag property="og:type" content="website" />
-        <CustomMetaTag property="og:url" content="https://idonthavespotify.sjdonado.de" />
+        <CustomMetaTag property="og:url" content="https://idonthavespotify.donado.co" />
         <CustomMetaTag property="og:site_name" content="I don't have Spotify" />
         <CustomMetaTag
           property="og:description"
@@ -32,7 +32,7 @@ export default function MainLayout(props: { children: JSX.Element }) {
         />
         <CustomMetaTag property="og:image:alt" content="I don't have Spotify favicon" />
 
-        <script src="https://unpkg.com/htmx.org@1.9.8"></script>
+        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
         <meta name="htmx-config" content='{"defaultSwapStyle":"outerHTML"}' />
 
         <link href="/assets/css/index.min.css" rel="stylesheet" />

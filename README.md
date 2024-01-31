@@ -2,9 +2,9 @@
 
 > More links coming soon :)
 
-| Raycast API                                                                                                                                                                           | Web Page                                                                                                                                                                                            |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ![Uptime Badge](https://uptime.sjdonado.de/api/badge/3/uptime/24?labelPrefix=API%20&labelSuffix=h) ![Uptime Badge](https://uptime.sjdonado.de/api/badge/3/ping/24?labelPrefix=API%20) | ![Uptime Badge](https://uptime.sjdonado.de/api/badge/2/uptime/24?labelPrefix=Web%20Page%20&labelSuffix=h) ![Uptime Badge](https://uptime.sjdonado.de/api/badge/2/ping/24?labelPrefix=Web%20Page%20) |
+| Raycast API                                                                                                                                                                       | Web Page                                                                                                                                                                                        |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ![Uptime Badge](https://uptime.donado.co/api/badge/3/uptime/24?labelPrefix=API%20&labelSuffix=h) ![Uptime Badge](https://uptime.donado.co/api/badge/3/ping/24?labelPrefix=API%20) | ![Uptime Badge](https://uptime.donado.co/api/badge/2/uptime/24?labelPrefix=Web%20Page%20&labelSuffix=h) ![Uptime Badge](https://uptime.donado.co/api/badge/2/ping/24?labelPrefix=Web%20Page%20) |
 
 ## Web
 

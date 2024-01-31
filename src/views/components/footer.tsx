@@ -11,7 +11,7 @@ export default function Footer(props: { searchCount?: number }) {
       )}
       <p class="flex flex-wrap justify-center items-center m-auto text-[0.7rem] md:text-sm">
         <a
-          href="https://uptime.sjdonado.de/status/apps"
+          href="https://uptime.donado.co/status/apps"
           class="text-green-500 hover:underline"
           target="_blank"
           rel="noreferrer"
