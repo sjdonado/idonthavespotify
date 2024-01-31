@@ -22,7 +22,7 @@ export default class HttpClient {
 
     const { data } = await axios.get(url, {
       headers,
-      timeout: 2000,
+      timeout: 6000,
       signal: AbortSignal.timeout(2000),
     });
 

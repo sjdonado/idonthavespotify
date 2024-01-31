@@ -1,11 +1,5 @@
-import {
-  SPOTIFY_LINK_DESKTOP_REGEX,
-  SPOTIFY_LINK_MOBILE_REGEX,
-} from '~/config/constants';
-
-import HttpClient from '~/utils/http-client';
-import { logger } from '~/utils/logger';
 import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
+import { fetchSpotifyMetadata } from '~/utils/spotify';
 
 export enum SpotifyMetadataType {
   Song = 'music.song',
@@ -28,22 +22,7 @@ export const parseSpotifyMetadata = async (
   spotifyLink: string
 ): Promise<{ metadata: SpotifyMetadata; url: string }> => {
   try {
-    let url = spotifyLink;
-    let html = await HttpClient.get(url, true);
-    logger.info(`Parsing Spotify metadata: ${url}`);
-
-    if (SPOTIFY_LINK_MOBILE_REGEX.test(spotifyLink)) {
-      url = html.match(SPOTIFY_LINK_DESKTOP_REGEX)?.[0];
-
-      if (!url) {
-        throw new Error(`Could not parse Spotify metadata. Desktop link not found.`);
-      }
-
-      // wait a random amount of time to avoid rate limiting
-      await new Promise(res => setTimeout(res, Math.random() * 500));
-
-      html = await HttpClient.get(url, true);
-    }
+    const { html, url } = await fetchSpotifyMetadata(spotifyLink);
 
     const doc = getCheerioDoc(html);
 
