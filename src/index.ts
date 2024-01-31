@@ -10,7 +10,12 @@ import { pageRouter } from './routes/page';
 export const app = new Elysia()
   .use(html())
   .use(
-    staticPlugin({ prefix: '', headers: { 'Cache-Control': 'public, max-age=86400' } })
+    staticPlugin({
+      prefix: '',
+      headers: {
+        'Cache-Control': 'public, max-age=86400',
+      },
+    })
   )
   .on('beforeHandle', async ({ request }) => {
     logger.info(

@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@elysiajs/html": "^0.7.3",
-    "@elysiajs/static": "^0.7.1",
+    "@elysiajs/static": "^0.8.1",
     "axios": "^1.5.1",
     "axios-retry": "^3.9.1",
     "cheerio": "^1.0.0-rc.12",
