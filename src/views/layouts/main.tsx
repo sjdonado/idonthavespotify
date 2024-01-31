@@ -39,7 +39,7 @@ export default function MainLayout(props: { children: JSX.Element }) {
         <link href="/assets/css/index.min.css" rel="stylesheet" />
       </head>
 
-      <body className="font-extralight">{props.children}</body>
+      <body class="bg-black font-light text-white">{props.children}</body>
 
       <script
         defer

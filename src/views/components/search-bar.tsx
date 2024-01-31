@@ -10,7 +10,7 @@ export default function SearchBar() {
         hx-swap="innerHTML"
         hx-indicator="#loading-indicator"
         hx-request='\"timeout\":12000'
-        class="flex justify-center items-center w-full max-w-3xl"
+        class="flex w-full max-w-3xl items-center justify-center"
       >
         <label for="song-link" class="sr-only">
           Search
@@ -19,19 +19,21 @@ export default function SearchBar() {
           type="text"
           id="song-link"
           name="spotifyLink"
-          class="flex-1 bg-white text-black border placeholder-gray-400 rounded-lg p-2.5 font-normal"
+          class="flex-1 rounded-lg border bg-white p-2.5 font-normal text-black placeholder:text-gray-400"
           placeholder="https://open.spotify.com/track/7A8MwSsu9efJXP6xvZfRN3?si=d4f1e2eb324c43df"
           pattern={SPOTIFY_LINK_REGEX.source}
         />
         <button
           type="submit"
-          class="p-2.5 ml-2 text-sm font-medium bg-green-500 text-white border border-green-500 rounded-lg focus:ring-1 focus:outline-none focus:ring-white"
+          class="ml-2 rounded-lg border border-green-500 bg-green-500 p-2.5 text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-white"
         >
           <i class="fas fa-search p-1 text-black" />
           <span class="sr-only">Search</span>
         </button>
       </form>
-      <div id="search-results"></div>
+      <div class="my-4">
+        <div id="search-results"></div>
+      </div>
       <script src="/assets/js/search-bar.min.js" defer></script>
     </>
   );

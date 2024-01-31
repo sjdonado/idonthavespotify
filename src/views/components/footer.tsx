@@ -1,6 +1,6 @@
 export default function Footer(props: { searchCount?: number }) {
   return (
-    <footer class="text-center mt-2 text-[0.7rem] md:text-sm">
+    <footer class="mt-2 text-center text-[0.7rem] md:text-sm">
       {props.searchCount && (
         <p>
           {'Queries performed: '}
@@ -9,7 +9,7 @@ export default function Footer(props: { searchCount?: number }) {
           </span>
         </p>
       )}
-      <p class="flex flex-wrap justify-center items-center m-auto text-[0.7rem] md:text-sm font-normal">
+      <p class="m-auto flex flex-wrap items-center justify-center text-[0.7rem] font-normal md:text-sm">
         <a
           href="https://uptime.donado.co/status/apps"
           class="text-green-500 hover:underline"
@@ -19,7 +19,7 @@ export default function Footer(props: { searchCount?: number }) {
           <i class="fas fa-server mr-1" />
           Status
         </a>
-        <span class="text-gray-500 mx-2">|</span>
+        <span class="mx-2 text-gray-500">|</span>
         <a
           href="https://raycast.com/sjdonado/idonthavespotify"
           class="flex justify-center text-green-500 hover:underline"
@@ -30,7 +30,7 @@ export default function Footer(props: { searchCount?: number }) {
             viewBox="0 0 16 16"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            class="w-4 mr-1"
+            class="mr-1 w-4"
           >
             <path
               fill-rule="evenodd"
@@ -41,7 +41,7 @@ export default function Footer(props: { searchCount?: number }) {
           </svg>
           <span>View on Raycast</span>
         </a>
-        <span class="text-gray-500 mx-2">|</span>
+        <span class="mx-2 text-gray-500">|</span>
         <a
           href="https://github.com/sjdonado/idonthavespotify"
           class="text-green-500 hover:underline"
