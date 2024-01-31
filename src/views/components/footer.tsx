@@ -4,12 +4,12 @@ export default function Footer(props: { searchCount?: number }) {
       {props.searchCount && (
         <p>
           {'Queries performed: '}
-          <span class="font-bold" data-testid="search-count">
+          <span class="font-normal" data-testid="search-count">
             {props.searchCount}
           </span>
         </p>
       )}
-      <p class="flex flex-wrap justify-center items-center m-auto text-[0.7rem] md:text-sm">
+      <p class="flex flex-wrap justify-center items-center m-auto text-[0.7rem] md:text-sm font-normal">
         <a
           href="https://uptime.donado.co/status/apps"
           class="text-green-500 hover:underline"

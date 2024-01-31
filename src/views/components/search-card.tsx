@@ -16,7 +16,7 @@ export default function SearchCard(props: { spotifyContent: SpotifyContent }) {
         audio={props.spotifyContent.audio}
       />
       <div class="flex-1 flex-col items-start p-2 mb-2 md:mr-6">
-        <div class="font-bold text-xl hyphens-auto mb-2">
+        <div class="font-normal text-2xl hyphens-auto mb-2">
           {props.spotifyContent.title}
         </div>
         <p class="text-sm h-5 max-h-10 overflow-clip">

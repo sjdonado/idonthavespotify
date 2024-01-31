@@ -35,10 +35,11 @@ export default function MainLayout(props: { children: JSX.Element }) {
         <script src="https://unpkg.com/htmx.org@1.9.10"></script>
         <meta name="htmx-config" content='{"defaultSwapStyle":"outerHTML"}' />
 
+        <link href="https://fonts.cdnfonts.com/css/montserrat" rel="stylesheet" />
         <link href="/assets/css/index.min.css" rel="stylesheet" />
       </head>
 
-      <body>{props.children}</body>
+      <body className="font-extralight">{props.children}</body>
 
       <script
         defer
