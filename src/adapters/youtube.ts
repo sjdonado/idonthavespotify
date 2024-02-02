@@ -3,12 +3,11 @@ import * as config from '~/config/default';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { responseMatchesQuery } from '~/utils/compare';
-import { getQueryFromMetadata } from '~/utils/query';
 
 import { SpotifyMetadata, SpotifyMetadataType } from '~/parsers/spotify';
 import { SpotifyContentLink, SpotifyContentLinkType } from '~/services/search';
 
-interface YoutubeSearchListResponse {
+type YoutubeSearchListResponse = {
   items: [
     {
       id: {
@@ -21,36 +20,35 @@ interface YoutubeSearchListResponse {
       };
     },
   ];
-}
+};
 
-export async function getYouTubeLink(
-  metadata: SpotifyMetadata
-): Promise<SpotifyContentLink | undefined> {
-  let query = getQueryFromMetadata(metadata.title, metadata.description, metadata.type);
+const YOUTUBE_SEARCH_TYPES = {
+  [SpotifyMetadataType.Song]: 'video',
+  [SpotifyMetadataType.Album]: 'playlist',
+  [SpotifyMetadataType.Playlist]: 'playlist',
+  [SpotifyMetadataType.Artist]: 'channel',
+  [SpotifyMetadataType.Podcast]: 'video',
+  [SpotifyMetadataType.Show]: 'channel',
+};
 
-  const searchTypes = {
-    [SpotifyMetadataType.Song]: 'video',
-    [SpotifyMetadataType.Album]: 'playlist',
-    [SpotifyMetadataType.Playlist]: 'playlist',
-    [SpotifyMetadataType.Artist]: 'channel',
-    [SpotifyMetadataType.Podcast]: 'video',
-    [SpotifyMetadataType.Show]: 'channel',
-  };
+export async function getYouTubeLink(query: string, metadata: SpotifyMetadata) {
+  const params = new URLSearchParams({
+    part: 'snippet',
+    maxResults: '1',
+    q: metadata.type === SpotifyMetadataType.Artist ? `${query}%20official` : query,
+    type: YOUTUBE_SEARCH_TYPES[metadata.type],
+    key: config.services.youTube.apiKey as string,
+  });
 
-  if (metadata.type === SpotifyMetadataType.Artist) {
-    query = `${query}%20official`;
-  }
-
-  const url = `${config.services.youTube.apiSearchUrl}${query}&type=${
-    searchTypes[metadata.type]
-  }&key=${config.services.youTube.apiKey}`;
+  const url = new URL(`${config.services.youTube.apiUrl}/search`);
+  url.search = params.toString();
 
   try {
-    const response = (await HttpClient.get(url)) as YoutubeSearchListResponse;
+    const response = await HttpClient.get<YoutubeSearchListResponse>(url.toString());
 
     if (!response.items?.length) {
       logger.error('[YouTube] No results found', url);
-      return undefined;
+      return;
     }
 
     const [
@@ -70,18 +68,15 @@ export async function getYouTubeLink(
     };
 
     if (!responseMatchesQuery(snippet.title, query)) {
-      return undefined;
+      return;
     }
-
-    const link = youtubeLinkByType[metadata.type];
 
     return {
       type: SpotifyContentLinkType.YouTube,
-      url: link,
+      url: youtubeLinkByType[metadata.type],
       isVerified: true,
-    };
+    } as SpotifyContentLink;
   } catch (error) {
     logger.error(`[YouTube] (${url}) ${error}`);
-    return undefined;
   }
 }

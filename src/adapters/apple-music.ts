@@ -4,22 +4,22 @@ import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { getCheerioDoc } from '~/utils/scraper';
 import { responseMatchesQuery } from '~/utils/compare';
-import { getQueryFromMetadata } from '~/utils/query';
 
 import { SpotifyMetadata, SpotifyMetadataType } from '~/parsers/spotify';
 import { SpotifyContentLink, SpotifyContentLinkType } from '~/services/search';
 
 export const APPLE_MUSIC_LINK_SELECTOR = 'a[href^="https://music.apple.com/"]';
 
-export async function getAppleMusicLink(
-  metadata: SpotifyMetadata
-): Promise<SpotifyContentLink | undefined> {
-  const query = getQueryFromMetadata(metadata.title, metadata.description, metadata.type);
+export async function getAppleMusicLink(query: string, metadata: SpotifyMetadata) {
+  const params = new URLSearchParams({
+    term: query,
+  });
 
-  const url = `${config.services.appleMusic.baseUrl}${query}`;
+  const url = new URL(config.services.appleMusic.baseUrl);
+  url.search = params.toString();
 
   try {
-    const html = await HttpClient.get(url);
+    const html = await HttpClient.get<string>(url.toString());
     const doc = getCheerioDoc(html);
 
     const appleMusicDataByType = {
@@ -28,7 +28,6 @@ export async function getAppleMusicLink(
           .first()
           .attr('href'),
         title: doc(`div[aria-label="Songs"] ${APPLE_MUSIC_LINK_SELECTOR}`).first().text(),
-        isVerified: true,
       },
       [SpotifyMetadataType.Album]: {
         href: doc(`div[aria-label="Albums"] ${APPLE_MUSIC_LINK_SELECTOR}`)
@@ -37,7 +36,6 @@ export async function getAppleMusicLink(
         title: doc(`div[aria-label="Albums"] ${APPLE_MUSIC_LINK_SELECTOR}`)
           .first()
           .text(),
-        isVerified: true,
       },
       [SpotifyMetadataType.Playlist]: {
         href: doc(`div[aria-label="Playlists"] ${APPLE_MUSIC_LINK_SELECTOR}`)
@@ -46,7 +44,6 @@ export async function getAppleMusicLink(
         title: doc(`div[aria-label="Playlists"] ${APPLE_MUSIC_LINK_SELECTOR}`)
           .first()
           .text(),
-        isVerified: true,
       },
       [SpotifyMetadataType.Artist]: {
         href: doc(`div[aria-label="Artists"] ${APPLE_MUSIC_LINK_SELECTOR}`)
@@ -55,26 +52,25 @@ export async function getAppleMusicLink(
         title: doc(`div[aria-label="Artists"] ${APPLE_MUSIC_LINK_SELECTOR}`)
           .first()
           .text(),
-        isVerified: true,
       },
       [SpotifyMetadataType.Podcast]: undefined,
       [SpotifyMetadataType.Show]: undefined,
     };
 
-    const { title, href, isVerified } = appleMusicDataByType[metadata.type] ?? {};
+    const { title, href } = appleMusicDataByType[metadata.type] ?? {};
 
     if (!responseMatchesQuery(title ?? '', query)) {
-      return undefined;
+      return;
     }
 
     return {
       type: SpotifyContentLinkType.AppleMusic,
       url: href ?? url,
-      isVerified,
-    };
+      isVerified: Boolean(href),
+    } as SpotifyContentLink;
   } catch (err) {
     logger.error(`[Apple Music] (${url}) ${err}`);
 
-    return undefined;
+    return;
   }
 }
