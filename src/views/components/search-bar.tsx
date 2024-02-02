@@ -19,7 +19,7 @@ export default function SearchBar() {
           type="text"
           id="song-link"
           name="spotifyLink"
-          class="flex-1 rounded-lg border bg-white p-2.5 font-normal text-black placeholder:text-gray-400"
+          class="flex-1 rounded-lg border bg-white p-2.5 text-sm font-normal text-black placeholder:text-gray-400 lg:text-base"
           placeholder="https://open.spotify.com/track/7A8MwSsu9efJXP6xvZfRN3?si=d4f1e2eb324c43df"
           pattern={SPOTIFY_LINK_REGEX.source}
         />
