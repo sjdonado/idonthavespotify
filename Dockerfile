@@ -15,11 +15,11 @@ COPY src src
 COPY www www
 
 COPY tsconfig.json .
-COPY build.ts .
 COPY tailwind.config.js .
+COPY postcss.config.js .
+COPY vite.config.js .
 
-RUN bun run build:js
-RUN bun run build:css
+RUN bun run build
 
 COPY public public
 

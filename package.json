@@ -1,11 +1,10 @@
 {
   "name": "idonthavespotify",
-  "version": "1.0.50",
+  "version": "0.0.8",
   "scripts": {
-    "dev": "bun run build:js && bun run build:css && bun run --watch www/bin.ts",
-    "test": "REDIS_URL=redis://null:6379 bun test --coverage",
-    "build:js": "bun run build.ts",
-    "build:css": "tailwindcss --minify -i ./src/views/css/index.css -o ./public/assets/css/index.min.css"
+    "dev": "concurrently \"vite build --watch\" \"bun run --watch www/bin.ts\"",
+    "build": "vite build",
+    "test": "REDIS_URL=redis://null:6379 bun test --coverage"
   },
   "dependencies": {
     "@elysiajs/html": "^0.7.3",
@@ -13,7 +12,7 @@
     "axios": "^1.5.1",
     "axios-retry": "^3.9.1",
     "cheerio": "^1.0.0-rc.12",
-    "elysia": "latest",
+    "elysia": "^0.7.0",
     "ioredis": "^5.3.2",
     "pino": "^8.16.0",
     "pino-pretty": "^10.2.3",
@@ -23,8 +22,10 @@
   "devDependencies": {
     "@types/string-similarity": "^4.0.0",
     "@typescript-eslint/eslint-plugin": "^6.7.4",
+    "autoprefixer": "^10.4.17",
     "axios-mock-adapter": "^1.22.0",
     "bun-types": "latest",
+    "concurrently": "^8.2.2",
     "eslint": "^8.50.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-import": "^2.28.1",
@@ -32,9 +33,12 @@
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-tailwindcss": "^3.14.1",
     "ioredis-mock": "^8.9.0",
+    "postcss": "^8.4.33",
     "prettier": "^3.0.3",
+    "rollup-plugin-copy": "^3.5.0",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "vite": "^5.0.12"
   },
   "module": "www/bin.js"
 }
