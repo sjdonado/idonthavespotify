@@ -53,7 +53,7 @@ export async function fetchSpotifyMetadata(spotifyLink: string, retries = 3) {
         url = html.match(SPOTIFY_LINK_DESKTOP_REGEX)?.[0];
 
         if (!url) {
-          throw new Error('Spotify link is not valid');
+          throw new Error('Invalid mobile spotify link');
         }
 
         // wait a random amount of time to avoid rate limiting
