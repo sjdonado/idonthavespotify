@@ -34,7 +34,6 @@ export default function SearchBar() {
       <div class="my-4">
         <div id="search-results"></div>
       </div>
-      <script src="/assets/js/search-bar.min.js" defer></script>
     </>
   );
 }

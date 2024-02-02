@@ -857,7 +857,7 @@ describe('Api router', () => {
       expect(response).toEqual({
         code: 'UNKNOWN',
         message:
-          '[Spotify Parser] (https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384) Error: Could not parse Spotify metadata.',
+          '[parseSpotifyMetadata] (https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384) Error: Spotify metadata not found',
       });
     });
 

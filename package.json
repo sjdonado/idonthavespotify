@@ -2,7 +2,8 @@
   "name": "idonthavespotify",
   "version": "0.0.8",
   "scripts": {
-    "dev": "concurrently \"vite build --watch\" \"bun run --watch www/bin.ts\"",
+    "dev": "concurrently \"bun run build:dev\" \"bun run --watch www/bin.ts\"",
+    "build:dev": "vite build --mode=development --watch",
     "build": "vite build",
     "test": "REDIS_URL=redis://null:6379 bun test --coverage"
   },
