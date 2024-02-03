@@ -6,9 +6,9 @@ export const services = {
     clientVersion: Bun.env.SPOTIFY_CLIENT_VERSION!,
   },
   youTube: {
-    apiKey: Bun.env.YOUTUBE_API_KEY,
-    apiSearchUrl: Bun.env.YOUTUBE_API_SEARCH_URL!,
+    apiUrl: Bun.env.YOUTUBE_API_URL!,
     baseUrl: Bun.env.YOUTUBE_BASE_URL!,
+    apiKey: Bun.env.YOUTUBE_API_KEY,
   },
   deezer: {
     apiUrl: Bun.env.DEEZER_API_URL!,
@@ -17,7 +17,12 @@ export const services = {
     baseUrl: Bun.env.APPLE_MUSIC_BASE_URL!,
   },
   tidal: {
+    authUrl: Bun.env.TIDAL_AUTH_URL!,
+    apiUrl: Bun.env.TIDAL_API_URL!,
     baseUrl: Bun.env.TIDAL_BASE_URL!,
+    clientId: Bun.env.TIDAL_CLIENT_ID!,
+    clientSecret: Bun.env.TIDAL_CLIENT_SECRET!,
+    countryCode: Bun.env.TIDAL_COUNTRY_CODE!,
   },
   soundCloud: {
     baseUrl: Bun.env.SOUNDCLOUD_BASE_URL!,

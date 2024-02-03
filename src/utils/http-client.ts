@@ -1,5 +1,5 @@
 import axios from 'axios';
-// import randUserAgent from 'rand-user-agent';
+import randUserAgent from 'rand-user-agent';
 
 type HttpClientOptions = {
   payload?: unknown;
@@ -12,7 +12,7 @@ const DEFAULT_TIMEOUT = 6000;
 export default class HttpClient {
   static defaultHeaders = {
     'Accept-Encoding': 'gzip',
-    // 'User-Agent': randUserAgent('desktop', 'chrome'),
+    'User-Agent': randUserAgent('desktop', 'chrome'),
   };
 
   static async get<T>(url: string, options?: HttpClientOptions) {
