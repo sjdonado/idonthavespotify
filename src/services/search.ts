@@ -1,6 +1,7 @@
 import { SPOTIFY_LINK_REGEX } from '~/config/constants';
 
 import { logger } from '~/utils/logger';
+import { getQueryFromMetadata } from '~/utils/query';
 
 import { SpotifyMetadataType, parseSpotifyMetadata } from '~/parsers/spotify';
 
@@ -12,6 +13,7 @@ import { getYouTubeLink } from '~/adapters/youtube';
 import { getDeezerLink } from '~/adapters/deezer';
 import { getSoundCloudLink } from '~/adapters/soundcloud';
 import { getTidalLink } from '~/adapters/tidal';
+
 export enum SpotifyContentLinkType {
   YouTube = 'youTube',
   AppleMusic = 'appleMusic',
@@ -43,37 +45,44 @@ export const spotifySearch = async (spotifyLink: string): Promise<SpotifyContent
   const cache = await getSpotifySearchFromCache(id);
   if (cache) {
     await incrementSearchCount();
-    logger.info(`loaded from cache: ${spotifyLink}`);
+    logger.info(`[${spotifySearch.name}] loaded from cache: ${spotifyLink}`);
+
     return cache;
   }
-  logger.info(`cache miss: ${spotifyLink}`);
+
+  logger.info(`[${spotifySearch.name}] cache miss: ${spotifyLink}`);
 
   const { metadata, url } = await parseSpotifyMetadata(spotifyLink);
 
-  logger.info(`Fetching links: ${url}`);
-  const [appleMusicLink, youtubeLink, deezerLink] = await Promise.all([
-    getAppleMusicLink(metadata),
-    getYouTubeLink(metadata),
-    getDeezerLink(metadata),
+  const query = getQueryFromMetadata(metadata.title, metadata.description, metadata.type);
+
+  logger.info(`[${spotifySearch.name}] url: ${url}, query: ${query}`);
+
+  const [appleMusicLink, youtubeLink, deezerLink, tidalLink] = await Promise.all([
+    getAppleMusicLink(query, metadata),
+    getYouTubeLink(query, metadata),
+    getDeezerLink(query, metadata),
+    getTidalLink(query, metadata),
   ]);
 
   logger.info(
-    `Search results:
-      appleMusic: ${appleMusicLink !== undefined},
-      youtube: ${youtubeLink !== undefined},
-      deezer: ${deezerLink! !== undefined}`
+    `[${spotifySearch.name}] results: ${JSON.stringify({
+      appleMusicLink,
+      youtubeLink,
+      deezerLink,
+      tidalLink,
+    })}`
   );
 
-  const soundcloudLink = getSoundCloudLink(metadata);
-  const tidalLink = getTidalLink(metadata);
+  const soundcloudLink = getSoundCloudLink(query);
 
-  const links = [appleMusicLink, youtubeLink, deezerLink].filter(
-    Boolean
-  ) as SpotifyContentLink[];
+  const links = [appleMusicLink, youtubeLink, deezerLink, tidalLink].filter(
+    link => link && link.isVerified
+  );
 
   // if at least one verified link is found, add to the rest
   if (links.length > 0) {
-    links.push(soundcloudLink, tidalLink);
+    links.push(soundcloudLink);
   }
 
   const spotifyContent: SpotifyContent = {
@@ -84,7 +93,7 @@ export const spotifySearch = async (spotifyLink: string): Promise<SpotifyContent
     image: metadata.image,
     audio: metadata.audio,
     source: url,
-    links,
+    links: links as SpotifyContentLink[],
   };
 
   await Promise.all([incrementSearchCount(), cacheSpotifySearch(spotifyContent)]);
