@@ -15,7 +15,7 @@ export async function getAppleMusicLink(query: string, metadata: SpotifyMetadata
     term: query,
   });
 
-  const url = new URL(config.services.appleMusic.baseUrl);
+  const url = new URL(`${config.services.appleMusic.apiUrl}/search`);
   url.search = params.toString();
 
   try {

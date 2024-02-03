@@ -14,7 +14,7 @@ export const services = {
     apiUrl: Bun.env.DEEZER_API_URL!,
   },
   appleMusic: {
-    baseUrl: Bun.env.APPLE_MUSIC_BASE_URL!,
+    apiUrl: Bun.env.APPLE_MUSIC_API_URL!,
   },
   tidal: {
     authUrl: Bun.env.TIDAL_AUTH_URL!,
