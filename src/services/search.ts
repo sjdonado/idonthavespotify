@@ -76,9 +76,7 @@ export const spotifySearch = async (spotifyLink: string): Promise<SpotifyContent
 
   const soundcloudLink = getSoundCloudLink(query);
 
-  const links = [appleMusicLink, youtubeLink, deezerLink, tidalLink].filter(
-    link => link && link.isVerified
-  );
+  const links = [appleMusicLink, youtubeLink, deezerLink, tidalLink].filter(Boolean);
 
   // if at least one verified link is found, add to the rest
   if (links.length > 0) {

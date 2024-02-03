@@ -1,4 +1,5 @@
 import * as config from '~/config/default';
+import { ADAPTERS_QUERY_LIMIT } from '~/config/constants';
 
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
@@ -19,22 +20,27 @@ interface DeezerSearchResponse {
 }
 
 const DEEZER_SEARCH_TYPES = {
-  [SpotifyMetadataType.Song]: '/track',
-  [SpotifyMetadataType.Album]: '/album',
-  [SpotifyMetadataType.Playlist]: '/playlist',
-  [SpotifyMetadataType.Artist]: '/artist',
-  [SpotifyMetadataType.Show]: '/podcast',
-  [SpotifyMetadataType.Podcast]: '',
+  [SpotifyMetadataType.Song]: 'track',
+  [SpotifyMetadataType.Album]: 'album',
+  [SpotifyMetadataType.Playlist]: 'playlist',
+  [SpotifyMetadataType.Artist]: 'artist',
+  [SpotifyMetadataType.Show]: 'podcast',
+  [SpotifyMetadataType.Podcast]: undefined,
 };
 
 export async function getDeezerLink(query: string, metadata: SpotifyMetadata) {
+  const type = DEEZER_SEARCH_TYPES[metadata.type];
+
+  if (!type) {
+    return;
+  }
+
   const params = new URLSearchParams({
     q: query,
-    type: DEEZER_SEARCH_TYPES[metadata.type],
-    limit: '1',
+    limit: String(ADAPTERS_QUERY_LIMIT),
   });
 
-  const url = new URL(config.services.deezer.apiUrl);
+  const url = new URL(`${config.services.deezer.apiUrl}/${type}`);
   url.search = params.toString();
 
   try {

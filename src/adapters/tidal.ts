@@ -1,4 +1,5 @@
 import * as config from '~/config/default';
+import { ADAPTERS_QUERY_LIMIT } from '~/config/constants';
 
 import HttpClient from '~/utils/http-client';
 
@@ -32,20 +33,26 @@ type TidalSearchResponse = {
 const TIDAL_SEARCH_TYPES = {
   [SpotifyMetadataType.Song]: 'TRACKS',
   [SpotifyMetadataType.Album]: 'ALBUMS',
-  [SpotifyMetadataType.Playlist]: 'ALBUMS',
+  [SpotifyMetadataType.Playlist]: undefined,
   [SpotifyMetadataType.Artist]: 'ARTISTS',
-  [SpotifyMetadataType.Podcast]: 'TRACKS',
-  [SpotifyMetadataType.Show]: 'ARTISTS',
+  [SpotifyMetadataType.Podcast]: undefined,
+  [SpotifyMetadataType.Show]: undefined,
 };
 
 export async function getTidalLink(query: string, metadata: SpotifyMetadata) {
+  const type = TIDAL_SEARCH_TYPES[metadata.type];
+
+  if (!type) {
+    return;
+  }
+
   const authToken = await getAuthToken();
 
   const params = new URLSearchParams({
     query,
-    type: TIDAL_SEARCH_TYPES[metadata.type],
+    type,
     countryCode: config.services.tidal.countryCode,
-    limit: '1',
+    limit: String(ADAPTERS_QUERY_LIMIT),
   });
 
   const url = new URL(`${config.services.tidal.apiUrl}/search`);
@@ -63,16 +70,19 @@ export async function getTidalLink(query: string, metadata: SpotifyMetadata) {
   const trackId = response.tracks?.[0]?.resource?.id;
   const artistId = response.artists?.[0]?.resource?.id;
 
-  const tidalLinkPath = {
-    [SpotifyMetadataType.Song]: trackAlbumId
-      ? `album/${trackAlbumId}/track/${trackId}`
-      : undefined,
-    [SpotifyMetadataType.Album]: albumId ? `album/${albumId}` : undefined,
-    [SpotifyMetadataType.Playlist]: albumId ? `album/${albumId}` : undefined,
-    [SpotifyMetadataType.Artist]: artistId ? `artist/${artistId}` : undefined,
-    [SpotifyMetadataType.Podcast]: undefined,
-    [SpotifyMetadataType.Show]: undefined,
-  }[metadata.type];
+  let tidalLinkPath;
+
+  if (type === SpotifyMetadataType.Song && trackAlbumId) {
+    tidalLinkPath = `album/${trackAlbumId}/track/${trackId}`;
+  }
+
+  if (type === SpotifyMetadataType.Album && albumId) {
+    tidalLinkPath = `album/${albumId}`;
+  }
+
+  if (type === SpotifyMetadataType.Artist && artistId) {
+    tidalLinkPath = `artist/${artistId}`;
+  }
 
   if (!tidalLinkPath) {
     return;

@@ -1,4 +1,5 @@
 import * as config from '~/config/default';
+import { ADAPTERS_QUERY_LIMIT } from '~/config/constants';
 
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
@@ -34,7 +35,7 @@ const YOUTUBE_SEARCH_TYPES = {
 export async function getYouTubeLink(query: string, metadata: SpotifyMetadata) {
   const params = new URLSearchParams({
     part: 'snippet',
-    maxResults: '1',
+    maxResults: String(ADAPTERS_QUERY_LIMIT),
     q: metadata.type === SpotifyMetadataType.Artist ? `${query}%20official` : query,
     type: YOUTUBE_SEARCH_TYPES[metadata.type],
     key: config.services.youTube.apiKey as string,
