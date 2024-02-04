@@ -18,9 +18,7 @@ export type SpotifyMetadata = {
   audio?: string;
 };
 
-export const parseSpotifyMetadata = async (
-  spotifyLink: string
-): Promise<{ metadata: SpotifyMetadata; url: string }> => {
+export const parseSpotifyMetadata = async (spotifyLink: string) => {
   try {
     const { html, url } = await fetchSpotifyMetadata(spotifyLink);
 
@@ -48,7 +46,7 @@ export const parseSpotifyMetadata = async (
         audio,
       },
       url,
-    };
+    } as { metadata: SpotifyMetadata; url: string };
   } catch (err) {
     throw new Error(`[${parseSpotifyMetadata.name}] (${spotifyLink}) ${err}`);
   }

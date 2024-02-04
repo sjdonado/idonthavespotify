@@ -1,7 +1,13 @@
 import axios from 'axios';
 import randUserAgent from 'rand-user-agent';
 
-import * as config from '~/config/default';
+type HttpClientOptions = {
+  payload?: unknown;
+  headers?: Record<string, string>;
+  timeout?: number;
+};
+
+const DEFAULT_TIMEOUT = 6000;
 
 export default class HttpClient {
   static defaultHeaders = {
@@ -9,23 +15,33 @@ export default class HttpClient {
     'User-Agent': randUserAgent('desktop', 'chrome'),
   };
 
-  static async get(url: string, auth: boolean = false) {
+  static async get<T>(url: string, options?: HttpClientOptions) {
+    return HttpClient.request<T>('GET', url, options);
+  }
+
+  static async post<T>(url: string, payload: unknown, options: HttpClientOptions = {}) {
+    return HttpClient.request<T>('POST', url, { ...options, payload });
+  }
+
+  private static async request<T>(
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+    url: string,
+    options?: HttpClientOptions
+  ) {
     const headers = {
       ...HttpClient.defaultHeaders,
-      ...(auth
-        ? {
-            'User-Agent': `${config.services.spotify.clientVersion} (Macintosh; Apple Silicon)`,
-            // Authorization: `Bearer ${await getOrUpdateSpotifyAccessToken()}`,
-          }
-        : {}),
+      ...(options?.headers ?? {}),
     };
 
-    const { data } = await axios.get(url, {
+    const { data } = await axios.request({
+      url,
+      method,
+      data: options?.payload,
       headers,
-      timeout: 6000,
-      signal: AbortSignal.timeout(2000),
+      timeout: options?.timeout ?? DEFAULT_TIMEOUT,
+      signal: AbortSignal.timeout(options?.timeout ?? DEFAULT_TIMEOUT),
     });
 
-    return data;
+    return data as T;
   }
 }
