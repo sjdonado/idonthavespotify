@@ -9,14 +9,14 @@
 ## Web
 
 <div align="center">
-  <img alt="Website screenshot" src="https://user-images.githubusercontent.com/27580836/232951519-e536c69d-0207-4c40-806c-5772f62f1377.png">
+  <img width="1840" alt="Website screenshot" src="https://github.com/sjdonado/idonthavespotify/assets/27580836/4a243d5e-0ab6-4174-9c79-baf5f2cff98a">
 </div>
 
 ## Raycast Extension
 
 <a href="https://raycast.com/sjdonado/idonthavespotify" target="_blank">
   <div align="center">
-    <img alt="Raycast Extension screenshot" src="https://user-images.githubusercontent.com/27580836/230833330-9759063b-04d4-4559-b3b2-859e4a13f947.png">
+    <img width="862" alt="Raycast Extension screenshot" src="https://github.com/sjdonado/idonthavespotify/assets/27580836/0edcb1da-f3f4-4a0b-be2f-e767dbbb62b5">
   </div>
 </a>
 
