@@ -1,16 +1,33 @@
+import { compareTwoStrings } from 'string-similarity';
+
 import * as config from '~/config/default';
+import { RESPONSE_COMPARE_MIN_SCORE } from '~/config/constants';
 
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { getCheerioDoc } from '~/utils/scraper';
-import { responseMatchesQuery } from '~/utils/compare';
 
 import { SpotifyMetadata, SpotifyMetadataType } from '~/parsers/spotify';
 import { SpotifyContentLink, SpotifyContentLinkType } from '~/services/search';
 
 export const APPLE_MUSIC_LINK_SELECTOR = 'a[href^="https://music.apple.com/"]';
 
+const APPLE_MUSIC_SEARCH_TYPES = {
+  [SpotifyMetadataType.Song]: 'Songs',
+  [SpotifyMetadataType.Album]: 'Albums',
+  [SpotifyMetadataType.Playlist]: 'Playlists',
+  [SpotifyMetadataType.Artist]: 'Artists',
+  [SpotifyMetadataType.Podcast]: undefined,
+  [SpotifyMetadataType.Show]: undefined,
+};
+
 export async function getAppleMusicLink(query: string, metadata: SpotifyMetadata) {
+  const searchType = APPLE_MUSIC_SEARCH_TYPES[metadata.type];
+
+  if (!searchType) {
+    return;
+  }
+
   // apple music does not support x-www-form-urlencoded encoding
   const params = `term=${encodeURIComponent(query)}`;
 
@@ -20,55 +37,36 @@ export async function getAppleMusicLink(query: string, metadata: SpotifyMetadata
     const html = await HttpClient.get<string>(url.toString());
     const doc = getCheerioDoc(html);
 
-    const appleMusicDataByType = {
-      [SpotifyMetadataType.Song]: {
-        href: doc(`div[aria-label="Songs"] ${APPLE_MUSIC_LINK_SELECTOR}`)
-          .first()
-          .attr('href'),
-        title: doc(`div[aria-label="Songs"] ${APPLE_MUSIC_LINK_SELECTOR}`).first().text(),
-      },
-      [SpotifyMetadataType.Album]: {
-        href: doc(`div[aria-label="Albums"] ${APPLE_MUSIC_LINK_SELECTOR}`)
-          .first()
-          .attr('href'),
-        title: doc(`div[aria-label="Albums"] ${APPLE_MUSIC_LINK_SELECTOR}`)
-          .first()
-          .text(),
-      },
-      [SpotifyMetadataType.Playlist]: {
-        href: doc(`div[aria-label="Playlists"] ${APPLE_MUSIC_LINK_SELECTOR}`)
-          .first()
-          .attr('href'),
-        title: doc(`div[aria-label="Playlists"] ${APPLE_MUSIC_LINK_SELECTOR}`)
-          .first()
-          .text(),
-      },
-      [SpotifyMetadataType.Artist]: {
-        href: doc(`div[aria-label="Artists"] ${APPLE_MUSIC_LINK_SELECTOR}`)
-          .first()
-          .attr('href'),
-        title: doc(`div[aria-label="Artists"] ${APPLE_MUSIC_LINK_SELECTOR}`)
-          .first()
-          .text(),
-      },
-      [SpotifyMetadataType.Podcast]: undefined,
-      [SpotifyMetadataType.Show]: undefined,
+    const listElements = doc(
+      `div[aria-label="${searchType}"] a[href^="https://music.apple.com/"]:lt(3)`
+    );
+
+    const bestScore = {
+      href: '',
+      score: 0,
     };
 
-    const { title, href } = appleMusicDataByType[metadata.type] ?? {};
+    listElements.each((i, element) => {
+      const title = doc(element).text().trim();
+      const href = doc(element).attr('href');
+      const score = compareTwoStrings(title.toLowerCase(), query.toLowerCase());
 
-    if (!title || !href) {
-      throw new Error('No results found');
+      if (href && score > bestScore.score) {
+        bestScore.href = href;
+        bestScore.score = score;
+      }
+    });
+
+    if (bestScore.score <= RESPONSE_COMPARE_MIN_SCORE) {
+      throw new Error(`No results found: ${JSON.stringify(bestScore)}`);
     }
-
-    const isVerified = responseMatchesQuery(title ?? '', query);
 
     return {
       type: SpotifyContentLinkType.AppleMusic,
-      url: isVerified ? href : url.toString(),
-      isVerified,
+      url: bestScore.href,
+      isVerified: true,
     } as SpotifyContentLink;
   } catch (err) {
-    logger.error(`[Apple Music] (${url}) ${err}`);
+    logger.error(`[Apple Music](${url}) ${err} `);
   }
 }
