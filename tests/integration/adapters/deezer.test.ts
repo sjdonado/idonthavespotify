@@ -13,8 +13,6 @@ import axios from 'axios';
 import Redis from 'ioredis';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
-import * as config from '~/config/default';
-
 import { app } from '~/index';
 
 import { JSONRequest } from '../../utils/request';
@@ -22,12 +20,10 @@ import {
   SEARCH_ENDPOINT,
   getAppleMusicSearchLink,
   getDeezerSearchLink,
-  getTidalSearchLink,
   getYoutubeSearchLink,
 } from '../../utils/shared';
 
 import youtubeSongResponseMock from '../../fixtures/youtube/youtubeSongResponseMock.json';
-import tidalAuthResponseMock from '../../fixtures/tidal/tidalAuthResponseMock.json';
 
 const spotifySongHeadResponseMock = await Bun.file(
   'tests/fixtures/spotify/spotifySongHeadResponseMock.html'
@@ -65,7 +61,6 @@ describe('Adapter - Deezer', () => {
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
     const youtubeSearchLink = getYoutubeSearchLink(query, 'video');
     const deezerSearchLink = getDeezerSearchLink(query, 'track');
-    const tidalSearchLink = getTidalSearchLink(query, 'TRACKS');
 
     const request = JSONRequest(SEARCH_ENDPOINT, { spotifyLink });
 
@@ -73,9 +68,6 @@ describe('Adapter - Deezer', () => {
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
     mock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
     mock.onGet(deezerSearchLink).reply(500);
-
-    mock.onPost(config.services.tidal.authUrl).reply(200, tidalAuthResponseMock);
-    mock.onGet(tidalSearchLink).reply(200, {});
 
     redisGetMock.mockResolvedValue(0);
     redisSetMock.mockResolvedValue('');
@@ -105,10 +97,14 @@ describe('Adapter - Deezer', () => {
           type: 'soundCloud',
           url: 'https://soundcloud.com/search/sounds?q=Do%20Not%20Disturb%20Drake',
         },
+        {
+          type: 'tidal',
+          url: 'https://listen.tidal.com/search?q=Do%20Not%20Disturb%20Drake',
+        },
       ],
     });
 
-    expect(redisGetMock).toHaveBeenCalledTimes(3);
-    expect(redisSetMock).toHaveBeenCalledTimes(3);
+    expect(redisGetMock).toHaveBeenCalledTimes(2);
+    expect(redisSetMock).toHaveBeenCalledTimes(2);
   });
 });

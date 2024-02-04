@@ -95,6 +95,10 @@ describe('GET /search - Playlist', () => {
           type: 'soundCloud',
           url: 'https://soundcloud.com/search/sounds?q=This%20Is%20Bad%20Bunny%20Playlist',
         },
+        {
+          type: 'tidal',
+          url: 'https://listen.tidal.com/search?q=This%20Is%20Bad%20Bunny%20Playlist',
+        },
       ],
     });
 

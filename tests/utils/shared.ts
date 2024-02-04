@@ -73,17 +73,3 @@ export const getDeezerSearchLink = (query: string, type: string) => {
 
   return url.toString();
 };
-
-export const getTidalSearchLink = (query: string, type: string) => {
-  const params = new URLSearchParams({
-    query,
-    type,
-    countryCode: config.services.tidal.countryCode,
-    limit: '1',
-  });
-
-  const url = new URL(`${config.services.tidal.apiUrl}/search`);
-  url.search = params.toString();
-
-  return url.toString();
-};

@@ -8,6 +8,7 @@ import {
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 
+// TODO: https://github.com/sjdonado/idonthavespotify/issues/6
 // import { cacheSpotifyAccessToken, getSpotifyAccessToken } from '~/services/cache';
 
 // const authOptions = {
@@ -22,6 +23,7 @@ import { logger } from '~/utils/logger';
 //   },
 // };
 
+// TODO: https://github.com/sjdonado/idonthavespotify/issues/6
 // export const getOrUpdateSpotifyAccessToken = async () => {
 //   const cache = await getSpotifyAccessToken();
 //   if (cache) {

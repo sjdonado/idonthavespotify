@@ -17,12 +17,7 @@ export const services = {
     apiUrl: Bun.env.APPLE_MUSIC_API_URL!,
   },
   tidal: {
-    authUrl: Bun.env.TIDAL_AUTH_URL!,
-    apiUrl: Bun.env.TIDAL_API_URL!,
     baseUrl: Bun.env.TIDAL_BASE_URL!,
-    clientId: Bun.env.TIDAL_CLIENT_ID!,
-    clientSecret: Bun.env.TIDAL_CLIENT_SECRET!,
-    countryCode: Bun.env.TIDAL_COUNTRY_CODE!,
   },
   soundCloud: {
     baseUrl: Bun.env.SOUNDCLOUD_BASE_URL!,

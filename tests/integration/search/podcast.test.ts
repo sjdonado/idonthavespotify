@@ -91,6 +91,10 @@ describe('GET /search - Podcast Episode', () => {
           type: 'soundCloud',
           url: 'https://soundcloud.com/search/sounds?q=The%20End%20of%20Twitter%20as%20We%20Know%20It%20Waveform%3A%20The%20MKBHD%20Podcast',
         },
+        {
+          type: 'tidal',
+          url: 'https://listen.tidal.com/search?q=The%20End%20of%20Twitter%20as%20We%20Know%20It%20Waveform%3A%20The%20MKBHD%20Podcast',
+        },
       ],
     });
 

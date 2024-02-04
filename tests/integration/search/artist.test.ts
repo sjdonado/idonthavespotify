@@ -13,8 +13,6 @@ import axios from 'axios';
 import Redis from 'ioredis';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
-import * as config from '~/config/default';
-
 import { app } from '~/index';
 
 import { JSONRequest } from '../../utils/request';
@@ -22,13 +20,11 @@ import {
   SEARCH_ENDPOINT,
   getAppleMusicSearchLink,
   getDeezerSearchLink,
-  getTidalSearchLink,
   getYoutubeSearchLink,
 } from '../../utils/shared';
 
 import youtubeArtistResponseMock from '../../fixtures/youtube/youtubeArtistResponseMock.json';
 import deezerArtistResponseMock from '../../fixtures/deezer/deezerArtistResponseMock.json';
-import tidalAuthResponseMock from '../../fixtures/tidal/tidalAuthResponseMock.json';
 
 const [spotifyArtistHeadResponseMock, appleMusicArtistResponseMock] = await Promise.all([
   Bun.file('tests/fixtures/spotify/spotifyArtistHeadResponseMock.html').text(),
@@ -63,7 +59,6 @@ describe('GET /search - Artist', () => {
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
     const youtubeSearchLink = getYoutubeSearchLink(`${query}%20official`, 'channel');
     const deezerSearchLink = getDeezerSearchLink(query, 'artist');
-    const tidalSearchLink = getTidalSearchLink(query, 'ARTISTS');
 
     const request = JSONRequest(SEARCH_ENDPOINT, { spotifyLink });
 
@@ -71,9 +66,6 @@ describe('GET /search - Artist', () => {
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicArtistResponseMock);
     mock.onGet(youtubeSearchLink).reply(200, youtubeArtistResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerArtistResponseMock);
-
-    mock.onPost(config.services.tidal.authUrl).reply(200, tidalAuthResponseMock);
-    mock.onGet(tidalSearchLink).reply(200, {});
 
     redisGetMock.mockResolvedValue(0);
     redisSetMock.mockResolvedValue('');
@@ -107,10 +99,14 @@ describe('GET /search - Artist', () => {
           type: 'soundCloud',
           url: 'https://soundcloud.com/search/sounds?q=J.%20Cole',
         },
+        {
+          type: 'tidal',
+          url: 'https://listen.tidal.com/search?q=J.%20Cole',
+        },
       ],
     });
 
-    expect(redisGetMock).toHaveBeenCalledTimes(3);
-    expect(redisSetMock).toHaveBeenCalledTimes(3);
+    expect(redisGetMock).toHaveBeenCalledTimes(2);
+    expect(redisSetMock).toHaveBeenCalledTimes(2);
   });
 });

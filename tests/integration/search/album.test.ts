@@ -13,8 +13,6 @@ import axios from 'axios';
 import Redis from 'ioredis';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
-import * as config from '~/config/default';
-
 import { app } from '~/index';
 
 import { JSONRequest } from '../../utils/request';
@@ -22,13 +20,11 @@ import {
   SEARCH_ENDPOINT,
   getAppleMusicSearchLink,
   getDeezerSearchLink,
-  getTidalSearchLink,
   getYoutubeSearchLink,
 } from '../../utils/shared';
 
 import youtubeAlbumResponseMock from '../../fixtures/youtube/youtubeAlbumResponseMock.json';
 import deezerAlbumResponseMock from '../../fixtures/deezer/deezerAlbumResponseMock.json';
-import tidalAuthResponseMock from '../../fixtures/tidal/tidalAuthResponseMock.json';
 
 const [spotifyAlbumHeadResponseMock, appleMusicAlbumResponseMock] = await Promise.all([
   Bun.file('tests/fixtures/spotify/spotifyAlbumHeadResponseMock.html').text(),
@@ -63,7 +59,6 @@ describe('GET /search - Album', () => {
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
     const youtubeSearchLink = getYoutubeSearchLink(query, 'playlist');
     const deezerSearchLink = getDeezerSearchLink(query, 'album');
-    const tidalSearchLink = getTidalSearchLink(query, 'ALBUMS');
 
     const request = JSONRequest(SEARCH_ENDPOINT, { spotifyLink });
 
@@ -71,9 +66,6 @@ describe('GET /search - Album', () => {
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicAlbumResponseMock);
     mock.onGet(youtubeSearchLink).reply(200, youtubeAlbumResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerAlbumResponseMock);
-
-    mock.onPost(config.services.tidal.authUrl).reply(200, tidalAuthResponseMock);
-    mock.onGet(tidalSearchLink).reply(200, {});
 
     redisGetMock.mockResolvedValue(0);
     redisSetMock.mockResolvedValue('');
@@ -107,10 +99,14 @@ describe('GET /search - Album', () => {
           type: 'soundCloud',
           url: 'https://soundcloud.com/search/sounds?q=For%20All%20The%20Dogs%20Drake',
         },
+        {
+          type: 'tidal',
+          url: 'https://listen.tidal.com/search?q=For%20All%20The%20Dogs%20Drake',
+        },
       ],
     });
 
-    expect(redisGetMock).toHaveBeenCalledTimes(3);
-    expect(redisSetMock).toHaveBeenCalledTimes(3);
+    expect(redisGetMock).toHaveBeenCalledTimes(2);
+    expect(redisSetMock).toHaveBeenCalledTimes(2);
   });
 });

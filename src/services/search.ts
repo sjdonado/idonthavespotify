@@ -58,11 +58,10 @@ export const spotifySearch = async (spotifyLink: string): Promise<SpotifyContent
 
   logger.info(`[${spotifySearch.name}] url: ${url}, query: ${query}`);
 
-  const [appleMusicLink, youtubeLink, deezerLink, tidalLink] = await Promise.all([
+  const [appleMusicLink, youtubeLink, deezerLink] = await Promise.all([
     getAppleMusicLink(query, metadata),
     getYouTubeLink(query, metadata),
     getDeezerLink(query, metadata),
-    getTidalLink(query, metadata),
   ]);
 
   logger.info(
@@ -70,17 +69,17 @@ export const spotifySearch = async (spotifyLink: string): Promise<SpotifyContent
       appleMusicLink,
       youtubeLink,
       deezerLink,
-      tidalLink,
     })}`
   );
 
+  const tidalLink = getTidalLink(query);
   const soundcloudLink = getSoundCloudLink(query);
 
-  const links = [appleMusicLink, youtubeLink, deezerLink, tidalLink].filter(Boolean);
+  const links = [appleMusicLink, youtubeLink, deezerLink].filter(Boolean);
 
   // if at least one verified link is found, add to the rest
   if (links.length > 0) {
-    links.push(soundcloudLink);
+    links.push(soundcloudLink, tidalLink);
   }
 
   const spotifyContent: SpotifyContent = {

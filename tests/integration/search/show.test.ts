@@ -95,6 +95,10 @@ describe('GET /search - Podcast Show', () => {
           type: 'soundCloud',
           url: 'https://soundcloud.com/search/sounds?q=Waveform%3A%20The%20MKBHD%20Podcast',
         },
+        {
+          type: 'tidal',
+          url: 'https://listen.tidal.com/search?q=Waveform%3A%20The%20MKBHD%20Podcast',
+        },
       ],
     });
 
