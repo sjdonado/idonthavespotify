@@ -26,15 +26,15 @@ import {
   getYoutubeSearchLink,
 } from '../../utils/shared';
 
-import deezerSongResponseMock from '../../fixtures/song/deezerResponseMock.json';
-import tidalAuthResponseMock from '../../fixtures/auth/tidalResponseMock.json';
+import deezerSongResponseMock from '../../fixtures/deezer/deezerSongResponseMock.json';
+import tidalAuthResponseMock from '../../fixtures/tidal/tidalAuthResponseMock.json';
 
 const spotifySongHeadResponseMock = await Bun.file(
-  'tests/fixtures/song/spotifyHeadResponseMock.html'
+  'tests/fixtures/spotify/spotifySongHeadResponseMock.html'
 ).text();
 
 const appleMusicSongResponseMock = await Bun.file(
-  'tests/fixtures/song/appleMusicResponseMock.html'
+  'tests/fixtures/apple-music/appleMusicSongResponseMock.html'
 ).text();
 
 describe('Adapter - YouTube', () => {

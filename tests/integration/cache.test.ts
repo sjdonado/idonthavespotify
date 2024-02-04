@@ -19,7 +19,7 @@ import { JSONRequest } from '../utils/request';
 import { SEARCH_ENDPOINT, cachedResponse, cachedSpotifyLink } from '../utils/shared';
 
 const spotifySongHeadResponseMock = await Bun.file(
-  'tests/fixtures/song/spotifyHeadResponseMock.html'
+  'tests/fixtures/spotify/spotifySongHeadResponseMock.html'
 ).text();
 
 describe('Searches cache', () => {

@@ -23,13 +23,15 @@ import {
   getYoutubeSearchLink,
 } from '../../utils/shared';
 
-import youtubeExclusiveContentResponseMock from '../../fixtures/spotify-exclusive/youtubeResponseMock.json';
-import deezerExclusiveContentResponseMock from '../../fixtures/spotify-exclusive/deezerResponseMock.json';
+import youtubeExclusiveContentResponseMock from '../../fixtures/youtube/youtubeEmptyResponseMock.json';
+import deezerExclusiveContentResponseMock from '../../fixtures/deezer/deezerEmptyResponseMock.json';
 
 const [spotifyExclusiveContentHeadResponseMock, appleMusicExclusiveContentResponseMock] =
   await Promise.all([
-    Bun.file('tests/fixtures/spotify-exclusive/spotifyHeadResponseMock.html').text(),
-    Bun.file('tests/fixtures/spotify-exclusive/appleMusicResponseMock.html').text(),
+    Bun.file(
+      'tests/fixtures/spotify/spotifyExclusiveContentHeadResponseMock.html'
+    ).text(),
+    Bun.file('tests/fixtures/apple-music/appleMusicEmptyResponseMock.html').text(),
   ]);
 
 describe('GET /search - Spotify Exclusive Content', () => {

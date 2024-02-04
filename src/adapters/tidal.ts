@@ -2,6 +2,7 @@ import * as config from '~/config/default';
 import { ADAPTERS_QUERY_LIMIT } from '~/config/constants';
 
 import HttpClient from '~/utils/http-client';
+import { logger } from '~/utils/logger';
 
 import { SpotifyMetadata, SpotifyMetadataType } from '~/parsers/spotify';
 
@@ -58,41 +59,45 @@ export async function getTidalLink(query: string, metadata: SpotifyMetadata) {
   const url = new URL(`${config.services.tidal.apiUrl}/search`);
   url.search = params.toString();
 
-  const response = await HttpClient.get<TidalSearchResponse>(url.toString(), {
-    headers: {
-      Authorization: `${authToken.token_type} ${authToken.access_token}`,
-      'Content-Type': 'application/vnd.tidal.v1+json',
-    },
-  });
+  try {
+    const response = await HttpClient.get<TidalSearchResponse>(url.toString(), {
+      headers: {
+        Authorization: `${authToken.token_type} ${authToken.access_token}`,
+        'Content-Type': 'application/vnd.tidal.v1+json',
+      },
+    });
 
-  const albumId = response.albums?.[0]?.resource?.id;
-  const trackAlbumId = response.tracks?.[0]?.resource?.album?.id;
-  const trackId = response.tracks?.[0]?.resource?.id;
-  const artistId = response.artists?.[0]?.resource?.id;
+    const albumId = response.albums?.[0]?.resource?.id;
+    const trackAlbumId = response.tracks?.[0]?.resource?.album?.id;
+    const trackId = response.tracks?.[0]?.resource?.id;
+    const artistId = response.artists?.[0]?.resource?.id;
 
-  let tidalLinkPath;
+    let tidalLinkPath;
 
-  if (type === SpotifyMetadataType.Song && trackAlbumId) {
-    tidalLinkPath = `album/${trackAlbumId}/track/${trackId}`;
+    if (type === SpotifyMetadataType.Song && trackAlbumId) {
+      tidalLinkPath = `album/${trackAlbumId}/track/${trackId}`;
+    }
+
+    if (type === SpotifyMetadataType.Album && albumId) {
+      tidalLinkPath = `album/${albumId}`;
+    }
+
+    if (type === SpotifyMetadataType.Artist && artistId) {
+      tidalLinkPath = `artist/${artistId}`;
+    }
+
+    if (!tidalLinkPath) {
+      return;
+    }
+
+    return {
+      type: SpotifyContentLinkType.Tidal,
+      url: `${config.services.tidal.baseUrl}/${tidalLinkPath}`,
+      isVerified: true,
+    } as SpotifyContentLink;
+  } catch (error) {
+    logger.error(`[Tidal] (${url}) ${error}`);
   }
-
-  if (type === SpotifyMetadataType.Album && albumId) {
-    tidalLinkPath = `album/${albumId}`;
-  }
-
-  if (type === SpotifyMetadataType.Artist && artistId) {
-    tidalLinkPath = `artist/${artistId}`;
-  }
-
-  if (!tidalLinkPath) {
-    return;
-  }
-
-  return {
-    type: SpotifyContentLinkType.Tidal,
-    url: `${config.services.tidal.baseUrl}/${tidalLinkPath}`,
-    isVerified: true,
-  } as SpotifyContentLink;
 }
 
 async function getAuthToken() {

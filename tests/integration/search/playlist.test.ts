@@ -23,13 +23,13 @@ import {
   getYoutubeSearchLink,
 } from '../../utils/shared';
 
-import youtubePlaylistResponseMock from '../../fixtures/playlist/youtubeResponseMock.json';
-import deezerPlaylistResponseMock from '../../fixtures/playlist/deezerResponseMock.json';
+import youtubePlaylistResponseMock from '../../fixtures/youtube/youtubePlaylistResponseMock.json';
+import deezerPlaylistResponseMock from '../../fixtures/deezer/deezerPlaylistResponseMock.json';
 
 const [spotifyPlaylistHeadResponseMock, appleMusicPlaylistResponseMock] =
   await Promise.all([
-    Bun.file('tests/fixtures/playlist/spotifyHeadResponseMock.html').text(),
-    Bun.file('tests/fixtures/playlist/appleMusicResponseMock.html').text(),
+    Bun.file('tests/fixtures/spotify/spotifyPlaylistHeadResponseMock.html').text(),
+    Bun.file('tests/fixtures/apple-music/appleMusicPlaylistResponseMock.html').text(),
   ]);
 
 describe('GET /search - Playlist', () => {

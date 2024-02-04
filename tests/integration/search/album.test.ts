@@ -26,13 +26,13 @@ import {
   getYoutubeSearchLink,
 } from '../../utils/shared';
 
-import youtubeAlbumResponseMock from '../../fixtures/album/youtubeResponseMock.json';
-import deezerAlbumResponseMock from '../../fixtures/album/deezerResponseMock.json';
-import tidalAuthResponseMock from '../../fixtures/auth/tidalResponseMock.json';
+import youtubeAlbumResponseMock from '../../fixtures/youtube/youtubeAlbumResponseMock.json';
+import deezerAlbumResponseMock from '../../fixtures/deezer/deezerAlbumResponseMock.json';
+import tidalAuthResponseMock from '../../fixtures/tidal/tidalAuthResponseMock.json';
 
 const [spotifyAlbumHeadResponseMock, appleMusicAlbumResponseMock] = await Promise.all([
-  Bun.file('tests/fixtures/album/spotifyHeadResponseMock.html').text(),
-  Bun.file('tests/fixtures/album/appleMusicResponseMock.html').text(),
+  Bun.file('tests/fixtures/spotify/spotifyAlbumHeadResponseMock.html').text(),
+  Bun.file('tests/fixtures/apple-music/appleMusicAlbumResponseMock.html').text(),
 ]);
 
 describe('GET /search - Album', () => {

@@ -23,12 +23,12 @@ import {
   getYoutubeSearchLink,
 } from '../../utils/shared';
 
-import youtubeShowResponseMock from '../../fixtures/show/youtubeResponseMock.json';
-import deezerShowResponseMock from '../../fixtures/show/deezerResponseMock.json';
+import youtubeShowResponseMock from '../../fixtures/youtube/youtubeShowResponseMock.json';
+import deezerShowResponseMock from '../../fixtures/deezer/deezerShowResponseMock.json';
 
 const [spotifyShowHeadResponseMock, appleMusicShowResponseMock] = await Promise.all([
-  Bun.file('tests/fixtures/show/spotifyHeadResponseMock.html').text(),
-  Bun.file('tests/fixtures/show/appleMusicResponseMock.html').text(),
+  Bun.file('tests/fixtures/spotify/spotifyShowHeadResponseMock.html').text(),
+  Bun.file('tests/fixtures/apple-music/appleMusicShowResponseMock.html').text(),
 ]);
 
 describe('GET /search - Podcast Show', () => {

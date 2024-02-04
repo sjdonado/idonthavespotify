@@ -22,12 +22,12 @@ import {
   getYoutubeSearchLink,
 } from '../../utils/shared';
 
-import youtubePodcastResponseMock from '../../fixtures/podcast/youtubeResponseMock.json';
+import youtubePodcastResponseMock from '../../fixtures/youtube/youtubePodcastResponseMock.json';
 
 const [spotifyPodcastHeadResponseMock, appleMusicPodcastResponseMock] = await Promise.all(
   [
-    Bun.file('tests/fixtures/podcast/spotifyHeadResponseMock.html').text(),
-    Bun.file('tests/fixtures/podcast/appleMusicResponseMock.html').text(),
+    Bun.file('tests/fixtures/spotify/spotifyPodcastHeadResponseMock.html').text(),
+    Bun.file('tests/fixtures/apple-music/appleMusicPodcastResponseMock.html').text(),
   ]
 );
 
