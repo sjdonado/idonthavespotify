@@ -8,7 +8,7 @@ export const searchPayloadValidator = t.Object({
 
 export const apiVersionValidator = t.Object({
   v: t.String({
-    pattern: '1.3',
+    pattern: '1',
     error: 'Unsupported API version',
   }),
 });
