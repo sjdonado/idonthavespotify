@@ -44,7 +44,7 @@ describe('Page router', () => {
 
       expect(doc('h1').text()).toEqual("I don't have Spotify");
       expect(doc('h2').text()).toEqual(
-        'Paste a Spotify link and get the content on other platforms.'
+        'Paste a Spotify link and listen on other platforms.'
       );
 
       const footerText = doc('footer').text();

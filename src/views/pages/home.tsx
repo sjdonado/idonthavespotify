@@ -10,7 +10,7 @@ export default function Home(props: { searchCount?: number }) {
         <div class="my-7 text-center sm:my-16">
           <h1 class="text-4xl uppercase md:text-5xl lg:text-6xl">I don't have Spotify</h1>
           <h2 class="mt-6 text-xs md:text-sm lg:text-lg">
-            Paste a Spotify link and get the content on other platforms.
+            Paste a Spotify link and listen on other platforms.
           </h2>
         </div>
         <SearchBar />
