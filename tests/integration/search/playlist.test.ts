@@ -77,11 +77,6 @@ describe('GET /search - Playlist', () => {
       source: 'https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ',
       links: [
         {
-          type: 'appleMusic',
-          url: 'https://music.apple.com/ca/search?term=This%20Is%20Bad%20Bunny%20Playlist',
-          isVerified: false,
-        },
-        {
           type: 'youTube',
           url: 'https://www.youtube.com/playlist?list=PLIqoag_AY7ykvJKLrUzfvX7pXS-YMIDfR',
           isVerified: true,
@@ -93,8 +88,8 @@ describe('GET /search - Playlist', () => {
         },
         {
           type: 'soundCloud',
-          url: 'https://soundcloud.com/search?q=This+Is+Bad+Bunny+Playlist',
-          isVerified: false,
+          url: 'https://soundcloud.com/rafael-moreno-180913328/sets/this-is-bad-bunny',
+          isVerified: true,
         },
         {
           type: 'tidal',

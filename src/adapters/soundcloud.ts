@@ -1,9 +1,11 @@
+import { compareTwoStrings } from 'string-similarity';
+
 import * as config from '~/config/default';
+import { RESPONSE_COMPARE_MIN_SCORE } from '~/config/constants';
 
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { getCheerioDoc } from '~/utils/scraper';
-import { responseMatchesQuery } from '~/utils/compare';
 
 import { SpotifyContentLink, SpotifyContentLinkType } from '~/services/search';
 import { SpotifyMetadata, SpotifyMetadataType } from '~/parsers/spotify';
@@ -28,21 +30,32 @@ export async function getSoundCloudLink(query: string, metadata: SpotifyMetadata
     const noscriptHTML = doc('noscript').eq(1).html();
     const noscriptDoc = getCheerioDoc(noscriptHTML ?? '');
 
-    const firstResultEl = noscriptDoc('ul:nth-of-type(2) li:first-of-type h2 a');
+    const listElements = noscriptDoc('ul:nth-of-type(2) li:lt(3) h2 a');
 
-    const title = firstResultEl.text().trim();
-    const href = firstResultEl.attr('href');
+    const bestScore = {
+      href: '',
+      score: 0,
+    };
 
-    if (!title || !href) {
-      throw new Error('No results found');
+    listElements.each((i, element) => {
+      const title = noscriptDoc(element).text().trim();
+      const href = noscriptDoc(element).attr('href');
+      const score = compareTwoStrings(title.toLowerCase(), query.toLowerCase());
+
+      if (href && score > bestScore.score) {
+        bestScore.href = href;
+        bestScore.score = score;
+      }
+    });
+
+    if (bestScore.score <= RESPONSE_COMPARE_MIN_SCORE) {
+      throw new Error(`No results found: ${JSON.stringify(bestScore)}`);
     }
-
-    const isVerified = responseMatchesQuery(title, query);
 
     return {
       type: SpotifyContentLinkType.SoundCloud,
-      url: isVerified ? `${config.services.soundCloud.baseUrl}${href}` : url.toString(),
-      isVerified,
+      url: `${config.services.soundCloud.baseUrl}${bestScore.href}`,
+      isVerified: true,
     } as SpotifyContentLink;
   } catch (err) {
     logger.error(`[SoundCloud] (${url}) ${err}`);
