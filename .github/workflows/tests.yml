@@ -12,8 +12,8 @@ env:
   YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
   DEEZER_API_URL: https://api.deezer.com/search
   APPLE_MUSIC_API_URL: https://music.apple.com/ca
-  SOUNDCLOUD_BASE_URL: https://soundcloud.com/search/sounds?q=
-  TIDAL_BASE_URL: https://listen.tidal.com/search?q=
+  SOUNDCLOUD_BASE_URL: https://soundcloud.com
+  TIDAL_BASE_URL: https://listen.tidal.com
   REDIS_URL: redis://127.0.0.1:6379
 jobs:
   tests:

@@ -59,7 +59,7 @@ describe('GET /search - Song', () => {
 
   it('should return 200', async () => {
     const spotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
-    const query = 'Do%20Not%20Disturb%20Drake';
+    const query = 'Do Not Disturb Drake';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
     const youtubeSearchLink = getYoutubeSearchLink(query, 'video');
@@ -103,11 +103,11 @@ describe('GET /search - Song', () => {
         },
         {
           type: 'soundCloud',
-          url: 'https://soundcloud.com/search/sounds?q=Do%20Not%20Disturb%20Drake',
+          url: 'https://soundcloud.com/search/sounds?q=Do+Not+Disturb+Drake',
         },
         {
           type: 'tidal',
-          url: 'https://listen.tidal.com/search?q=Do%20Not%20Disturb%20Drake',
+          url: 'https://listen.tidal.com/search?q=Do+Not+Disturb+Drake',
         },
       ],
     });
@@ -119,7 +119,7 @@ describe('GET /search - Song', () => {
   it('should return 200 - Mobile link', async () => {
     const mobileSpotifyLink = 'https://spotify.link/mOQKfqJZ1Db';
     const desktopSpotifyLink = 'https://open.spotify.com/track/3eP13S8D5m2cweMEg3ZDed';
-    const query = 'Do%20Not%20Disturb%20Drake';
+    const query = 'Do Not Disturb Drake';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
     const youtubeSearchLink = getYoutubeSearchLink(query, 'video');
@@ -165,11 +165,11 @@ describe('GET /search - Song', () => {
         },
         {
           type: 'soundCloud',
-          url: 'https://soundcloud.com/search/sounds?q=Do%20Not%20Disturb%20Drake',
+          url: 'https://soundcloud.com/search/sounds?q=Do+Not+Disturb+Drake',
         },
         {
           type: 'tidal',
-          url: 'https://listen.tidal.com/search?q=Do%20Not%20Disturb%20Drake',
+          url: 'https://listen.tidal.com/search?q=Do+Not+Disturb+Drake',
         },
       ],
     });
@@ -181,7 +181,7 @@ describe('GET /search - Song', () => {
   it('should return 200 - Extra query params', async () => {
     const spotifyLink =
       'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384?si=NbEEVPZvTVuov_nA3ylJJQ&utm_source=copy-link&utm_medium=copy-link&context=spotify%3Aalbum%3A4czdORdCWP9umpbhFXK2aW&_branch_match_id=1238568162599463760&_branch_referrer=H2sIAAAAAAAAA8soKSkottLXLy7IL8lMq9TLyczL1q%2Fy8nHxLLXwM3RJAgDKC3LnIAAAAA%3D%3D';
-    const query = 'Do%20Not%20Disturb%20Drake';
+    const query = 'Do Not Disturb Drake';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
     const youtubeSearchLink = getYoutubeSearchLink(query, 'video');
@@ -225,11 +225,11 @@ describe('GET /search - Song', () => {
         },
         {
           type: 'soundCloud',
-          url: 'https://soundcloud.com/search/sounds?q=Do%20Not%20Disturb%20Drake',
+          url: 'https://soundcloud.com/search/sounds?q=Do+Not+Disturb+Drake',
         },
         {
           type: 'tidal',
-          url: 'https://listen.tidal.com/search?q=Do%20Not%20Disturb%20Drake',
+          url: 'https://listen.tidal.com/search?q=Do+Not+Disturb+Drake',
         },
       ],
     });

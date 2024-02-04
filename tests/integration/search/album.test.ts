@@ -54,7 +54,7 @@ describe('GET /search - Album', () => {
 
   it('should return 200', async () => {
     const spotifyLink = 'https://open.spotify.com/album/4czdORdCWP9umpbhFXK2fW';
-    const query = 'For%20All%20The%20Dogs%20Drake';
+    const query = 'For All The Dogs Drake';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
     const youtubeSearchLink = getYoutubeSearchLink(query, 'playlist');
@@ -97,11 +97,11 @@ describe('GET /search - Album', () => {
         },
         {
           type: 'soundCloud',
-          url: 'https://soundcloud.com/search/sounds?q=For%20All%20The%20Dogs%20Drake',
+          url: 'https://soundcloud.com/search/sounds?q=For+All+The+Dogs+Drake',
         },
         {
           type: 'tidal',
-          url: 'https://listen.tidal.com/search?q=For%20All%20The%20Dogs%20Drake',
+          url: 'https://listen.tidal.com/search?q=For+All+The+Dogs+Drake',
         },
       ],
     });

@@ -3,7 +3,15 @@ import * as config from '~/config/default';
 import { SpotifyContentLink, SpotifyContentLinkType } from '~/services/search';
 
 export const getSoundCloudLink = (query: string) => {
-  const url = `${config.services.soundCloud.baseUrl}${query}`;
+  const params = new URLSearchParams({
+    q: query,
+  });
 
-  return { type: SpotifyContentLinkType.SoundCloud, url } as SpotifyContentLink;
+  const url = new URL(`${config.services.soundCloud.baseUrl}/search/sounds`);
+  url.search = params.toString();
+
+  return {
+    type: SpotifyContentLinkType.SoundCloud,
+    url: url.toString(),
+  } as SpotifyContentLink;
 };

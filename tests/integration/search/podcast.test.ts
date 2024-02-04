@@ -54,8 +54,7 @@ describe('GET /search - Podcast Episode', () => {
 
   it('should return 200', async () => {
     const spotifyLink = 'https://open.spotify.com/episode/43TCrgmP23qkLcAXZQN8qT';
-    const query =
-      'The%20End%20of%20Twitter%20as%20We%20Know%20It%20Waveform%3A%20The%20MKBHD%20Podcast';
+    const query = 'The End of Twitter as We Know It Waveform: The MKBHD Podcast';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
     const youtubeSearchLink = getYoutubeSearchLink(query, 'video');
@@ -89,11 +88,11 @@ describe('GET /search - Podcast Episode', () => {
         },
         {
           type: 'soundCloud',
-          url: 'https://soundcloud.com/search/sounds?q=The%20End%20of%20Twitter%20as%20We%20Know%20It%20Waveform%3A%20The%20MKBHD%20Podcast',
+          url: 'https://soundcloud.com/search/sounds?q=The+End+of+Twitter+as+We+Know+It+Waveform%3A+The+MKBHD+Podcast',
         },
         {
           type: 'tidal',
-          url: 'https://listen.tidal.com/search?q=The%20End%20of%20Twitter%20as%20We%20Know%20It%20Waveform%3A%20The%20MKBHD%20Podcast',
+          url: 'https://listen.tidal.com/search?q=The+End+of+Twitter+as+We+Know+It+Waveform%3A+The+MKBHD+Podcast',
         },
       ],
     });

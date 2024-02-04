@@ -55,7 +55,7 @@ describe('GET /search - Playlist', () => {
 
   it('should return 200', async () => {
     const spotifyLink = 'https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ';
-    const query = 'This%20Is%20Bad%20Bunny%20Playlist';
+    const query = 'This Is Bad Bunny Playlist';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
     const youtubeSearchLink = getYoutubeSearchLink(query, 'playlist');
@@ -93,11 +93,11 @@ describe('GET /search - Playlist', () => {
         },
         {
           type: 'soundCloud',
-          url: 'https://soundcloud.com/search/sounds?q=This%20Is%20Bad%20Bunny%20Playlist',
+          url: 'https://soundcloud.com/search/sounds?q=This+Is+Bad+Bunny+Playlist',
         },
         {
           type: 'tidal',
-          url: 'https://listen.tidal.com/search?q=This%20Is%20Bad%20Bunny%20Playlist',
+          url: 'https://listen.tidal.com/search?q=This+Is+Bad+Bunny+Playlist',
         },
       ],
     });

@@ -53,7 +53,7 @@ describe('Adapter - Apple Music', () => {
 
   it('should return 200 when adapter returns error', async () => {
     const spotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
-    const query = 'Do%20Not%20Disturb%20Drake';
+    const query = 'Do Not Disturb Drake';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
     const youtubeSearchLink = getYoutubeSearchLink(query, 'video');
@@ -92,11 +92,11 @@ describe('Adapter - Apple Music', () => {
         },
         {
           type: 'soundCloud',
-          url: 'https://soundcloud.com/search/sounds?q=Do%20Not%20Disturb%20Drake',
+          url: 'https://soundcloud.com/search/sounds?q=Do+Not+Disturb+Drake',
         },
         {
           type: 'tidal',
-          url: 'https://listen.tidal.com/search?q=Do%20Not%20Disturb%20Drake',
+          url: 'https://listen.tidal.com/search?q=Do+Not+Disturb+Drake',
         },
       ],
     });

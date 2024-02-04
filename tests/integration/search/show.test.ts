@@ -54,7 +54,7 @@ describe('GET /search - Podcast Show', () => {
 
   it('should return 200', async () => {
     const spotifyLink = 'https://open.spotify.com/show/6o81QuW22s5m2nfcXWjucc';
-    const query = 'Waveform%3A%20The%20MKBHD%20Podcast';
+    const query = 'Waveform: The MKBHD Podcast';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
     const youtubeSearchLink = getYoutubeSearchLink(query, 'channel');
@@ -93,11 +93,11 @@ describe('GET /search - Podcast Show', () => {
         },
         {
           type: 'soundCloud',
-          url: 'https://soundcloud.com/search/sounds?q=Waveform%3A%20The%20MKBHD%20Podcast',
+          url: 'https://soundcloud.com/search/sounds?q=Waveform%3A+The+MKBHD+Podcast',
         },
         {
           type: 'tidal',
-          url: 'https://listen.tidal.com/search?q=Waveform%3A%20The%20MKBHD%20Podcast',
+          url: 'https://listen.tidal.com/search?q=Waveform%3A+The+MKBHD+Podcast',
         },
       ],
     });

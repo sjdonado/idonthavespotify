@@ -54,10 +54,10 @@ describe('GET /search - Artist', () => {
 
   it('should return 200', async () => {
     const spotifyLink = 'https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5';
-    const query = 'J.%20Cole';
+    const query = 'J. Cole';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
-    const youtubeSearchLink = getYoutubeSearchLink(`${query}%20official`, 'channel');
+    const youtubeSearchLink = getYoutubeSearchLink(`${query} official`, 'channel');
     const deezerSearchLink = getDeezerSearchLink(query, 'artist');
 
     const request = JSONRequest(SEARCH_ENDPOINT, { spotifyLink });
@@ -97,11 +97,11 @@ describe('GET /search - Artist', () => {
         },
         {
           type: 'soundCloud',
-          url: 'https://soundcloud.com/search/sounds?q=J.%20Cole',
+          url: 'https://soundcloud.com/search/sounds?q=J.+Cole',
         },
         {
           type: 'tidal',
-          url: 'https://listen.tidal.com/search?q=J.%20Cole',
+          url: 'https://listen.tidal.com/search?q=J.+Cole',
         },
       ],
     });

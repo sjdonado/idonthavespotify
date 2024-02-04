@@ -35,5 +35,5 @@ export function getQueryFromMetadata(
     query = artist ? `${query} ${artist}` : query;
   }
 
-  return encodeURIComponent(query);
+  return query;
 }

@@ -3,7 +3,15 @@ import * as config from '~/config/default';
 import { SpotifyContentLink, SpotifyContentLinkType } from '~/services/search';
 
 export function getTidalLink(query: string) {
-  const url = `${config.services.tidal.baseUrl}${query}`;
+  const params = new URLSearchParams({
+    q: query,
+  });
 
-  return { type: SpotifyContentLinkType.Tidal, url } as SpotifyContentLink;
+  const url = new URL(`${config.services.tidal.baseUrl}/search`);
+  url.search = params.toString();
+
+  return {
+    type: SpotifyContentLinkType.Tidal,
+    url: url.toString(),
+  } as SpotifyContentLink;
 }

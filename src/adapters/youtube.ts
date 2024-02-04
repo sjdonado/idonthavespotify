@@ -36,7 +36,7 @@ export async function getYouTubeLink(query: string, metadata: SpotifyMetadata) {
   const params = new URLSearchParams({
     part: 'snippet',
     maxResults: String(ADAPTERS_QUERY_LIMIT),
-    q: metadata.type === SpotifyMetadataType.Artist ? `${query}%20official` : query,
+    q: metadata.type === SpotifyMetadataType.Artist ? `${query} official` : query,
     type: YOUTUBE_SEARCH_TYPES[metadata.type],
     key: config.services.youTube.apiKey as string,
   });
@@ -48,8 +48,7 @@ export async function getYouTubeLink(query: string, metadata: SpotifyMetadata) {
     const response = await HttpClient.get<YoutubeSearchListResponse>(url.toString());
 
     if (!response.items?.length) {
-      logger.error('[YouTube] No results found', url);
-      return;
+      throw new Error(`No results found: ${JSON.stringify(response)}`);
     }
 
     const [
