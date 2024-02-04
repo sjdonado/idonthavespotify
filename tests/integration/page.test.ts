@@ -24,7 +24,7 @@ const spotifySongHeadResponseMock = await Bun.file(
   'tests/fixtures/song/spotifyHeadResponseMock.html'
 ).text();
 
-describe('Api router', () => {
+describe('Page router', () => {
   let mock: AxiosMockAdapter;
   let redisSetMock: jest.Mock;
   let redisGetMock: jest.Mock;
