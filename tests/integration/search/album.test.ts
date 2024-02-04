@@ -1,13 +1,4 @@
-import {
-  beforeAll,
-  afterEach,
-  afterAll,
-  describe,
-  expect,
-  it,
-  spyOn,
-  jest,
-} from 'bun:test';
+import { beforeAll, afterEach, describe, expect, it, spyOn, jest } from 'bun:test';
 
 import axios from 'axios';
 import Redis from 'ioredis';
@@ -17,18 +8,24 @@ import { app } from '~/index';
 
 import { JSONRequest } from '../../utils/request';
 import {
-  SEARCH_ENDPOINT,
+  API_SEARCH_ENDPOINT,
   getAppleMusicSearchLink,
   getDeezerSearchLink,
-  getYoutubeSearchLink,
+  getSoundCloudSearchLink,
+  getYouTubeSearchLink,
 } from '../../utils/shared';
 
-import youtubeAlbumResponseMock from '../../fixtures/youtube/youtubeAlbumResponseMock.json';
-import deezerAlbumResponseMock from '../../fixtures/deezer/deezerAlbumResponseMock.json';
+import youtubeAlbumResponseMock from '../../fixtures/youtube/albumResponseMock.json';
+import deezerAlbumResponseMock from '../../fixtures/deezer/albumResponseMock.json';
 
-const [spotifyAlbumHeadResponseMock, appleMusicAlbumResponseMock] = await Promise.all([
-  Bun.file('tests/fixtures/spotify/spotifyAlbumHeadResponseMock.html').text(),
-  Bun.file('tests/fixtures/apple-music/appleMusicAlbumResponseMock.html').text(),
+const [
+  spotifyAlbumHeadResponseMock,
+  appleMusicAlbumResponseMock,
+  soundCloudAlbumResponseMock,
+] = await Promise.all([
+  Bun.file('tests/fixtures/spotify/albumHeadResponseMock.html').text(),
+  Bun.file('tests/fixtures/apple-music/albumResponseMock.html').text(),
+  Bun.file('tests/fixtures/soundcloud/albumResponseMock.html').text(),
 ]);
 
 describe('GET /search - Album', () => {
@@ -46,10 +43,7 @@ describe('GET /search - Album', () => {
   afterEach(() => {
     redisGetMock.mockReset();
     redisSetMock.mockReset();
-  });
-
-  afterAll(() => {
-    mock.restore();
+    mock.reset();
   });
 
   it('should return 200', async () => {
@@ -57,15 +51,17 @@ describe('GET /search - Album', () => {
     const query = 'For All The Dogs Drake';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
-    const youtubeSearchLink = getYoutubeSearchLink(query, 'playlist');
+    const youtubeSearchLink = getYouTubeSearchLink(query, 'playlist');
     const deezerSearchLink = getDeezerSearchLink(query, 'album');
+    const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(SEARCH_ENDPOINT, { spotifyLink });
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink });
 
     mock.onGet(spotifyLink).reply(200, spotifyAlbumHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicAlbumResponseMock);
     mock.onGet(youtubeSearchLink).reply(200, youtubeAlbumResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerAlbumResponseMock);
+    mock.onGet(soundCloudSearchLink).reply(200, soundCloudAlbumResponseMock);
 
     redisGetMock.mockResolvedValue(0);
     redisSetMock.mockResolvedValue('');
@@ -97,7 +93,8 @@ describe('GET /search - Album', () => {
         },
         {
           type: 'soundCloud',
-          url: 'https://soundcloud.com/search/sounds?q=For+All+The+Dogs+Drake',
+          url: 'https://soundcloud.com/octobersveryown/sets/for-all-the-dogs-3',
+          isVerified: true,
         },
         {
           type: 'tidal',
@@ -108,5 +105,6 @@ describe('GET /search - Album', () => {
 
     expect(redisGetMock).toHaveBeenCalledTimes(2);
     expect(redisSetMock).toHaveBeenCalledTimes(2);
+    expect(mock.history.get).toHaveLength(5);
   });
 });

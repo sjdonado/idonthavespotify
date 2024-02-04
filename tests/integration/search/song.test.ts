@@ -1,13 +1,4 @@
-import {
-  beforeAll,
-  afterEach,
-  afterAll,
-  describe,
-  expect,
-  it,
-  spyOn,
-  jest,
-} from 'bun:test';
+import { beforeAll, afterEach, describe, expect, it, spyOn, jest } from 'bun:test';
 
 import axios from 'axios';
 import Redis from 'ioredis';
@@ -17,23 +8,26 @@ import { app } from '~/index';
 
 import { JSONRequest } from '../../utils/request';
 import {
-  SEARCH_ENDPOINT,
+  API_SEARCH_ENDPOINT,
   getAppleMusicSearchLink,
   getDeezerSearchLink,
-  getYoutubeSearchLink,
+  getSoundCloudSearchLink,
+  getYouTubeSearchLink,
 } from '../../utils/shared';
 
-import youtubeSongResponseMock from '../../fixtures/youtube/youtubeSongResponseMock.json';
-import deezerSongResponseMock from '../../fixtures/deezer/deezerSongResponseMock.json';
+import youtubeSongResponseMock from '../../fixtures/youtube/songResponseMock.json';
+import deezerSongResponseMock from '../../fixtures/deezer/songResponseMock.json';
 
 const [
   spotifySongHeadResponseMock,
   spotifyMobileHeadResponseMock,
   appleMusicSongResponseMock,
+  soundCloudSongResponseMock,
 ] = await Promise.all([
-  Bun.file('tests/fixtures/spotify/spotifySongHeadResponseMock.html').text(),
-  Bun.file('tests/fixtures/spotify/spotifyMobileHeadResponseMock.html').text(),
-  Bun.file('tests/fixtures/apple-music/appleMusicSongResponseMock.html').text(),
+  Bun.file('tests/fixtures/spotify/songHeadResponseMock.html').text(),
+  Bun.file('tests/fixtures/spotify/mobileHeadResponseMock.html').text(),
+  Bun.file('tests/fixtures/apple-music/songResponseMock.html').text(),
+  Bun.file('tests/fixtures/soundcloud/songResponseMock.html').text(),
 ]);
 
 describe('GET /search - Song', () => {
@@ -51,10 +45,7 @@ describe('GET /search - Song', () => {
   afterEach(() => {
     redisGetMock.mockReset();
     redisSetMock.mockReset();
-  });
-
-  afterAll(() => {
-    mock.restore();
+    mock.reset();
   });
 
   it('should return 200', async () => {
@@ -62,15 +53,17 @@ describe('GET /search - Song', () => {
     const query = 'Do Not Disturb Drake';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
-    const youtubeSearchLink = getYoutubeSearchLink(query, 'video');
+    const youtubeSearchLink = getYouTubeSearchLink(query, 'video');
     const deezerSearchLink = getDeezerSearchLink(query, 'track');
+    const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(SEARCH_ENDPOINT, { spotifyLink });
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink });
 
     mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
     mock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
+    mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
 
     redisGetMock.mockResolvedValue(0);
     redisSetMock.mockResolvedValue('');
@@ -103,7 +96,8 @@ describe('GET /search - Song', () => {
         },
         {
           type: 'soundCloud',
-          url: 'https://soundcloud.com/search/sounds?q=Do+Not+Disturb+Drake',
+          url: 'https://soundcloud.com/octobersveryown/drake-do-not-disturb',
+          isVerified: true,
         },
         {
           type: 'tidal',
@@ -114,6 +108,7 @@ describe('GET /search - Song', () => {
 
     expect(redisGetMock).toHaveBeenCalledTimes(2);
     expect(redisSetMock).toHaveBeenCalledTimes(2);
+    expect(mock.history.get).toHaveLength(5);
   });
 
   it('should return 200 - Mobile link', async () => {
@@ -122,10 +117,11 @@ describe('GET /search - Song', () => {
     const query = 'Do Not Disturb Drake';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
-    const youtubeSearchLink = getYoutubeSearchLink(query, 'video');
+    const youtubeSearchLink = getYouTubeSearchLink(query, 'video');
     const deezerSearchLink = getDeezerSearchLink(query, 'track');
+    const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(SEARCH_ENDPOINT, { spotifyLink: mobileSpotifyLink });
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink: mobileSpotifyLink });
 
     mock.onGet(mobileSpotifyLink).reply(200, spotifyMobileHeadResponseMock);
     mock.onGet(desktopSpotifyLink).reply(200, spotifySongHeadResponseMock);
@@ -133,6 +129,7 @@ describe('GET /search - Song', () => {
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
     mock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
+    mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
 
     redisGetMock.mockResolvedValue(0);
     redisSetMock.mockResolvedValue('');
@@ -165,7 +162,8 @@ describe('GET /search - Song', () => {
         },
         {
           type: 'soundCloud',
-          url: 'https://soundcloud.com/search/sounds?q=Do+Not+Disturb+Drake',
+          url: 'https://soundcloud.com/octobersveryown/drake-do-not-disturb',
+          isVerified: true,
         },
         {
           type: 'tidal',
@@ -176,6 +174,8 @@ describe('GET /search - Song', () => {
 
     expect(redisGetMock).toHaveBeenCalledTimes(2);
     expect(redisSetMock).toHaveBeenCalledTimes(2);
+    // extra call due to parsing mobile link to desktop
+    expect(mock.history.get).toHaveLength(6);
   });
 
   it('should return 200 - Extra query params', async () => {
@@ -184,15 +184,17 @@ describe('GET /search - Song', () => {
     const query = 'Do Not Disturb Drake';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
-    const youtubeSearchLink = getYoutubeSearchLink(query, 'video');
+    const youtubeSearchLink = getYouTubeSearchLink(query, 'video');
     const deezerSearchLink = getDeezerSearchLink(query, 'track');
+    const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(SEARCH_ENDPOINT, { spotifyLink });
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink });
 
     mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
     mock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
+    mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
 
     redisGetMock.mockResolvedValue(0);
     redisSetMock.mockResolvedValue('');
@@ -225,7 +227,8 @@ describe('GET /search - Song', () => {
         },
         {
           type: 'soundCloud',
-          url: 'https://soundcloud.com/search/sounds?q=Do+Not+Disturb+Drake',
+          url: 'https://soundcloud.com/octobersveryown/drake-do-not-disturb',
+          isVerified: true,
         },
         {
           type: 'tidal',
@@ -236,5 +239,6 @@ describe('GET /search - Song', () => {
 
     expect(redisGetMock).toHaveBeenCalledTimes(2);
     expect(redisSetMock).toHaveBeenCalledTimes(2);
+    expect(mock.history.get).toHaveLength(5);
   });
 });

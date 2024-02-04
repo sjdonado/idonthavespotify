@@ -1,13 +1,4 @@
-import {
-  beforeAll,
-  afterEach,
-  afterAll,
-  describe,
-  expect,
-  it,
-  spyOn,
-  jest,
-} from 'bun:test';
+import { beforeAll, afterEach, describe, expect, it, spyOn, jest } from 'bun:test';
 
 import axios from 'axios';
 import Redis from 'ioredis';
@@ -17,22 +8,25 @@ import { app } from '~/index';
 
 import { JSONRequest } from '../../utils/request';
 import {
-  SEARCH_ENDPOINT,
+  API_SEARCH_ENDPOINT,
   getAppleMusicSearchLink,
   getDeezerSearchLink,
-  getYoutubeSearchLink,
+  getSoundCloudSearchLink,
+  getYouTubeSearchLink,
 } from '../../utils/shared';
 
-import youtubeExclusiveContentResponseMock from '../../fixtures/youtube/youtubeEmptyResponseMock.json';
-import deezerExclusiveContentResponseMock from '../../fixtures/deezer/deezerEmptyResponseMock.json';
+import youtubeExclusiveContentResponseMock from '../../fixtures/youtube/emptyResponseMock.json';
+import deezerExclusiveContentResponseMock from '../../fixtures/deezer/emptyResponseMock.json';
 
-const [spotifyExclusiveContentHeadResponseMock, appleMusicExclusiveContentResponseMock] =
-  await Promise.all([
-    Bun.file(
-      'tests/fixtures/spotify/spotifyExclusiveContentHeadResponseMock.html'
-    ).text(),
-    Bun.file('tests/fixtures/apple-music/appleMusicEmptyResponseMock.html').text(),
-  ]);
+const [
+  spotifyExclusiveContentHeadResponseMock,
+  appleMusicExclusiveContentResponseMock,
+  soundCloudExclusiveContentResponseMock,
+] = await Promise.all([
+  Bun.file('tests/fixtures/spotify/exclusiveContentHeadResponseMock.html').text(),
+  Bun.file('tests/fixtures/apple-music/emptyResponseMock.html').text(),
+  Bun.file('tests/fixtures/soundcloud/emptyResponseMock.html').text(),
+]);
 
 describe('GET /search - Spotify Exclusive Content', () => {
   let mock: AxiosMockAdapter;
@@ -49,26 +43,25 @@ describe('GET /search - Spotify Exclusive Content', () => {
   afterEach(() => {
     redisGetMock.mockReset();
     redisSetMock.mockReset();
-  });
-
-  afterAll(() => {
-    mock.restore();
+    mock.reset();
   });
 
   it('should return 200', async () => {
     const spotifyLink = 'https://open.spotify.com/show/7LuQv400JFzzlJrOuMukRj';
-    const query = 'The%20Louis%20Theroux%20Podcast';
+    const query = 'The Louis Theroux Podcast';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
-    const youtubeSearchLink = getYoutubeSearchLink(query, 'channel');
+    const youtubeSearchLink = getYouTubeSearchLink(query, 'channel');
     const deezerSearchLink = getDeezerSearchLink(query, 'podcast');
+    const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(SEARCH_ENDPOINT, { spotifyLink });
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink });
 
     mock.onGet(spotifyLink).reply(200, spotifyExclusiveContentHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicExclusiveContentResponseMock);
     mock.onGet(youtubeSearchLink).reply(200, youtubeExclusiveContentResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerExclusiveContentResponseMock);
+    mock.onGet(soundCloudSearchLink).reply(200, soundCloudExclusiveContentResponseMock);
 
     redisGetMock.mockResolvedValue(0);
     redisSetMock.mockResolvedValue('');
@@ -88,5 +81,6 @@ describe('GET /search - Spotify Exclusive Content', () => {
 
     expect(redisGetMock).toHaveBeenCalledTimes(2);
     expect(redisSetMock).toHaveBeenCalledTimes(2);
+    expect(mock.history.get).toHaveLength(4);
   });
 });

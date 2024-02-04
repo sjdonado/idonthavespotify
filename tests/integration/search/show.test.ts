@@ -1,13 +1,4 @@
-import {
-  beforeAll,
-  afterEach,
-  afterAll,
-  describe,
-  expect,
-  it,
-  spyOn,
-  jest,
-} from 'bun:test';
+import { beforeAll, afterEach, describe, expect, it, spyOn, jest } from 'bun:test';
 
 import axios from 'axios';
 import Redis from 'ioredis';
@@ -17,18 +8,18 @@ import { app } from '~/index';
 
 import { JSONRequest } from '../../utils/request';
 import {
-  SEARCH_ENDPOINT,
+  API_SEARCH_ENDPOINT,
   getAppleMusicSearchLink,
   getDeezerSearchLink,
-  getYoutubeSearchLink,
+  getYouTubeSearchLink,
 } from '../../utils/shared';
 
-import youtubeShowResponseMock from '../../fixtures/youtube/youtubeShowResponseMock.json';
-import deezerShowResponseMock from '../../fixtures/deezer/deezerShowResponseMock.json';
+import youtubeShowResponseMock from '../../fixtures/youtube/showResponseMock.json';
+import deezerShowResponseMock from '../../fixtures/deezer/showResponseMock.json';
 
 const [spotifyShowHeadResponseMock, appleMusicShowResponseMock] = await Promise.all([
-  Bun.file('tests/fixtures/spotify/spotifyShowHeadResponseMock.html').text(),
-  Bun.file('tests/fixtures/apple-music/appleMusicShowResponseMock.html').text(),
+  Bun.file('tests/fixtures/spotify/showHeadResponseMock.html').text(),
+  Bun.file('tests/fixtures/apple-music/showResponseMock.html').text(),
 ]);
 
 describe('GET /search - Podcast Show', () => {
@@ -46,10 +37,7 @@ describe('GET /search - Podcast Show', () => {
   afterEach(() => {
     redisGetMock.mockReset();
     redisSetMock.mockReset();
-  });
-
-  afterAll(() => {
-    mock.restore();
+    mock.reset();
   });
 
   it('should return 200', async () => {
@@ -57,10 +45,10 @@ describe('GET /search - Podcast Show', () => {
     const query = 'Waveform: The MKBHD Podcast';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
-    const youtubeSearchLink = getYoutubeSearchLink(query, 'channel');
+    const youtubeSearchLink = getYouTubeSearchLink(query, 'channel');
     const deezerSearchLink = getDeezerSearchLink(query, 'podcast');
 
-    const request = JSONRequest(SEARCH_ENDPOINT, { spotifyLink });
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink });
 
     mock.onGet(spotifyLink).reply(200, spotifyShowHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicShowResponseMock);
@@ -92,10 +80,6 @@ describe('GET /search - Podcast Show', () => {
           isVerified: true,
         },
         {
-          type: 'soundCloud',
-          url: 'https://soundcloud.com/search/sounds?q=Waveform%3A+The+MKBHD+Podcast',
-        },
-        {
           type: 'tidal',
           url: 'https://listen.tidal.com/search?q=Waveform%3A+The+MKBHD+Podcast',
         },
@@ -104,5 +88,6 @@ describe('GET /search - Podcast Show', () => {
 
     expect(redisGetMock).toHaveBeenCalledTimes(2);
     expect(redisSetMock).toHaveBeenCalledTimes(2);
+    expect(mock.history.get).toHaveLength(4);
   });
 });

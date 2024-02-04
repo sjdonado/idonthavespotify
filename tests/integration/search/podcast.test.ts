@@ -1,13 +1,4 @@
-import {
-  beforeAll,
-  afterEach,
-  afterAll,
-  describe,
-  expect,
-  it,
-  spyOn,
-  jest,
-} from 'bun:test';
+import { beforeAll, afterEach, describe, expect, it, spyOn, jest } from 'bun:test';
 
 import axios from 'axios';
 import Redis from 'ioredis';
@@ -17,19 +8,23 @@ import { app } from '~/index';
 
 import { JSONRequest } from '../../utils/request';
 import {
-  SEARCH_ENDPOINT,
+  API_SEARCH_ENDPOINT,
   getAppleMusicSearchLink,
-  getYoutubeSearchLink,
+  getSoundCloudSearchLink,
+  getYouTubeSearchLink,
 } from '../../utils/shared';
 
-import youtubePodcastResponseMock from '../../fixtures/youtube/youtubePodcastResponseMock.json';
+import youtubePodcastResponseMock from '../../fixtures/youtube/podcastResponseMock.json';
 
-const [spotifyPodcastHeadResponseMock, appleMusicPodcastResponseMock] = await Promise.all(
-  [
-    Bun.file('tests/fixtures/spotify/spotifyPodcastHeadResponseMock.html').text(),
-    Bun.file('tests/fixtures/apple-music/appleMusicPodcastResponseMock.html').text(),
-  ]
-);
+const [
+  spotifyPodcastHeadResponseMock,
+  appleMusicPodcastResponseMock,
+  soundCloudPodcastResponseMock,
+] = await Promise.all([
+  Bun.file('tests/fixtures/spotify/podcastHeadResponseMock.html').text(),
+  Bun.file('tests/fixtures/apple-music/podcastResponseMock.html').text(),
+  Bun.file('tests/fixtures/soundcloud/emptyResponseMock.html').text(),
+]);
 
 describe('GET /search - Podcast Episode', () => {
   let mock: AxiosMockAdapter;
@@ -46,10 +41,7 @@ describe('GET /search - Podcast Episode', () => {
   afterEach(() => {
     redisGetMock.mockReset();
     redisSetMock.mockReset();
-  });
-
-  afterAll(() => {
-    mock.restore();
+    mock.reset();
   });
 
   it('should return 200', async () => {
@@ -57,13 +49,15 @@ describe('GET /search - Podcast Episode', () => {
     const query = 'The End of Twitter as We Know It Waveform: The MKBHD Podcast';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
-    const youtubeSearchLink = getYoutubeSearchLink(query, 'video');
+    const youtubeSearchLink = getYouTubeSearchLink(query, 'video');
+    const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(SEARCH_ENDPOINT, { spotifyLink });
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink });
 
     mock.onGet(spotifyLink).reply(200, spotifyPodcastHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicPodcastResponseMock);
     mock.onGet(youtubeSearchLink).reply(200, youtubePodcastResponseMock);
+    mock.onGet(soundCloudSearchLink).reply(200, soundCloudPodcastResponseMock);
 
     redisGetMock.mockResolvedValue(0);
     redisSetMock.mockResolvedValue('');
@@ -87,10 +81,6 @@ describe('GET /search - Podcast Episode', () => {
           isVerified: true,
         },
         {
-          type: 'soundCloud',
-          url: 'https://soundcloud.com/search/sounds?q=The+End+of+Twitter+as+We+Know+It+Waveform%3A+The+MKBHD+Podcast',
-        },
-        {
           type: 'tidal',
           url: 'https://listen.tidal.com/search?q=The+End+of+Twitter+as+We+Know+It+Waveform%3A+The+MKBHD+Podcast',
         },
@@ -99,5 +89,6 @@ describe('GET /search - Podcast Episode', () => {
 
     expect(redisGetMock).toHaveBeenCalledTimes(2);
     expect(redisSetMock).toHaveBeenCalledTimes(2);
+    expect(mock.history.get).toHaveLength(4);
   });
 });
