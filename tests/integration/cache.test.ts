@@ -1,13 +1,4 @@
-import {
-  beforeAll,
-  afterEach,
-  afterAll,
-  describe,
-  expect,
-  it,
-  spyOn,
-  jest,
-} from 'bun:test';
+import { beforeAll, afterEach, describe, expect, it, spyOn, jest } from 'bun:test';
 
 import axios from 'axios';
 import Redis from 'ioredis';
@@ -16,10 +7,10 @@ import AxiosMockAdapter from 'axios-mock-adapter';
 import { app } from '~/index';
 
 import { JSONRequest } from '../utils/request';
-import { SEARCH_ENDPOINT, cachedResponse, cachedSpotifyLink } from '../utils/shared';
+import { API_SEARCH_ENDPOINT, cachedResponse, cachedSpotifyLink } from '../utils/shared';
 
 const spotifySongHeadResponseMock = await Bun.file(
-  'tests/fixtures/spotify/spotifySongHeadResponseMock.html'
+  'tests/fixtures/spotify/songHeadResponseMock.html'
 ).text();
 
 describe('Searches cache', () => {
@@ -37,14 +28,11 @@ describe('Searches cache', () => {
   afterEach(() => {
     redisGetMock.mockReset();
     redisSetMock.mockReset();
-  });
-
-  afterAll(() => {
-    mock.restore();
+    mock.reset();
   });
 
   it('should return 200 from cache', async () => {
-    const request = JSONRequest(SEARCH_ENDPOINT, { spotifyLink: cachedSpotifyLink });
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink: cachedSpotifyLink });
 
     mock.onGet(cachedSpotifyLink).reply(200, spotifySongHeadResponseMock);
 
@@ -62,10 +50,11 @@ describe('Searches cache', () => {
       ['idonthavespotify:searchCount'],
     ]);
     expect(redisSetMock).toHaveBeenCalledTimes(1);
+    expect(mock.history.get.length).toBe(0);
   });
 
   it('should return 200 from cache and increase search count', async () => {
-    const request = JSONRequest(SEARCH_ENDPOINT, { spotifyLink: cachedSpotifyLink });
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink: cachedSpotifyLink });
     const searchCount = 2;
 
     mock.onGet(cachedSpotifyLink).reply(200, spotifySongHeadResponseMock);
@@ -87,5 +76,6 @@ describe('Searches cache', () => {
     expect(redisSetMock.mock.calls).toEqual([
       ['idonthavespotify:searchCount', `${searchCount + 1}`],
     ]);
+    expect(mock.history.get.length).toBe(0);
   });
 });

@@ -1,13 +1,4 @@
-import {
-  beforeAll,
-  afterEach,
-  afterAll,
-  describe,
-  expect,
-  it,
-  spyOn,
-  jest,
-} from 'bun:test';
+import { beforeAll, afterEach, describe, expect, it, spyOn, jest } from 'bun:test';
 
 import axios from 'axios';
 import Redis from 'ioredis';
@@ -17,18 +8,24 @@ import { app } from '~/index';
 
 import { JSONRequest } from '../../utils/request';
 import {
-  SEARCH_ENDPOINT,
+  API_SEARCH_ENDPOINT,
   getAppleMusicSearchLink,
   getDeezerSearchLink,
-  getYoutubeSearchLink,
+  getSoundCloudSearchLink,
+  getYouTubeSearchLink,
 } from '../../utils/shared';
 
-import youtubeArtistResponseMock from '../../fixtures/youtube/youtubeArtistResponseMock.json';
-import deezerArtistResponseMock from '../../fixtures/deezer/deezerArtistResponseMock.json';
+import youtubeArtistResponseMock from '../../fixtures/youtube/artistResponseMock.json';
+import deezerArtistResponseMock from '../../fixtures/deezer/artistResponseMock.json';
 
-const [spotifyArtistHeadResponseMock, appleMusicArtistResponseMock] = await Promise.all([
-  Bun.file('tests/fixtures/spotify/spotifyArtistHeadResponseMock.html').text(),
-  Bun.file('tests/fixtures/apple-music/appleMusicArtistResponseMock.html').text(),
+const [
+  spotifyArtistHeadResponseMock,
+  appleMusicArtistResponseMock,
+  soundCloudArtistResponseMock,
+] = await Promise.all([
+  Bun.file('tests/fixtures/spotify/artistHeadResponseMock.html').text(),
+  Bun.file('tests/fixtures/apple-music/artistResponseMock.html').text(),
+  Bun.file('tests/fixtures/soundcloud/artistResponseMock.html').text(),
 ]);
 
 describe('GET /search - Artist', () => {
@@ -46,10 +43,7 @@ describe('GET /search - Artist', () => {
   afterEach(() => {
     redisGetMock.mockReset();
     redisSetMock.mockReset();
-  });
-
-  afterAll(() => {
-    mock.restore();
+    mock.reset();
   });
 
   it('should return 200', async () => {
@@ -57,15 +51,17 @@ describe('GET /search - Artist', () => {
     const query = 'J. Cole';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
-    const youtubeSearchLink = getYoutubeSearchLink(`${query} official`, 'channel');
+    const youtubeSearchLink = getYouTubeSearchLink(`${query} official`, 'channel');
     const deezerSearchLink = getDeezerSearchLink(query, 'artist');
+    const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(SEARCH_ENDPOINT, { spotifyLink });
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink });
 
     mock.onGet(spotifyLink).reply(200, spotifyArtistHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicArtistResponseMock);
     mock.onGet(youtubeSearchLink).reply(200, youtubeArtistResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerArtistResponseMock);
+    mock.onGet(soundCloudSearchLink).reply(200, soundCloudArtistResponseMock);
 
     redisGetMock.mockResolvedValue(0);
     redisSetMock.mockResolvedValue('');
@@ -97,7 +93,8 @@ describe('GET /search - Artist', () => {
         },
         {
           type: 'soundCloud',
-          url: 'https://soundcloud.com/search/sounds?q=J.+Cole',
+          url: 'https://soundcloud.com/j-cole',
+          isVerified: true,
         },
         {
           type: 'tidal',
@@ -108,5 +105,6 @@ describe('GET /search - Artist', () => {
 
     expect(redisGetMock).toHaveBeenCalledTimes(2);
     expect(redisSetMock).toHaveBeenCalledTimes(2);
+    expect(mock.history.get).toHaveLength(5);
   });
 });

@@ -68,7 +68,7 @@ export async function getYouTubeLink(query: string, metadata: SpotifyMetadata) {
     };
 
     if (!responseMatchesQuery(snippet.title, query)) {
-      return;
+      throw new Error(`Query does not match: ${JSON.stringify(snippet)}`);
     }
 
     return {

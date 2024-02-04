@@ -1,13 +1,4 @@
-import {
-  beforeAll,
-  afterEach,
-  afterAll,
-  describe,
-  expect,
-  it,
-  spyOn,
-  jest,
-} from 'bun:test';
+import { beforeAll, afterEach, describe, expect, it, spyOn, jest } from 'bun:test';
 
 import axios from 'axios';
 import Redis from 'ioredis';
@@ -17,20 +8,25 @@ import { app } from '~/index';
 
 import { JSONRequest } from '../../utils/request';
 import {
-  SEARCH_ENDPOINT,
+  API_SEARCH_ENDPOINT,
   getAppleMusicSearchLink,
   getDeezerSearchLink,
-  getYoutubeSearchLink,
+  getSoundCloudSearchLink,
+  getYouTubeSearchLink,
 } from '../../utils/shared';
 
-import youtubePlaylistResponseMock from '../../fixtures/youtube/youtubePlaylistResponseMock.json';
-import deezerPlaylistResponseMock from '../../fixtures/deezer/deezerPlaylistResponseMock.json';
+import youtubePlaylistResponseMock from '../../fixtures/youtube/playlistResponseMock.json';
+import deezerPlaylistResponseMock from '../../fixtures/deezer/playlistResponseMock.json';
 
-const [spotifyPlaylistHeadResponseMock, appleMusicPlaylistResponseMock] =
-  await Promise.all([
-    Bun.file('tests/fixtures/spotify/spotifyPlaylistHeadResponseMock.html').text(),
-    Bun.file('tests/fixtures/apple-music/appleMusicPlaylistResponseMock.html').text(),
-  ]);
+const [
+  spotifyPlaylistHeadResponseMock,
+  appleMusicPlaylistResponseMock,
+  soundCloudPlaylistResponseMock,
+] = await Promise.all([
+  Bun.file('tests/fixtures/spotify/playlistHeadResponseMock.html').text(),
+  Bun.file('tests/fixtures/apple-music/playlistResponseMock.html').text(),
+  Bun.file('tests/fixtures/soundcloud/playlistResponseMock.html').text(),
+]);
 
 describe('GET /search - Playlist', () => {
   let mock: AxiosMockAdapter;
@@ -47,10 +43,7 @@ describe('GET /search - Playlist', () => {
   afterEach(() => {
     redisGetMock.mockReset();
     redisSetMock.mockReset();
-  });
-
-  afterAll(() => {
-    mock.restore();
+    mock.reset();
   });
 
   it('should return 200', async () => {
@@ -58,15 +51,17 @@ describe('GET /search - Playlist', () => {
     const query = 'This Is Bad Bunny Playlist';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
-    const youtubeSearchLink = getYoutubeSearchLink(query, 'playlist');
+    const youtubeSearchLink = getYouTubeSearchLink(query, 'playlist');
     const deezerSearchLink = getDeezerSearchLink(query, 'playlist');
+    const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(SEARCH_ENDPOINT, { spotifyLink });
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink });
 
     mock.onGet(spotifyLink).reply(200, spotifyPlaylistHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicPlaylistResponseMock);
     mock.onGet(youtubeSearchLink).reply(200, youtubePlaylistResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerPlaylistResponseMock);
+    mock.onGet(soundCloudSearchLink).reply(200, soundCloudPlaylistResponseMock);
 
     redisGetMock.mockResolvedValue(0);
     redisSetMock.mockResolvedValue('');
@@ -82,6 +77,11 @@ describe('GET /search - Playlist', () => {
       source: 'https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ',
       links: [
         {
+          type: 'appleMusic',
+          url: 'https://music.apple.com/ca/search?term=This%20Is%20Bad%20Bunny%20Playlist',
+          isVerified: false,
+        },
+        {
           type: 'youTube',
           url: 'https://www.youtube.com/playlist?list=PLIqoag_AY7ykvJKLrUzfvX7pXS-YMIDfR',
           isVerified: true,
@@ -93,7 +93,8 @@ describe('GET /search - Playlist', () => {
         },
         {
           type: 'soundCloud',
-          url: 'https://soundcloud.com/search/sounds?q=This+Is+Bad+Bunny+Playlist',
+          url: 'https://soundcloud.com/search?q=This+Is+Bad+Bunny+Playlist',
+          isVerified: false,
         },
         {
           type: 'tidal',
@@ -104,5 +105,6 @@ describe('GET /search - Playlist', () => {
 
     expect(redisGetMock).toHaveBeenCalledTimes(2);
     expect(redisSetMock).toHaveBeenCalledTimes(2);
+    expect(mock.history.get).toHaveLength(5);
   });
 });

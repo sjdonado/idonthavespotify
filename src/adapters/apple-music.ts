@@ -11,12 +11,10 @@ import { SpotifyContentLink, SpotifyContentLinkType } from '~/services/search';
 export const APPLE_MUSIC_LINK_SELECTOR = 'a[href^="https://music.apple.com/"]';
 
 export async function getAppleMusicLink(query: string, metadata: SpotifyMetadata) {
-  const params = new URLSearchParams({
-    term: query,
-  });
+  // apple music does not support x-www-form-urlencoded encoding
+  const params = `term=${encodeURIComponent(query)}`;
 
-  const url = new URL(`${config.services.appleMusic.apiUrl}/search`);
-  url.search = params.toString();
+  const url = new URL(`${config.services.appleMusic.apiUrl}/search?${params}`);
 
   try {
     const html = await HttpClient.get<string>(url.toString());
@@ -59,18 +57,18 @@ export async function getAppleMusicLink(query: string, metadata: SpotifyMetadata
 
     const { title, href } = appleMusicDataByType[metadata.type] ?? {};
 
-    if (!responseMatchesQuery(title ?? '', query)) {
-      return;
+    if (!title || !href) {
+      throw new Error('No results found');
     }
+
+    const isVerified = responseMatchesQuery(title ?? '', query);
 
     return {
       type: SpotifyContentLinkType.AppleMusic,
-      url: href ?? url,
-      isVerified: Boolean(href),
+      url: isVerified ? href : url.toString(),
+      isVerified,
     } as SpotifyContentLink;
   } catch (err) {
     logger.error(`[Apple Music] (${url}) ${err}`);
-
-    return;
   }
 }

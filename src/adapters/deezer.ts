@@ -47,13 +47,13 @@ export async function getDeezerLink(query: string, metadata: SpotifyMetadata) {
     const response = await HttpClient.get<DeezerSearchResponse>(url.toString());
 
     if (response.total === 0) {
-      throw new Error(`No results found: ${JSON.stringify(response, null, 2)}`);
+      throw new Error(`No results found: ${JSON.stringify(response)}`);
     }
 
     const [{ title, name, link }] = response.data;
 
     if (!responseMatchesQuery(title ?? name ?? '', query)) {
-      return;
+      throw new Error(`Query does not match: ${JSON.stringify({ title, name })}`);
     }
 
     return {
