@@ -1,10 +1,11 @@
 ---
-name: 'deploy to donado.co'
+name: Deploy to donado.co
 
 on:
-  push:
-    branches:
-      - master
+  workflow_run:
+    workflows: ['Run tests']
+    types:
+      - completed
 
 jobs:
   deploy:

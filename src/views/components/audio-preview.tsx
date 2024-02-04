@@ -24,7 +24,6 @@ export default function AudioPreview(props: {
           </svg>
         </div>
       </div>
-      <script src="/assets/js/audio-preview.min.js" defer></script>
     </>
   ) : (
     <img class="m-4 w-48" src={props.image} alt={props.title} />

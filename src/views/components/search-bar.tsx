@@ -9,7 +9,7 @@ export default function SearchBar() {
         hx-target="#search-results"
         hx-swap="innerHTML"
         hx-indicator="#loading-indicator"
-        hx-request='\"timeout\":12000'
+        hx-request='\"timeout\":24000'
         class="flex w-full max-w-3xl items-center justify-center"
       >
         <label for="song-link" class="sr-only">
@@ -34,7 +34,6 @@ export default function SearchBar() {
       <div class="my-4">
         <div id="search-results"></div>
       </div>
-      <script src="/assets/js/search-bar.min.js" defer></script>
     </>
   );
 }

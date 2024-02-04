@@ -23,17 +23,18 @@ export const getSpotifySearchFromCache = async (id: string) => {
   return JSON.parse(cache) as SpotifyContent;
 };
 
-export const cacheSpotifyAccessToken = async (
-  accessToken: string,
-  expiration: number
-) => {
-  return setWithKey(
-    `${config.redis.cacheKey}:spotifyAccessToken`,
-    accessToken,
-    expiration
-  );
-};
-
-export const getSpotifyAccessToken = async () => {
-  return getByKey(`${config.redis.cacheKey}:spotifyAccessToken`);
-};
+// TODO: https://github.com/sjdonado/idonthavespotify/issues/6
+// export const cacheSpotifyAccessToken = async (
+//   accessToken: string,
+//   expiration: number
+// ) => {
+//   return setWithKey(
+//     `${config.redis.cacheKey}:spotifyAccessToken`,
+//     accessToken,
+//     expiration
+//   );
+// };
+//
+// export const getSpotifyAccessToken = async () => {
+//   return getByKey(`${config.redis.cacheKey}:spotifyAccessToken`);
+// };

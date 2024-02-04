@@ -17,8 +17,6 @@ export const formDataRequest = (endpoint: string, body: object) => {
 
   return new Request(endpoint, {
     method: 'POST',
-    // eslint-disable-next-line
-    // @ts-ignore
     body: formData,
   });
 };

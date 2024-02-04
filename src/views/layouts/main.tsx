@@ -46,6 +46,8 @@ export default function MainLayout(props: { children: JSX.Element }) {
         src="https://kit.fontawesome.com/f559975e2f.js"
         crossorigin="anonymous"
       />
+      <script src="/assets/js/audio-preview.min.js" defer></script>
+      <script src="/assets/js/search-bar.min.js" defer></script>
     </html>
   );
 }

@@ -21,10 +21,10 @@ import { app } from '~/index';
 const INDEX_ENDPOINT = 'http://localhost';
 
 const spotifySongHeadResponseMock = await Bun.file(
-  'tests/fixtures/song/spotifyHeadResponseMock.html'
+  'tests/fixtures/spotify/spotifySongHeadResponseMock.html'
 ).text();
 
-describe('Api router', () => {
+describe('Page router', () => {
   let mock: AxiosMockAdapter;
   let redisSetMock: jest.Mock;
   let redisGetMock: jest.Mock;
