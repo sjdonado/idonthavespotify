@@ -1,4 +1,4 @@
-name: run tests
+name: Run tests
 
 on:
   push:
@@ -7,12 +7,15 @@ on:
     branches: [master]
 
 env:
-  YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
-  YOUTUBE_API_SEARCH_URL: https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q=
-  DEEZER_API_URL: https://api.deezer.com/search
+  YOUTUBE_API_URL: https://www.googleapis.com/youtube/v3
   YOUTUBE_BASE_URL: https://www.youtube.com/
-  APPLE_MUSIC_BASE_URL: https://music.apple.com/us/search?term=
-  TIDAL_BASE_URL: https://listen.tidal.com/search?q=
+  YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+  DEEZER_API_URL: https://api.deezer.com/search
+  TIDAL_AUTH_URL: https://auth.tidal.com/v1/oauth2/token
+  TIDAL_API_URL: https://openapi.tidal.com
+  TIDAL_BASE_URL: https://listen.tidal.com/browse
+  TIDAL_COUNTRY_CODE: US
+  APPLE_MUSIC_API_URL: https://music.apple.com/ca
   SOUNDCLOUD_BASE_URL: https://soundcloud.com/search/sounds?q=
   REDIS_URL: redis://127.0.0.1:6379
 jobs:
