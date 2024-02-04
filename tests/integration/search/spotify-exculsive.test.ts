@@ -81,6 +81,6 @@ describe('GET /search - Spotify Exclusive Content', () => {
 
     expect(redisGetMock).toHaveBeenCalledTimes(2);
     expect(redisSetMock).toHaveBeenCalledTimes(2);
-    expect(mock.history.get).toHaveLength(4);
+    expect(mock.history.get).toHaveLength(3);
   });
 });

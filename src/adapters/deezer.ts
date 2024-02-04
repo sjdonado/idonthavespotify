@@ -29,9 +29,9 @@ const DEEZER_SEARCH_TYPES = {
 };
 
 export async function getDeezerLink(query: string, metadata: SpotifyMetadata) {
-  const type = DEEZER_SEARCH_TYPES[metadata.type];
+  const searchType = DEEZER_SEARCH_TYPES[metadata.type];
 
-  if (!type) {
+  if (!searchType) {
     return;
   }
 
@@ -40,7 +40,7 @@ export async function getDeezerLink(query: string, metadata: SpotifyMetadata) {
     limit: String(ADAPTERS_QUERY_LIMIT),
   });
 
-  const url = new URL(`${config.services.deezer.apiUrl}/${type}`);
+  const url = new URL(`${config.services.deezer.apiUrl}/${searchType}`);
   url.search = params.toString();
 
   try {

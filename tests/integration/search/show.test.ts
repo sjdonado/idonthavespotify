@@ -88,6 +88,6 @@ describe('GET /search - Podcast Show', () => {
 
     expect(redisGetMock).toHaveBeenCalledTimes(2);
     expect(redisSetMock).toHaveBeenCalledTimes(2);
-    expect(mock.history.get).toHaveLength(4);
+    expect(mock.history.get).toHaveLength(3);
   });
 });
