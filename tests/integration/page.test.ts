@@ -1,13 +1,4 @@
-import {
-  beforeAll,
-  afterEach,
-  afterAll,
-  describe,
-  expect,
-  it,
-  spyOn,
-  jest,
-} from 'bun:test';
+import { beforeAll, afterEach, describe, expect, it, spyOn, jest } from 'bun:test';
 
 import axios from 'axios';
 import Redis from 'ioredis';
@@ -21,7 +12,7 @@ import { app } from '~/index';
 const INDEX_ENDPOINT = 'http://localhost';
 
 const spotifySongHeadResponseMock = await Bun.file(
-  'tests/fixtures/spotify/spotifySongHeadResponseMock.html'
+  'tests/fixtures/spotify/songHeadResponseMock.html'
 ).text();
 
 describe('Page router', () => {
@@ -39,10 +30,7 @@ describe('Page router', () => {
   afterEach(() => {
     redisGetMock.mockReset();
     redisSetMock.mockReset();
-  });
-
-  afterAll(() => {
-    mock.restore();
+    mock.reset();
   });
 
   describe('GET /', () => {
@@ -111,7 +99,8 @@ describe('Page router', () => {
         },
         {
           type: 'soundCloud',
-          url: 'https://soundcloud.com/search/sounds?q=Do%20Not%20Disturb%20Drake',
+          url: 'https://soundcloud.com/octobersveryown/drake-do-not-disturb',
+          isVerified: true,
         },
         {
           type: 'tidal',
@@ -154,7 +143,7 @@ describe('Page router', () => {
       );
       expect(searchLinks[3].attribs['aria-label']).toContain('Listen on SoundCloud');
       expect(searchLinks[3].attribs['href']).toBe(
-        'https://soundcloud.com/search/sounds?q=Do%20Not%20Disturb%20Drake'
+        'https://soundcloud.com/octobersveryown/drake-do-not-disturb'
       );
       expect(searchLinks[4].attribs['aria-label']).toContain('Listen on Tidal');
       expect(searchLinks[4].attribs['href']).toBe(
@@ -163,6 +152,7 @@ describe('Page router', () => {
 
       expect(redisGetMock).toHaveBeenCalledTimes(2);
       expect(redisSetMock).toHaveBeenCalledTimes(1);
+      expect(mock.history.get).toHaveLength(0);
     });
 
     it('should return search card when searchLinks are empty', async () => {
@@ -195,6 +185,7 @@ describe('Page router', () => {
 
       expect(redisGetMock).toHaveBeenCalledTimes(2);
       expect(redisSetMock).toHaveBeenCalledTimes(1);
+      expect(mock.history.get).toHaveLength(0);
     });
 
     it('should return error message when sent an invalid spotifyLink', async () => {
@@ -219,6 +210,8 @@ describe('Page router', () => {
 
       const errorMessage = doc('p').text();
       expect(errorMessage).toContain('Something went wrong, try again later.');
+      // two retries
+      expect(mock.history.get).toHaveLength(2);
     });
   });
 });

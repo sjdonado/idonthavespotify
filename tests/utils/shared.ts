@@ -1,7 +1,7 @@
 import * as config from '~/config/default';
 
 export const API_ENDPOINT = 'http://localhost/api';
-export const SEARCH_ENDPOINT = `${API_ENDPOINT}/search?v=1.3`;
+export const API_SEARCH_ENDPOINT = `${API_ENDPOINT}/search?v=1`;
 
 export const cachedSpotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
 
@@ -31,12 +31,17 @@ export const cachedResponse = {
     },
     {
       type: 'soundCloud',
-      url: 'https://soundcloud.com/search/sounds?q=Do%20Not%20Disturb%20Drake',
+      url: 'https://soundcloud.com/octobersveryown/drake-do-not-disturb',
+      isVerified: true,
+    },
+    {
+      type: 'tidal',
+      url: 'https://listen.tidal.com/search?q=Do%20Not%20Disturb%20Drake',
     },
   ],
 };
 
-export const getYoutubeSearchLink = (query: string, type: string) => {
+export const getYouTubeSearchLink = (query: string, type: string) => {
   const params = new URLSearchParams({
     part: 'snippet',
     maxResults: '1',
@@ -67,6 +72,17 @@ export const getDeezerSearchLink = (query: string, type: string) => {
   });
 
   const url = new URL(`${config.services.deezer.apiUrl}/${type}`);
+  url.search = params.toString();
+
+  return url.toString();
+};
+
+export const getSoundCloudSearchLink = (query: string) => {
+  const params = new URLSearchParams({
+    q: query,
+  });
+
+  const url = new URL(`${config.services.soundCloud.baseUrl}/search`);
   url.search = params.toString();
 
   return url.toString();
