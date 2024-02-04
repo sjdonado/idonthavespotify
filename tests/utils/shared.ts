@@ -52,11 +52,9 @@ export const getYoutubeSearchLink = (query: string, type: string) => {
 };
 
 export const getAppleMusicSearchLink = (query: string) => {
-  const params = new URLSearchParams({
-    term: query,
-  });
+  const params = `?term=${encodeURIComponent(query)}`;
 
-  const url = new URL(`${config.services.appleMusic.apiUrl}/search`);
+  const url = new URL(`${config.services.appleMusic.apiUrl}/search${params}`);
   url.search = params.toString();
 
   return url.toString();
