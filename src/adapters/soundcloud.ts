@@ -1,7 +1,4 @@
-import { compareTwoStrings } from 'string-similarity';
-
 import * as config from '~/config/default';
-import { RESPONSE_COMPARE_MIN_SCORE } from '~/config/constants';
 
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
@@ -9,6 +6,7 @@ import { getCheerioDoc } from '~/utils/scraper';
 
 import { SpotifyContentLink, SpotifyContentLinkType } from '~/services/search';
 import { SpotifyMetadata, SpotifyMetadataType } from '~/parsers/spotify';
+import { getResultWithBestScore } from '~/utils/compare';
 
 export async function getSoundCloudLink(query: string, metadata: SpotifyMetadata) {
   if (metadata.type === SpotifyMetadataType.Show) {
@@ -32,29 +30,11 @@ export async function getSoundCloudLink(query: string, metadata: SpotifyMetadata
 
     const listElements = noscriptDoc('ul:nth-of-type(2) li:lt(3) h2 a');
 
-    const bestScore = {
-      href: '',
-      score: 0,
-    };
-
-    listElements.each((i, element) => {
-      const title = noscriptDoc(element).text().trim();
-      const href = noscriptDoc(element).attr('href');
-      const score = compareTwoStrings(title.toLowerCase(), query.toLowerCase());
-
-      if (href && score > bestScore.score) {
-        bestScore.href = href;
-        bestScore.score = score;
-      }
-    });
-
-    if (bestScore.score <= RESPONSE_COMPARE_MIN_SCORE) {
-      throw new Error(`No results found: ${JSON.stringify(bestScore)}`);
-    }
+    const { href } = getResultWithBestScore(noscriptDoc, listElements, query);
 
     return {
       type: SpotifyContentLinkType.SoundCloud,
-      url: `${config.services.soundCloud.baseUrl}${bestScore.href}`,
+      url: `${config.services.soundCloud.baseUrl}${href}`,
       isVerified: true,
     } as SpotifyContentLink;
   } catch (err) {

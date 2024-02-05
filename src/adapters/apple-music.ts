@@ -1,7 +1,5 @@
-import { compareTwoStrings } from 'string-similarity';
-
 import * as config from '~/config/default';
-import { RESPONSE_COMPARE_MIN_SCORE } from '~/config/constants';
+import { DEFAULT_TIMEOUT } from '~/config/constants';
 
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
@@ -9,6 +7,7 @@ import { getCheerioDoc } from '~/utils/scraper';
 
 import { SpotifyMetadata, SpotifyMetadataType } from '~/parsers/spotify';
 import { SpotifyContentLink, SpotifyContentLinkType } from '~/services/search';
+import { getResultWithBestScore } from '~/utils/compare';
 
 export const APPLE_MUSIC_LINK_SELECTOR = 'a[href^="https://music.apple.com/"]';
 
@@ -34,36 +33,20 @@ export async function getAppleMusicLink(query: string, metadata: SpotifyMetadata
   const url = new URL(`${config.services.appleMusic.apiUrl}/search?${params}`);
 
   try {
-    const html = await HttpClient.get<string>(url.toString());
+    const html = await HttpClient.get<string>(url.toString(), {
+      timeout: DEFAULT_TIMEOUT * 2,
+    });
     const doc = getCheerioDoc(html);
 
     const listElements = doc(
       `div[aria-label="${searchType}"] a[href^="https://music.apple.com/"]:lt(3)`
     );
 
-    const bestScore = {
-      href: '',
-      score: 0,
-    };
-
-    listElements.each((i, element) => {
-      const title = doc(element).text().trim();
-      const href = doc(element).attr('href');
-      const score = compareTwoStrings(title.toLowerCase(), query.toLowerCase());
-
-      if (href && score > bestScore.score) {
-        bestScore.href = href;
-        bestScore.score = score;
-      }
-    });
-
-    if (bestScore.score <= RESPONSE_COMPARE_MIN_SCORE) {
-      throw new Error(`No results found: ${JSON.stringify(bestScore)}`);
-    }
+    const { href } = getResultWithBestScore(doc, listElements, query);
 
     return {
       type: SpotifyContentLinkType.AppleMusic,
-      url: bestScore.href,
+      url: href,
       isVerified: true,
     } as SpotifyContentLink;
   } catch (err) {
