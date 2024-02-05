@@ -1,6 +1,7 @@
 import * as config from '~/config/default';
 
 import {
+  DEFAULT_TIMEOUT,
   SPOTIFY_LINK_DESKTOP_REGEX,
   SPOTIFY_LINK_MOBILE_REGEX,
 } from '~/config/constants';
@@ -51,7 +52,10 @@ export async function fetchSpotifyMetadata(spotifyLink: string, retries = 2) {
 
   for (let i = 0; i < retries; i++) {
     try {
-      let html = await HttpClient.get<string>(url, { headers: spotifyHeaders });
+      let html = await HttpClient.get<string>(url, {
+        headers: spotifyHeaders,
+        timeout: DEFAULT_TIMEOUT * 2 * (i + 1),
+      });
 
       logger.info(`[${fetchSpotifyMetadata.name}] parse spotify metadata: ${url}`);
 

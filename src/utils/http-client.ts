@@ -1,13 +1,13 @@
 import axios from 'axios';
 import randUserAgent from 'rand-user-agent';
 
+import { DEFAULT_TIMEOUT } from '~/config/constants';
+
 type HttpClientOptions = {
   payload?: unknown;
   headers?: Record<string, string>;
   timeout?: number;
 };
-
-const DEFAULT_TIMEOUT = 6000;
 
 export default class HttpClient {
   static defaultHeaders = {
