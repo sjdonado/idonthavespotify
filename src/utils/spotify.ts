@@ -42,7 +42,7 @@ import { logger } from '~/utils/logger';
 //   return response.data.access_token;
 // };
 
-export async function fetchSpotifyMetadata(spotifyLink: string, retries = 2) {
+export async function fetchSpotifyMetadata(spotifyLink: string) {
   let url = spotifyLink;
 
   const spotifyHeaders = {
@@ -50,42 +50,33 @@ export async function fetchSpotifyMetadata(spotifyLink: string, retries = 2) {
     // Authorization: `Bearer ${await getOrUpdateSpotifyAccessToken()}`,
   };
 
-  for (let i = 0; i < retries; i++) {
-    try {
-      let html = await HttpClient.get<string>(url, {
-        headers: spotifyHeaders,
-        timeout: DEFAULT_TIMEOUT * 2 * (i + 1),
-      });
+  let html = await HttpClient.get<string>(url, {
+    headers: spotifyHeaders,
+    timeout: DEFAULT_TIMEOUT / 2,
+  });
 
-      logger.info(`[${fetchSpotifyMetadata.name}] parse spotify metadata: ${url}`);
+  logger.info(`[${fetchSpotifyMetadata.name}] parse spotify metadata: ${url}`);
 
-      if (SPOTIFY_LINK_MOBILE_REGEX.test(spotifyLink)) {
-        url = html.match(SPOTIFY_LINK_DESKTOP_REGEX)?.[0] ?? '';
+  if (SPOTIFY_LINK_MOBILE_REGEX.test(spotifyLink)) {
+    url = html.match(SPOTIFY_LINK_DESKTOP_REGEX)?.[0] ?? '';
 
-        if (!url) {
-          throw new Error('Invalid mobile spotify link');
-        }
-
-        // wait a random amount of time to avoid rate limiting
-        await new Promise(res => setTimeout(res, Math.random() * 1000 * (i + 1)));
-
-        logger.info(
-          `[${fetchSpotifyMetadata.name}] parse spotify metadata (desktop): ${url}`
-        );
-
-        html = await HttpClient.get<string>(url, { headers: spotifyHeaders });
-      }
-
-      return { html, url };
-    } catch (err) {
-      logger.error(`[${fetchSpotifyMetadata.name}] Attempt ${i + 1} failed. Retrying...`);
-      logger.error(err);
-
-      await new Promise(res => setTimeout(res, 1000 * (i + 1)));
+    if (!url) {
+      throw new Error('Invalid mobile spotify link');
     }
+
+    // wait a random amount of time to avoid rate limiting
+    await new Promise(res => setTimeout(res, Math.random() * 1000));
+
+    logger.info(
+      `[${fetchSpotifyMetadata.name}] parse spotify metadata (desktop): ${url}`
+    );
+
+    html = await HttpClient.get<string>(url, {
+      headers: spotifyHeaders,
+      timeout: DEFAULT_TIMEOUT / 2,
+      retries: 2,
+    });
   }
 
-  throw new Error(
-    `[${fetchSpotifyMetadata.name}] Failed to fetch Spotify metadata after ${retries} retries`
-  );
+  return { html, url };
 }

@@ -210,8 +210,7 @@ describe('Page router', () => {
 
       const errorMessage = doc('p').text();
       expect(errorMessage).toContain('Something went wrong, try again later.');
-      // two retries
-      expect(mock.history.get).toHaveLength(2);
+      expect(mock.history.get).toHaveLength(1);
     });
   });
 });

@@ -3,10 +3,13 @@ import randUserAgent from 'rand-user-agent';
 
 import { DEFAULT_TIMEOUT } from '~/config/constants';
 
+import { logger } from '~/utils/logger';
+
 type HttpClientOptions = {
   payload?: unknown;
   headers?: Record<string, string>;
   timeout?: number;
+  retries?: number;
 };
 
 export default class HttpClient {
@@ -33,15 +36,30 @@ export default class HttpClient {
       ...(options?.headers ?? {}),
     };
 
-    const { data } = await axios.request({
-      url,
-      method,
-      data: options?.payload,
-      headers,
-      timeout: options?.timeout ?? DEFAULT_TIMEOUT,
-      signal: AbortSignal.timeout(options?.timeout ?? DEFAULT_TIMEOUT),
-    });
+    const retries = options?.retries ?? 1;
 
-    return data as T;
+    for (let i = 0; i < retries; i++) {
+      try {
+        const { data } = await axios.request({
+          url,
+          method,
+          data: options?.payload,
+          headers,
+          timeout: options?.timeout ?? DEFAULT_TIMEOUT * (i + 1),
+          signal: AbortSignal.timeout(options?.timeout ?? DEFAULT_TIMEOUT),
+        });
+
+        return data as T;
+      } catch (err) {
+        logger.error(`[${HttpClient.request.name}] Attempt ${i + 1} failed. Retrying...`);
+        logger.error(err);
+
+        await new Promise(res => setTimeout(res, 1000 * (i + 1)));
+      }
+    }
+
+    throw new Error(
+      `[${HttpClient.request.name}] Failed to fetch ${url} after ${retries} retries`
+    );
   }
 }
