@@ -1,7 +1,6 @@
-import { beforeAll, afterEach, describe, expect, it, spyOn, jest } from 'bun:test';
+import { beforeAll, afterEach, describe, expect, it } from 'bun:test';
 
 import axios from 'axios';
-import Redis from 'ioredis';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
 import { getDeezerLink } from '~/adapters/deezer';
@@ -14,19 +13,12 @@ import deezerSongResponseMock from '../fixtures/deezer/songResponseMock.json';
 
 describe('Adapter - Deezer', () => {
   let mock: AxiosMockAdapter;
-  let redisSetMock: jest.Mock;
-  let redisGetMock: jest.Mock;
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
-
-    redisSetMock = spyOn(Redis.prototype, 'set');
-    redisGetMock = spyOn(Redis.prototype, 'get');
   });
 
   afterEach(() => {
-    redisGetMock.mockReset();
-    redisSetMock.mockReset();
     mock.reset();
   });
 

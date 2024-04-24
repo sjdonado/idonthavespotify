@@ -1,7 +1,6 @@
-import { beforeAll, afterEach, describe, expect, it, spyOn, jest } from 'bun:test';
+import { beforeAll, afterEach, describe, expect, it } from 'bun:test';
 
 import axios from 'axios';
-import Redis from 'ioredis';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
 import { app } from '~/index';
@@ -30,19 +29,12 @@ const [
 
 describe('GET /search - Playlist', () => {
   let mock: AxiosMockAdapter;
-  let redisSetMock: jest.Mock;
-  let redisGetMock: jest.Mock;
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
-
-    redisSetMock = spyOn(Redis.prototype, 'set');
-    redisGetMock = spyOn(Redis.prototype, 'get');
   });
 
   afterEach(() => {
-    redisGetMock.mockReset();
-    redisSetMock.mockReset();
     mock.reset();
   });
 
@@ -62,9 +54,6 @@ describe('GET /search - Playlist', () => {
     mock.onGet(youtubeSearchLink).reply(200, youtubePlaylistResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerPlaylistResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudPlaylistResponseMock);
-
-    redisGetMock.mockResolvedValue(0);
-    redisSetMock.mockResolvedValue('');
 
     const response = await app.handle(request).then(res => res.json());
 
@@ -98,8 +87,6 @@ describe('GET /search - Playlist', () => {
       ],
     });
 
-    expect(redisGetMock).toHaveBeenCalledTimes(2);
-    expect(redisSetMock).toHaveBeenCalledTimes(2);
     expect(mock.history.get).toHaveLength(5);
   });
 });

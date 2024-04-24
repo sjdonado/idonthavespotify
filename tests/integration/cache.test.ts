@@ -1,7 +1,6 @@
-import { beforeAll, afterEach, describe, expect, it, spyOn, jest } from 'bun:test';
+import { beforeAll, afterEach, describe, expect, it, jest } from 'bun:test';
 
 import axios from 'axios';
-import Redis from 'ioredis';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
 import { app } from '~/index';
@@ -15,19 +14,12 @@ const spotifySongHeadResponseMock = await Bun.file(
 
 describe('Searches cache', () => {
   let mock: AxiosMockAdapter;
-  let redisSetMock: jest.Mock;
-  let redisGetMock: jest.Mock;
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
-
-    redisSetMock = spyOn(Redis.prototype, 'set');
-    redisGetMock = spyOn(Redis.prototype, 'get');
   });
 
   afterEach(() => {
-    redisGetMock.mockReset();
-    redisSetMock.mockReset();
     mock.reset();
   });
 
@@ -36,20 +28,10 @@ describe('Searches cache', () => {
 
     mock.onGet(cachedSpotifyLink).reply(200, spotifySongHeadResponseMock);
 
-    redisGetMock.mockResolvedValueOnce(JSON.stringify(cachedResponse));
-    redisGetMock.mockResolvedValue(1);
-    redisSetMock.mockResolvedValue('');
-
     const response = await app.handle(request).then(res => res.json());
 
     expect(response).toEqual(cachedResponse);
 
-    expect(redisGetMock).toHaveBeenCalledTimes(2);
-    expect(redisGetMock.mock.calls).toEqual([
-      ['idonthavespotify:cache::2KvHC9z14GSl4YpkNMX384'],
-      ['idonthavespotify:searchCount'],
-    ]);
-    expect(redisSetMock).toHaveBeenCalledTimes(1);
     expect(mock.history.get.length).toBe(0);
   });
 
@@ -59,23 +41,10 @@ describe('Searches cache', () => {
 
     mock.onGet(cachedSpotifyLink).reply(200, spotifySongHeadResponseMock);
 
-    redisGetMock.mockResolvedValueOnce(JSON.stringify(cachedResponse));
-    redisGetMock.mockResolvedValue(searchCount);
-    redisSetMock.mockResolvedValue('');
-
     const response = await app.handle(request).then(res => res.json());
 
     expect(response).toEqual(cachedResponse);
 
-    expect(redisGetMock).toHaveBeenCalledTimes(2);
-    expect(redisGetMock.mock.calls).toEqual([
-      ['idonthavespotify:cache::2KvHC9z14GSl4YpkNMX384'],
-      ['idonthavespotify:searchCount'],
-    ]);
-    expect(redisSetMock).toHaveBeenCalledTimes(1);
-    expect(redisSetMock.mock.calls).toEqual([
-      ['idonthavespotify:searchCount', `${searchCount + 1}`],
-    ]);
     expect(mock.history.get.length).toBe(0);
   });
 });

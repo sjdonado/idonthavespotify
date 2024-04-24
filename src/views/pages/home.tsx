@@ -2,7 +2,7 @@ import LoadingIndicator from '../components/loading-indicator';
 import SearchBar from '../components/search-bar';
 import Footer from '../components/footer';
 
-export default function Home(props: { searchCount?: number }) {
+export default function Home() {
   return (
     <div class="flex flex-col overflow-y-auto md:h-screen">
       <LoadingIndicator />
@@ -15,7 +15,7 @@ export default function Home(props: { searchCount?: number }) {
         </div>
         <SearchBar />
       </main>
-      <Footer searchCount={props.searchCount} />
+      <Footer />
     </div>
   );
 }

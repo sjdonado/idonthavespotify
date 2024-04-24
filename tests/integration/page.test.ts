@@ -1,7 +1,6 @@
-import { beforeAll, afterEach, describe, expect, it, spyOn, jest } from 'bun:test';
+import { beforeAll, afterEach, describe, expect, it } from 'bun:test';
 
 import axios from 'axios';
-import Redis from 'ioredis';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
 import { getCheerioDoc } from '~/utils/scraper';
@@ -17,27 +16,18 @@ const spotifySongHeadResponseMock = await Bun.file(
 
 describe('Page router', () => {
   let mock: AxiosMockAdapter;
-  let redisSetMock: jest.Mock;
-  let redisGetMock: jest.Mock;
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
-
-    redisSetMock = spyOn(Redis.prototype, 'set');
-    redisGetMock = spyOn(Redis.prototype, 'get');
   });
 
   afterEach(() => {
-    redisGetMock.mockReset();
-    redisSetMock.mockReset();
     mock.reset();
   });
 
   describe('GET /', () => {
     it('should return landing page', async () => {
       const request = new Request(`${INDEX_ENDPOINT}`);
-
-      redisGetMock.mockResolvedValue(1);
 
       const response = await app.handle(request).then(res => res.text());
       const doc = getCheerioDoc(response);
@@ -51,15 +41,10 @@ describe('Page router', () => {
       expect(footerText).toContain('Status');
       expect(footerText).toContain('View on Raycast');
       expect(footerText).toContain('View on Github');
-
-      expect(redisGetMock).toHaveBeenCalledTimes(1);
-      expect(redisSetMock).toHaveBeenCalledTimes(0);
     });
 
     it('should return error message if searchCount returns error', async () => {
       const request = new Request(`${INDEX_ENDPOINT}`);
-
-      redisGetMock.mockRejectedValueOnce(new Error('Something went wrong'));
 
       const response = app.handle(request).then(res => res.text());
 
@@ -114,10 +99,6 @@ describe('Page router', () => {
 
       mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
 
-      redisGetMock.mockResolvedValueOnce(JSON.stringify(cachedResponse));
-      redisGetMock.mockResolvedValue(1);
-      redisSetMock.mockResolvedValue('');
-
       const response = await app.handle(request).then(res => res.text());
       const doc = getCheerioDoc(response);
 
@@ -150,8 +131,6 @@ describe('Page router', () => {
         'https://listen.tidal.com/search?q=Do%20Not%20Disturb%20Drake'
       );
 
-      expect(redisGetMock).toHaveBeenCalledTimes(2);
-      expect(redisSetMock).toHaveBeenCalledTimes(1);
       expect(mock.history.get).toHaveLength(0);
     });
 
@@ -165,12 +144,6 @@ describe('Page router', () => {
 
       mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
 
-      redisGetMock.mockResolvedValueOnce(
-        JSON.stringify(cachedResponseWithEmptySearchLinks)
-      );
-      redisGetMock.mockResolvedValue(1);
-      redisSetMock.mockResolvedValue('');
-
       const response = await app.handle(request).then(res => res.text());
       const doc = getCheerioDoc(response);
 
@@ -183,8 +156,6 @@ describe('Page router', () => {
 
       expect(searchLinks).toHaveLength(0);
 
-      expect(redisGetMock).toHaveBeenCalledTimes(2);
-      expect(redisSetMock).toHaveBeenCalledTimes(1);
       expect(mock.history.get).toHaveLength(0);
     });
 

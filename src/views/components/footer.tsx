@@ -1,14 +1,9 @@
-export default function Footer(props: { searchCount?: number }) {
+import * as config from '~/config/default';
+
+export default function Footer() {
   return (
     <footer class="mt-2 text-center text-[0.7rem] md:text-sm">
-      {props.searchCount && (
-        <p>
-          {'Queries performed: '}
-          <span class="font-normal" data-testid="search-count">
-            {props.searchCount}
-          </span>
-        </p>
-      )}
+      <p>{config.metadata.appVersion}</p>
       <p class="m-auto flex flex-wrap items-center justify-center text-[0.7rem] font-normal md:text-sm">
         <a
           href="https://uptime.donado.co/status/apps"

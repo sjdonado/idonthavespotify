@@ -1,7 +1,6 @@
-import { beforeAll, afterEach, describe, expect, it, spyOn, jest } from 'bun:test';
+import { beforeAll, afterEach, describe, expect, it } from 'bun:test';
 
 import axios from 'axios';
-import Redis from 'ioredis';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
 import { getYouTubeLink } from '~/adapters/youtube';
@@ -14,19 +13,12 @@ import youTubeSongResponseMock from '../fixtures/youtube/songResponseMock.json';
 
 describe('Adapter - YouTube', () => {
   let mock: AxiosMockAdapter;
-  let redisSetMock: jest.Mock;
-  let redisGetMock: jest.Mock;
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
-
-    redisSetMock = spyOn(Redis.prototype, 'set');
-    redisGetMock = spyOn(Redis.prototype, 'get');
   });
 
   afterEach(() => {
-    redisGetMock.mockReset();
-    redisSetMock.mockReset();
     mock.reset();
   });
 

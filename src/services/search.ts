@@ -6,7 +6,6 @@ import { getQueryFromMetadata } from '~/utils/query';
 import { SpotifyMetadataType, parseSpotifyMetadata } from '~/parsers/spotify';
 
 import { cacheSpotifySearch, getSpotifySearchFromCache } from './cache';
-import { incrementSearchCount } from './statistics';
 
 import { getAppleMusicLink } from '~/adapters/apple-music';
 import { getYouTubeLink } from '~/adapters/youtube';
@@ -44,7 +43,6 @@ export const spotifySearch = async (spotifyLink: string): Promise<SpotifyContent
 
   const cache = await getSpotifySearchFromCache(id);
   if (cache) {
-    await incrementSearchCount();
     logger.info(`[${spotifySearch.name}] loaded from cache: ${spotifyLink}`);
 
     return cache;
@@ -94,7 +92,7 @@ export const spotifySearch = async (spotifyLink: string): Promise<SpotifyContent
     links: links as SpotifyContentLink[],
   };
 
-  await Promise.all([incrementSearchCount(), cacheSpotifySearch(spotifyContent)]);
+  cacheSpotifySearch(spotifyContent);
 
   return spotifyContent;
 };

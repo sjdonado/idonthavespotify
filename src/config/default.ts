@@ -1,3 +1,5 @@
+import version from '../../package.json';
+
 export const services = {
   spotify: {
     authUrl: Bun.env.SPOTIFY_AUTH_URL!,
@@ -24,8 +26,6 @@ export const services = {
   },
 };
 
-export const redis = {
-  url: Bun.env.REDIS_URL!,
-  searchCountKey: 'idonthavespotify:searchCount',
-  cacheKey: 'idonthavespotify:cache:',
+export const metadata = {
+  appVersion: version,
 };

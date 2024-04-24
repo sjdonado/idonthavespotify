@@ -1,26 +1,27 @@
 import * as config from '~/config/default';
 
-import { setWithKey, getByKey } from '~/utils/redis';
 import { SpotifyContent } from './search';
 
-export const cacheSpotifySearch = async (spotifyContent: SpotifyContent) => {
-  return setWithKey(
-    `${config.redis.cacheKey}:${spotifyContent.id}`,
-    JSON.stringify(spotifyContent)
-  );
+const cache = {} as Record<string, string>;
+
+export const cacheSpotifySearch = (spotifyContent: SpotifyContent) => {
+  Object.assign(cache, {
+    [`${spotifyContent.id}`]: JSON.stringify(spotifyContent),
+  });
 };
 
 export const getSpotifySearchFromCache = async (id: string) => {
   if (id.length === 0) {
-    return undefined;
+    return;
   }
 
-  const cache = await getByKey(`${config.redis.cacheKey}:${id}`);
-  if (!cache) {
-    return undefined;
+  const data = cache[id];
+
+  if (!data) {
+    return;
   }
 
-  return JSON.parse(cache) as SpotifyContent;
+  return JSON.parse(data) as SpotifyContent;
 };
 
 // TODO: https://github.com/sjdonado/idonthavespotify/issues/6
