@@ -24,7 +24,7 @@ export const parseSpotifyMetadata = async (spotifyLink: string) => {
 
     const doc = getCheerioDoc(html);
 
-    const title = metaTagContent(doc, 'og:title', 'property');
+    const title = metaTagContent(doc, 'og:title', 'property')?.trim();
     const description = metaTagContent(doc, 'og:description', 'property');
     const image = metaTagContent(doc, 'og:image', 'property');
     const audio = metaTagContent(doc, 'og:audio', 'property');
