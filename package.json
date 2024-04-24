@@ -1,6 +1,6 @@
 {
   "name": "idonthavespotify",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "scripts": {
     "dev": "concurrently \"bun run build:dev\" \"bun run --watch www/bin.ts\"",
     "build:dev": "vite build --mode=development --watch",
@@ -16,6 +16,7 @@
     "elysia": "^1.0.14",
     "pino": "^8.20.0",
     "pino-pretty": "^11.0.0",
+    "puppeteer": "^22.7.0",
     "rand-user-agent": "^2.0.60",
     "string-similarity": "^4.0.4"
   },
