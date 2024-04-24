@@ -1,41 +1,52 @@
-import * as config from '~/config/default';
+import { SearchMetadata } from '~/parsers/spotify';
+import { SearchResult } from './search';
 
-import { SpotifyContent } from './search';
+const inMemoryCache = {} as Record<string, string>;
 
-const cache = {} as Record<string, string>;
-
-export const cacheSpotifySearch = (spotifyContent: SpotifyContent) => {
-  Object.assign(cache, {
-    [`${spotifyContent.id}`]: JSON.stringify(spotifyContent),
+export const cacheSearchMetadata = (searchMetadata: SearchMetadata) => {
+  Object.assign(inMemoryCache, {
+    [`search:${searchMetadata.url}`]: JSON.stringify(searchMetadata),
   });
 };
 
-export const getSpotifySearchFromCache = async (id: string) => {
-  if (id.length === 0) {
-    return;
-  }
-
-  const data = cache[id];
+export const getCachedSearchMetadata = (url: SearchMetadata['url']) => {
+  const data = inMemoryCache[`search:${url}`];
 
   if (!data) {
     return;
   }
 
-  return JSON.parse(data) as SpotifyContent;
+  return JSON.parse(data) as SearchMetadata;
+};
+
+export const cacheSearchResult = (searchResult: SearchResult) => {
+  Object.assign(inMemoryCache, {
+    [`searchResult:${searchResult.id}`]: JSON.stringify(searchResult),
+  });
+};
+
+export const getCachedSearchResult = (id: SearchResult['id']) => {
+  const data = inMemoryCache[`searchResult:${id}`];
+
+  if (!data) {
+    return;
+  }
+
+  return JSON.parse(data) as SearchResult;
 };
 
 // TODO: https://github.com/sjdonado/idonthavespotify/issues/6
-// export const cacheSpotifyAccessToken = async (
-//   accessToken: string,
-//   expiration: number
-// ) => {
-//   return setWithKey(
-//     `${config.redis.cacheKey}:spotifyAccessToken`,
-//     accessToken,
-//     expiration
-//   );
-// };
-//
-// export const getSpotifyAccessToken = async () => {
-//   return getByKey(`${config.redis.cacheKey}:spotifyAccessToken`);
-// };
+/* export const cacheSpotifyAccessToken = async (
+  accessToken: string,
+  expiration: number
+) => {
+  return setWithKey(
+    `${config.redis.cacheKey}:spotifyAccessToken`,
+    accessToken,
+    expiration
+  );
+};
+
+export const getSpotifyAccessToken = async () => {
+  return getByKey(`${config.redis.cacheKey}:spotifyAccessToken`);
+}; */

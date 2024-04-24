@@ -1,3 +1,4 @@
+import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
 import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
 import { fetchSpotifyMetadata } from '~/utils/spotify';
 
@@ -18,7 +19,17 @@ export type SpotifyMetadata = {
   audio?: string;
 };
 
+export type SearchMetadata = {
+  url: string;
+  metadata: SpotifyMetadata;
+};
+
 export const parseSpotifyMetadata = async (spotifyLink: string) => {
+  const cached = getCachedSearchMetadata(spotifyLink);
+  if (cached) {
+    return cached;
+  }
+
   try {
     const { html, url } = await fetchSpotifyMetadata(spotifyLink);
 
@@ -37,7 +48,7 @@ export const parseSpotifyMetadata = async (spotifyLink: string) => {
       throw new Error('Spotify metadata not found');
     }
 
-    return {
+    const searchMetadata = {
       metadata: {
         title,
         description,
@@ -46,7 +57,11 @@ export const parseSpotifyMetadata = async (spotifyLink: string) => {
         audio,
       },
       url,
-    } as { metadata: SpotifyMetadata; url: string };
+    } as SearchMetadata;
+
+    cacheSearchMetadata(searchMetadata);
+
+    return searchMetadata;
   } catch (err) {
     throw new Error(`[${parseSpotifyMetadata.name}] (${spotifyLink}) ${err}`);
   }

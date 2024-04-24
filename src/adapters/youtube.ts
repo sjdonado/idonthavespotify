@@ -33,7 +33,6 @@ export async function getYouTubeLink(query: string, metadata: SpotifyMetadata) {
 
     const cookies = config.services.youTube.cookies.split('|').map(cookie => {
       const [name, value] = cookie.split(':');
-
       return {
         ...youtubeCookie,
         name,
