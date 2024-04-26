@@ -1,9 +1,10 @@
-import { beforeAll, afterEach, describe, expect, it } from 'bun:test';
+import { beforeAll, afterEach, describe, expect, it, mock, jest } from 'bun:test';
 
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
 import { app } from '~/index';
+import { getLinkWithPuppeteer } from '~/utils/scraper';
 
 import { JSONRequest } from '../../utils/request';
 import {
@@ -14,7 +15,6 @@ import {
   getYouTubeSearchLink,
 } from '../../utils/shared';
 
-import youtubeArtistResponseMock from '../../fixtures/youtube/artistResponseMock.json';
 import deezerArtistResponseMock from '../../fixtures/deezer/artistResponseMock.json';
 
 const [
@@ -27,14 +27,20 @@ const [
   Bun.file('tests/fixtures/soundcloud/artistResponseMock.html').text(),
 ]);
 
+mock.module('~/utils/scraper', () => ({
+  getLinkWithPuppeteer: jest.fn(),
+}));
+
 describe('GET /search - Artist', () => {
   let mock: AxiosMockAdapter;
+  const getLinkWithPuppeteerMock = getLinkWithPuppeteer as jest.Mock;
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
   });
 
   afterEach(() => {
+    getLinkWithPuppeteerMock.mockClear();
     mock.reset();
   });
 
@@ -43,7 +49,7 @@ describe('GET /search - Artist', () => {
     const query = 'J. Cole';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
-    const youtubeSearchLink = getYouTubeSearchLink(`${query} official`, 'channel');
+    const youtubeSearchLink = getYouTubeSearchLink(query, 'channel');
     const deezerSearchLink = getDeezerSearchLink(query, 'artist');
     const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
@@ -51,9 +57,12 @@ describe('GET /search - Artist', () => {
 
     mock.onGet(spotifyLink).reply(200, spotifyArtistHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicArtistResponseMock);
-    mock.onGet(youtubeSearchLink).reply(200, youtubeArtistResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerArtistResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudArtistResponseMock);
+
+    const mockedYoutubeLink =
+      'https://music.youtube.com/channel/UC0ajkOzj8xE3Gs3LHCE243A';
+    getLinkWithPuppeteerMock.mockResolvedValue(mockedYoutubeLink);
 
     const response = await app.handle(request).then(res => res.json());
 
@@ -72,7 +81,7 @@ describe('GET /search - Artist', () => {
         },
         {
           type: 'youTube',
-          url: 'https://www.youtube.com/channel/UCnc6db-y3IU7CkT_yeVXdVg',
+          url: mockedYoutubeLink,
           isVerified: true,
         },
         {
@@ -92,6 +101,12 @@ describe('GET /search - Artist', () => {
       ],
     });
 
-    expect(mock.history.get).toHaveLength(5);
+    expect(mock.history.get).toHaveLength(4);
+    expect(getLinkWithPuppeteerMock).toHaveBeenCalledTimes(1);
+    expect(getLinkWithPuppeteerMock).toHaveBeenCalledWith(
+      expect.stringContaining(youtubeSearchLink),
+      'ytmusic-card-shelf-renderer a',
+      expect.any(Array)
+    );
   });
 });

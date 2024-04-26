@@ -1,9 +1,10 @@
-import { beforeAll, afterEach, describe, expect, it } from 'bun:test';
+import { beforeAll, afterEach, describe, expect, it, mock, jest } from 'bun:test';
 
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
 import { app } from '~/index';
+import { getLinkWithPuppeteer } from '~/utils/scraper';
 
 import { JSONRequest } from '../utils/request';
 import {
@@ -16,7 +17,6 @@ import {
   getYouTubeSearchLink,
 } from '../utils/shared';
 
-import youtubeSongResponseMock from '../fixtures/youtube/songResponseMock.json';
 import deezerSongResponseMock from '../fixtures/deezer/songResponseMock.json';
 
 const [
@@ -31,12 +31,14 @@ const [
 
 describe('Api router', () => {
   let mock: AxiosMockAdapter;
+  const getLinkWithPuppeteerMock = getLinkWithPuppeteer as jest.Mock;
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
   });
 
   afterEach(() => {
+    getLinkWithPuppeteerMock.mockClear();
     mock.reset();
   });
 
@@ -46,7 +48,7 @@ describe('Api router', () => {
       const query = 'Do Not Disturb Drake';
 
       const appleMusicSearchLink = getAppleMusicSearchLink(query);
-      const youtubeSearchLink = getYouTubeSearchLink(query, 'video');
+      const youtubeSearchLink = getYouTubeSearchLink(query, 'song');
       const deezerSearchLink = getDeezerSearchLink(query, 'track');
       const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
@@ -54,9 +56,11 @@ describe('Api router', () => {
 
       mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
       mock.onGet(appleMusicSearchLink).reply(500);
-      mock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
       mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
       mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
+
+      const mockedYoutubeLink = 'https://music.youtube.com/watch?v=zhY_0DoQCQs';
+      getLinkWithPuppeteerMock.mockResolvedValue(mockedYoutubeLink);
 
       const response = await app.handle(request).then(res => res.json());
 
@@ -71,7 +75,7 @@ describe('Api router', () => {
         links: [
           {
             type: 'youTube',
-            url: 'https://www.youtube.com/watch?v=zhY_0DoQCQs',
+            url: mockedYoutubeLink,
             isVerified: true,
           },
           {
@@ -91,7 +95,13 @@ describe('Api router', () => {
         ],
       });
 
-      expect(mock.history.get).toHaveLength(5);
+      expect(mock.history.get).toHaveLength(4);
+      expect(getLinkWithPuppeteerMock).toHaveBeenCalledTimes(1);
+      expect(getLinkWithPuppeteerMock).toHaveBeenCalledWith(
+        expect.stringContaining(youtubeSearchLink),
+        'ytmusic-card-shelf-renderer a',
+        expect.any(Array)
+      );
     });
 
     it('should return 200 when adapter returns error - Youtube', async () => {
@@ -107,21 +117,10 @@ describe('Api router', () => {
 
       mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
       mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
-      mock.onGet(youtubeSearchLink).reply(400, {
-        error: {
-          errors: [
-            {
-              domain: 'youtube.parameter',
-              reason: 'invalidValue',
-              message: "Invalid value for parameter 'videoId'",
-            },
-          ],
-          code: 400,
-          message: "Invalid value for parameter 'videoId'",
-        },
-      });
       mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
       mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
+
+      getLinkWithPuppeteerMock.mockRejectedValue(undefined);
 
       const response = await app.handle(request).then(res => res.json());
 
@@ -156,7 +155,13 @@ describe('Api router', () => {
         ],
       });
 
-      expect(mock.history.get).toHaveLength(5);
+      expect(mock.history.get).toHaveLength(4);
+      expect(getLinkWithPuppeteerMock).toHaveBeenCalledTimes(1);
+      expect(getLinkWithPuppeteerMock).toHaveBeenCalledWith(
+        expect.stringContaining(youtubeSearchLink),
+        'ytmusic-card-shelf-renderer a',
+        expect.any(Array)
+      );
     });
 
     it('should return 200 when adapter returns error - Deezer', async () => {
@@ -172,9 +177,11 @@ describe('Api router', () => {
 
       mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
       mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
-      mock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
       mock.onGet(deezerSearchLink).reply(500);
       mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
+
+      const mockedYoutubeLink = 'https://music.youtube.com/watch?v=zhY_0DoQCQs';
+      getLinkWithPuppeteerMock.mockResolvedValue(mockedYoutubeLink);
 
       const response = await app.handle(request).then(res => res.json());
 
@@ -194,7 +201,7 @@ describe('Api router', () => {
           },
           {
             type: 'youTube',
-            url: 'https://www.youtube.com/watch?v=zhY_0DoQCQs',
+            url: mockedYoutubeLink,
             isVerified: true,
           },
           {
@@ -209,7 +216,13 @@ describe('Api router', () => {
         ],
       });
 
-      expect(mock.history.get).toHaveLength(5);
+      expect(mock.history.get).toHaveLength(4);
+      expect(getLinkWithPuppeteerMock).toHaveBeenCalledTimes(1);
+      expect(getLinkWithPuppeteerMock).toHaveBeenCalledWith(
+        expect.stringContaining(youtubeSearchLink),
+        'ytmusic-card-shelf-renderer a',
+        expect.any(Array)
+      );
     });
 
     it('should return 200 when adapter returns error - SoundCloud', async () => {
@@ -225,9 +238,11 @@ describe('Api router', () => {
 
       mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
       mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
-      mock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
       mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
       mock.onGet(soundCloudSearchLink).reply(500);
+
+      const mockedYoutubeLink = 'https://music.youtube.com/watch?v=zhY_0DoQCQs';
+      getLinkWithPuppeteerMock.mockResolvedValue(mockedYoutubeLink);
 
       const response = await app.handle(request).then(res => res.json());
 
@@ -247,7 +262,7 @@ describe('Api router', () => {
           },
           {
             type: 'youTube',
-            url: 'https://www.youtube.com/watch?v=zhY_0DoQCQs',
+            url: mockedYoutubeLink,
             isVerified: true,
           },
           {
@@ -262,7 +277,13 @@ describe('Api router', () => {
         ],
       });
 
-      expect(mock.history.get).toHaveLength(5);
+      expect(mock.history.get).toHaveLength(4);
+      expect(getLinkWithPuppeteerMock).toHaveBeenCalledTimes(1);
+      expect(getLinkWithPuppeteerMock).toHaveBeenCalledWith(
+        expect.stringContaining(youtubeSearchLink),
+        'ytmusic-card-shelf-renderer a',
+        expect.any(Array)
+      );
     });
 
     it('should return unknown error - could not parse Spotify metadata', async () => {

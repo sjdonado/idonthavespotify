@@ -7,12 +7,12 @@ import { SpotifyContentLink, SpotifyContentLinkType } from '~/services/search';
 import { getLinkWithPuppeteer } from '~/utils/scraper';
 
 const YOUTUBE_SEARCH_TYPES = {
-  [SpotifyMetadataType.Song]: 'video',
-  [SpotifyMetadataType.Album]: 'playlist',
-  [SpotifyMetadataType.Playlist]: 'playlist',
+  [SpotifyMetadataType.Song]: 'song',
+  [SpotifyMetadataType.Album]: 'album',
+  [SpotifyMetadataType.Playlist]: '',
   [SpotifyMetadataType.Artist]: 'channel',
-  [SpotifyMetadataType.Podcast]: 'video',
-  [SpotifyMetadataType.Show]: 'channel',
+  [SpotifyMetadataType.Podcast]: '',
+  [SpotifyMetadataType.Show]: '',
 };
 
 export async function getYouTubeLink(query: string, metadata: SpotifyMetadata) {
@@ -45,6 +45,10 @@ export async function getYouTubeLink(query: string, metadata: SpotifyMetadata) {
       'ytmusic-card-shelf-renderer a',
       cookies
     );
+
+    if (!link) {
+      return;
+    }
 
     return {
       type: SpotifyContentLinkType.YouTube,

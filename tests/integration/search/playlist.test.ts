@@ -1,9 +1,10 @@
-import { beforeAll, afterEach, describe, expect, it } from 'bun:test';
+import { beforeAll, afterEach, describe, expect, it, mock, jest } from 'bun:test';
 
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
 import { app } from '~/index';
+import { getLinkWithPuppeteer } from '~/utils/scraper';
 
 import { JSONRequest } from '../../utils/request';
 import {
@@ -14,7 +15,6 @@ import {
   getYouTubeSearchLink,
 } from '../../utils/shared';
 
-import youtubePlaylistResponseMock from '../../fixtures/youtube/playlistResponseMock.json';
 import deezerPlaylistResponseMock from '../../fixtures/deezer/playlistResponseMock.json';
 
 const [
@@ -27,14 +27,20 @@ const [
   Bun.file('tests/fixtures/soundcloud/playlistResponseMock.html').text(),
 ]);
 
+mock.module('~/utils/scraper', () => ({
+  getLinkWithPuppeteer: jest.fn(),
+}));
+
 describe('GET /search - Playlist', () => {
   let mock: AxiosMockAdapter;
+  const getLinkWithPuppeteerMock = getLinkWithPuppeteer as jest.Mock;
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
   });
 
   afterEach(() => {
+    getLinkWithPuppeteerMock.mockClear();
     mock.reset();
   });
 
@@ -43,7 +49,7 @@ describe('GET /search - Playlist', () => {
     const query = 'This Is Bad Bunny Playlist';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
-    const youtubeSearchLink = getYouTubeSearchLink(query, 'playlist');
+    const youtubeSearchLink = getYouTubeSearchLink(query, '');
     const deezerSearchLink = getDeezerSearchLink(query, 'playlist');
     const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
@@ -51,9 +57,12 @@ describe('GET /search - Playlist', () => {
 
     mock.onGet(spotifyLink).reply(200, spotifyPlaylistHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicPlaylistResponseMock);
-    mock.onGet(youtubeSearchLink).reply(200, youtubePlaylistResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerPlaylistResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudPlaylistResponseMock);
+
+    const mockedYoutubeLink =
+      'https://music.youtube.com/playlist?list=RDCLAK5uy_k3jElZuYeDhqZsFkUnRf519q4CD52CaRY';
+    getLinkWithPuppeteerMock.mockResolvedValue(mockedYoutubeLink);
 
     const response = await app.handle(request).then(res => res.json());
 
@@ -67,7 +76,7 @@ describe('GET /search - Playlist', () => {
       links: [
         {
           type: 'youTube',
-          url: 'https://www.youtube.com/playlist?list=PLIqoag_AY7ykvJKLrUzfvX7pXS-YMIDfR',
+          url: mockedYoutubeLink,
           isVerified: true,
         },
         {
@@ -87,6 +96,12 @@ describe('GET /search - Playlist', () => {
       ],
     });
 
-    expect(mock.history.get).toHaveLength(5);
+    expect(mock.history.get).toHaveLength(4);
+    expect(getLinkWithPuppeteerMock).toHaveBeenCalledTimes(1);
+    expect(getLinkWithPuppeteerMock).toHaveBeenCalledWith(
+      expect.stringContaining(youtubeSearchLink),
+      'ytmusic-card-shelf-renderer a',
+      expect.any(Array)
+    );
   });
 });

@@ -1,9 +1,10 @@
-import { beforeAll, afterEach, describe, expect, it } from 'bun:test';
+import { beforeAll, afterEach, describe, expect, it, mock, jest } from 'bun:test';
 
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
 import { app } from '~/index';
+import { getLinkWithPuppeteer } from '~/utils/scraper';
 
 import { JSONRequest } from '../../utils/request';
 import {
@@ -14,7 +15,6 @@ import {
   getYouTubeSearchLink,
 } from '../../utils/shared';
 
-import youtubeExclusiveContentResponseMock from '../../fixtures/youtube/emptyResponseMock.json';
 import deezerExclusiveContentResponseMock from '../../fixtures/deezer/emptyResponseMock.json';
 
 const [
@@ -27,14 +27,20 @@ const [
   Bun.file('tests/fixtures/soundcloud/emptyResponseMock.html').text(),
 ]);
 
+mock.module('~/utils/scraper', () => ({
+  getLinkWithPuppeteer: jest.fn(),
+}));
+
 describe('GET /search - Spotify Exclusive Content', () => {
   let mock: AxiosMockAdapter;
+  const getLinkWithPuppeteerMock = getLinkWithPuppeteer as jest.Mock;
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
   });
 
   afterEach(() => {
+    getLinkWithPuppeteerMock.mockClear();
     mock.reset();
   });
 
@@ -43,7 +49,7 @@ describe('GET /search - Spotify Exclusive Content', () => {
     const query = 'The Louis Theroux Podcast';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
-    const youtubeSearchLink = getYouTubeSearchLink(query, 'channel');
+    const youtubeSearchLink = getYouTubeSearchLink(query, '');
     const deezerSearchLink = getDeezerSearchLink(query, 'podcast');
     const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
@@ -51,9 +57,10 @@ describe('GET /search - Spotify Exclusive Content', () => {
 
     mock.onGet(spotifyLink).reply(200, spotifyExclusiveContentHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicExclusiveContentResponseMock);
-    mock.onGet(youtubeSearchLink).reply(200, youtubeExclusiveContentResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerExclusiveContentResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudExclusiveContentResponseMock);
+
+    getLinkWithPuppeteerMock.mockResolvedValue(undefined);
 
     const response = await app.handle(request).then(res => res.json());
 
@@ -68,6 +75,12 @@ describe('GET /search - Spotify Exclusive Content', () => {
       links: [],
     });
 
-    expect(mock.history.get).toHaveLength(3);
+    expect(mock.history.get).toHaveLength(2);
+    expect(getLinkWithPuppeteerMock).toHaveBeenCalledTimes(1);
+    expect(getLinkWithPuppeteerMock).toHaveBeenCalledWith(
+      expect.stringContaining(youtubeSearchLink),
+      'ytmusic-card-shelf-renderer a',
+      expect.any(Array)
+    );
   });
 });

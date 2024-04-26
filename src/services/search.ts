@@ -41,7 +41,7 @@ export interface SearchResult {
 export const spotifySearch = async (spotifyLink: string): Promise<SearchResult> => {
   const id = spotifyLink.match(SPOTIFY_LINK_REGEX)?.[3] ?? '';
 
-  const cache = await getCachedSearchResult(id);
+  const cache = getCachedSearchResult(id);
   if (cache) {
     logger.info(`[${spotifySearch.name}] loaded from cache: ${spotifyLink}`);
     return cache;
