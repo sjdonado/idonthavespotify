@@ -62,7 +62,7 @@ describe('GET /search - Artist', () => {
 
     const mockedYoutubeLink =
       'https://music.youtube.com/channel/UC0ajkOzj8xE3Gs3LHCE243A';
-    getLinkWithPuppeteerMock.mockResolvedValue(mockedYoutubeLink);
+    getLinkWithPuppeteerMock.mockResolvedValueOnce(mockedYoutubeLink);
 
     const response = await app.handle(request).then(res => res.json());
 

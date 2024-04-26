@@ -18,7 +18,7 @@ describe('Searches cache', () => {
   });
 
   it('should return 200 from cache', async () => {
-    getCachedSearchResultMock.mockReturnValue(cachedResponse);
+    getCachedSearchResultMock.mockReturnValueOnce(cachedResponse);
 
     const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink: cachedSpotifyLink });
     const response = await app.handle(request).then(res => res.json());

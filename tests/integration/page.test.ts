@@ -47,7 +47,7 @@ describe('Page router', () => {
     const spotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
 
     it('should return search card with a valid spotifyLink', async () => {
-      getCachedSearchResultMock.mockReturnValue(cachedResponse);
+      getCachedSearchResultMock.mockReturnValueOnce(cachedResponse);
 
       const request = formDataRequest(endpoint, { spotifyLink });
       const response = await app.handle(request).then(res => res.text());
@@ -87,7 +87,7 @@ describe('Page router', () => {
     });
 
     it('should return search card when searchLinks are empty', async () => {
-      getCachedSearchResultMock.mockReturnValue({
+      getCachedSearchResultMock.mockReturnValueOnce({
         ...cachedResponse,
         links: [],
       });
@@ -122,7 +122,7 @@ describe('Page router', () => {
     });
 
     it('should return error message when internal server error', async () => {
-      getCachedSearchResultMock.mockImplementation(() => {
+      getCachedSearchResultMock.mockImplementationOnce(() => {
         throw new Error('Injected Error');
       });
 

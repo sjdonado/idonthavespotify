@@ -24,7 +24,7 @@ describe('Adapter - YouTube', () => {
     const searchLink = getYouTubeSearchLink(query, 'song');
 
     const mockedYoutubeLink = 'https://music.youtube.com/watch?v=zhY_0DoQCQs';
-    getLinkWithPuppeteerMock.mockResolvedValue(mockedYoutubeLink);
+    getLinkWithPuppeteerMock.mockResolvedValueOnce(mockedYoutubeLink);
 
     const youTubeLink = await getYouTubeLink(query, {
       type: SpotifyMetadataType.Song,

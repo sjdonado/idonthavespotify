@@ -62,7 +62,7 @@ describe('GET /search - Playlist', () => {
 
     const mockedYoutubeLink =
       'https://music.youtube.com/playlist?list=RDCLAK5uy_k3jElZuYeDhqZsFkUnRf519q4CD52CaRY';
-    getLinkWithPuppeteerMock.mockResolvedValue(mockedYoutubeLink);
+    getLinkWithPuppeteerMock.mockResolvedValueOnce(mockedYoutubeLink);
 
     const response = await app.handle(request).then(res => res.json());
 

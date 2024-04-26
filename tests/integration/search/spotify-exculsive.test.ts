@@ -60,7 +60,7 @@ describe('GET /search - Spotify Exclusive Content', () => {
     mock.onGet(deezerSearchLink).reply(200, deezerExclusiveContentResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudExclusiveContentResponseMock);
 
-    getLinkWithPuppeteerMock.mockResolvedValue(undefined);
+    getLinkWithPuppeteerMock.mockResolvedValueOnce(undefined);
 
     const response = await app.handle(request).then(res => res.json());
 

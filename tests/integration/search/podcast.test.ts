@@ -57,7 +57,7 @@ describe('GET /search - Podcast Episode', () => {
 
     const mockedYoutubeLink =
       'https://music.youtube.com/watch?v=v4FYdo-oZQk&list=PL70yIS6vx_Y2xaKD3w2qb6Eu06jNBdNJb';
-    getLinkWithPuppeteerMock.mockResolvedValue(mockedYoutubeLink);
+    getLinkWithPuppeteerMock.mockResolvedValueOnce(mockedYoutubeLink);
 
     const response = await app.handle(request).then(res => res.json());
 

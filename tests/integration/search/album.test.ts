@@ -1,4 +1,4 @@
-import { afterEach, beforeAll, describe, expect, it, mock, jest } from 'bun:test';
+import { beforeEach, beforeAll, describe, expect, it, mock, jest } from 'bun:test';
 
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
@@ -39,7 +39,7 @@ describe('GET /search - Album', () => {
     mock = new AxiosMockAdapter(axios);
   });
 
-  afterEach(() => {
+  beforeEach(() => {
     getLinkWithPuppeteerMock.mockClear();
     mock.reset();
   });
@@ -62,7 +62,7 @@ describe('GET /search - Album', () => {
 
     const mockedYoutubeLink =
       'https://music.youtube.com/watch?v=k20wnICXpps&list=OLAK5uy_lRly1oG8OVTI3C2gZv0pPjYxH-Q3U6GrM';
-    getLinkWithPuppeteerMock.mockResolvedValue(mockedYoutubeLink);
+    getLinkWithPuppeteerMock.mockResolvedValueOnce(mockedYoutubeLink);
 
     const response = await app.handle(request).then(res => res.json());
 

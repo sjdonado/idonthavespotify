@@ -45,10 +45,10 @@ describe('GET /search - Song', () => {
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
+    getCachedSearchResultMock.mockReturnValue(undefined);
   });
 
   beforeEach(() => {
-    getCachedSearchResultMock.mockReturnValue(undefined);
     getLinkWithPuppeteerMock.mockClear();
     mock.reset();
   });
