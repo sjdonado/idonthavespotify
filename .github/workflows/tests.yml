@@ -7,28 +7,15 @@ on:
     branches: [master]
 
 env:
-  YOUTUBE_API_URL: https://www.googleapis.com/youtube/v3
-  YOUTUBE_BASE_URL: https://www.youtube.com/
-  YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+  YOUTUBE_MUSIC_URL: https://music.youtube.com/search
+  YOUTUBE_COOKIES: ${{ secrets.YOUTUBE_COOKIES }}
   DEEZER_API_URL: https://api.deezer.com/search
   APPLE_MUSIC_API_URL: https://music.apple.com/ca
   SOUNDCLOUD_BASE_URL: https://soundcloud.com
   TIDAL_BASE_URL: https://listen.tidal.com
-  REDIS_URL: redis://127.0.0.1:6379
 jobs:
   tests:
-    timeout-minutes: 60
     runs-on: ubuntu-latest
-    services:
-      redis:
-        image: redis:7.0-alpine
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
     steps:
       - uses: actions/checkout@v3
       - uses: oven-sh/setup-bun@v1
