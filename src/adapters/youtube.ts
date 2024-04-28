@@ -1,79 +1,58 @@
 import * as config from '~/config/default';
-import { ADAPTERS_QUERY_LIMIT } from '~/config/constants';
 
-import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
-import { responseMatchesQuery } from '~/utils/compare';
 
 import { SpotifyMetadata, SpotifyMetadataType } from '~/parsers/spotify';
 import { SpotifyContentLink, SpotifyContentLinkType } from '~/services/search';
-
-type YoutubeSearchListResponse = {
-  items: [
-    {
-      id: {
-        videoId: string;
-        channelId: string;
-        playlistId: string;
-      };
-      snippet: {
-        title: string;
-      };
-    },
-  ];
-};
+import { getLinkWithPuppeteer } from '~/utils/scraper';
 
 const YOUTUBE_SEARCH_TYPES = {
-  [SpotifyMetadataType.Song]: 'video',
-  [SpotifyMetadataType.Album]: 'playlist',
-  [SpotifyMetadataType.Playlist]: 'playlist',
+  [SpotifyMetadataType.Song]: 'song',
+  [SpotifyMetadataType.Album]: 'album',
+  [SpotifyMetadataType.Playlist]: '',
   [SpotifyMetadataType.Artist]: 'channel',
-  [SpotifyMetadataType.Podcast]: 'video',
-  [SpotifyMetadataType.Show]: 'channel',
+  [SpotifyMetadataType.Podcast]: '',
+  [SpotifyMetadataType.Show]: '',
 };
 
 export async function getYouTubeLink(query: string, metadata: SpotifyMetadata) {
   const params = new URLSearchParams({
-    part: 'snippet',
-    maxResults: String(ADAPTERS_QUERY_LIMIT),
-    q: metadata.type === SpotifyMetadataType.Artist ? `${query} official` : query,
-    type: YOUTUBE_SEARCH_TYPES[metadata.type],
-    key: config.services.youTube.apiKey as string,
+    q: `${query} ${YOUTUBE_SEARCH_TYPES[metadata.type]}`,
   });
 
-  const url = new URL(`${config.services.youTube.apiUrl}/search`);
+  const url = new URL(config.services.youTube.musicUrl);
   url.search = params.toString();
 
   try {
-    const response = await HttpClient.get<YoutubeSearchListResponse>(url.toString());
-
-    if (!response.items?.length) {
-      throw new Error(`No results found: ${JSON.stringify(response)}`);
-    }
-
-    const [
-      {
-        id: { videoId, channelId, playlistId },
-        snippet,
-      },
-    ] = response.items;
-
-    const youtubeLinkByType = {
-      [SpotifyMetadataType.Song]: `${config.services.youTube.baseUrl}watch?v=${videoId}`,
-      [SpotifyMetadataType.Album]: `${config.services.youTube.baseUrl}playlist?list=${playlistId}`,
-      [SpotifyMetadataType.Playlist]: `${config.services.youTube.baseUrl}playlist?list=${playlistId}`,
-      [SpotifyMetadataType.Artist]: `${config.services.youTube.baseUrl}channel/${channelId}`,
-      [SpotifyMetadataType.Podcast]: `${config.services.youTube.baseUrl}watch?v=${videoId}`,
-      [SpotifyMetadataType.Show]: `${config.services.youTube.baseUrl}channel/${channelId}`,
+    const youtubeCookie = {
+      domain: '.youtube.com',
+      path: '/',
+      expires: Date.now() + 365 * 24 * 60 * 60 * 1000,
+      secure: true,
     };
 
-    if (!responseMatchesQuery(snippet.title, query)) {
-      throw new Error(`Query does not match: ${JSON.stringify(snippet)}`);
+    const cookies = config.services.youTube.cookies.split('|').map(cookie => {
+      const [name, value] = cookie.split(':');
+      return {
+        ...youtubeCookie,
+        name,
+        value,
+      };
+    });
+
+    const link = await getLinkWithPuppeteer(
+      url.toString(),
+      'ytmusic-card-shelf-renderer a',
+      cookies
+    );
+
+    if (!link) {
+      return;
     }
 
     return {
       type: SpotifyContentLinkType.YouTube,
-      url: youtubeLinkByType[metadata.type],
+      url: link,
       isVerified: true,
     } as SpotifyContentLink;
   } catch (error) {

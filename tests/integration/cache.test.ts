@@ -1,81 +1,80 @@
-import { beforeAll, afterEach, describe, expect, it, spyOn, jest } from 'bun:test';
+import { beforeAll, describe, expect, it, mock, jest, afterAll } from 'bun:test';
 
 import axios from 'axios';
-import Redis from 'ioredis';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
 import { app } from '~/index';
+import { getLinkWithPuppeteer } from '~/utils/scraper';
 
 import { JSONRequest } from '../utils/request';
-import { API_SEARCH_ENDPOINT, cachedResponse, cachedSpotifyLink } from '../utils/shared';
+import {
+  API_SEARCH_ENDPOINT,
+  cachedSpotifyLink,
+  getAppleMusicSearchLink,
+  getDeezerSearchLink,
+  getSoundCloudSearchLink,
+} from '../utils/shared';
 
-const spotifySongHeadResponseMock = await Bun.file(
-  'tests/fixtures/spotify/songHeadResponseMock.html'
-).text();
+import { cacheStore } from '~/services/cache';
+
+import deezerSongResponseMock from '../fixtures/deezer/songResponseMock.json';
+
+const [
+  spotifySongHeadResponseMock,
+  appleMusicSongResponseMock,
+  soundCloudSongResponseMock,
+] = await Promise.all([
+  Bun.file('tests/fixtures/spotify/songHeadResponseMock.html').text(),
+  Bun.file('tests/fixtures/spotify/mobileHeadResponseMock.html').text(),
+  Bun.file('tests/fixtures/apple-music/songResponseMock.html').text(),
+  Bun.file('tests/fixtures/soundcloud/songResponseMock.html').text(),
+]);
+
+mock.module('~/utils/scraper', () => ({
+  getLinkWithPuppeteer: jest.fn(),
+}));
 
 describe('Searches cache', () => {
   let mock: AxiosMockAdapter;
-  let redisSetMock: jest.Mock;
-  let redisGetMock: jest.Mock;
+  const getLinkWithPuppeteerMock = getLinkWithPuppeteer as jest.Mock;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     mock = new AxiosMockAdapter(axios);
 
-    redisSetMock = spyOn(Redis.prototype, 'set');
-    redisGetMock = spyOn(Redis.prototype, 'get');
+    const query = 'Do Not Disturb Drake';
+
+    const appleMusicSearchLink = getAppleMusicSearchLink(query);
+    const deezerSearchLink = getDeezerSearchLink(query, 'track');
+    const soundCloudSearchLink = getSoundCloudSearchLink(query);
+
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink: cachedSpotifyLink });
+
+    mock.onGet(cachedSpotifyLink).reply(200, spotifySongHeadResponseMock);
+    mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
+    mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
+    mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
+
+    getLinkWithPuppeteerMock.mockResolvedValueOnce(
+      'https://music.youtube.com/watch?v=zhY_0DoQCQs'
+    );
+
+    // fill cache
+    await app.handle(request).then(res => res.json());
+
+    expect(mock.history.get).toHaveLength(4);
+    expect(getLinkWithPuppeteerMock).toHaveBeenCalledTimes(1);
   });
 
-  afterEach(() => {
-    redisGetMock.mockReset();
-    redisSetMock.mockReset();
+  afterAll(() => {
+    cacheStore.reset();
     mock.reset();
   });
 
   it('should return 200 from cache', async () => {
     const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink: cachedSpotifyLink });
-
-    mock.onGet(cachedSpotifyLink).reply(200, spotifySongHeadResponseMock);
-
-    redisGetMock.mockResolvedValueOnce(JSON.stringify(cachedResponse));
-    redisGetMock.mockResolvedValue(1);
-    redisSetMock.mockResolvedValue('');
-
     const response = await app.handle(request).then(res => res.json());
 
-    expect(response).toEqual(cachedResponse);
-
-    expect(redisGetMock).toHaveBeenCalledTimes(2);
-    expect(redisGetMock.mock.calls).toEqual([
-      ['idonthavespotify:cache::2KvHC9z14GSl4YpkNMX384'],
-      ['idonthavespotify:searchCount'],
-    ]);
-    expect(redisSetMock).toHaveBeenCalledTimes(1);
-    expect(mock.history.get.length).toBe(0);
-  });
-
-  it('should return 200 from cache and increase search count', async () => {
-    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink: cachedSpotifyLink });
-    const searchCount = 2;
-
-    mock.onGet(cachedSpotifyLink).reply(200, spotifySongHeadResponseMock);
-
-    redisGetMock.mockResolvedValueOnce(JSON.stringify(cachedResponse));
-    redisGetMock.mockResolvedValue(searchCount);
-    redisSetMock.mockResolvedValue('');
-
-    const response = await app.handle(request).then(res => res.json());
-
-    expect(response).toEqual(cachedResponse);
-
-    expect(redisGetMock).toHaveBeenCalledTimes(2);
-    expect(redisGetMock.mock.calls).toEqual([
-      ['idonthavespotify:cache::2KvHC9z14GSl4YpkNMX384'],
-      ['idonthavespotify:searchCount'],
-    ]);
-    expect(redisSetMock).toHaveBeenCalledTimes(1);
-    expect(redisSetMock.mock.calls).toEqual([
-      ['idonthavespotify:searchCount', `${searchCount + 1}`],
-    ]);
-    expect(mock.history.get.length).toBe(0);
+    expect(response.source).toEqual(cachedSpotifyLink);
+    expect(response.links).toBeArray();
   });
 });

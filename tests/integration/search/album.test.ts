@@ -1,10 +1,11 @@
-import { beforeAll, afterEach, describe, expect, it, spyOn, jest } from 'bun:test';
+import { beforeEach, beforeAll, describe, expect, it, mock, jest } from 'bun:test';
 
 import axios from 'axios';
-import Redis from 'ioredis';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
 import { app } from '~/index';
+import { getLinkWithPuppeteer } from '~/utils/scraper';
+import { cacheStore } from '~/services/cache';
 
 import { JSONRequest } from '../../utils/request';
 import {
@@ -15,7 +16,6 @@ import {
   getYouTubeSearchLink,
 } from '../../utils/shared';
 
-import youtubeAlbumResponseMock from '../../fixtures/youtube/albumResponseMock.json';
 import deezerAlbumResponseMock from '../../fixtures/deezer/albumResponseMock.json';
 
 const [
@@ -28,22 +28,22 @@ const [
   Bun.file('tests/fixtures/soundcloud/albumResponseMock.html').text(),
 ]);
 
+mock.module('~/utils/scraper', () => ({
+  getLinkWithPuppeteer: jest.fn(),
+}));
+
 describe('GET /search - Album', () => {
   let mock: AxiosMockAdapter;
-  let redisSetMock: jest.Mock;
-  let redisGetMock: jest.Mock;
+  const getLinkWithPuppeteerMock = getLinkWithPuppeteer as jest.Mock;
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
-
-    redisSetMock = spyOn(Redis.prototype, 'set');
-    redisGetMock = spyOn(Redis.prototype, 'get');
   });
 
-  afterEach(() => {
-    redisGetMock.mockReset();
-    redisSetMock.mockReset();
+  beforeEach(() => {
+    getLinkWithPuppeteerMock.mockClear();
     mock.reset();
+    cacheStore.reset();
   });
 
   it('should return 200', async () => {
@@ -51,7 +51,7 @@ describe('GET /search - Album', () => {
     const query = 'For All The Dogs Drake';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
-    const youtubeSearchLink = getYouTubeSearchLink(query, 'playlist');
+    const youtubeSearchLink = getYouTubeSearchLink(query, 'album');
     const deezerSearchLink = getDeezerSearchLink(query, 'album');
     const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
@@ -59,12 +59,12 @@ describe('GET /search - Album', () => {
 
     mock.onGet(spotifyLink).reply(200, spotifyAlbumHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicAlbumResponseMock);
-    mock.onGet(youtubeSearchLink).reply(200, youtubeAlbumResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerAlbumResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudAlbumResponseMock);
 
-    redisGetMock.mockResolvedValue(0);
-    redisSetMock.mockResolvedValue('');
+    const mockedYoutubeLink =
+      'https://music.youtube.com/watch?v=k20wnICXpps&list=OLAK5uy_lRly1oG8OVTI3C2gZv0pPjYxH-Q3U6GrM';
+    getLinkWithPuppeteerMock.mockResolvedValueOnce(mockedYoutubeLink);
 
     const response = await app.handle(request).then(res => res.json());
 
@@ -83,7 +83,7 @@ describe('GET /search - Album', () => {
         },
         {
           type: 'youTube',
-          url: 'https://www.youtube.com/playlist?list=PLF4zOU-_1sldqZIv8UEvE2ChFHLkkneT1',
+          url: mockedYoutubeLink,
           isVerified: true,
         },
         {
@@ -103,8 +103,12 @@ describe('GET /search - Album', () => {
       ],
     });
 
-    expect(redisGetMock).toHaveBeenCalledTimes(2);
-    expect(redisSetMock).toHaveBeenCalledTimes(2);
-    expect(mock.history.get).toHaveLength(5);
+    expect(mock.history.get).toHaveLength(4);
+    expect(getLinkWithPuppeteerMock).toHaveBeenCalledTimes(1);
+    expect(getLinkWithPuppeteerMock).toHaveBeenCalledWith(
+      expect.stringContaining(youtubeSearchLink),
+      'ytmusic-card-shelf-renderer a',
+      expect.any(Array)
+    );
   });
 });

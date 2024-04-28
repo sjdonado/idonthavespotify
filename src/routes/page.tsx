@@ -5,7 +5,6 @@ import { logger } from '~/utils/logger';
 import { searchPayloadValidator } from '~/validations/search';
 
 import { spotifySearch } from '~/services/search';
-import { getSearchCount } from '~/services/statistics';
 
 import MainLayout from '~/views/layouts/main';
 import Home from '~/views/pages/home';
@@ -21,11 +20,9 @@ export const pageRouter = new Elysia()
     return <ErrorMessage />;
   })
   .get('/', async () => {
-    const searchCount = await getSearchCount();
-
     return (
       <MainLayout>
-        <Home searchCount={searchCount} />
+        <Home />
       </MainLayout>
     );
   })

@@ -1,3 +1,5 @@
+import { version } from '../../package.json';
+
 export const services = {
   spotify: {
     authUrl: Bun.env.SPOTIFY_AUTH_URL!,
@@ -6,9 +8,8 @@ export const services = {
     clientVersion: Bun.env.SPOTIFY_CLIENT_VERSION!,
   },
   youTube: {
-    apiUrl: Bun.env.YOUTUBE_API_URL!,
-    baseUrl: Bun.env.YOUTUBE_BASE_URL!,
-    apiKey: Bun.env.YOUTUBE_API_KEY,
+    musicUrl: Bun.env.YOUTUBE_MUSIC_URL!,
+    cookies: Bun.env.YOUTUBE_COOKIES!,
   },
   deezer: {
     apiUrl: Bun.env.DEEZER_API_URL!,
@@ -24,8 +25,11 @@ export const services = {
   },
 };
 
-export const redis = {
-  url: Bun.env.REDIS_URL!,
-  searchCountKey: 'idonthavespotify:searchCount',
-  cacheKey: 'idonthavespotify:cache:',
+export const metadata = {
+  appVersion: version,
+};
+
+export const cache = {
+  databasePath: Bun.env.DATABASE_PATH!,
+  expTime: 60 * 60 * 24, // 1 day in seconds
 };

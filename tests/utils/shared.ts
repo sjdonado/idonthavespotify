@@ -21,7 +21,7 @@ export const cachedResponse = {
     },
     {
       type: 'youTube',
-      url: 'https://www.youtube.com/watch?v=zhY_0DoQCQs',
+      url: 'https://music.youtube.com/watch?v=zhY_0DoQCQs',
       isVerified: true,
     },
     {
@@ -36,21 +36,17 @@ export const cachedResponse = {
     },
     {
       type: 'tidal',
-      url: 'https://listen.tidal.com/search?q=Do%20Not%20Disturb%20Drake',
+      url: 'https://listen.tidal.com/search?q=Do+Not+Disturb+Drake',
     },
   ],
 };
 
 export const getYouTubeSearchLink = (query: string, type: string) => {
   const params = new URLSearchParams({
-    part: 'snippet',
-    maxResults: '1',
-    q: query,
-    type: type,
-    key: config.services.youTube.apiKey as string,
+    q: `${query} ${type}`,
   });
 
-  const url = new URL(`${config.services.youTube.apiUrl}/search`);
+  const url = new URL(config.services.youTube.musicUrl);
   url.search = params.toString();
 
   return url.toString();

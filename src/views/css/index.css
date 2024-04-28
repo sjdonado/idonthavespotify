@@ -16,6 +16,10 @@ html {
   animation: loading 2s linear infinite;
 }
 
+.min-screen-3 {
+  min-height: calc(100vh - 3rem);
+}
+
 @keyframes loading {
   0% {
     left: -100%;

@@ -1,40 +1,30 @@
-import { beforeAll, afterEach, describe, expect, it, spyOn, jest } from 'bun:test';
-
-import axios from 'axios';
-import Redis from 'ioredis';
-import AxiosMockAdapter from 'axios-mock-adapter';
+import { afterEach, describe, expect, it, mock, jest } from 'bun:test';
 
 import { getYouTubeLink } from '~/adapters/youtube';
 import { SpotifyMetadata, SpotifyMetadataType } from '~/parsers/spotify';
+import { getLinkWithPuppeteer } from '~/utils/scraper';
 import { SpotifyContentLinkType } from '~/services/search';
 
 import { getYouTubeSearchLink } from '../utils/shared';
 
-import youTubeSongResponseMock from '../fixtures/youtube/songResponseMock.json';
+mock.module('~/utils/scraper', () => ({
+  getLinkWithPuppeteer: jest.fn(),
+}));
 
 describe('Adapter - YouTube', () => {
-  let mock: AxiosMockAdapter;
-  let redisSetMock: jest.Mock;
-  let redisGetMock: jest.Mock;
-
-  beforeAll(() => {
-    mock = new AxiosMockAdapter(axios);
-
-    redisSetMock = spyOn(Redis.prototype, 'set');
-    redisGetMock = spyOn(Redis.prototype, 'get');
-  });
+  const getLinkWithPuppeteerMock = getLinkWithPuppeteer as jest.Mock;
 
   afterEach(() => {
-    redisGetMock.mockReset();
-    redisSetMock.mockReset();
-    mock.reset();
+    getLinkWithPuppeteerMock.mockClear();
   });
 
   it('should return verified link', async () => {
     const query = 'Do Not Disturb Drake';
 
-    const youTubeSearchLink = getYouTubeSearchLink(query, 'video');
-    mock.onGet(youTubeSearchLink).reply(200, youTubeSongResponseMock);
+    const searchLink = getYouTubeSearchLink(query, 'song');
+
+    const mockedYoutubeLink = 'https://music.youtube.com/watch?v=zhY_0DoQCQs';
+    getLinkWithPuppeteerMock.mockResolvedValueOnce(mockedYoutubeLink);
 
     const youTubeLink = await getYouTubeLink(query, {
       type: SpotifyMetadataType.Song,
@@ -42,10 +32,15 @@ describe('Adapter - YouTube', () => {
 
     expect(youTubeLink).toEqual({
       type: SpotifyContentLinkType.YouTube,
-      url: 'https://www.youtube.com/watch?v=zhY_0DoQCQs',
+      url: mockedYoutubeLink,
       isVerified: true,
     });
 
-    expect(mock.history.get).toHaveLength(1);
+    expect(getLinkWithPuppeteerMock).toHaveBeenCalledTimes(1);
+    expect(getLinkWithPuppeteerMock).toHaveBeenCalledWith(
+      expect.stringContaining(searchLink),
+      'ytmusic-card-shelf-renderer a',
+      expect.any(Array)
+    );
   });
 });

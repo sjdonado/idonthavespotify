@@ -5,8 +5,7 @@ import { getQueryFromMetadata } from '~/utils/query';
 
 import { SpotifyMetadataType, parseSpotifyMetadata } from '~/parsers/spotify';
 
-import { cacheSpotifySearch, getSpotifySearchFromCache } from './cache';
-import { incrementSearchCount } from './statistics';
+import { cacheSearchResult, getCachedSearchResult } from './cache';
 
 import { getAppleMusicLink } from '~/adapters/apple-music';
 import { getYouTubeLink } from '~/adapters/youtube';
@@ -28,7 +27,7 @@ export interface SpotifyContentLink {
   isVerified?: boolean;
 }
 
-export interface SpotifyContent {
+export interface SearchResult {
   id: string;
   type: SpotifyMetadataType;
   title: string;
@@ -39,14 +38,12 @@ export interface SpotifyContent {
   links: SpotifyContentLink[];
 }
 
-export const spotifySearch = async (spotifyLink: string): Promise<SpotifyContent> => {
+export const spotifySearch = async (spotifyLink: string): Promise<SearchResult> => {
   const id = spotifyLink.match(SPOTIFY_LINK_REGEX)?.[3] ?? '';
 
-  const cache = await getSpotifySearchFromCache(id);
+  const cache = await getCachedSearchResult(id);
   if (cache) {
-    await incrementSearchCount();
     logger.info(`[${spotifySearch.name}] loaded from cache: ${spotifyLink}`);
-
     return cache;
   }
 
@@ -55,7 +52,6 @@ export const spotifySearch = async (spotifyLink: string): Promise<SpotifyContent
   const { metadata, url } = await parseSpotifyMetadata(spotifyLink);
 
   const query = getQueryFromMetadata(metadata.title, metadata.description, metadata.type);
-
   logger.info(`[${spotifySearch.name}] url: ${url}, query: ${query}`);
 
   const [appleMusicLink, youtubeLink, deezerLink, soundCloudLink] = await Promise.all([
@@ -83,7 +79,7 @@ export const spotifySearch = async (spotifyLink: string): Promise<SpotifyContent
     links.push(tidalLink);
   }
 
-  const spotifyContent: SpotifyContent = {
+  const searchResult: SearchResult = {
     id,
     type: metadata.type,
     title: metadata.title,
@@ -94,7 +90,7 @@ export const spotifySearch = async (spotifyLink: string): Promise<SpotifyContent
     links: links as SpotifyContentLink[],
   };
 
-  await Promise.all([incrementSearchCount(), cacheSpotifySearch(spotifyContent)]);
+  await cacheSearchResult(searchResult);
 
-  return spotifyContent;
+  return searchResult;
 };

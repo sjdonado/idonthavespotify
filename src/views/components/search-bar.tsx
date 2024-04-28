@@ -32,7 +32,7 @@ export default function SearchBar() {
         </button>
       </form>
       <div class="my-4">
-        <div id="search-results"></div>
+        <div id="search-results" />
       </div>
     </>
   );
