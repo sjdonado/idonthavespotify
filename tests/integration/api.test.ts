@@ -1,10 +1,20 @@
-import { beforeAll, beforeEach, describe, expect, it, mock, jest } from 'bun:test';
+import {
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  mock,
+  jest,
+  afterEach,
+} from 'bun:test';
 
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
 import { app } from '~/index';
 import { getLinkWithPuppeteer } from '~/utils/scraper';
+import { cacheStore } from '~/services/cache';
 
 import { JSONRequest } from '../utils/request';
 import {
@@ -18,7 +28,6 @@ import {
 } from '../utils/shared';
 
 import deezerSongResponseMock from '../fixtures/deezer/songResponseMock.json';
-import { getCachedSearchMetadata, getCachedSearchResult } from '~/services/cache';
 
 const [
   spotifySongHeadResponseMock,
@@ -34,25 +43,20 @@ mock.module('~/utils/scraper', () => ({
   getLinkWithPuppeteer: jest.fn(),
 }));
 
-mock.module('~/services/cache', () => ({
-  getCachedSearchResult: jest.fn(),
-  getCachedSearchMetadata: jest.fn(),
-}));
-
 describe('Api router', () => {
   let mock: AxiosMockAdapter;
   const getLinkWithPuppeteerMock = getLinkWithPuppeteer as jest.Mock;
-  const getCachedSearchResultMock = getCachedSearchResult as jest.Mock;
-  const getCachedSearchMetadataMock = getCachedSearchMetadata as jest.Mock;
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
-    getCachedSearchResultMock.mockReturnValue(undefined);
-    getCachedSearchMetadataMock.mockReturnValue(undefined);
   });
 
   beforeEach(() => {
-    getLinkWithPuppeteerMock.mockClear();
+    cacheStore.reset();
+    mock.reset();
+  });
+
+  afterEach(() => {
     mock.reset();
   });
 
@@ -123,7 +127,7 @@ describe('Api router', () => {
       const query = 'Do Not Disturb Drake';
 
       const appleMusicSearchLink = getAppleMusicSearchLink(query);
-      const youtubeSearchLink = getYouTubeSearchLink(query, 'video');
+      // const youtubeSearchLink = getYouTubeSearchLink(query, 'video');
       const deezerSearchLink = getDeezerSearchLink(query, 'track');
       const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
@@ -134,7 +138,9 @@ describe('Api router', () => {
       mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
       mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
 
-      getLinkWithPuppeteerMock.mockRejectedValueOnce(undefined);
+      getLinkWithPuppeteerMock.mockImplementationOnce(() => {
+        throw new Error('Injected Error');
+      });
 
       const response = await app.handle(request).then(res => res.json());
 

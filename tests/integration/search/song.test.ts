@@ -5,7 +5,7 @@ import AxiosMockAdapter from 'axios-mock-adapter';
 
 import { app } from '~/index';
 import { getLinkWithPuppeteer } from '~/utils/scraper';
-import { getCachedSearchResult } from '~/services/cache';
+import { cacheStore } from '~/services/cache';
 
 import { JSONRequest } from '../../utils/request';
 import {
@@ -34,23 +34,18 @@ mock.module('~/utils/scraper', () => ({
   getLinkWithPuppeteer: jest.fn(),
 }));
 
-mock.module('~/services/cache', () => ({
-  getCachedSearchResult: jest.fn(),
-}));
-
 describe('GET /search - Song', () => {
   let mock: AxiosMockAdapter;
   const getLinkWithPuppeteerMock = getLinkWithPuppeteer as jest.Mock;
-  const getCachedSearchResultMock = getCachedSearchResult as jest.Mock;
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
-    getCachedSearchResultMock.mockReturnValue(undefined);
   });
 
   beforeEach(() => {
     getLinkWithPuppeteerMock.mockClear();
     mock.reset();
+    cacheStore.reset();
   });
 
   it('should return 200', async () => {

@@ -5,6 +5,7 @@ import AxiosMockAdapter from 'axios-mock-adapter';
 
 import { app } from '~/index';
 import { getLinkWithPuppeteer } from '~/utils/scraper';
+import { cacheStore } from '~/services/cache';
 
 import { JSONRequest } from '../../utils/request';
 import {
@@ -15,7 +16,6 @@ import {
 } from '../../utils/shared';
 
 import deezerShowResponseMock from '../../fixtures/deezer/showResponseMock.json';
-import { getCachedSearchResult } from '~/services/cache';
 
 const [spotifyShowHeadResponseMock, appleMusicShowResponseMock] = await Promise.all([
   Bun.file('tests/fixtures/spotify/showHeadResponseMock.html').text(),
@@ -26,23 +26,18 @@ mock.module('~/utils/scraper', () => ({
   getLinkWithPuppeteer: jest.fn(),
 }));
 
-mock.module('~/services/cache', () => ({
-  getCachedSearchResult: jest.fn(),
-}));
-
 describe('GET /search - Podcast Show', () => {
   let mock: AxiosMockAdapter;
   const getLinkWithPuppeteerMock = getLinkWithPuppeteer as jest.Mock;
-  const getCachedSearchResultMock = getCachedSearchResult as jest.Mock;
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
-    getCachedSearchResultMock.mockReturnValue(undefined);
   });
 
   beforeEach(() => {
     getLinkWithPuppeteerMock.mockReset();
     mock.reset();
+    cacheStore.reset();
   });
 
   it('should return 200', async () => {

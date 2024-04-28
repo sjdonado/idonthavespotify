@@ -28,3 +28,8 @@ export const services = {
 export const metadata = {
   appVersion: version,
 };
+
+export const cache = {
+  databasePath: Bun.env.DATABASE_PATH!,
+  expTime: 60 * 60 * 24, // 1 day in seconds
+};

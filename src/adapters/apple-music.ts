@@ -39,7 +39,7 @@ export async function getAppleMusicLink(query: string, metadata: SpotifyMetadata
     const doc = getCheerioDoc(html);
 
     const listElements = doc(
-      `div[aria-label="${searchType}"] a[href^="https://music.apple.com/"]:lt(3)`
+      `${searchType ? 'div[aria-label="' + searchType + '"]' : ''} a[href^="https://music.apple.com/"]:lt(3)`
     );
 
     const { href } = getResultWithBestScore(doc, listElements, query);

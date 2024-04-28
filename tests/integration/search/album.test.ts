@@ -5,6 +5,7 @@ import AxiosMockAdapter from 'axios-mock-adapter';
 
 import { app } from '~/index';
 import { getLinkWithPuppeteer } from '~/utils/scraper';
+import { cacheStore } from '~/services/cache';
 
 import { JSONRequest } from '../../utils/request';
 import {
@@ -42,6 +43,7 @@ describe('GET /search - Album', () => {
   beforeEach(() => {
     getLinkWithPuppeteerMock.mockClear();
     mock.reset();
+    cacheStore.reset();
   });
 
   it('should return 200', async () => {

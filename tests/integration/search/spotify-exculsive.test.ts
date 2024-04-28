@@ -1,10 +1,11 @@
-import { beforeAll, afterEach, describe, expect, it, mock, jest } from 'bun:test';
+import { beforeAll, beforeEach, describe, expect, it, mock, jest } from 'bun:test';
 
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
 import { app } from '~/index';
 import { getLinkWithPuppeteer } from '~/utils/scraper';
+import { cacheStore } from '~/services/cache';
 
 import { JSONRequest } from '../../utils/request';
 import {
@@ -39,9 +40,10 @@ describe('GET /search - Spotify Exclusive Content', () => {
     mock = new AxiosMockAdapter(axios);
   });
 
-  afterEach(() => {
+  beforeEach(() => {
     getLinkWithPuppeteerMock.mockClear();
     mock.reset();
+    cacheStore.reset();
   });
 
   it('should return 200', async () => {

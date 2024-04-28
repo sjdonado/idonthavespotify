@@ -12,6 +12,8 @@
     "@elysiajs/static": "^1.0.2",
     "axios": "^1.6.8",
     "axios-retry": "^4.1.0",
+    "cache-manager": "~4.1.0",
+    "cache-manager-sqlite": "^0.2.0",
     "cheerio": "^1.0.0-rc.12",
     "elysia": "^1.0.14",
     "pino": "^8.20.0",

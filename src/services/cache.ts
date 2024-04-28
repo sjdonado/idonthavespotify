@@ -1,38 +1,39 @@
+import * as config from '~/config/default';
+
+const sqliteStore = require('cache-manager-sqlite');
+const cacheManager = require('cache-manager');
+
 import { SearchMetadata } from '~/parsers/spotify';
 import { SearchResult } from './search';
 
-const inMemoryCache = {} as Record<string, string>;
+export const cacheStore = cacheManager.caching({
+  store: sqliteStore,
+  name: 'cache',
+  path: config.cache.databasePath,
+});
 
-export const cacheSearchMetadata = (searchMetadata: SearchMetadata) => {
-  Object.assign(inMemoryCache, {
-    [`search:${searchMetadata.url}`]: JSON.stringify(searchMetadata),
+export const cacheSearchMetadata = async (searchMetadata: SearchMetadata) => {
+  await cacheStore.set(`search:${searchMetadata.url}`, searchMetadata, {
+    ttl: config.cache.expTime,
   });
 };
 
-export const getCachedSearchMetadata = (url: SearchMetadata['url']) => {
-  const data = inMemoryCache[`search:${url}`];
+export const getCachedSearchMetadata = async (url: SearchMetadata['url']) => {
+  const data = (await cacheStore.get(`search:${url}`)) as SearchMetadata;
 
-  if (!data) {
-    return;
-  }
-
-  return JSON.parse(data) as SearchMetadata;
+  return data;
 };
 
-export const cacheSearchResult = (searchResult: SearchResult) => {
-  Object.assign(inMemoryCache, {
-    [`searchResult:${searchResult.id}`]: JSON.stringify(searchResult),
+export const cacheSearchResult = async (searchResult: SearchResult) => {
+  await cacheStore.set(`searchResult:${searchResult.id}`, searchResult, {
+    ttl: config.cache.expTime,
   });
 };
 
-export const getCachedSearchResult = (id: SearchResult['id']) => {
-  const data = inMemoryCache[`searchResult:${id}`];
+export const getCachedSearchResult = async (id: SearchResult['id']) => {
+  const data = (await cacheStore.get(`searchResult:${id}`)) as SearchResult;
 
-  if (!data) {
-    return;
-  }
-
-  return JSON.parse(data) as SearchResult;
+  return data;
 };
 
 // TODO: https://github.com/sjdonado/idonthavespotify/issues/6

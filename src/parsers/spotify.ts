@@ -25,7 +25,7 @@ export type SearchMetadata = {
 };
 
 export const parseSpotifyMetadata = async (spotifyLink: string) => {
-  const cached = getCachedSearchMetadata(spotifyLink);
+  const cached = await getCachedSearchMetadata(spotifyLink);
   if (cached) {
     return cached;
   }
@@ -59,7 +59,7 @@ export const parseSpotifyMetadata = async (spotifyLink: string) => {
       url,
     } as SearchMetadata;
 
-    cacheSearchMetadata(searchMetadata);
+    await cacheSearchMetadata(searchMetadata);
 
     return searchMetadata;
   } catch (err) {
