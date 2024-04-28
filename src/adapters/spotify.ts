@@ -78,5 +78,5 @@ export async function fetchSpotifyMetadata(spotifyLink: string) {
     });
   }
 
-  return { html, url };
+  return html;
 }
