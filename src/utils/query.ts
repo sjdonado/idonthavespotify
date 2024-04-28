@@ -1,9 +1,9 @@
-import { SpotifyMetadataType } from '~/parsers/spotify';
+import { MetadataType } from '~/config/enum';
 
 export function getQueryFromMetadata(
   title: string,
   description: string,
-  type: SpotifyMetadataType
+  type: MetadataType
 ) {
   const parsedTitle = title
     .replace(
@@ -14,22 +14,22 @@ export function getQueryFromMetadata(
 
   let query = parsedTitle;
 
-  if (type === SpotifyMetadataType.Song) {
+  if (type === MetadataType.Song) {
     const [, artist] = description.match(/^([^·]+) · Song · \d+$/) ?? [];
     query = artist ? `${query} ${artist}` : query;
   }
 
-  if (type === SpotifyMetadataType.Album) {
+  if (type === MetadataType.Album) {
     const [, artist] = description.match(/(.+?) · Album ·/) ?? [];
 
     query = artist ? `${query} ${artist}` : query;
   }
 
-  if (type === SpotifyMetadataType.Playlist) {
+  if (type === MetadataType.Playlist) {
     query = `${query.replace(/This is /, '')} Playlist`;
   }
 
-  if (type === SpotifyMetadataType.Podcast) {
+  if (type === MetadataType.Podcast) {
     const [, artist] = description.match(/from (.+?) on Spotify\./) ?? [];
 
     query = artist ? `${query} ${artist}` : query;

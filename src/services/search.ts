@@ -1,9 +1,10 @@
-import { SPOTIFY_LINK_REGEX } from '~/config/constants';
+import { MetadataType, ServiceType } from '~/config/enum';
 
 import { logger } from '~/utils/logger';
 import { getQueryFromMetadata } from '~/utils/query';
 
-import { SpotifyMetadataType, parseSpotifyMetadata } from '~/parsers/spotify';
+import { linkToServiceType } from '~/parsers/link';
+import { getSpotifyMetadata } from '~/parsers/spotify';
 
 import { cacheSearchResult, getCachedSearchResult } from './cache';
 
@@ -13,46 +14,58 @@ import { getDeezerLink } from '~/adapters/deezer';
 import { getSoundCloudLink } from '~/adapters/soundcloud';
 import { getTidalLink } from '~/adapters/tidal';
 
-export enum SpotifyContentLinkType {
-  YouTube = 'youTube',
-  AppleMusic = 'appleMusic',
-  Tidal = 'tidal',
-  SoundCloud = 'soundCloud',
-  Deezer = 'deezer',
-}
+export type SearchMetadata = {
+  title: string;
+  description: string;
+  type: MetadataType;
+  image: string;
+  audio?: string;
+};
 
-export interface SpotifyContentLink {
-  type: SpotifyContentLinkType;
+export interface SearchResultLink {
+  type: ServiceType;
   url: string;
   isVerified?: boolean;
 }
 
 export interface SearchResult {
   id: string;
-  type: SpotifyMetadataType;
+  type: MetadataType;
   title: string;
   description: string;
   image: string;
   audio?: string;
   source: string;
-  links: SpotifyContentLink[];
+  links: SearchResultLink[];
 }
 
-export const spotifySearch = async (spotifyLink: string): Promise<SearchResult> => {
-  const id = spotifyLink.match(SPOTIFY_LINK_REGEX)?.[3] ?? '';
+export const search = async (link: string) => {
+  const { type, id } = linkToServiceType(link);
 
   const cache = await getCachedSearchResult(id);
   if (cache) {
-    logger.info(`[${spotifySearch.name}] loaded from cache: ${spotifyLink}`);
+    logger.info(`[${search.name}] loaded from cache: ${link}`);
     return cache;
   }
 
-  logger.info(`[${spotifySearch.name}] cache miss: ${spotifyLink}`);
+  logger.info(`[${search.name}] cache miss: ${link}`);
 
-  const { metadata, url } = await parseSpotifyMetadata(spotifyLink);
+  let metadata;
+
+  if (type === ServiceType.Spotify) {
+    metadata = await getSpotifyMetadata(link);
+  }
+
+  if (type === ServiceType.YouTube) {
+    // metadata = await parseYoutubeMetadata;
+  }
+
+  if (!metadata) {
+    throw new Error('Adapter not implemented yet');
+  }
 
   const query = getQueryFromMetadata(metadata.title, metadata.description, metadata.type);
-  logger.info(`[${spotifySearch.name}] url: ${url}, query: ${query}`);
+  logger.info(`[${search.name}] link: ${link}, query: ${query}`);
 
   const [appleMusicLink, youtubeLink, deezerLink, soundCloudLink] = await Promise.all([
     getAppleMusicLink(query, metadata),
@@ -62,7 +75,7 @@ export const spotifySearch = async (spotifyLink: string): Promise<SearchResult> 
   ]);
 
   logger.info(
-    `[${spotifySearch.name}] results: ${JSON.stringify({
+    `[${search.name}] results: ${JSON.stringify({
       appleMusicLink,
       youtubeLink,
       deezerLink,
@@ -86,8 +99,8 @@ export const spotifySearch = async (spotifyLink: string): Promise<SearchResult> 
     description: metadata.description,
     image: metadata.image,
     audio: metadata.audio,
-    source: url,
-    links: links as SpotifyContentLink[],
+    source: link,
+    links: links as SearchResultLink[],
   };
 
   await cacheSearchResult(searchResult);

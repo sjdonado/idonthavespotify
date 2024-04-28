@@ -1,26 +1,26 @@
 import * as config from '~/config/default';
+import { MetadataType, ServiceType } from '~/config/enum';
 import { DEFAULT_TIMEOUT } from '~/config/constants';
 
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { getCheerioDoc } from '~/utils/scraper';
 
-import { SpotifyMetadata, SpotifyMetadataType } from '~/parsers/spotify';
-import { SpotifyContentLink, SpotifyContentLinkType } from '~/services/search';
+import { SearchMetadata, SearchResultLink } from '~/services/search';
 import { getResultWithBestScore } from '~/utils/compare';
 
 export const APPLE_MUSIC_LINK_SELECTOR = 'a[href^="https://music.apple.com/"]';
 
 const APPLE_MUSIC_SEARCH_TYPES = {
-  [SpotifyMetadataType.Song]: 'Songs',
-  [SpotifyMetadataType.Album]: 'Albums',
-  [SpotifyMetadataType.Playlist]: 'Playlists',
-  [SpotifyMetadataType.Artist]: 'Artists',
-  [SpotifyMetadataType.Podcast]: undefined,
-  [SpotifyMetadataType.Show]: undefined,
+  [MetadataType.Song]: 'Songs',
+  [MetadataType.Album]: 'Albums',
+  [MetadataType.Playlist]: 'Playlists',
+  [MetadataType.Artist]: 'Artists',
+  [MetadataType.Podcast]: undefined,
+  [MetadataType.Show]: undefined,
 };
 
-export async function getAppleMusicLink(query: string, metadata: SpotifyMetadata) {
+export async function getAppleMusicLink(query: string, metadata: SearchMetadata) {
   const searchType = APPLE_MUSIC_SEARCH_TYPES[metadata.type];
 
   if (!searchType) {
@@ -45,10 +45,10 @@ export async function getAppleMusicLink(query: string, metadata: SpotifyMetadata
     const { href } = getResultWithBestScore(doc, listElements, query);
 
     return {
-      type: SpotifyContentLinkType.AppleMusic,
+      type: ServiceType.AppleMusic,
       url: href,
       isVerified: true,
-    } as SpotifyContentLink;
+    } as SearchResultLink;
   } catch (err) {
     logger.error(`[Apple Music](${url}) ${err} `);
   }

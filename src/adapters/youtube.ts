@@ -1,21 +1,21 @@
 import * as config from '~/config/default';
+import { MetadataType, ServiceType } from '~/config/enum';
 
 import { logger } from '~/utils/logger';
 
-import { SpotifyMetadata, SpotifyMetadataType } from '~/parsers/spotify';
-import { SpotifyContentLink, SpotifyContentLinkType } from '~/services/search';
+import { SearchMetadata, SearchResultLink } from '~/services/search';
 import { getLinkWithPuppeteer } from '~/utils/scraper';
 
 const YOUTUBE_SEARCH_TYPES = {
-  [SpotifyMetadataType.Song]: 'song',
-  [SpotifyMetadataType.Album]: 'album',
-  [SpotifyMetadataType.Playlist]: '',
-  [SpotifyMetadataType.Artist]: 'channel',
-  [SpotifyMetadataType.Podcast]: '',
-  [SpotifyMetadataType.Show]: '',
+  [MetadataType.Song]: 'song',
+  [MetadataType.Album]: 'album',
+  [MetadataType.Playlist]: '',
+  [MetadataType.Artist]: 'channel',
+  [MetadataType.Podcast]: '',
+  [MetadataType.Show]: '',
 };
 
-export async function getYouTubeLink(query: string, metadata: SpotifyMetadata) {
+export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
   const params = new URLSearchParams({
     q: `${query} ${YOUTUBE_SEARCH_TYPES[metadata.type]}`,
   });
@@ -51,10 +51,10 @@ export async function getYouTubeLink(query: string, metadata: SpotifyMetadata) {
     }
 
     return {
-      type: SpotifyContentLinkType.YouTube,
+      type: ServiceType.YouTube,
       url: link,
       isVerified: true,
-    } as SpotifyContentLink;
+    } as SearchResultLink;
   } catch (error) {
     logger.error(`[YouTube] (${url}) ${error}`);
   }

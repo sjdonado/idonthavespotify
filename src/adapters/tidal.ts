@@ -1,6 +1,7 @@
 import * as config from '~/config/default';
+import { ServiceType } from '~/config/enum';
 
-import { SpotifyContentLink, SpotifyContentLinkType } from '~/services/search';
+import { SearchResultLink } from '~/services/search';
 
 export function getTidalLink(query: string) {
   const params = new URLSearchParams({
@@ -11,7 +12,7 @@ export function getTidalLink(query: string) {
   url.search = params.toString();
 
   return {
-    type: SpotifyContentLinkType.Tidal,
+    type: ServiceType.Tidal,
     url: url.toString(),
-  } as SpotifyContentLink;
+  } as SearchResultLink;
 }

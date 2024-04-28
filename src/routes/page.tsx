@@ -4,7 +4,7 @@ import { logger } from '~/utils/logger';
 
 import { searchPayloadValidator } from '~/validations/search';
 
-import { spotifySearch } from '~/services/search';
+import { search } from '~/services/search';
 
 import MainLayout from '~/views/layouts/main';
 import Home from '~/views/pages/home';
@@ -28,10 +28,10 @@ export const pageRouter = new Elysia()
   })
   .post(
     '/search',
-    async ({ body: { spotifyLink } }) => {
-      const spotifyContent = await spotifySearch(spotifyLink);
+    async ({ body: { link } }) => {
+      const searchResult = await search(link);
 
-      return <SearchCard spotifyContent={spotifyContent} />;
+      return <SearchCard searchResult={searchResult} />;
     },
     {
       body: searchPayloadValidator,

@@ -1,15 +1,15 @@
 import * as config from '~/config/default';
+import { MetadataType, ServiceType } from '~/config/enum';
 
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { getCheerioDoc } from '~/utils/scraper';
-
-import { SpotifyContentLink, SpotifyContentLinkType } from '~/services/search';
-import { SpotifyMetadata, SpotifyMetadataType } from '~/parsers/spotify';
 import { getResultWithBestScore } from '~/utils/compare';
 
-export async function getSoundCloudLink(query: string, metadata: SpotifyMetadata) {
-  if (metadata.type === SpotifyMetadataType.Show) {
+import { SearchMetadata, SearchResultLink } from '~/services/search';
+
+export async function getSoundCloudLink(query: string, metadata: SearchMetadata) {
+  if (metadata.type === MetadataType.Show) {
     return;
   }
 
@@ -33,10 +33,10 @@ export async function getSoundCloudLink(query: string, metadata: SpotifyMetadata
     const { href } = getResultWithBestScore(noscriptDoc, listElements, query);
 
     return {
-      type: SpotifyContentLinkType.SoundCloud,
+      type: ServiceType.SoundCloud,
       url: `${config.services.soundCloud.baseUrl}${href}`,
       isVerified: true,
-    } as SpotifyContentLink;
+    } as SearchResultLink;
   } catch (err) {
     logger.error(`[SoundCloud] (${url}) ${err}`);
   }
