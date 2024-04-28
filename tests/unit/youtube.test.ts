@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, mock, jest } from 'bun:test';
 
+import { MetadataType, ServiceType } from '~/config/enum';
 import { getYouTubeLink } from '~/adapters/youtube';
-import { SpotifyMetadata, SpotifyMetadataType } from '~/parsers/spotify';
 import { getLinkWithPuppeteer } from '~/utils/scraper';
-import { SpotifyContentLinkType } from '~/services/search';
+import { SearchMetadata } from '~/services/search';
 
 import { getYouTubeSearchLink } from '../utils/shared';
 
@@ -27,11 +27,11 @@ describe('Adapter - YouTube', () => {
     getLinkWithPuppeteerMock.mockResolvedValueOnce(mockedYoutubeLink);
 
     const youTubeLink = await getYouTubeLink(query, {
-      type: SpotifyMetadataType.Song,
-    } as SpotifyMetadata);
+      type: MetadataType.Song,
+    } as SearchMetadata);
 
     expect(youTubeLink).toEqual({
-      type: SpotifyContentLinkType.YouTube,
+      type: ServiceType.YouTube,
       url: mockedYoutubeLink,
       isVerified: true,
     });

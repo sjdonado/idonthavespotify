@@ -62,7 +62,7 @@ describe('Api router', () => {
 
   describe('GET /search', () => {
     it('should return 200 when adapter returns error - Apple Music', async () => {
-      const spotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
+      const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
       const query = 'Do Not Disturb Drake';
 
       const appleMusicSearchLink = getAppleMusicSearchLink(query);
@@ -70,9 +70,9 @@ describe('Api router', () => {
       const deezerSearchLink = getDeezerSearchLink(query, 'track');
       const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-      const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink });
+      const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
 
-      mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
+      mock.onGet(link).reply(200, spotifySongHeadResponseMock);
       mock.onGet(appleMusicSearchLink).reply(500);
       mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
       mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
@@ -84,7 +84,7 @@ describe('Api router', () => {
 
       expect(response).toEqual({
         id: '2KvHC9z14GSl4YpkNMX384',
-        type: 'music.song',
+        type: 'song',
         title: 'Do Not Disturb',
         description: 'Drake · Song · 2017',
         image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
@@ -123,7 +123,7 @@ describe('Api router', () => {
     });
 
     it('should return 200 when adapter returns error - Youtube', async () => {
-      const spotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
+      const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
       const query = 'Do Not Disturb Drake';
 
       const appleMusicSearchLink = getAppleMusicSearchLink(query);
@@ -131,9 +131,9 @@ describe('Api router', () => {
       const deezerSearchLink = getDeezerSearchLink(query, 'track');
       const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-      const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink });
+      const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
 
-      mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
+      mock.onGet(link).reply(200, spotifySongHeadResponseMock);
       mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
       mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
       mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
@@ -146,7 +146,7 @@ describe('Api router', () => {
 
       expect(response).toEqual({
         id: '2KvHC9z14GSl4YpkNMX384',
-        type: 'music.song',
+        type: 'song',
         title: 'Do Not Disturb',
         description: 'Drake · Song · 2017',
         image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
@@ -185,7 +185,7 @@ describe('Api router', () => {
     });
 
     it('should return 200 when adapter returns error - Deezer', async () => {
-      const spotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
+      const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
       const query = 'Do Not Disturb Drake';
 
       const appleMusicSearchLink = getAppleMusicSearchLink(query);
@@ -193,9 +193,9 @@ describe('Api router', () => {
       const deezerSearchLink = getDeezerSearchLink(query, 'track');
       const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-      const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink });
+      const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
 
-      mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
+      mock.onGet(link).reply(200, spotifySongHeadResponseMock);
       mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
       mock.onGet(deezerSearchLink).reply(500);
       mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
@@ -207,7 +207,7 @@ describe('Api router', () => {
 
       expect(response).toEqual({
         id: '2KvHC9z14GSl4YpkNMX384',
-        type: 'music.song',
+        type: 'song',
         title: 'Do Not Disturb',
         description: 'Drake · Song · 2017',
         image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
@@ -246,7 +246,7 @@ describe('Api router', () => {
     });
 
     it('should return 200 when adapter returns error - SoundCloud', async () => {
-      const spotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
+      const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
       const query = 'Do Not Disturb Drake';
 
       const appleMusicSearchLink = getAppleMusicSearchLink(query);
@@ -254,9 +254,9 @@ describe('Api router', () => {
       const deezerSearchLink = getDeezerSearchLink(query, 'track');
       const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-      const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink });
+      const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
 
-      mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
+      mock.onGet(link).reply(200, spotifySongHeadResponseMock);
       mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
       mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
       mock.onGet(soundCloudSearchLink).reply(500);
@@ -268,7 +268,7 @@ describe('Api router', () => {
 
       expect(response).toEqual({
         id: '2KvHC9z14GSl4YpkNMX384',
-        type: 'music.song',
+        type: 'song',
         title: 'Do Not Disturb',
         description: 'Drake · Song · 2017',
         image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
@@ -308,7 +308,7 @@ describe('Api router', () => {
 
     it('should return unknown error - could not parse Spotify metadata', async () => {
       const request = JSONRequest(API_SEARCH_ENDPOINT, {
-        spotifyLink: cachedSpotifyLink,
+        link: cachedSpotifyLink,
       });
 
       mock.onGet(cachedSpotifyLink).reply(200, '<html></html>');
@@ -318,19 +318,19 @@ describe('Api router', () => {
       expect(response).toEqual({
         code: 'UNKNOWN',
         message:
-          '[parseSpotifyMetadata] (https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384) Error: Spotify metadata not found',
+          '[getSpotifyMetadata] (https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384) Error: Spotify metadata not found',
       });
     });
 
-    it('should return bad request - invalid spotifyLink', async () => {
-      const spotifyLink = 'https://open.spotify.com/invalid';
+    it('should return bad request - invalid link', async () => {
+      const link = 'https://open.spotify.com/invalid';
 
-      const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink });
+      const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
       const response = await app.handle(request).then(res => res.json());
 
       expect(response).toEqual({
-        code: 'VALIDATION',
-        message: 'Invalid spotify link',
+        code: 'UNKNOWN',
+        message: 'Link not valid or could not be parsed',
       });
     });
 
@@ -340,13 +340,13 @@ describe('Api router', () => {
 
       expect(response).toEqual({
         code: 'VALIDATION',
-        message: 'Invalid spotify link',
+        message: 'Invalid link',
       });
     });
 
     it('should return bad request - unsupported API version', async () => {
       const request = JSONRequest(`${API_ENDPOINT}/search?v=2`, {
-        spotifyLink: cachedSpotifyLink,
+        link: cachedSpotifyLink,
       });
       const response = await app.handle(request).then(res => res.json());
 
@@ -358,7 +358,7 @@ describe('Api router', () => {
 
     it('should return bad request - missing API version query param', async () => {
       const request = JSONRequest(`${API_ENDPOINT}/search`, {
-        spotifyLink: cachedSpotifyLink,
+        link: cachedSpotifyLink,
       });
       const response = await app.handle(request).then(res => res.json());
 

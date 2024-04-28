@@ -7,7 +7,7 @@ export const cachedSpotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4Yp
 
 export const cachedResponse = {
   id: '2KvHC9z14GSl4YpkNMX384',
-  type: 'music.song',
+  type: 'song',
   title: 'Do Not Disturb',
   description: 'Drake · Song · 2017',
   image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',

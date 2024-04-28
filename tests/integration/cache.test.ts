@@ -47,7 +47,7 @@ describe('Searches cache', () => {
     const deezerSearchLink = getDeezerSearchLink(query, 'track');
     const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink: cachedSpotifyLink });
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { link: cachedSpotifyLink });
 
     mock.onGet(cachedSpotifyLink).reply(200, spotifySongHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
@@ -71,7 +71,7 @@ describe('Searches cache', () => {
   });
 
   it('should return 200 from cache', async () => {
-    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink: cachedSpotifyLink });
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { link: cachedSpotifyLink });
     const response = await app.handle(request).then(res => res.json());
 
     expect(response.source).toEqual(cachedSpotifyLink);

@@ -3,9 +3,9 @@ import { beforeAll, afterEach, describe, expect, it } from 'bun:test';
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
+import { MetadataType, ServiceType } from '~/config/enum';
 import { getDeezerLink } from '~/adapters/deezer';
-import { SpotifyMetadata, SpotifyMetadataType } from '~/parsers/spotify';
-import { SpotifyContentLinkType } from '~/services/search';
+import { SearchMetadata } from '~/services/search';
 
 import { getDeezerSearchLink } from '../utils/shared';
 
@@ -29,11 +29,11 @@ describe('Adapter - Deezer', () => {
     mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
 
     const deezerLink = await getDeezerLink(query, {
-      type: SpotifyMetadataType.Song,
-    } as SpotifyMetadata);
+      type: MetadataType.Song,
+    } as SearchMetadata);
 
     expect(deezerLink).toEqual({
-      type: SpotifyContentLinkType.Deezer,
+      type: ServiceType.Deezer,
       url: 'https://www.deezer.com/track/144572248',
       isVerified: true,
     });

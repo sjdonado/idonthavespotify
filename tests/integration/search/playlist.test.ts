@@ -47,7 +47,7 @@ describe('GET /search - Playlist', () => {
   });
 
   it('should return 200', async () => {
-    const spotifyLink = 'https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ';
+    const link = 'https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ';
     const query = 'This Is Bad Bunny Playlist';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
@@ -55,9 +55,9 @@ describe('GET /search - Playlist', () => {
     const deezerSearchLink = getDeezerSearchLink(query, 'playlist');
     const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink });
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
 
-    mock.onGet(spotifyLink).reply(200, spotifyPlaylistHeadResponseMock);
+    mock.onGet(link).reply(200, spotifyPlaylistHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicPlaylistResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerPlaylistResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudPlaylistResponseMock);
@@ -70,7 +70,7 @@ describe('GET /search - Playlist', () => {
 
     expect(response).toEqual({
       id: '37i9dQZF1DX2apWzyECwyZ',
-      type: 'music.playlist',
+      type: 'playlist',
       title: 'This Is Bad Bunny',
       description: 'This Is Bad Bunny · Playlist · 109 songs · 5.2M likes',
       image: 'https://i.scdn.co/image/ab67706f000000029c0eb2fdff534f803ea018e1',

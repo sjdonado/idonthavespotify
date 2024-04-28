@@ -47,7 +47,7 @@ describe('GET /search - Spotify Exclusive Content', () => {
   });
 
   it('should return 200', async () => {
-    const spotifyLink = 'https://open.spotify.com/show/7LuQv400JFzzlJrOuMukRj';
+    const link = 'https://open.spotify.com/show/7LuQv400JFzzlJrOuMukRj';
     const query = 'The Louis Theroux Podcast';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
@@ -55,9 +55,9 @@ describe('GET /search - Spotify Exclusive Content', () => {
     const deezerSearchLink = getDeezerSearchLink(query, 'podcast');
     const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink });
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
 
-    mock.onGet(spotifyLink).reply(200, spotifyExclusiveContentHeadResponseMock);
+    mock.onGet(link).reply(200, spotifyExclusiveContentHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicExclusiveContentResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerExclusiveContentResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudExclusiveContentResponseMock);
@@ -68,7 +68,7 @@ describe('GET /search - Spotify Exclusive Content', () => {
 
     expect(response).toEqual({
       id: '7LuQv400JFzzlJrOuMukRj',
-      type: 'website',
+      type: 'show',
       title: 'The Louis Theroux Podcast',
       description:
         'Listen to The Louis Theroux Podcast on Spotify. Join Louis Theroux as he embarks on a series of in-depth and freewheeling conversations with a curated collection of fascinating figures from across the globe. The Louis Theroux Podcast is a Spotify Exclusive podcast from Mindhouse.',

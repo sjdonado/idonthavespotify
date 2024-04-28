@@ -3,11 +3,11 @@ import { beforeAll, afterEach, describe, expect, it } from 'bun:test';
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
+import { MetadataType, ServiceType } from '~/config/enum';
 import { getSoundCloudLink } from '~/adapters/soundcloud';
-import { SpotifyContentLinkType } from '~/services/search';
+import { SearchMetadata } from '~/services/search';
 
 import { getSoundCloudSearchLink } from '../utils/shared';
-import { SpotifyMetadata, SpotifyMetadataType } from '~/parsers/spotify';
 
 const soundCloudSongResponseMock = await Bun.file(
   'tests/fixtures/soundcloud/songResponseMock.html'
@@ -31,11 +31,11 @@ describe('Adapter - SoundCloud', () => {
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
 
     const soundCloudLink = await getSoundCloudLink(query, {
-      type: SpotifyMetadataType.Song,
-    } as SpotifyMetadata);
+      type: MetadataType.Song,
+    } as SearchMetadata);
 
     expect(soundCloudLink).toEqual({
-      type: SpotifyContentLinkType.SoundCloud,
+      type: ServiceType.SoundCloud,
       url: 'https://soundcloud.com/octobersveryown/drake-do-not-disturb',
       isVerified: true,
     });

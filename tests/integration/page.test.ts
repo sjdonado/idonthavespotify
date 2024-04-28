@@ -44,12 +44,12 @@ describe('Page router', () => {
 
   describe('POST /search', () => {
     const endpoint = `${INDEX_ENDPOINT}/search`;
-    const spotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
+    const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
 
-    it('should return search card with a valid spotifyLink', async () => {
+    it('should return search card with a valid link', async () => {
       getCachedSearchResultMock.mockResolvedValueOnce(cachedResponse);
 
-      const request = formDataRequest(endpoint, { spotifyLink });
+      const request = formDataRequest(endpoint, { link });
       const response = await app.handle(request).then(res => res.text());
 
       const doc = getCheerioDoc(response);
@@ -92,7 +92,7 @@ describe('Page router', () => {
         links: [],
       });
 
-      const request = formDataRequest(endpoint, { spotifyLink });
+      const request = formDataRequest(endpoint, { link });
       const response = await app.handle(request).then(res => res.text());
 
       const doc = getCheerioDoc(response);
@@ -109,9 +109,9 @@ describe('Page router', () => {
       expect(getCachedSearchResultMock).toHaveBeenCalledTimes(1);
     });
 
-    it('should return error message when sent an invalid spotifyLink', async () => {
+    it('should return error message when sent an invalid link', async () => {
       const request = formDataRequest(endpoint, {
-        spotifyLink: 'https://open.spotify.com/invalid',
+        link: 'https://open.spotify.com/invalid',
       });
 
       const response = await app.handle(request).then(res => res.text());
@@ -126,7 +126,7 @@ describe('Page router', () => {
         throw new Error('Injected Error');
       });
 
-      const request = formDataRequest(endpoint, { spotifyLink });
+      const request = formDataRequest(endpoint, { link });
       const response = await app.handle(request).then(res => res.text());
 
       const doc = getCheerioDoc(response);
