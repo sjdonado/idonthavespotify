@@ -1,5 +1,6 @@
 import * as config from '~/config/default';
 import { MetadataType, ServiceType } from '~/config/enum';
+import { RESPONSE_COMPARE_MIN_SCORE } from '~/config/constants';
 
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
@@ -46,12 +47,12 @@ export async function getAppleMusicLink(query: string, metadata: SearchMetadata)
       `${searchType ? 'div[aria-label="' + searchType + '"]' : ''} a[href^="https://music.apple.com/"]:lt(3)`
     );
 
-    const { href } = getResultWithBestScore(doc, listElements, query);
+    const { href, score } = getResultWithBestScore(doc, listElements, query);
 
     const searchResultLink = {
       type: ServiceType.AppleMusic,
       url: href,
-      isVerified: true,
+      isVerified: score > RESPONSE_COMPARE_MIN_SCORE,
     } as SearchResultLink;
 
     await cacheSearchResultLink(url, searchResultLink);

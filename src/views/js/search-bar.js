@@ -42,7 +42,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     htmx.ajax('POST', '/search', {
       source: '#search-form',
       values: {
-        link: undefined,
         searchId,
       },
     });

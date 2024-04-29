@@ -1,5 +1,6 @@
 import * as config from '~/config/default';
 import { MetadataType, ServiceType } from '~/config/enum';
+import { RESPONSE_COMPARE_MIN_SCORE } from '~/config/constants';
 
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
@@ -37,7 +38,11 @@ export async function getSoundCloudLink(query: string, metadata: SearchMetadata)
 
     const listElements = noscriptDoc('ul:nth-of-type(2) li:lt(3) h2 a');
 
-    const { href } = getResultWithBestScore(noscriptDoc, listElements, query);
+    const { href, score } = getResultWithBestScore(noscriptDoc, listElements, query);
+
+    if (score <= RESPONSE_COMPARE_MIN_SCORE) {
+      return;
+    }
 
     const searchResultLink = {
       type: ServiceType.SoundCloud,
