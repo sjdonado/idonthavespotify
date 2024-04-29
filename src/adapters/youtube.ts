@@ -7,6 +7,7 @@ import { SearchMetadata, SearchResultLink } from '~/services/search';
 import { getLinkWithPuppeteer } from '~/utils/scraper';
 import HttpClient from '~/utils/http-client';
 import { DEFAULT_TIMEOUT } from '~/config/constants';
+import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
 
 const YOUTUBE_SEARCH_TYPES = {
   [MetadataType.Song]: 'song',
@@ -24,6 +25,12 @@ export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
 
   const url = new URL(config.services.youTube.musicUrl);
   url.search = params.toString();
+
+  const cache = await getCachedSearchResultLink(url);
+  if (cache) {
+    logger.info(`[YouTube] (${url}) cache hit`);
+    return cache;
+  }
 
   try {
     const youtubeCookie = {
@@ -52,11 +59,13 @@ export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
       return;
     }
 
-    return {
+    const searchResultLink = {
       type: ServiceType.YouTube,
       url: link,
       isVerified: true,
     } as SearchResultLink;
+
+    await cacheSearchResultLink(url, searchResultLink);
   } catch (error) {
     logger.error(`[YouTube] (${url}) ${error}`);
   }

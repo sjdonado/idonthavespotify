@@ -1,13 +1,14 @@
 import { MetadataType } from '~/config/enum';
-import { fetchSpotifyMetadata } from '~/adapters/spotify';
 
 import { logger } from '~/utils/logger';
 import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
 
-import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
 import { SearchMetadata } from '~/services/search';
+import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
 
-export enum SpotifyMetadataType {
+import { fetchSpotifyMetadata } from '~/adapters/spotify';
+
+enum SpotifyMetadataType {
   Song = 'music.song',
   Album = 'music.album',
   Playlist = 'music.playlist',
@@ -51,6 +52,7 @@ export const getSpotifyMetadata = async (id: string, link: string) => {
     }
 
     const metadata = {
+      id,
       title,
       description,
       type: SPOTIFY_METADATA_TO_METADATA_TYPE[type],

@@ -59,14 +59,10 @@ export async function getDeezerLink(query: string, metadata: SearchMetadata) {
 
     const [{ title, name, link }] = response.data;
 
-    if (!responseMatchesQuery(title ?? name ?? '', query)) {
-      throw new Error(`Query does not match: ${JSON.stringify({ title, name })}`);
-    }
-
     const searchResultLink = {
       type: ServiceType.Deezer,
       url: link,
-      isVerified: true,
+      isVerified: responseMatchesQuery(title ?? name ?? '', query),
     } as SearchResultLink;
 
     await cacheSearchResultLink(url, searchResultLink);

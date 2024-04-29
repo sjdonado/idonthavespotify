@@ -3,6 +3,8 @@ import * as config from '~/config/default';
 const sqliteStore = require('cache-manager-sqlite');
 const cacheManager = require('cache-manager');
 
+import { SearchService } from '~/parsers/link';
+
 import { SearchMetadata, SearchResultLink } from './search';
 
 export const cacheStore = cacheManager.caching({
@@ -10,6 +12,14 @@ export const cacheStore = cacheManager.caching({
   name: 'cache',
   path: config.cache.databasePath,
 });
+
+export const cacheSearchService = async (id: string, searchService: SearchService) => {
+  await cacheStore.set(`service:${id}`, searchService);
+};
+
+export const getCachedSearchService = async (id: string) => {
+  return cacheStore.get(`service:${id}`) as SearchService;
+};
 
 export const cacheSearchResultLink = async (
   url: URL,
@@ -47,15 +57,3 @@ export const cacheSpotifyAccessToken = async (accessToken: string, expTime: numb
 export const getCachedSpotifyAccessToken = async () => {
   return cacheStore.get('spotify:accessToken');
 };
-
-// export const cacheSearchResult = async (searchResult: SearchResult) => {
-//   await cacheStore.set(`searchResult:${searchResult.id}`, searchResult, {
-//     ttl: config.cache.expTime,
-//   });
-// };
-//
-// export const getCachedSearchResult = async (id: SearchResult['id']) => {
-//   const data = (await cacheStore.get(`searchResult:${id}`)) as SearchResult;
-//
-//   return data;
-// };

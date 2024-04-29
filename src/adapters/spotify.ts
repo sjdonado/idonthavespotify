@@ -10,9 +10,15 @@ import { MetadataType, ServiceType } from '~/config/enum';
 
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
-import { SearchMetadata, SearchResultLink } from '~/services/search';
 import { responseMatchesQuery } from '~/utils/compare';
-import { cacheSpotifyAccessToken, getCachedSpotifyAccessToken } from '~/services/cache';
+
+import { SearchMetadata, SearchResultLink } from '~/services/search';
+import {
+  cacheSearchResultLink,
+  cacheSpotifyAccessToken,
+  getCachedSearchResultLink,
+  getCachedSpotifyAccessToken,
+} from '~/services/cache';
 
 interface SpotifyAuthResponse {
   access_token: string;
@@ -59,7 +65,11 @@ export async function getSpotifyLink(query: string, metadata: SearchMetadata) {
   const url = new URL(config.services.spotify.apiUrl);
   url.search = params.toString();
 
-  logger.info(`[Spotify] (${url}) new search`);
+  const cache = await getCachedSearchResultLink(url);
+  if (cache) {
+    logger.info(`[Spotify] (${url}) cache hit`);
+    return cache;
+  }
 
   try {
     const response = await HttpClient.get<SpotifySearchResponse>(url.toString(), {
@@ -80,11 +90,13 @@ export async function getSpotifyLink(query: string, metadata: SearchMetadata) {
       throw new Error(`Query does not match: ${JSON.stringify({ name })}`);
     }
 
-    return {
+    const searchResultLink = {
       type: ServiceType.Spotify,
       url: external_urls.spotify,
       isVerified: true,
     } as SearchResultLink;
+
+    await cacheSearchResultLink(url, searchResultLink);
   } catch (error) {
     logger.error(`[Spotify] (${url}) ${error}`);
   }

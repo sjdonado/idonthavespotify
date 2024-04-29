@@ -1,18 +1,51 @@
 import { SPOTIFY_LINK_REGEX, YOUTUBE_LINK_REGEX } from '~/config/constants';
 import { ServiceType } from '~/config/enum';
 
-export const linkToServiceType = (link: string) => {
-  const spotifyId = link.match(SPOTIFY_LINK_REGEX)?.[3];
+import { logger } from '~/utils/logger';
+import { cacheSearchService, getCachedSearchService } from '~/services/cache';
 
+export type SearchService = {
+  id: string;
+  type: string;
+  source: string;
+};
+
+export const getSearchService = async (link?: string, searchId?: string) => {
+  const cached = searchId ? await getCachedSearchService(searchId) : null;
+  if (cached) {
+    logger.info(`[${getSearchService.name}] (${searchId}) cache hit`);
+    return cached;
+  }
+
+  if (!link && searchId) {
+    throw new Error('SearchId does not exist');
+  }
+
+  let id, type;
+
+  const spotifyId = link!.match(SPOTIFY_LINK_REGEX)?.[3];
   if (spotifyId) {
-    return { type: ServiceType.Spotify, id: spotifyId };
+    id = spotifyId;
+    type = ServiceType.Spotify;
   }
 
-  const youtubeId = link.match(YOUTUBE_LINK_REGEX)?.[1];
-
+  const youtubeId = link!.match(YOUTUBE_LINK_REGEX)?.[1];
   if (youtubeId) {
-    return { type: ServiceType.YouTube, id: youtubeId };
+    id = youtubeId;
+    type = ServiceType.YouTube;
   }
 
-  throw new Error('Link not valid or could not be parsed');
+  if (!id || !type) {
+    throw new Error('Link not valid or could not be parsed');
+  }
+
+  const searchService = {
+    id,
+    type,
+    source: link,
+  } as SearchService;
+
+  await cacheSearchService(id, searchService);
+
+  return searchService;
 };

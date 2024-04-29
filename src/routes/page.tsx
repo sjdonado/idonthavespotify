@@ -28,8 +28,8 @@ export const pageRouter = new Elysia()
   })
   .post(
     '/search',
-    async ({ body: { link } }) => {
-      const searchResult = await search(link);
+    async ({ body: { link, searchId } }) => {
+      const searchResult = await search(link, searchId);
 
       return <SearchCard searchResult={searchResult} />;
     },

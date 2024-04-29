@@ -1,9 +1,12 @@
 import { MetadataType } from '~/config/enum';
-import { fetchSpotifyMetadata } from '~/adapters/spotify';
 
+import { logger } from '~/utils/logger';
 import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
-import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
+
 import { SearchMetadata } from '~/services/search';
+import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
+
+import { fetchSpotifyMetadata } from '~/adapters/spotify';
 
 enum YoutubeMetadataType {
   Song = 'video.other',
@@ -26,6 +29,7 @@ const YOUTUBE_METADATA_TO_METADATA_TYPE = {
 export const getYouTubeMetadata = async (id: string, link: string) => {
   const cached = await getCachedSearchMetadata(id);
   if (cached) {
+    logger.info(`[YouTube] (${id}) metadata cache hit`);
     return cached;
   }
 
@@ -46,6 +50,7 @@ export const getYouTubeMetadata = async (id: string, link: string) => {
     const parsedTitle = title?.replace('- YouTube Music', '').trim();
 
     const metadata = {
+      id,
       title: parsedTitle,
       description,
       type: YOUTUBE_METADATA_TO_METADATA_TYPE[type as YoutubeMetadataType],

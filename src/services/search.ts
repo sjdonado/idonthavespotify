@@ -2,7 +2,7 @@ import { MetadataType, ServiceType } from '~/config/enum';
 
 import { logger } from '~/utils/logger';
 
-import { linkToServiceType } from '~/parsers/link';
+import { getSearchService } from '~/parsers/link';
 import { getSpotifyMetadata, getSpotifyQueryFromMetadata } from '~/parsers/spotify';
 import { getYouTubeMetadata, getYouTubeQueryFromMetadata } from '~/parsers/youtube';
 
@@ -21,13 +21,13 @@ export type SearchMetadata = {
   audio?: string;
 };
 
-export interface SearchResultLink {
+export type SearchResultLink = {
   type: ServiceType;
   url: string;
   isVerified?: boolean;
-}
+};
 
-export interface SearchResult {
+export type SearchResult = {
   id: string;
   type: MetadataType;
   title: string;
@@ -36,20 +36,20 @@ export interface SearchResult {
   audio?: string;
   source: string;
   links: SearchResultLink[];
-}
+};
 
-export const search = async (link: string) => {
-  const { type, id } = linkToServiceType(link);
+export const search = async (link?: string, searchId?: string) => {
+  const searchService = await getSearchService(link, searchId);
 
   let metadata, query;
 
-  if (type === ServiceType.Spotify) {
-    metadata = await getSpotifyMetadata(id, link);
+  if (searchService.type === ServiceType.Spotify) {
+    metadata = await getSpotifyMetadata(searchService.id, link!);
     query = getSpotifyQueryFromMetadata(metadata);
   }
 
-  if (type === ServiceType.YouTube) {
-    metadata = await getYouTubeMetadata(id, link);
+  if (searchService.type === ServiceType.YouTube) {
+    metadata = await getYouTubeMetadata(searchService.id, link!);
     query = getYouTubeQueryFromMetadata(metadata);
   }
 
@@ -58,25 +58,25 @@ export const search = async (link: string) => {
   }
 
   logger.info(
-    `[${search.name}] (new search) ${JSON.stringify({ link, query, metadata }, null, 2)}`
+    `[${search.name}] (params) ${JSON.stringify({ link, query, metadata }, null, 2)}`
   );
 
   const [spotifyLink, youtubeLink, appleMusicLink, deezerLink, soundCloudLink] =
     await Promise.all([
-      type !== ServiceType.Spotify ? getSpotifyLink(query, metadata) : null,
-      type !== ServiceType.YouTube ? getYouTubeLink(query, metadata) : null,
+      searchService.type !== ServiceType.Spotify ? getSpotifyLink(query, metadata) : null,
+      searchService.type !== ServiceType.YouTube ? getYouTubeLink(query, metadata) : null,
       getAppleMusicLink(query, metadata),
       getDeezerLink(query, metadata),
       getSoundCloudLink(query, metadata),
     ]);
 
   logger.info(
-    `[${search.name}] (search results) ${JSON.stringify({
+    `[${search.name}] (results) ${JSON.stringify({
       spotifyLink,
       youtubeLink,
       appleMusicLink,
-      deezerLink,
       soundCloudLink,
+      deezerLink,
     })}`
   );
 
@@ -86,8 +86,8 @@ export const search = async (link: string) => {
     spotifyLink,
     youtubeLink,
     appleMusicLink,
-    deezerLink,
     soundCloudLink,
+    deezerLink,
   ].filter(Boolean);
 
   // add no-verified links if at least one link is verified
@@ -96,13 +96,13 @@ export const search = async (link: string) => {
   }
 
   const searchResult: SearchResult = {
-    id,
+    id: searchService.id,
     type: metadata.type,
     title: metadata.title,
     description: metadata.description,
     image: metadata.image,
     audio: metadata.audio,
-    source: link,
+    source: searchService.source,
     links: links as SearchResultLink[],
   };
 
