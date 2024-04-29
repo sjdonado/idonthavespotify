@@ -17,6 +17,7 @@ export const pageRouter = new Elysia()
     logger.error(error);
 
     set.status = 200;
+    // TODO: return different error messages for: searchId not found, link validation error
     return <ErrorMessage />;
   })
   .get('/', async () => {

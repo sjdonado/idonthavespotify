@@ -1,6 +1,5 @@
 import { SearchResult } from '~/services/search';
 
-import AudioPreview from './audio-preview';
 import SearchLink from './search-link';
 
 export default function SearchCard(props: { searchResult: SearchResult }) {
@@ -10,10 +9,10 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
       data-id={props.searchResult.id}
       class="m-4 flex max-w-2xl flex-wrap items-start justify-center rounded-lg border border-white md:p-4"
     >
-      <AudioPreview
-        title={props.searchResult.title}
-        image={props.searchResult.image}
-        audio={props.searchResult.audio}
+      <img
+        class="m-4 w-48"
+        src={props.searchResult.image}
+        alt={props.searchResult.title}
       />
       <div class="mb-2 flex-1 flex-col items-start p-2 md:mr-6">
         <div class="mb-2 hyphens-auto text-center text-2xl font-normal md:text-start">
