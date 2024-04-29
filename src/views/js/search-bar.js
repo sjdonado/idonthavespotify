@@ -1,5 +1,3 @@
-import { SPOTIFY_LINK_REGEX } from '~/config/constants';
-
 const searchParams = new URLSearchParams(window.location.search);
 const searchForm = document.getElementById('search-form');
 
@@ -13,12 +11,8 @@ const updateQueryParams = ({ newSearchId }) => {
   window.history.replaceState({}, '', `${window.location.pathname}?${searchParams}`);
 };
 
-const submitSearch = ({ spotifyLink }) => {
-  if (!SPOTIFY_LINK_REGEX.test(spotifyLink)) {
-    return;
-  }
-
-  searchForm.querySelector('input').value = spotifyLink;
+const submitSearch = ({ link }) => {
+  searchForm.querySelector('input').value = link;
   htmx.ajax('POST', '/search', { source: '#search-form' });
 };
 
@@ -28,7 +22,7 @@ const getSpotifyLinkFromClipboard = async () => {
       const clipboardText = await navigator.clipboard.readText();
 
       if (clipboardText) {
-        submitSearch({ spotifyLink: clipboardText });
+        submitSearch({ link: clipboardText });
       }
     } catch (error) {
       console.error('Clipboard access error:', error);
@@ -38,10 +32,11 @@ const getSpotifyLinkFromClipboard = async () => {
   }
 };
 
-const searchId = searchParams.get('id');
-if (searchId) {
-  submitSearch({ spotifyLink: `https://open.spotify.com/track/${searchId}` });
-}
+// TODO: if searchId send an extra param
+// const searchId = searchParams.get('id');
+// if (searchId) {
+//   submitSearch({ link: `https://open.spotify.com/track/${searchId}` });
+// }
 
 document.addEventListener('htmx:timeout', function () {
   document.getElementById('search-results').innerHTML =

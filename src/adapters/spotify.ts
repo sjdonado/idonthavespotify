@@ -55,7 +55,7 @@ export async function fetchSpotifyMetadata(spotifyLink: string) {
     timeout: DEFAULT_TIMEOUT / 2,
   });
 
-  logger.info(`[${fetchSpotifyMetadata.name}] parse spotify metadata: ${url}`);
+  logger.info(`[${fetchSpotifyMetadata.name}] parse metadata: ${url}`);
 
   if (SPOTIFY_LINK_MOBILE_REGEX.test(spotifyLink)) {
     url = html.match(SPOTIFY_LINK_DESKTOP_REGEX)?.[0] ?? '';
@@ -67,9 +67,7 @@ export async function fetchSpotifyMetadata(spotifyLink: string) {
     // wait a random amount of time to avoid rate limiting
     await new Promise(res => setTimeout(res, Math.random() * 1000));
 
-    logger.info(
-      `[${fetchSpotifyMetadata.name}] parse spotify metadata (desktop): ${url}`
-    );
+    logger.info(`[${fetchSpotifyMetadata.name}] parse metadata (desktop): ${url}`);
 
     html = await HttpClient.get<string>(url, {
       headers: spotifyHeaders,

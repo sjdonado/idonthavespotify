@@ -5,6 +5,8 @@ import { logger } from '~/utils/logger';
 
 import { SearchMetadata, SearchResultLink } from '~/services/search';
 import { getLinkWithPuppeteer } from '~/utils/scraper';
+import HttpClient from '~/utils/http-client';
+import { DEFAULT_TIMEOUT } from '~/config/constants';
 
 const YOUTUBE_SEARCH_TYPES = {
   [MetadataType.Song]: 'song',
@@ -31,8 +33,8 @@ export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
       secure: true,
     };
 
-    const cookies = config.services.youTube.cookies.split('|').map(cookie => {
-      const [name, value] = cookie.split(':');
+    const cookies = config.services.youTube.cookies.split(';').map(cookie => {
+      const [name, value] = cookie.split('=');
       return {
         ...youtubeCookie,
         name,
@@ -58,4 +60,17 @@ export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
   } catch (error) {
     logger.error(`[YouTube] (${url}) ${error}`);
   }
+}
+
+export async function fetchYoutubeMetadata(youtubeLink: string) {
+  logger.info(`[${fetchYoutubeMetadata.name}] parse metadata (desktop): ${youtubeLink}`);
+
+  const html = await HttpClient.get<string>(youtubeLink, {
+    headers: {
+      Cookie: config.services.youTube.cookies,
+    },
+    timeout: DEFAULT_TIMEOUT / 2,
+  });
+
+  return html;
 }
