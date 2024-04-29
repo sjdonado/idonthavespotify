@@ -23,8 +23,8 @@ const YOUTUBE_METADATA_TO_METADATA_TYPE = {
   [YoutubeMetadataType.Show]: MetadataType.Show,
 };
 
-export const getYouTubeMetadata = async (link: string) => {
-  const cached = await getCachedSearchMetadata(link);
+export const getYouTubeMetadata = async (id: string, link: string) => {
+  const cached = await getCachedSearchMetadata(id);
   if (cached) {
     return cached;
   }
@@ -43,14 +43,16 @@ export const getYouTubeMetadata = async (link: string) => {
       throw new Error('Youtube metadata not found');
     }
 
+    const parsedTitle = title?.replace('- YouTube Music', '').trim();
+
     const metadata = {
-      title,
+      title: parsedTitle,
       description,
       type: YOUTUBE_METADATA_TO_METADATA_TYPE[type as YoutubeMetadataType],
       image,
     } as SearchMetadata;
 
-    await cacheSearchMetadata(link, metadata);
+    await cacheSearchMetadata(id, metadata);
 
     return metadata;
   } catch (err) {
@@ -59,13 +61,15 @@ export const getYouTubeMetadata = async (link: string) => {
 };
 
 export const getYouTubeQueryFromMetadata = (metadata: SearchMetadata) => {
-  const parsedTitle = metadata.title?.replace('- YouTube Music', '').trim();
-
-  let query = parsedTitle;
+  let query = metadata.title;
 
   if (metadata.type === MetadataType.Song) {
-    const [, artist, album] = metadata.description?.match(/· ([^·]+) ([^·]+) ℗/) ?? [];
-    query = artist ? `${query} ${artist}` : query;
+    const matches = metadata.description?.match(/(?:·|&)\s*([^·&℗]+)/g);
+    const artists = [
+      ...new Set(matches?.map(match => match.trim().replace(/^[·&]\s*/, '')) || []),
+    ];
+
+    query = matches ? `${query} ${artists}` : query;
   }
 
   // TODO: extract artist from description depending on the metadata structure

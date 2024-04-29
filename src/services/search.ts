@@ -44,12 +44,12 @@ export const search = async (link: string) => {
   let metadata, query;
 
   if (type === ServiceType.Spotify) {
-    metadata = await getSpotifyMetadata(link);
+    metadata = await getSpotifyMetadata(id, link);
     query = getSpotifyQueryFromMetadata(metadata);
   }
 
   if (type === ServiceType.YouTube) {
-    metadata = await getYouTubeMetadata(link);
+    metadata = await getYouTubeMetadata(id, link);
     query = getYouTubeQueryFromMetadata(metadata);
   }
 
@@ -82,7 +82,13 @@ export const search = async (link: string) => {
 
   const tidalLink = getTidalLink(query);
 
-  const links = [appleMusicLink, youtubeLink, deezerLink, soundCloudLink].filter(Boolean);
+  const links = [
+    spotifyLink,
+    youtubeLink,
+    appleMusicLink,
+    deezerLink,
+    soundCloudLink,
+  ].filter(Boolean);
 
   // add no-verified links if at least one link is verified
   if (links.some(link => link?.isVerified)) {

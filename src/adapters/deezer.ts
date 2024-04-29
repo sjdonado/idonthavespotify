@@ -7,6 +7,7 @@ import { logger } from '~/utils/logger';
 import { responseMatchesQuery } from '~/utils/compare';
 
 import { SearchMetadata, SearchResultLink } from '~/services/search';
+import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
 
 interface DeezerSearchResponse {
   total: number;
@@ -43,6 +44,12 @@ export async function getDeezerLink(query: string, metadata: SearchMetadata) {
   const url = new URL(`${config.services.deezer.apiUrl}/${searchType}`);
   url.search = params.toString();
 
+  const cache = await getCachedSearchResultLink(url);
+  if (cache) {
+    logger.info(`[Deezer] (${url}) cache hit`);
+    return cache;
+  }
+
   try {
     const response = await HttpClient.get<DeezerSearchResponse>(url.toString());
 
@@ -56,11 +63,13 @@ export async function getDeezerLink(query: string, metadata: SearchMetadata) {
       throw new Error(`Query does not match: ${JSON.stringify({ title, name })}`);
     }
 
-    return {
+    const searchResultLink = {
       type: ServiceType.Deezer,
       url: link,
       isVerified: true,
     } as SearchResultLink;
+
+    await cacheSearchResultLink(url, searchResultLink);
   } catch (error) {
     logger.error(`[Deezer] (${url}) ${error}`);
   }

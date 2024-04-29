@@ -5,9 +5,10 @@ import { DEFAULT_TIMEOUT } from '~/config/constants';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { getCheerioDoc } from '~/utils/scraper';
+import { getResultWithBestScore } from '~/utils/compare';
 
 import { SearchMetadata, SearchResultLink } from '~/services/search';
-import { getResultWithBestScore } from '~/utils/compare';
+import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
 
 export const APPLE_MUSIC_LINK_SELECTOR = 'a[href^="https://music.apple.com/"]';
 
@@ -32,6 +33,12 @@ export async function getAppleMusicLink(query: string, metadata: SearchMetadata)
 
   const url = new URL(`${config.services.appleMusic.apiUrl}/search?${params}`);
 
+  const cache = await getCachedSearchResultLink(url);
+  if (cache) {
+    logger.info(`[Apple Music] (${url}) cache hit`);
+    return cache;
+  }
+
   try {
     const html = await HttpClient.get<string>(url.toString(), {
       timeout: DEFAULT_TIMEOUT * 2,
@@ -44,12 +51,16 @@ export async function getAppleMusicLink(query: string, metadata: SearchMetadata)
 
     const { href } = getResultWithBestScore(doc, listElements, query);
 
-    return {
+    const searchResultLink = {
       type: ServiceType.AppleMusic,
       url: href,
       isVerified: true,
     } as SearchResultLink;
+
+    await cacheSearchResultLink(url, searchResultLink);
+
+    return searchResultLink;
   } catch (err) {
-    logger.error(`[Apple Music](${url}) ${err} `);
+    logger.error(`[Apple Music] (${url}) ${err} `);
   }
 }

@@ -7,6 +7,7 @@ import { getCheerioDoc } from '~/utils/scraper';
 import { getResultWithBestScore } from '~/utils/compare';
 
 import { SearchMetadata, SearchResultLink } from '~/services/search';
+import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
 
 export async function getSoundCloudLink(query: string, metadata: SearchMetadata) {
   if (metadata.type === MetadataType.Show) {
@@ -20,6 +21,12 @@ export async function getSoundCloudLink(query: string, metadata: SearchMetadata)
   const url = new URL(`${config.services.soundCloud.baseUrl}/search`);
   url.search = params.toString();
 
+  const cache = await getCachedSearchResultLink(url);
+  if (cache) {
+    logger.info(`[SoundCloud] (${url}) cache hit`);
+    return cache;
+  }
+
   try {
     const html = await HttpClient.get<string>(url.toString());
     const doc = getCheerioDoc(html);
@@ -32,11 +39,13 @@ export async function getSoundCloudLink(query: string, metadata: SearchMetadata)
 
     const { href } = getResultWithBestScore(noscriptDoc, listElements, query);
 
-    return {
+    const searchResultLink = {
       type: ServiceType.SoundCloud,
       url: `${config.services.soundCloud.baseUrl}${href}`,
       isVerified: true,
     } as SearchResultLink;
+
+    await cacheSearchResultLink(url, searchResultLink);
   } catch (err) {
     logger.error(`[SoundCloud] (${url}) ${err}`);
   }

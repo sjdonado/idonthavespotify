@@ -19,9 +19,7 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
         <div class="mb-2 hyphens-auto text-center text-2xl font-normal md:text-start">
           {props.searchResult.title}
         </div>
-        <p class="h-5 max-h-10 text-clip text-center text-sm md:text-start">
-          {props.searchResult.description}
-        </p>
+        <p class="text-center text-sm md:text-start">{props.searchResult.description}</p>
         {props.searchResult.links.length === 0 && (
           <p class="mt-6 w-full text-center text-sm md:text-start">
             Not available on other platforms

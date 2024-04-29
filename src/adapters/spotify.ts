@@ -59,6 +59,8 @@ export async function getSpotifyLink(query: string, metadata: SearchMetadata) {
   const url = new URL(config.services.spotify.apiUrl);
   url.search = params.toString();
 
+  logger.info(`[Spotify] (${url}) new search`);
+
   try {
     const response = await HttpClient.get<SpotifySearchResponse>(url.toString(), {
       headers: {
@@ -66,15 +68,13 @@ export async function getSpotifyLink(query: string, metadata: SearchMetadata) {
       },
     });
 
-    console.log('spotify response', response);
-
     const [[, data]] = Object.entries(response);
 
     if (data.total === 0) {
       throw new Error(`No results found: ${JSON.stringify(response)}`);
     }
 
-    const [{ name, external_urls }] = data.items;
+    const { name, external_urls } = data.items[0];
 
     if (!responseMatchesQuery(name ?? '', query)) {
       throw new Error(`Query does not match: ${JSON.stringify({ name })}`);
