@@ -1,6 +1,10 @@
 import { ServiceType } from '~/config/enum';
 
 const SEARCH_LINK_DICT = {
+  [ServiceType.Spotify]: {
+    icon: 'fab fa-spotify',
+    label: 'Listen on Spotify',
+  },
   [ServiceType.YouTube]: {
     icon: 'fab fa-youtube',
     label: 'Listen on YouTube',

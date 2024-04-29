@@ -1,18 +1,9 @@
 const searchParams = new URLSearchParams(window.location.search);
-const searchForm = document.getElementById('search-form');
-
-searchForm.addEventListener('htmx:afterOnLoad', () => {
-  const newSearchId = document.getElementById('search-card').getAttribute('data-id');
-  updateQueryParams({ newSearchId });
-});
-
-const updateQueryParams = ({ newSearchId }) => {
-  searchParams.set('id', newSearchId);
-  window.history.replaceState({}, '', `${window.location.pathname}?${searchParams}`);
-};
 
 const submitSearch = ({ link }) => {
+  const searchForm = document.getElementById('search-form');
   searchForm.querySelector('input').value = link;
+
   htmx.ajax('POST', '/search', { source: '#search-form' });
 };
 
@@ -32,15 +23,31 @@ const getSpotifyLinkFromClipboard = async () => {
   }
 };
 
-// TODO: if searchId send an extra param
-// const searchId = searchParams.get('id');
-// if (searchId) {
-//   submitSearch({ link: `https://open.spotify.com/track/${searchId}` });
-// }
+document.addEventListener('htmx:afterOnLoad', () => {
+  const searchId = document.getElementById('search-card')?.getAttribute('data-id');
+  if (searchId) {
+    searchParams.set('id', searchId);
+    window.history.replaceState({}, '', `${window.location.pathname}?${searchParams}`);
+  }
+});
 
 document.addEventListener('htmx:timeout', function () {
   document.getElementById('search-results').innerHTML =
     '<p class="mt-8 text-center">Something went wrong, try again later.</p>';
 });
 
-getSpotifyLinkFromClipboard();
+document.addEventListener('DOMContentLoaded', async () => {
+  const searchId = searchParams.get('id');
+  if (searchId) {
+    htmx.ajax('POST', '/search', {
+      source: '#search-form',
+      values: {
+        link: undefined,
+        searchId,
+      },
+    });
+    return;
+  }
+
+  await getSpotifyLinkFromClipboard();
+});

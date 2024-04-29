@@ -6,7 +6,10 @@ export default function MainLayout(props: { children: JSX.Element }) {
       <head>
         <title>I don't have spotify</title>
         <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
+        />
         <meta name="theme-color" content="#000000" />
 
         <meta
@@ -33,7 +36,6 @@ export default function MainLayout(props: { children: JSX.Element }) {
         <CustomMetaTag property="og:image:alt" content="I don't have Spotify favicon" />
 
         <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-        <meta name="htmx-config" content='{"defaultSwapStyle":"outerHTML"}' />
 
         <link href="https://fonts.cdnfonts.com/css/montserrat" rel="stylesheet" />
         <link href="/assets/css/index.min.css" rel="stylesheet" />
@@ -46,6 +48,8 @@ export default function MainLayout(props: { children: JSX.Element }) {
         src="https://kit.fontawesome.com/f559975e2f.js"
         crossorigin="anonymous"
       />
+
+      <script src="assets/js/search-bar.min.js" />
     </html>
   );
 }
