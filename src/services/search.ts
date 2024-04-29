@@ -58,39 +58,23 @@ export const search = async (link?: string, searchId?: string) => {
   }
 
   logger.info(
-    `[${search.name}] (params) ${JSON.stringify({ link, query, metadata }, null, 2)}`
+    `[${search.name}] (params) ${JSON.stringify({ searchService, metadata, query }, null, 2)}`
   );
 
-  const [spotifyLink, youtubeLink, appleMusicLink, deezerLink, soundCloudLink] =
-    await Promise.all([
-      searchService.type !== ServiceType.Spotify ? getSpotifyLink(query, metadata) : null,
-      searchService.type !== ServiceType.YouTube ? getYouTubeLink(query, metadata) : null,
-      getAppleMusicLink(query, metadata),
-      getDeezerLink(query, metadata),
-      getSoundCloudLink(query, metadata),
-    ]);
+  const searchResults = await Promise.all([
+    searchService.type !== ServiceType.Spotify ? getSpotifyLink(query, metadata) : null,
+    searchService.type !== ServiceType.YouTube ? getYouTubeLink(query, metadata) : null,
+    getAppleMusicLink(query, metadata),
+    getDeezerLink(query, metadata),
+    getSoundCloudLink(query, metadata),
+  ]);
 
-  logger.info(
-    `[${search.name}] (results) ${JSON.stringify({
-      spotifyLink,
-      youtubeLink,
-      appleMusicLink,
-      soundCloudLink,
-      deezerLink,
-    })}`
-  );
+  const links = searchResults.filter(Boolean);
 
-  const tidalLink = getTidalLink(query);
-
-  const links = [
-    spotifyLink,
-    youtubeLink,
-    appleMusicLink,
-    soundCloudLink,
-    deezerLink,
-  ].filter(Boolean);
+  logger.info(`[${search.name}] (results) ${JSON.stringify(links, null, 2)}`);
 
   // add no-verified links if at least one link is verified
+  const tidalLink = getTidalLink(query);
   if (links.some(link => link?.isVerified)) {
     links.push(tidalLink);
   }

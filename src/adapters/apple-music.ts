@@ -1,6 +1,5 @@
 import * as config from '~/config/default';
 import { MetadataType, ServiceType } from '~/config/enum';
-import { DEFAULT_TIMEOUT } from '~/config/constants';
 
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
@@ -40,9 +39,7 @@ export async function getAppleMusicLink(query: string, metadata: SearchMetadata)
   }
 
   try {
-    const html = await HttpClient.get<string>(url.toString(), {
-      timeout: DEFAULT_TIMEOUT * 2,
-    });
+    const html = await HttpClient.get<string>(url.toString());
     const doc = getCheerioDoc(html);
 
     const listElements = doc(

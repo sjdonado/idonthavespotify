@@ -46,6 +46,8 @@ export async function getSoundCloudLink(query: string, metadata: SearchMetadata)
     } as SearchResultLink;
 
     await cacheSearchResultLink(url, searchResultLink);
+
+    return searchResultLink;
   } catch (err) {
     logger.error(`[SoundCloud] (${url}) ${err}`);
   }

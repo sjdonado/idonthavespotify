@@ -74,7 +74,7 @@ export const getYouTubeQueryFromMetadata = (metadata: SearchMetadata) => {
       ...new Set(matches?.map(match => match.trim().replace(/^[·&]\s*/, '')) || []),
     ];
 
-    query = matches ? `${query} ${artists}` : query;
+    query = matches ? `${query} ${artists[0]}` : query;
   }
 
   // TODO: extract artist from description depending on the metadata structure

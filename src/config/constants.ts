@@ -9,6 +9,6 @@ export const YOUTUBE_LINK_REGEX =
   /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be|music\.youtube\.com)\/(?:watch\?v=|embed\/|v\/|shorts\/|playlist\?list=)?([\w-]{11})(?:\S+)?/;
 
 export const ADAPTERS_QUERY_LIMIT = 1;
-export const RESPONSE_COMPARE_MIN_SCORE = 0.4;
+export const RESPONSE_COMPARE_MIN_SCORE = 0.3;
 
-export const DEFAULT_TIMEOUT = 6000;
+export const DEFAULT_TIMEOUT = 3000;

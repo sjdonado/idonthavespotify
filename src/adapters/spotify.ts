@@ -2,7 +2,6 @@ import * as config from '~/config/default';
 
 import {
   ADAPTERS_QUERY_LIMIT,
-  DEFAULT_TIMEOUT,
   SPOTIFY_LINK_DESKTOP_REGEX,
   SPOTIFY_LINK_MOBILE_REGEX,
 } from '~/config/constants';
@@ -86,17 +85,15 @@ export async function getSpotifyLink(query: string, metadata: SearchMetadata) {
 
     const { name, external_urls } = data.items[0];
 
-    if (!responseMatchesQuery(name ?? '', query)) {
-      throw new Error(`Query does not match: ${JSON.stringify({ name })}`);
-    }
-
     const searchResultLink = {
       type: ServiceType.Spotify,
       url: external_urls.spotify,
-      isVerified: true,
+      isVerified: responseMatchesQuery(name ?? '', query),
     } as SearchResultLink;
 
     await cacheSearchResultLink(url, searchResultLink);
+
+    return searchResultLink;
   } catch (error) {
     logger.error(`[Spotify] (${url}) ${error}`);
   }
@@ -111,7 +108,6 @@ export async function fetchSpotifyMetadata(spotifyLink: string) {
 
   let html = await HttpClient.get<string>(url, {
     headers: spotifyHeaders,
-    timeout: DEFAULT_TIMEOUT / 2,
   });
 
   logger.info(`[${fetchSpotifyMetadata.name}] parse metadata: ${url}`);
@@ -130,7 +126,6 @@ export async function fetchSpotifyMetadata(spotifyLink: string) {
 
     html = await HttpClient.get<string>(url, {
       headers: spotifyHeaders,
-      timeout: DEFAULT_TIMEOUT / 2,
       retries: 2,
     });
   }

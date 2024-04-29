@@ -19,10 +19,12 @@ export default class HttpClient {
   };
 
   static async get<T>(url: string, options?: HttpClientOptions) {
+    logger.debug(`[HttpClient] GET - ${url}`);
     return HttpClient.request<T>('GET', url, options);
   }
 
   static async post<T>(url: string, payload: unknown, options: HttpClientOptions = {}) {
+    logger.debug(`[HttpClient] POST - ${url}`);
     return HttpClient.request<T>('POST', url, { ...options, payload });
   }
 

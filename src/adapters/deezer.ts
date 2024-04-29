@@ -66,6 +66,8 @@ export async function getDeezerLink(query: string, metadata: SearchMetadata) {
     } as SearchResultLink;
 
     await cacheSearchResultLink(url, searchResultLink);
+
+    return searchResultLink;
   } catch (error) {
     logger.error(`[Deezer] (${url}) ${error}`);
   }
