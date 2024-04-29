@@ -5,7 +5,7 @@ import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
 import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
 import { SearchMetadata } from '~/services/search';
 
-enum SpotifyMetadataType {
+export enum SpotifyMetadataType {
   Song = 'music.song',
   Album = 'music.album',
   Playlist = 'music.playlist',

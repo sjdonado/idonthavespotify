@@ -24,10 +24,10 @@ const YOUTUBE_METADATA_TO_METADATA_TYPE = {
 };
 
 export const getYouTubeMetadata = async (link: string) => {
-  // const cached = await getCachedSearchMetadata(link);
-  // if (cached) {
-  //   return cached;
-  // }
+  const cached = await getCachedSearchMetadata(link);
+  if (cached) {
+    return cached;
+  }
 
   try {
     const html = await fetchSpotifyMetadata(link);
@@ -37,9 +37,8 @@ export const getYouTubeMetadata = async (link: string) => {
     const title = metaTagContent(doc, 'og:title', 'property');
     const description = metaTagContent(doc, 'og:description', 'property');
     const image = metaTagContent(doc, 'og:image', 'property');
-    const type = metaTagContent(doc, 'og:type', 'property') as YoutubeMetadataType;
+    const type = metaTagContent(doc, 'og:type', 'property');
 
-    console.log({ title, description, image, type });
     if (!title || !description || !type || !image) {
       throw new Error('Youtube metadata not found');
     }
@@ -47,11 +46,11 @@ export const getYouTubeMetadata = async (link: string) => {
     const metadata = {
       title,
       description,
-      type: YOUTUBE_METADATA_TO_METADATA_TYPE[type],
+      type: YOUTUBE_METADATA_TO_METADATA_TYPE[type as YoutubeMetadataType],
       image,
     } as SearchMetadata;
 
-    // await cacheSearchMetadata(link, metadata);
+    await cacheSearchMetadata(link, metadata);
 
     return metadata;
   } catch (err) {
@@ -61,25 +60,26 @@ export const getYouTubeMetadata = async (link: string) => {
 
 export const getYouTubeQueryFromMetadata = (metadata: SearchMetadata) => {
   const parsedTitle = metadata.title?.replace('- YouTube Music', '').trim();
-  const [, artist, album] = metadata.description?.match(/· ([^·]+) ([^·]+) ℗/) ?? [];
 
   let query = parsedTitle;
 
   if (metadata.type === MetadataType.Song) {
+    const [, artist, album] = metadata.description?.match(/· ([^·]+) ([^·]+) ℗/) ?? [];
     query = artist ? `${query} ${artist}` : query;
   }
 
-  if (metadata.type === MetadataType.Album) {
-    query = artist ? `${query} ${artist}` : query;
-  }
-
-  if (metadata.type === MetadataType.Playlist) {
-    query = album ? `${query} ${album}` : query;
-  }
-
-  if (metadata.type === MetadataType.Podcast) {
-    query = artist ? `${query} ${artist}` : query;
-  }
+  // TODO: extract artist from description depending on the metadata structure
+  // if (metadata.type === MetadataType.Album) {
+  //   query = artist ? `${query} ${artist}` : query;
+  // }
+  //
+  // if (metadata.type === MetadataType.Playlist) {
+  //   query = album ? `${query} ${album}` : query;
+  // }
+  //
+  // if (metadata.type === MetadataType.Podcast) {
+  //   query = artist ? `${query} ${artist}` : query;
+  // }
 
   return query;
 };

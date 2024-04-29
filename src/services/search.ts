@@ -1,9 +1,6 @@
 import { MetadataType, ServiceType } from '~/config/enum';
 
 import { logger } from '~/utils/logger';
-import { getQueryFromMetadata } from '~/utils/query';
-
-import { cacheSearchResult, getCachedSearchResult } from './cache';
 
 import { linkToServiceType } from '~/parsers/link';
 import { getSpotifyMetadata, getSpotifyQueryFromMetadata } from '~/parsers/spotify';
@@ -14,6 +11,7 @@ import { getYouTubeLink } from '~/adapters/youtube';
 import { getDeezerLink } from '~/adapters/deezer';
 import { getSoundCloudLink } from '~/adapters/soundcloud';
 import { getTidalLink } from '~/adapters/tidal';
+import { getSpotifyLink } from '~/adapters/spotify';
 
 export type SearchMetadata = {
   title: string;
@@ -43,12 +41,6 @@ export interface SearchResult {
 export const search = async (link: string) => {
   const { type, id } = linkToServiceType(link);
 
-  // const cache = await getCachedSearchResult(id);
-  // if (cache) {
-  //   logger.info(`[${search.name}] loaded from cache: ${link}`);
-  //   return cache;
-  // }
-
   let metadata, query;
 
   if (type === ServiceType.Spotify) {
@@ -66,20 +58,23 @@ export const search = async (link: string) => {
   }
 
   logger.info(
-    `[${search.name}] (new search) link: ${link}, query: ${query}, metadata: ${JSON.stringify(metadata)}`
+    `[${search.name}] (new search) ${JSON.stringify({ link, query, metadata }, null, 2)}`
   );
 
-  const [appleMusicLink, youtubeLink, deezerLink, soundCloudLink] = await Promise.all([
-    getAppleMusicLink(query, metadata),
-    getYouTubeLink(query, metadata),
-    getDeezerLink(query, metadata),
-    getSoundCloudLink(query, metadata),
-  ]);
+  const [spotifyLink, youtubeLink, appleMusicLink, deezerLink, soundCloudLink] =
+    await Promise.all([
+      type !== ServiceType.Spotify ? getSpotifyLink(query, metadata) : null,
+      type !== ServiceType.YouTube ? getYouTubeLink(query, metadata) : null,
+      getAppleMusicLink(query, metadata),
+      getDeezerLink(query, metadata),
+      getSoundCloudLink(query, metadata),
+    ]);
 
   logger.info(
     `[${search.name}] (search results) ${JSON.stringify({
-      appleMusicLink,
+      spotifyLink,
       youtubeLink,
+      appleMusicLink,
       deezerLink,
       soundCloudLink,
     })}`
@@ -104,8 +99,6 @@ export const search = async (link: string) => {
     source: link,
     links: links as SearchResultLink[],
   };
-
-  // await cacheSearchResult(searchResult);
 
   return searchResult;
 };

@@ -3,7 +3,7 @@ import * as config from '~/config/default';
 const sqliteStore = require('cache-manager-sqlite');
 const cacheManager = require('cache-manager');
 
-import { SearchMetadata, SearchResult } from './search';
+import { SearchMetadata } from './search';
 
 export const cacheStore = cacheManager.caching({
   store: sqliteStore,
@@ -15,7 +15,7 @@ export const cacheSearchMetadata = async (
   link: string,
   searchMetadata: SearchMetadata
 ) => {
-  await cacheStore.set(`search:${link}`, searchMetadata, {
+  await cacheStore.set(`metadata:${link}`, searchMetadata, {
     ttl: config.cache.expTime,
   });
 };
@@ -26,30 +26,24 @@ export const getCachedSearchMetadata = async (link: string) => {
   return data;
 };
 
-export const cacheSearchResult = async (searchResult: SearchResult) => {
-  await cacheStore.set(`searchResult:${searchResult.id}`, searchResult, {
-    ttl: config.cache.expTime,
+export const cacheSpotifyAccessToken = async (accessToken: string, expTime: number) => {
+  await cacheStore.set('spotify:accessToken', accessToken, {
+    ttl: expTime,
   });
 };
 
-export const getCachedSearchResult = async (id: SearchResult['id']) => {
-  const data = (await cacheStore.get(`searchResult:${id}`)) as SearchResult;
-
-  return data;
+export const getCachedSpotifyAccessToken = async () => {
+  return cacheStore.get('spotify:accessToken');
 };
 
-// TODO: https://github.com/sjdonado/idonthavespotify/issues/6
-/* export const cacheSpotifyAccessToken = async (
-  accessToken: string,
-  expiration: number
-) => {
-  return setWithKey(
-    `${config.redis.cacheKey}:spotifyAccessToken`,
-    accessToken,
-    expiration
-  );
-};
-
-export const getSpotifyAccessToken = async () => {
-  return getByKey(`${config.redis.cacheKey}:spotifyAccessToken`);
-}; */
+// export const cacheSearchResult = async (searchResult: SearchResult) => {
+//   await cacheStore.set(`searchResult:${searchResult.id}`, searchResult, {
+//     ttl: config.cache.expTime,
+//   });
+// };
+//
+// export const getCachedSearchResult = async (id: SearchResult['id']) => {
+//   const data = (await cacheStore.get(`searchResult:${id}`)) as SearchResult;
+//
+//   return data;
+// };
