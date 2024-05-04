@@ -329,8 +329,8 @@ describe('Api router', () => {
       const response = await app.handle(request).then(res => res.json());
 
       expect(response).toEqual({
-        code: 'UNKNOWN',
-        message: 'Link not valid or could not be parsed',
+        code: 'VALIDATION',
+        message: 'Invalid link, please try with Spotify or Youtube links.',
       });
     });
 
@@ -342,7 +342,7 @@ describe('Api router', () => {
 
       expect(response).toEqual({
         code: 'VALIDATION',
-        message: 'Invalid input',
+        message: 'Invalid link, please try with Spotify or Youtube links.',
       });
     });
 
@@ -352,7 +352,7 @@ describe('Api router', () => {
 
       expect(response).toEqual({
         code: 'VALIDATION',
-        message: 'Invalid input',
+        message: 'Invalid link, please try with Spotify or Youtube links.',
       });
     });
 

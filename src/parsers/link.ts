@@ -1,3 +1,5 @@
+import { NotFoundError, ParseError } from 'elysia';
+
 import { SPOTIFY_LINK_REGEX, YOUTUBE_LINK_REGEX } from '~/config/constants';
 import { ServiceType } from '~/config/enum';
 
@@ -18,7 +20,7 @@ export const getSearchService = async (link?: string, searchId?: string) => {
   }
 
   if (!link && searchId) {
-    throw new Error('SearchId does not exist');
+    throw new NotFoundError('SearchId does not exist');
   }
 
   let id, type;
@@ -36,7 +38,7 @@ export const getSearchService = async (link?: string, searchId?: string) => {
   }
 
   if (!id || !type) {
-    throw new Error('Link not valid or could not be parsed');
+    throw new ParseError('Service id could not be extracted from link.');
   }
 
   const searchService = {

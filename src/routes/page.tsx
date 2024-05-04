@@ -1,4 +1,4 @@
-import { Elysia } from 'elysia';
+import { ERROR_CODE, Elysia, ValidationError, redirect } from 'elysia';
 
 import { logger } from '~/utils/logger';
 
@@ -13,12 +13,24 @@ import SearchCard from '~/views/components/search-card';
 import ErrorMessage from '~/views/components/error-message';
 
 export const pageRouter = new Elysia()
-  .onError(({ error, set }) => {
-    logger.error(error);
+  .onError(({ error, code, set }) => {
+    logger.error(`[pageRouter]: ${error}`);
+
+    if (code === 'NOT_FOUND') {
+      set.headers = {
+        'HX-Location': '/',
+      };
+
+      return;
+    }
 
     set.status = 200;
-    // TODO: return different error messages for: searchId not found, link validation error
-    return <ErrorMessage />;
+
+    if (code === 'VALIDATION' || code === 'PARSE') {
+      return <ErrorMessage message={error.message} />;
+    }
+
+    return <ErrorMessage message="Something went wrong, try again later." />;
   })
   .get('/', async () => {
     return (
@@ -31,7 +43,6 @@ export const pageRouter = new Elysia()
     '/search',
     async ({ body: { link, searchId } }) => {
       const searchResult = await search(link, searchId);
-
       return <SearchCard searchResult={searchResult} />;
     },
     {

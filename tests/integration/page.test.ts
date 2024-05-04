@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, mock, jest } from 'bun:test';
+import { beforeEach, describe, expect, it, mock, jest, spyOn } from 'bun:test';
 
 import { getCheerioDoc } from '~/utils/scraper';
 import { formDataRequest } from '../utils/request';
@@ -6,7 +6,6 @@ import { formDataRequest } from '../utils/request';
 import { app } from '~/index';
 
 import { MetadataType, ServiceType } from '~/config/enum';
-import { cachedResponse } from '../utils/shared';
 
 import {
   cacheSearchMetadata,
@@ -14,6 +13,8 @@ import {
   cacheSearchService,
   cacheStore,
 } from '~/services/cache';
+
+import * as linkParser from '~/parsers/link';
 
 const INDEX_ENDPOINT = 'http://localhost';
 
@@ -158,23 +159,27 @@ describe('Page router', () => {
       const doc = getCheerioDoc(response);
 
       const errorMessage = doc('p').text();
-      expect(errorMessage).toContain('Something went wrong, try again later.');
+      expect(errorMessage).toContain(
+        'Invalid link, please try with Spotify or Youtube links.'
+      );
     });
 
-    // it('should return error message when internal server error', async () => {
-    //   // searchMock.mockImplementationOnce(() => {
-    //   //   throw new Error('Injected Error');
-    //   // });
-    //
-    //   const request = formDataRequest(endpoint, { link });
-    //   const response = await app.handle(request).then(res => res.text());
-    //
-    //   const doc = getCheerioDoc(response);
-    //
-    //   const errorMessage = doc('p').text();
-    //   expect(errorMessage).toContain('Something went wrong, try again later.');
-    //
-    //   // expect(searchMock).toHaveBeenCalledTimes(1);
-    // });
+    it('should return error message when internal server error', async () => {
+      const getSearchServiceMock = spyOn(linkParser, 'getSearchService');
+
+      getSearchServiceMock.mockImplementationOnce(() => {
+        throw new Error('Injected Error');
+      });
+
+      const request = formDataRequest(endpoint, { link });
+      const response = await app.handle(request).then(res => res.text());
+
+      const doc = getCheerioDoc(response);
+
+      const errorMessage = doc('p').text();
+      expect(errorMessage).toContain('Something went wrong, try again later.');
+
+      expect(getSearchServiceMock).toHaveBeenCalledTimes(1);
+    });
   });
 });

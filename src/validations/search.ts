@@ -1,9 +1,15 @@
 import { t } from 'elysia';
+import { SPOTIFY_LINK_REGEX, YOUTUBE_LINK_REGEX } from '~/config/constants';
 
 export const searchPayloadValidator = t.Union(
   [
     t.Object({
-      link: t.String({ minLength: 1, error: 'Invalid link' }),
+      link: t.RegExp(
+        new RegExp(`${SPOTIFY_LINK_REGEX.source}|${YOUTUBE_LINK_REGEX.source}`),
+        {
+          error: 'Invalid link, please try again or open an issue on Github.',
+        }
+      ),
       searchId: t.Optional(t.String()),
     }),
     t.Object({
@@ -11,7 +17,9 @@ export const searchPayloadValidator = t.Union(
       searchId: t.String({ error: 'Invalid searchId' }),
     }),
   ],
-  { error: 'Invalid input' }
+  {
+    error: 'Invalid link, please try with Spotify or Youtube links.',
+  }
 );
 
 export const apiVersionValidator = t.Object({
