@@ -1,16 +1,16 @@
 # I don't have Spotify
 
-> More links coming soon :)
-
 | Raycast API                                                                                                                                                                       | Web Page                                                                                                                                                                                        |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ![Uptime Badge](https://uptime.donado.co/api/badge/3/uptime/24?labelPrefix=API%20&labelSuffix=h) ![Uptime Badge](https://uptime.donado.co/api/badge/3/ping/24?labelPrefix=API%20) | ![Uptime Badge](https://uptime.donado.co/api/badge/2/uptime/24?labelPrefix=Web%20Page%20&labelSuffix=h) ![Uptime Badge](https://uptime.donado.co/api/badge/2/ping/24?labelPrefix=Web%20Page%20) |
 
-## Web
+## Spotify Search
 
-<div align="center">
-  <img width="1840" alt="Website screenshot" src="https://github.com/sjdonado/idonthavespotify/assets/27580836/4a243d5e-0ab6-4174-9c79-baf5f2cff98a">
-</div>
+<img width="2032" alt="Screenshot 2024-05-04 at 12 52 36" src="https://github.com/sjdonado/idonthavespotify/assets/27580836/842c5aa5-d0ac-4bb8-938c-ce22d1d522c5">
+
+## Youtube Music Search (beta)
+
+<img width="2032" alt="Screenshot 2024-05-04 at 12 50 22" src="https://github.com/sjdonado/idonthavespotify/assets/27580836/2fce2d17-938a-402e-8b66-47ed6b12f6b0">
 
 ## Raycast Extension
 
