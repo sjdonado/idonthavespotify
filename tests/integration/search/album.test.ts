@@ -77,13 +77,13 @@ describe('GET /search - Album', () => {
       source: 'https://open.spotify.com/album/4czdORdCWP9umpbhFXK2fW',
       links: [
         {
-          type: 'appleMusic',
-          url: 'https://music.apple.com/us/album/for-all-the-dogs/1710685602',
+          type: 'youTube',
+          url: mockedYoutubeLink,
           isVerified: true,
         },
         {
-          type: 'youTube',
-          url: mockedYoutubeLink,
+          type: 'appleMusic',
+          url: 'https://music.apple.com/us/album/for-all-the-dogs/1710685602',
           isVerified: true,
         },
         {

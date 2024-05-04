@@ -39,6 +39,8 @@ describe('Searches cache', () => {
   const getLinkWithPuppeteerMock = getLinkWithPuppeteer as jest.Mock;
 
   beforeAll(async () => {
+    cacheStore.reset();
+
     mock = new AxiosMockAdapter(axios);
 
     const query = 'Do Not Disturb Drake';
@@ -66,7 +68,6 @@ describe('Searches cache', () => {
   });
 
   afterAll(() => {
-    cacheStore.reset();
     mock.reset();
   });
 

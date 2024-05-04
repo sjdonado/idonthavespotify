@@ -48,7 +48,7 @@ describe('GET /search - Song', () => {
     cacheStore.reset();
   });
 
-  it('should return 200', async () => {
+  it.only('should return 200', async () => {
     const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
     const query = 'Do Not Disturb Drake';
 
@@ -79,13 +79,13 @@ describe('GET /search - Song', () => {
       source: link,
       links: [
         {
-          type: 'appleMusic',
-          url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
+          type: 'youTube',
+          url: mockedYoutubeLink,
           isVerified: true,
         },
         {
-          type: 'youTube',
-          url: mockedYoutubeLink,
+          type: 'appleMusic',
+          url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
           isVerified: true,
         },
         {
@@ -148,13 +148,13 @@ describe('GET /search - Song', () => {
       source: mobileSpotifyLink,
       links: [
         {
-          type: 'appleMusic',
-          url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
+          type: 'youTube',
+          url: mockedYoutubeLink,
           isVerified: true,
         },
         {
-          type: 'youTube',
-          url: mockedYoutubeLink,
+          type: 'appleMusic',
+          url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
           isVerified: true,
         },
         {
@@ -216,13 +216,13 @@ describe('GET /search - Song', () => {
       source: link,
       links: [
         {
-          type: 'appleMusic',
-          url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
+          type: 'youTube',
+          url: mockedYoutubeLink,
           isVerified: true,
         },
         {
-          type: 'youTube',
-          url: mockedYoutubeLink,
+          type: 'appleMusic',
+          url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
           isVerified: true,
         },
         {

@@ -77,13 +77,13 @@ describe('GET /search - Artist', () => {
       source: 'https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5',
       links: [
         {
-          type: 'appleMusic',
-          url: 'https://music.apple.com/us/artist/j-cole/73705833',
+          type: 'youTube',
+          url: mockedYoutubeLink,
           isVerified: true,
         },
         {
-          type: 'youTube',
-          url: mockedYoutubeLink,
+          type: 'appleMusic',
+          url: 'https://music.apple.com/us/artist/j-cole/73705833',
           isVerified: true,
         },
         {

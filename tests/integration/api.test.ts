@@ -215,13 +215,13 @@ describe('Api router', () => {
         source: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
         links: [
           {
-            type: 'appleMusic',
-            url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
+            type: 'youTube',
+            url: mockedYoutubeLink,
             isVerified: true,
           },
           {
-            type: 'youTube',
-            url: mockedYoutubeLink,
+            type: 'appleMusic',
+            url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
             isVerified: true,
           },
           {
@@ -276,13 +276,13 @@ describe('Api router', () => {
         source: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
         links: [
           {
-            type: 'appleMusic',
-            url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
+            type: 'youTube',
+            url: mockedYoutubeLink,
             isVerified: true,
           },
           {
-            type: 'youTube',
-            url: mockedYoutubeLink,
+            type: 'appleMusic',
+            url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
             isVerified: true,
           },
           {
@@ -334,13 +334,25 @@ describe('Api router', () => {
       });
     });
 
+    it('should return bad request - invalid searchId', async () => {
+      const searchId = 123;
+
+      const request = JSONRequest(API_SEARCH_ENDPOINT, { searchId });
+      const response = await app.handle(request).then(res => res.json());
+
+      expect(response).toEqual({
+        code: 'VALIDATION',
+        message: 'Invalid input',
+      });
+    });
+
     it('should return bad request - unknown body param', async () => {
       const request = JSONRequest(API_SEARCH_ENDPOINT, { foo: 'bar' });
       const response = await app.handle(request).then(res => res.json());
 
       expect(response).toEqual({
         code: 'VALIDATION',
-        message: 'Invalid link',
+        message: 'Invalid input',
       });
     });
 
