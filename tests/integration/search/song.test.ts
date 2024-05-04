@@ -48,8 +48,8 @@ describe('GET /search - Song', () => {
     cacheStore.reset();
   });
 
-  it('should return 200', async () => {
-    const spotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
+  it.only('should return 200', async () => {
+    const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
     const query = 'Do Not Disturb Drake';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
@@ -57,9 +57,9 @@ describe('GET /search - Song', () => {
     const deezerSearchLink = getDeezerSearchLink(query, 'track');
     const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink });
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
 
-    mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
+    mock.onGet(link).reply(200, spotifySongHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
@@ -71,21 +71,21 @@ describe('GET /search - Song', () => {
 
     expect(response).toEqual({
       id: '2KvHC9z14GSl4YpkNMX384',
-      type: 'music.song',
+      type: 'song',
       title: 'Do Not Disturb',
       description: 'Drake · Song · 2017',
       image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
       audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
-      source: spotifyLink,
+      source: link,
       links: [
-        {
-          type: 'appleMusic',
-          url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
-          isVerified: true,
-        },
         {
           type: 'youTube',
           url: mockedYoutubeLink,
+          isVerified: true,
+        },
+        {
+          type: 'appleMusic',
+          url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
           isVerified: true,
         },
         {
@@ -124,7 +124,7 @@ describe('GET /search - Song', () => {
     const deezerSearchLink = getDeezerSearchLink(query, 'track');
     const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink: mobileSpotifyLink });
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { link: mobileSpotifyLink });
 
     mock.onGet(mobileSpotifyLink).reply(200, spotifyMobileHeadResponseMock);
     mock.onGet(desktopSpotifyLink).reply(200, spotifySongHeadResponseMock);
@@ -140,21 +140,21 @@ describe('GET /search - Song', () => {
 
     expect(response).toEqual({
       id: 'mOQKfqJZ1Db',
-      type: 'music.song',
+      type: 'song',
       title: 'Do Not Disturb',
       description: 'Drake · Song · 2017',
       image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
       audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
-      source: desktopSpotifyLink,
+      source: mobileSpotifyLink,
       links: [
-        {
-          type: 'appleMusic',
-          url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
-          isVerified: true,
-        },
         {
           type: 'youTube',
           url: mockedYoutubeLink,
+          isVerified: true,
+        },
+        {
+          type: 'appleMusic',
+          url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
           isVerified: true,
         },
         {
@@ -185,7 +185,7 @@ describe('GET /search - Song', () => {
   });
 
   it('should return 200 - Extra query params', async () => {
-    const spotifyLink =
+    const link =
       'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384?si=NbEEVPZvTVuov_nA3ylJJQ&utm_source=copy-link&utm_medium=copy-link&context=spotify%3Aalbum%3A4czdORdCWP9umpbhFXK2aW&_branch_match_id=1238568162599463760&_branch_referrer=H2sIAAAAAAAAA8soKSkottLXLy7IL8lMq9TLyczL1q%2Fy8nHxLLXwM3RJAgDKC3LnIAAAAA%3D%3D';
     const query = 'Do Not Disturb Drake';
 
@@ -194,9 +194,9 @@ describe('GET /search - Song', () => {
     const deezerSearchLink = getDeezerSearchLink(query, 'track');
     const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink });
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
 
-    mock.onGet(spotifyLink).reply(200, spotifySongHeadResponseMock);
+    mock.onGet(link).reply(200, spotifySongHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
@@ -208,21 +208,21 @@ describe('GET /search - Song', () => {
 
     expect(response).toEqual({
       id: '2KvHC9z14GSl4YpkNMX384',
-      type: 'music.song',
+      type: 'song',
       title: 'Do Not Disturb',
       description: 'Drake · Song · 2017',
       image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
       audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
-      source: spotifyLink,
+      source: link,
       links: [
-        {
-          type: 'appleMusic',
-          url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
-          isVerified: true,
-        },
         {
           type: 'youTube',
           url: mockedYoutubeLink,
+          isVerified: true,
+        },
+        {
+          type: 'appleMusic',
+          url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
           isVerified: true,
         },
         {

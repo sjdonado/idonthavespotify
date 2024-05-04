@@ -1,24 +1,41 @@
-import { beforeEach, describe, expect, it, mock, jest } from 'bun:test';
+import { beforeEach, describe, expect, it, mock, jest, spyOn } from 'bun:test';
 
 import { getCheerioDoc } from '~/utils/scraper';
 import { formDataRequest } from '../utils/request';
 
 import { app } from '~/index';
-import { getCachedSearchResult } from '~/services/cache';
 
-import { cachedResponse } from '../utils/shared';
+import { MetadataType, ServiceType } from '~/config/enum';
+
+import {
+  cacheSearchMetadata,
+  cacheSearchResultLink,
+  cacheSearchService,
+  cacheStore,
+} from '~/services/cache';
+
+import * as linkParser from '~/parsers/link';
 
 const INDEX_ENDPOINT = 'http://localhost';
 
-mock.module('~/services/cache', () => ({
-  getCachedSearchResult: jest.fn(),
-}));
-
 describe('Page router', () => {
-  const getCachedSearchResultMock = getCachedSearchResult as jest.Mock;
+  beforeEach(async () => {
+    cacheStore.reset();
 
-  beforeEach(() => {
-    getCachedSearchResultMock.mockReset();
+    await Promise.all([
+      cacheSearchService('2KvHC9z14GSl4YpkNMX384', {
+        id: '2KvHC9z14GSl4YpkNMX384',
+        type: 'spotify',
+        source: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
+      }),
+      cacheSearchMetadata('2KvHC9z14GSl4YpkNMX384', {
+        title: 'Do Not Disturb',
+        description: 'Drake · Song · 2017',
+        type: MetadataType.Song,
+        image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
+        audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
+      }),
+    ]);
   });
 
   describe('GET /', () => {
@@ -44,12 +61,45 @@ describe('Page router', () => {
 
   describe('POST /search', () => {
     const endpoint = `${INDEX_ENDPOINT}/search`;
-    const spotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
+    const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
 
-    it('should return search card with a valid spotifyLink', async () => {
-      getCachedSearchResultMock.mockResolvedValueOnce(cachedResponse);
+    it('should return search card with a valid link', async () => {
+      await Promise.all([
+        cacheSearchResultLink(
+          new URL('https://music.youtube.com/search?q=Do+Not+Disturb+Drake+song'),
+          {
+            type: ServiceType.YouTube,
+            url: 'https://music.youtube.com/watch?v=zhY_0DoQCQs',
+            isVerified: true,
+          }
+        ),
+        cacheSearchResultLink(
+          new URL('https://music.apple.com/ca/search?term=Do%20Not%20Disturb%20Drake'),
+          {
+            type: ServiceType.AppleMusic,
+            url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
+            isVerified: true,
+          }
+        ),
+        cacheSearchResultLink(
+          new URL('https://api.deezer.com/search/track?q=Do+Not+Disturb+Drake&limit=1'),
+          {
+            type: ServiceType.Deezer,
+            url: 'https://www.deezer.com/track/144572248',
+            isVerified: true,
+          }
+        ),
+        cacheSearchResultLink(
+          new URL('https://soundcloud.com/search?q=Do+Not+Disturb+Drake'),
+          {
+            type: ServiceType.SoundCloud,
+            url: 'https://soundcloud.com/octobersveryown/drake-do-not-disturb',
+            isVerified: true,
+          }
+        ),
+      ]);
 
-      const request = formDataRequest(endpoint, { spotifyLink });
+      const request = formDataRequest(endpoint, { link });
       const response = await app.handle(request).then(res => res.text());
 
       const doc = getCheerioDoc(response);
@@ -62,13 +112,13 @@ describe('Page router', () => {
       const searchLinks = doc('#search-card > div > ul > li >a').toArray();
 
       expect(searchLinks).toHaveLength(5);
-      expect(searchLinks[0].attribs['aria-label']).toContain('Listen on Apple Music');
+      expect(searchLinks[0].attribs['aria-label']).toContain('Listen on YouTube');
       expect(searchLinks[0].attribs['href']).toBe(
-        'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237'
-      );
-      expect(searchLinks[1].attribs['aria-label']).toContain('Listen on YouTube');
-      expect(searchLinks[1].attribs['href']).toBe(
         'https://music.youtube.com/watch?v=zhY_0DoQCQs'
+      );
+      expect(searchLinks[1].attribs['aria-label']).toContain('Listen on Apple Music');
+      expect(searchLinks[1].attribs['href']).toBe(
+        'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237'
       );
       expect(searchLinks[2].attribs['aria-label']).toContain('Listen on Deezer');
       expect(searchLinks[2].attribs['href']).toBe(
@@ -82,17 +132,10 @@ describe('Page router', () => {
       expect(searchLinks[4].attribs['href']).toBe(
         'https://listen.tidal.com/search?q=Do+Not+Disturb+Drake'
       );
-
-      expect(getCachedSearchResultMock).toHaveBeenCalledTimes(1);
     });
 
     it('should return search card when searchLinks are empty', async () => {
-      getCachedSearchResultMock.mockResolvedValueOnce({
-        ...cachedResponse,
-        links: [],
-      });
-
-      const request = formDataRequest(endpoint, { spotifyLink });
+      const request = formDataRequest(endpoint, { link });
       const response = await app.handle(request).then(res => res.text());
 
       const doc = getCheerioDoc(response);
@@ -105,28 +148,30 @@ describe('Page router', () => {
       const searchLinks = doc('#search-card > div > ul > li >a').toArray();
 
       expect(searchLinks).toHaveLength(0);
-
-      expect(getCachedSearchResultMock).toHaveBeenCalledTimes(1);
     });
 
-    it('should return error message when sent an invalid spotifyLink', async () => {
+    it('should return error message when sent an invalid link', async () => {
       const request = formDataRequest(endpoint, {
-        spotifyLink: 'https://open.spotify.com/invalid',
+        link: 'https://open.spotify.com/invalid',
       });
 
       const response = await app.handle(request).then(res => res.text());
       const doc = getCheerioDoc(response);
 
       const errorMessage = doc('p').text();
-      expect(errorMessage).toContain('Something went wrong, try again later.');
+      expect(errorMessage).toContain(
+        'Invalid link, please try with Spotify or Youtube links.'
+      );
     });
 
     it('should return error message when internal server error', async () => {
-      getCachedSearchResultMock.mockImplementationOnce(() => {
+      const getSearchServiceMock = spyOn(linkParser, 'getSearchService');
+
+      getSearchServiceMock.mockImplementationOnce(() => {
         throw new Error('Injected Error');
       });
 
-      const request = formDataRequest(endpoint, { spotifyLink });
+      const request = formDataRequest(endpoint, { link });
       const response = await app.handle(request).then(res => res.text());
 
       const doc = getCheerioDoc(response);
@@ -134,7 +179,7 @@ describe('Page router', () => {
       const errorMessage = doc('p').text();
       expect(errorMessage).toContain('Something went wrong, try again later.');
 
-      expect(getCachedSearchResultMock).toHaveBeenCalledTimes(1);
+      expect(getSearchServiceMock).toHaveBeenCalledTimes(1);
     });
   });
 });

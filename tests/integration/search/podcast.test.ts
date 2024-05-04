@@ -44,16 +44,16 @@ describe('GET /search - Podcast Episode', () => {
   });
 
   it('should return 200', async () => {
-    const spotifyLink = 'https://open.spotify.com/episode/43TCrgmP23qkLcAXZQN8qT';
+    const link = 'https://open.spotify.com/episode/43TCrgmP23qkLcAXZQN8qT';
     const query = 'The End of Twitter as We Know It Waveform: The MKBHD Podcast';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
     const youtubeSearchLink = getYouTubeSearchLink(query, '');
     const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink });
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
 
-    mock.onGet(spotifyLink).reply(200, spotifyPodcastHeadResponseMock);
+    mock.onGet(link).reply(200, spotifyPodcastHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicPodcastResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudPodcastResponseMock);
 
@@ -65,7 +65,7 @@ describe('GET /search - Podcast Episode', () => {
 
     expect(response).toEqual({
       id: '43TCrgmP23qkLcAXZQN8qT',
-      type: 'music.episode',
+      type: 'podcast',
       title: 'The End of Twitter as We Know It',
       description:
         'Listen to this episode from Waveform: The MKBHD Podcast on Spotify. So much happened this week! Not only did Twitter get renamed but Samsung Unpacked happened as well. First, Marques, Andrew, and David talk about base model pricing before talking all about Twitter getting renamed to X. Then they give their first impressions on the new Samsung products before we close it out with some trivia and tech show-and-tell too. Enjoy!  Links: Linus Base Models video: https://bit.ly/lttstartingprice Apple Insider Action Button article: https://bit.ly/appleinsiderrumors Lex Friedman interview with Zuck: https://bit.ly/lexvsmark  Shop products mentioned:  Google Pixel Fold at https://geni.us/zhOE5oh  Samsung Galaxy Z Fold 5 at https://geni.us/ofBYJ6J  Samsung Galaxy Z Flip 5 at https://geni.us/X7vim  Samsung Galaxy Tab S9 at https://geni.us/bBm1  Samsung Galaxy Watch 6 at https://geni.us/gOAk  Shop the merch: https://shop.mkbhd.com  Threads: Waveform: https://www.threads.net/@waveformpodcast Marques: https://www.threads.net/@mkbhd Andrew: https://www.threads.net/@andrew_manganelli David Imel: https://www.threads.net/@davidimel Adam: https:https://www.threads.net/@parmesanpapi17 Ellis: https://twitter.com/EllisRovin  Twitter: https://twitter.com/WVFRM  TikTok:  https://www.tiktok.com/@waveformpodcast  Join the Discord: https://discord.gg/mkbhd  Music by 20syl: https://bit.ly/2S53xlC  Waveform is part of the Vox Media Podcast Network. Learn more about your ad choices. Visit podcastchoices.com/adchoices',

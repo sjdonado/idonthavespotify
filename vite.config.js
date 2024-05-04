@@ -26,7 +26,6 @@ export default defineConfig({
     target: 'esnext',
     rollupOptions: {
       input: {
-        'assets/js/audio-preview': './src/views/js/audio-preview.js',
         'assets/js/search-bar': './src/views/js/search-bar.js',
         'assets/css/index': './src/views/css/index.css',
       },

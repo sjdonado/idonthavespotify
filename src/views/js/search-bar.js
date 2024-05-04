@@ -1,24 +1,11 @@
-import { SPOTIFY_LINK_REGEX } from '~/config/constants';
+import { SPOTIFY_LINK_REGEX, YOUTUBE_LINK_REGEX } from '~/config/constants';
 
 const searchParams = new URLSearchParams(window.location.search);
-const searchForm = document.getElementById('search-form');
 
-searchForm.addEventListener('htmx:afterOnLoad', () => {
-  const newSearchId = document.getElementById('search-card').getAttribute('data-id');
-  updateQueryParams({ newSearchId });
-});
+const submitSearch = ({ link }) => {
+  const searchForm = document.getElementById('search-form');
+  searchForm.querySelector('input').value = link;
 
-const updateQueryParams = ({ newSearchId }) => {
-  searchParams.set('id', newSearchId);
-  window.history.replaceState({}, '', `${window.location.pathname}?${searchParams}`);
-};
-
-const submitSearch = ({ spotifyLink }) => {
-  if (!SPOTIFY_LINK_REGEX.test(spotifyLink)) {
-    return;
-  }
-
-  searchForm.querySelector('input').value = spotifyLink;
   htmx.ajax('POST', '/search', { source: '#search-form' });
 };
 
@@ -27,8 +14,12 @@ const getSpotifyLinkFromClipboard = async () => {
     try {
       const clipboardText = await navigator.clipboard.readText();
 
-      if (clipboardText) {
-        submitSearch({ spotifyLink: clipboardText });
+      if (
+        clipboardText.match(
+          new RegExp(`${SPOTIFY_LINK_REGEX.source}|${YOUTUBE_LINK_REGEX.source}`)
+        )
+      ) {
+        submitSearch({ link: clipboardText });
       }
     } catch (error) {
       console.error('Clipboard access error:', error);
@@ -38,14 +29,30 @@ const getSpotifyLinkFromClipboard = async () => {
   }
 };
 
-const searchId = searchParams.get('id');
-if (searchId) {
-  submitSearch({ spotifyLink: `https://open.spotify.com/track/${searchId}` });
-}
+document.addEventListener('htmx:afterOnLoad', () => {
+  const searchId = document.getElementById('search-card')?.getAttribute('data-id');
+  if (searchId) {
+    searchParams.set('id', searchId);
+    window.history.replaceState({}, '', `${window.location.pathname}?${searchParams}`);
+  }
+});
 
 document.addEventListener('htmx:timeout', function () {
   document.getElementById('search-results').innerHTML =
     '<p class="mt-8 text-center">Something went wrong, try again later.</p>';
 });
 
-getSpotifyLinkFromClipboard();
+document.addEventListener('DOMContentLoaded', async () => {
+  const searchId = searchParams.get('id');
+  if (searchId) {
+    htmx.ajax('POST', '/search', {
+      source: '#search-form',
+      values: {
+        searchId,
+      },
+    });
+    return;
+  }
+
+  await getSpotifyLinkFromClipboard();
+});

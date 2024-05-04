@@ -3,9 +3,9 @@ import { beforeAll, afterEach, describe, expect, it } from 'bun:test';
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
+import { MetadataType, ServiceType } from '~/config/enum';
 import { getAppleMusicLink } from '~/adapters/apple-music';
-import { SpotifyContentLinkType } from '~/services/search';
-import { SpotifyMetadata, SpotifyMetadataType } from '~/parsers/spotify';
+import { SearchMetadata } from '~/services/search';
 
 import { getAppleMusicSearchLink } from '../utils/shared';
 
@@ -31,11 +31,11 @@ describe('Adapter - Apple Music', () => {
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
 
     const appleMusicLink = await getAppleMusicLink(query, {
-      type: SpotifyMetadataType.Song,
-    } as SpotifyMetadata);
+      type: MetadataType.Song,
+    } as SearchMetadata);
 
     expect(appleMusicLink).toEqual({
-      type: SpotifyContentLinkType.AppleMusic,
+      type: ServiceType.AppleMusic,
       url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
       isVerified: true,
     });

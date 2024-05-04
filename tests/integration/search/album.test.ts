@@ -47,7 +47,7 @@ describe('GET /search - Album', () => {
   });
 
   it('should return 200', async () => {
-    const spotifyLink = 'https://open.spotify.com/album/4czdORdCWP9umpbhFXK2fW';
+    const link = 'https://open.spotify.com/album/4czdORdCWP9umpbhFXK2fW';
     const query = 'For All The Dogs Drake';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
@@ -55,9 +55,9 @@ describe('GET /search - Album', () => {
     const deezerSearchLink = getDeezerSearchLink(query, 'album');
     const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink });
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
 
-    mock.onGet(spotifyLink).reply(200, spotifyAlbumHeadResponseMock);
+    mock.onGet(link).reply(200, spotifyAlbumHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicAlbumResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerAlbumResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudAlbumResponseMock);
@@ -70,20 +70,20 @@ describe('GET /search - Album', () => {
 
     expect(response).toEqual({
       id: '4czdORdCWP9umpbhFXK2fW',
-      type: 'music.album',
+      type: 'album',
       title: 'For All The Dogs',
       description: 'Drake · Album · 2023 · 23 songs.',
       image: 'https://i.scdn.co/image/ab67616d0000b2730062621987df634efede0e6c',
       source: 'https://open.spotify.com/album/4czdORdCWP9umpbhFXK2fW',
       links: [
         {
-          type: 'appleMusic',
-          url: 'https://music.apple.com/us/album/for-all-the-dogs/1710685602',
+          type: 'youTube',
+          url: mockedYoutubeLink,
           isVerified: true,
         },
         {
-          type: 'youTube',
-          url: mockedYoutubeLink,
+          type: 'appleMusic',
+          url: 'https://music.apple.com/us/album/for-all-the-dogs/1710685602',
           isVerified: true,
         },
         {

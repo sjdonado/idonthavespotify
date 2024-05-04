@@ -3,8 +3,9 @@ import * as config from '~/config/default';
 const sqliteStore = require('cache-manager-sqlite');
 const cacheManager = require('cache-manager');
 
-import { SearchMetadata } from '~/parsers/spotify';
-import { SearchResult } from './search';
+import { SearchService } from '~/parsers/link';
+
+import { SearchMetadata, SearchResultLink } from './search';
 
 export const cacheStore = cacheManager.caching({
   store: sqliteStore,
@@ -12,42 +13,47 @@ export const cacheStore = cacheManager.caching({
   path: config.cache.databasePath,
 });
 
-export const cacheSearchMetadata = async (searchMetadata: SearchMetadata) => {
-  await cacheStore.set(`search:${searchMetadata.url}`, searchMetadata, {
-    ttl: config.cache.expTime,
-  });
+export const cacheSearchService = async (id: string, searchService: SearchService) => {
+  await cacheStore.set(`service:${id}`, searchService);
 };
 
-export const getCachedSearchMetadata = async (url: SearchMetadata['url']) => {
-  const data = (await cacheStore.get(`search:${url}`)) as SearchMetadata;
-
-  return data;
+export const getCachedSearchService = async (id: string) => {
+  return cacheStore.get(`service:${id}`) as SearchService;
 };
 
-export const cacheSearchResult = async (searchResult: SearchResult) => {
-  await cacheStore.set(`searchResult:${searchResult.id}`, searchResult, {
-    ttl: config.cache.expTime,
-  });
-};
-
-export const getCachedSearchResult = async (id: SearchResult['id']) => {
-  const data = (await cacheStore.get(`searchResult:${id}`)) as SearchResult;
-
-  return data;
-};
-
-// TODO: https://github.com/sjdonado/idonthavespotify/issues/6
-/* export const cacheSpotifyAccessToken = async (
-  accessToken: string,
-  expiration: number
+export const cacheSearchResultLink = async (
+  url: URL,
+  searchResultLink: SearchResultLink
 ) => {
-  return setWithKey(
-    `${config.redis.cacheKey}:spotifyAccessToken`,
-    accessToken,
-    expiration
-  );
+  await cacheStore.set(`search:${url.toString()}`, searchResultLink, {
+    ttl: config.cache.expTime,
+  });
 };
 
-export const getSpotifyAccessToken = async () => {
-  return getByKey(`${config.redis.cacheKey}:spotifyAccessToken`);
-}; */
+export const getCachedSearchResultLink = async (url: URL) => {
+  const data = (await cacheStore.get(`search:${url.toString()}`)) as SearchResultLink;
+
+  return data;
+};
+
+export const cacheSearchMetadata = async (id: string, searchMetadata: SearchMetadata) => {
+  await cacheStore.set(`metadata:${id}`, searchMetadata, {
+    ttl: config.cache.expTime,
+  });
+};
+
+export const getCachedSearchMetadata = async (id: string) => {
+  const data = (await cacheStore.get(`metadata:${id}`)) as SearchMetadata;
+
+  return data;
+};
+
+export const cacheSpotifyAccessToken = async (accessToken: string, expTime: number) => {
+  await cacheStore.set('spotify:accessToken', accessToken, {
+    ttl: expTime,
+  });
+};
+
+export const getCachedSpotifyAccessToken = async () => {
+  return cacheStore.get('spotify:accessToken');
+};

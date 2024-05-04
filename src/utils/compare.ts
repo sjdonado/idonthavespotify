@@ -17,25 +17,21 @@ export function getResultWithBestScore(
 ) {
   const parsedQuery = query.toLowerCase().trim();
 
-  const bestScore = {
+  const resultWithBestScore = {
     href: '',
     score: 0,
   };
 
-  listElements.each((i, el) => {
+  listElements.each((_, el) => {
     const title = doc(el).text().trim();
     const href = doc(el).attr('href');
     const score = compareTwoStrings(title.toLowerCase(), parsedQuery);
 
-    if (href && score > bestScore.score) {
-      bestScore.href = href;
-      bestScore.score = score;
+    if (href && score > resultWithBestScore.score) {
+      resultWithBestScore.href = href;
+      resultWithBestScore.score = score;
     }
   });
 
-  if (bestScore.score <= RESPONSE_COMPARE_MIN_SCORE) {
-    throw new Error(`No results found: ${JSON.stringify(bestScore)}`);
-  }
-
-  return bestScore;
+  return resultWithBestScore;
 }

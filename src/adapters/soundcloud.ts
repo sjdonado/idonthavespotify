@@ -1,15 +1,17 @@
 import * as config from '~/config/default';
+import { MetadataType, ServiceType } from '~/config/enum';
+import { RESPONSE_COMPARE_MIN_SCORE } from '~/config/constants';
 
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { getCheerioDoc } from '~/utils/scraper';
-
-import { SpotifyContentLink, SpotifyContentLinkType } from '~/services/search';
-import { SpotifyMetadata, SpotifyMetadataType } from '~/parsers/spotify';
 import { getResultWithBestScore } from '~/utils/compare';
 
-export async function getSoundCloudLink(query: string, metadata: SpotifyMetadata) {
-  if (metadata.type === SpotifyMetadataType.Show) {
+import { SearchMetadata, SearchResultLink } from '~/services/search';
+import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
+
+export async function getSoundCloudLink(query: string, metadata: SearchMetadata) {
+  if (metadata.type === MetadataType.Show) {
     return;
   }
 
@@ -19,6 +21,12 @@ export async function getSoundCloudLink(query: string, metadata: SpotifyMetadata
 
   const url = new URL(`${config.services.soundCloud.baseUrl}/search`);
   url.search = params.toString();
+
+  const cache = await getCachedSearchResultLink(url);
+  if (cache) {
+    logger.info(`[SoundCloud] (${url}) cache hit`);
+    return cache;
+  }
 
   try {
     const html = await HttpClient.get<string>(url.toString());
@@ -30,13 +38,21 @@ export async function getSoundCloudLink(query: string, metadata: SpotifyMetadata
 
     const listElements = noscriptDoc('ul:nth-of-type(2) li:lt(3) h2 a');
 
-    const { href } = getResultWithBestScore(noscriptDoc, listElements, query);
+    const { href, score } = getResultWithBestScore(noscriptDoc, listElements, query);
 
-    return {
-      type: SpotifyContentLinkType.SoundCloud,
+    if (score <= RESPONSE_COMPARE_MIN_SCORE) {
+      return;
+    }
+
+    const searchResultLink = {
+      type: ServiceType.SoundCloud,
       url: `${config.services.soundCloud.baseUrl}${href}`,
       isVerified: true,
-    } as SpotifyContentLink;
+    } as SearchResultLink;
+
+    await cacheSearchResultLink(url, searchResultLink);
+
+    return searchResultLink;
   } catch (err) {
     logger.error(`[SoundCloud] (${url}) ${err}`);
   }

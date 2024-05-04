@@ -47,7 +47,7 @@ describe('GET /search - Artist', () => {
   });
 
   it('should return 200', async () => {
-    const spotifyLink = 'https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5';
+    const link = 'https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5';
     const query = 'J. Cole';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
@@ -55,9 +55,9 @@ describe('GET /search - Artist', () => {
     const deezerSearchLink = getDeezerSearchLink(query, 'artist');
     const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink });
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
 
-    mock.onGet(spotifyLink).reply(200, spotifyArtistHeadResponseMock);
+    mock.onGet(link).reply(200, spotifyArtistHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicArtistResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerArtistResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudArtistResponseMock);
@@ -70,20 +70,20 @@ describe('GET /search - Artist', () => {
 
     expect(response).toEqual({
       id: '6l3HvQ5sa6mXTsMTB19rO5',
-      type: 'profile',
+      type: 'artist',
       title: 'J. Cole',
       description: 'Artist · 45.1M monthly listeners.',
       image: 'https://i.scdn.co/image/ab6761610000e5ebadd503b411a712e277895c8a',
       source: 'https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5',
       links: [
         {
-          type: 'appleMusic',
-          url: 'https://music.apple.com/us/artist/j-cole/73705833',
+          type: 'youTube',
+          url: mockedYoutubeLink,
           isVerified: true,
         },
         {
-          type: 'youTube',
-          url: mockedYoutubeLink,
+          type: 'appleMusic',
+          url: 'https://music.apple.com/us/artist/j-cole/73705833',
           isVerified: true,
         },
         {

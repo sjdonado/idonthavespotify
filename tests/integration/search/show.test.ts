@@ -41,16 +41,16 @@ describe('GET /search - Podcast Show', () => {
   });
 
   it('should return 200', async () => {
-    const spotifyLink = 'https://open.spotify.com/show/6o81QuW22s5m2nfcXWjucc';
+    const link = 'https://open.spotify.com/show/6o81QuW22s5m2nfcXWjucc';
     const query = 'Waveform: The MKBHD Podcast';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
     const youtubeSearchLink = getYouTubeSearchLink(query, 'channel');
     const deezerSearchLink = getDeezerSearchLink(query, 'podcast');
 
-    const request = JSONRequest(API_SEARCH_ENDPOINT, { spotifyLink });
+    const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
 
-    mock.onGet(spotifyLink).reply(200, spotifyShowHeadResponseMock);
+    mock.onGet(link).reply(200, spotifyShowHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicShowResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerShowResponseMock);
 
@@ -62,7 +62,7 @@ describe('GET /search - Podcast Show', () => {
 
     expect(response).toEqual({
       id: '6o81QuW22s5m2nfcXWjucc',
-      type: 'website',
+      type: 'show',
       title: 'Waveform: The MKBHD Podcast',
       description:
         'Listen to Waveform: The MKBHD Podcast on Spotify. A tech podcast for the gadget lovers and tech heads among us from the mind of Marques Brownlee, better known as MKBHD. MKBHD has made a name for himself on YouTube reviewing everything from the newest smartphones to cameras to electric cars. Pulling from over 10 years of experience covering the tech industry, MKBHD and co-hosts Andrew Manganelli and David Imel will keep you informed and entertained as they take a deep dive into the latest and greatest in tech and what deserves your hard earned cash. New episodes every week. Waveform is part of the Vox Media Podcast Network. We wanna make the podcast even better, help us learn how we can: https://bit.ly/2EcYbu4 ',

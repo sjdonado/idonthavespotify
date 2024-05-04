@@ -1,12 +1,13 @@
 import * as config from '~/config/default';
+import { MetadataType, ServiceType } from '~/config/enum';
 import { ADAPTERS_QUERY_LIMIT } from '~/config/constants';
 
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { responseMatchesQuery } from '~/utils/compare';
 
-import { SpotifyMetadata, SpotifyMetadataType } from '~/parsers/spotify';
-import { SpotifyContentLink, SpotifyContentLinkType } from '~/services/search';
+import { SearchMetadata, SearchResultLink } from '~/services/search';
+import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
 
 interface DeezerSearchResponse {
   total: number;
@@ -20,15 +21,15 @@ interface DeezerSearchResponse {
 }
 
 const DEEZER_SEARCH_TYPES = {
-  [SpotifyMetadataType.Song]: 'track',
-  [SpotifyMetadataType.Album]: 'album',
-  [SpotifyMetadataType.Playlist]: 'playlist',
-  [SpotifyMetadataType.Artist]: 'artist',
-  [SpotifyMetadataType.Show]: 'podcast',
-  [SpotifyMetadataType.Podcast]: undefined,
+  [MetadataType.Song]: 'track',
+  [MetadataType.Album]: 'album',
+  [MetadataType.Playlist]: 'playlist',
+  [MetadataType.Artist]: 'artist',
+  [MetadataType.Show]: 'podcast',
+  [MetadataType.Podcast]: undefined,
 };
 
-export async function getDeezerLink(query: string, metadata: SpotifyMetadata) {
+export async function getDeezerLink(query: string, metadata: SearchMetadata) {
   const searchType = DEEZER_SEARCH_TYPES[metadata.type];
 
   if (!searchType) {
@@ -43,6 +44,12 @@ export async function getDeezerLink(query: string, metadata: SpotifyMetadata) {
   const url = new URL(`${config.services.deezer.apiUrl}/${searchType}`);
   url.search = params.toString();
 
+  const cache = await getCachedSearchResultLink(url);
+  if (cache) {
+    logger.info(`[Deezer] (${url}) cache hit`);
+    return cache;
+  }
+
   try {
     const response = await HttpClient.get<DeezerSearchResponse>(url.toString());
 
@@ -52,15 +59,15 @@ export async function getDeezerLink(query: string, metadata: SpotifyMetadata) {
 
     const [{ title, name, link }] = response.data;
 
-    if (!responseMatchesQuery(title ?? name ?? '', query)) {
-      throw new Error(`Query does not match: ${JSON.stringify({ title, name })}`);
-    }
-
-    return {
-      type: SpotifyContentLinkType.Deezer,
+    const searchResultLink = {
+      type: ServiceType.Deezer,
       url: link,
-      isVerified: true,
-    } as SpotifyContentLink;
+      isVerified: responseMatchesQuery(title ?? name ?? '', query),
+    } as SearchResultLink;
+
+    await cacheSearchResultLink(url, searchResultLink);
+
+    return searchResultLink;
   } catch (error) {
     logger.error(`[Deezer] (${url}) ${error}`);
   }

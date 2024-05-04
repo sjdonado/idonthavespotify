@@ -1,5 +1,3 @@
-import { SPOTIFY_LINK_REGEX } from '~/config/constants';
-
 export default function SearchBar() {
   return (
     <>
@@ -9,7 +7,7 @@ export default function SearchBar() {
         hx-target="#search-results"
         hx-swap="innerHTML"
         hx-indicator="#loading-indicator"
-        hx-request='\"timeout\":24000'
+        hx-request='\"timeout\":6000'
         class="flex w-full max-w-3xl items-center justify-center"
       >
         <label for="song-link" class="sr-only">
@@ -18,10 +16,9 @@ export default function SearchBar() {
         <input
           type="text"
           id="song-link"
-          name="spotifyLink"
+          name="link"
           class="flex-1 rounded-lg border bg-white p-2.5 text-sm font-normal text-black placeholder:text-gray-400 lg:text-base"
           placeholder="https://open.spotify.com/track/7A8MwSsu9efJXP6xvZfRN3?si=d4f1e2eb324c43df"
-          pattern={SPOTIFY_LINK_REGEX.source}
         />
         <button
           type="submit"
