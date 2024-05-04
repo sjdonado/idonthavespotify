@@ -1,3 +1,5 @@
+import { SPOTIFY_LINK_REGEX, YOUTUBE_LINK_REGEX } from '~/config/constants';
+
 const searchParams = new URLSearchParams(window.location.search);
 
 const submitSearch = ({ link }) => {
@@ -12,7 +14,11 @@ const getSpotifyLinkFromClipboard = async () => {
     try {
       const clipboardText = await navigator.clipboard.readText();
 
-      if (clipboardText) {
+      if (
+        clipboardText.match(
+          new RegExp(`${SPOTIFY_LINK_REGEX.source}|${YOUTUBE_LINK_REGEX.source}`)
+        )
+      ) {
         submitSearch({ link: clipboardText });
       }
     } catch (error) {
