@@ -22,16 +22,15 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: './dist',
     target: 'esnext',
     rollupOptions: {
       input: {
-        'assets/js/search-bar': './src/views/js/search-bar.js',
-        'assets/css/index': './src/views/css/index.css',
+        'assets/entry': './src/views/js/entry.js',
+        'assets/index': './src/views/css/index.css',
       },
       output: {
-        entryFileNames: '[name].min.js',
-        chunkFileNames: `[name].min.js`,
+        entryFileNames: '[name].js',
+        chunkFileNames: `[name]-[hash].js`,
         assetFileNames: `[name].min.[ext]`,
       },
     },

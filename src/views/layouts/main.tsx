@@ -55,7 +55,7 @@ export default function MainLayout({
         <script src="https://unpkg.com/htmx.org@1.9.12"></script>
 
         <link href="https://fonts.cdnfonts.com/css/montserrat" rel="stylesheet" />
-        <link href="/assets/css/index.min.css" rel="stylesheet" />
+        <link href="/assets/index.min.css" rel="stylesheet" />
       </head>
 
       <body class="bg-black font-light text-white">{children}</body>
@@ -66,7 +66,7 @@ export default function MainLayout({
         crossorigin="anonymous"
       />
 
-      <script src="assets/js/search-bar.min.js" />
+      <script src="assets/entry.js" />
     </html>
   );
 }
