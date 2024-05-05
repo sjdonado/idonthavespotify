@@ -39,7 +39,11 @@ export const pageRouter = new Elysia()
         const searchResult = id ? await search(undefined, id) : undefined;
 
         return (
-          <MainLayout title={searchResult?.title} description={searchResult?.description}>
+          <MainLayout
+            title={searchResult?.title}
+            description={searchResult?.description}
+            image={searchResult?.image}
+          >
             <Home source={searchResult?.source}>
               {searchResult && <SearchCard searchResult={searchResult} />}
             </Home>

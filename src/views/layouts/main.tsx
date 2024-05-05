@@ -3,10 +3,12 @@ import CustomMetaTag from '../components/custom-meta-tag';
 export default function MainLayout({
   title,
   description,
+  image,
   children,
 }: {
   title?: string;
   description?: string;
+  image?: string;
   children: JSX.Element;
 }) {
   return (
@@ -42,7 +44,10 @@ export default function MainLayout({
         />
         <CustomMetaTag
           property="og:image"
-          content="https://user-images.githubusercontent.com/27580836/227801051-a71d389e-2510-4965-a23e-d7478fe28f13.jpeg"
+          content={
+            image ??
+            'https://user-images.githubusercontent.com/27580836/227801051-a71d389e-2510-4965-a23e-d7478fe28f13.jpeg'
+          }
         />
         <CustomMetaTag property="og:image:alt" content="I don't have Spotify favicon" />
 
