@@ -1,6 +1,14 @@
 import CustomMetaTag from '../components/custom-meta-tag';
 
-export default function MainLayout(props: { children: JSX.Element }) {
+export default function MainLayout({
+  title,
+  description,
+  children,
+}: {
+  title?: string;
+  description?: string;
+  children: JSX.Element;
+}) {
   return (
     <html>
       <head>
@@ -21,13 +29,16 @@ export default function MainLayout(props: { children: JSX.Element }) {
           content="Spotify,YouTube,Deezer,Apple Music,Tidal,SoundCloud,converter,search,listen"
         />
 
-        <CustomMetaTag property="og:title" content="I don't have Spotify" />
         <CustomMetaTag property="og:type" content="website" />
         <CustomMetaTag property="og:url" content="https://idonthavespotify.donado.co" />
         <CustomMetaTag property="og:site_name" content="I don't have Spotify" />
+        <CustomMetaTag property="og:title" content={title ?? "I don't have Spotify"} />
         <CustomMetaTag
           property="og:description"
-          content="Find Spotify content on YouTube, Deezer, Apple Music, Tidal, SoundCloud and more."
+          content={
+            description ??
+            'Find Spotify content on YouTube, Deezer, Apple Music, Tidal, SoundCloud and more.'
+          }
         />
         <CustomMetaTag
           property="og:image"
@@ -41,7 +52,7 @@ export default function MainLayout(props: { children: JSX.Element }) {
         <link href="/assets/css/index.min.css" rel="stylesheet" />
       </head>
 
-      <body class="bg-black font-light text-white">{props.children}</body>
+      <body class="bg-black font-light text-white">{children}</body>
 
       <script
         defer

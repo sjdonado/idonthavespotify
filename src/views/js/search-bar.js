@@ -43,16 +43,5 @@ document.addEventListener('htmx:timeout', function () {
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const searchId = searchParams.get('id');
-  if (searchId) {
-    htmx.ajax('POST', '/search', {
-      source: '#search-form',
-      values: {
-        searchId,
-      },
-    });
-    return;
-  }
-
   await getSpotifyLinkFromClipboard();
 });

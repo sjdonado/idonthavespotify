@@ -20,7 +20,7 @@ export const getSearchService = async (link?: string, searchId?: string) => {
   }
 
   if (!link && searchId) {
-    throw new NotFoundError('SearchId does not exist');
+    throw new NotFoundError('Search id does not exist');
   }
 
   let id, type;

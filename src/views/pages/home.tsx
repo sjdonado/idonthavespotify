@@ -2,7 +2,7 @@ import LoadingIndicator from '../components/loading-indicator';
 import SearchBar from '../components/search-bar';
 import Footer from '../components/footer';
 
-export default function Home() {
+export default function Home({ children }: { children?: JSX.Element }) {
   return (
     <div class="flex flex-col">
       <LoadingIndicator />
@@ -14,6 +14,7 @@ export default function Home() {
           </h2>
         </div>
         <SearchBar />
+        {children}
       </main>
       <Footer />
     </div>
