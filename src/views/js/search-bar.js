@@ -17,7 +17,8 @@ const getSpotifyLinkFromClipboard = async () => {
       if (
         clipboardText.match(
           new RegExp(`${SPOTIFY_LINK_REGEX.source}|${YOUTUBE_LINK_REGEX.source}`)
-        )
+        ) &&
+        !searchParams.get('id')
       ) {
         submitSearch({ link: clipboardText });
       }

@@ -2,7 +2,13 @@ import LoadingIndicator from '../components/loading-indicator';
 import SearchBar from '../components/search-bar';
 import Footer from '../components/footer';
 
-export default function Home({ children }: { children?: JSX.Element }) {
+export default function Home({
+  source,
+  children,
+}: {
+  source?: string;
+  children?: JSX.Element;
+}) {
   return (
     <div class="flex flex-col">
       <LoadingIndicator />
@@ -13,8 +19,10 @@ export default function Home({ children }: { children?: JSX.Element }) {
             Paste a Spotify link and listen on other platforms.
           </h2>
         </div>
-        <SearchBar />
-        {children}
+        <SearchBar source={source} />
+        <div class="my-4">
+          <div id="search-results">{children}</div>
+        </div>
       </main>
       <Footer />
     </div>

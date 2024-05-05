@@ -40,7 +40,9 @@ export const pageRouter = new Elysia()
 
         return (
           <MainLayout title={searchResult?.title} description={searchResult?.description}>
-            <Home>{searchResult && <SearchCard searchResult={searchResult} />}</Home>
+            <Home source={searchResult?.source}>
+              {searchResult && <SearchCard searchResult={searchResult} />}
+            </Home>
           </MainLayout>
         );
       } catch (err) {

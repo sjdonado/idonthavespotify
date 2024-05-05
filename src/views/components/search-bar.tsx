@@ -1,4 +1,4 @@
-export default function SearchBar() {
+export default function SearchBar({ source }: { source?: string }) {
   return (
     <>
       <form
@@ -19,6 +19,7 @@ export default function SearchBar() {
           name="link"
           class="flex-1 rounded-lg border bg-white p-2.5 text-sm font-normal text-black placeholder:text-gray-400 lg:text-base"
           placeholder="https://open.spotify.com/track/7A8MwSsu9efJXP6xvZfRN3?si=d4f1e2eb324c43df"
+          value={source}
         />
         <button
           type="submit"
@@ -28,9 +29,6 @@ export default function SearchBar() {
           <span class="sr-only">Search</span>
         </button>
       </form>
-      <div class="my-4">
-        <div id="search-results" />
-      </div>
     </>
   );
 }
