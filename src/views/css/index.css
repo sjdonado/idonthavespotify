@@ -16,8 +16,8 @@ html {
   animation: loading 2s linear infinite;
 }
 
-.min-screen-3 {
-  min-height: calc(100vh - 3rem);
+.min-screen-4 {
+  min-height: calc(100vh - 4rem);
 }
 
 @keyframes loading {

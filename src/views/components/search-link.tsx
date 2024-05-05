@@ -7,7 +7,7 @@ const SEARCH_LINK_DICT = {
   },
   [ServiceType.YouTube]: {
     icon: 'fab fa-youtube',
-    label: 'Listen on YouTube',
+    label: 'Listen on YouTube Music',
   },
   [ServiceType.Deezer]: {
     icon: 'fab fa-deezer',
