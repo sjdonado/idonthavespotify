@@ -15,7 +15,7 @@ export default function Home({
       <main class="flex flex-1 flex-col items-center justify-start p-2 min-screen-4">
         <div class="my-7 text-center sm:my-16">
           <h1 class="text-4xl uppercase md:text-5xl lg:text-6xl">I don't have Spotify</h1>
-          <h2 class="mt-6 text-xs md:text-sm lg:text-lg">
+          <h2 class="mt-6 text-sm lg:text-lg">
             Paste a Spotify link and listen on other platforms.
           </h2>
         </div>
