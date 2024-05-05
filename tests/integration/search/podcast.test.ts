@@ -64,7 +64,7 @@ describe('GET /search - Podcast Episode', () => {
     const response = await app.handle(request).then(res => res.json());
 
     expect(response).toEqual({
-      id: '43TCrgmP23qkLcAXZQN8qT',
+      id: 'b3Blbi5zcG90aWZ5LmNvbS9lcGlzb2RlLzQzVENyZ21QMjNxa0xjQVhaUU44cVQ=',
       type: 'podcast',
       title: 'The End of Twitter as We Know It',
       description:

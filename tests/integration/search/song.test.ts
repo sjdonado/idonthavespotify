@@ -70,7 +70,7 @@ describe('GET /search - Song', () => {
     const response = await app.handle(request).then(res => res.json());
 
     expect(response).toEqual({
-      id: '2KvHC9z14GSl4YpkNMX384',
+      id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8yS3ZIQzl6MTRHU2w0WXBrTk1YMzg0',
       type: 'song',
       title: 'Do Not Disturb',
       description: 'Drake · Song · 2017',

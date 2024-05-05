@@ -69,7 +69,7 @@ describe('GET /search - Album', () => {
     const response = await app.handle(request).then(res => res.json());
 
     expect(response).toEqual({
-      id: '4czdORdCWP9umpbhFXK2fW',
+      id: 'b3Blbi5zcG90aWZ5LmNvbS9hbGJ1bS80Y3pkT1JkQ1dQOXVtcGJoRlhLMmZX',
       type: 'album',
       title: 'For All The Dogs',
       description: 'Drake · Album · 2023 · 23 songs.',

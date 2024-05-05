@@ -9,7 +9,7 @@ export const searchPayloadValidator = t.Object({
   link: t.RegExp(
     new RegExp(`${SPOTIFY_LINK_REGEX.source}|${YOUTUBE_LINK_REGEX.source}`),
     {
-      error: 'Invalid link, please try again or open an issue on Github.',
+      error: 'Invalid link, please try with Spotify or Youtube links.',
     }
   ),
 });
