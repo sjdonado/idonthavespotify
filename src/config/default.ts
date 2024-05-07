@@ -32,5 +32,5 @@ export const metadata = {
 
 export const cache = {
   databasePath: Bun.env.DATABASE_PATH!,
-  expTime: 60 * 60 * 24, // 1 day in seconds
+  expTime: 60 * 60 * 24 * 7, // 1 week in seconds
 };

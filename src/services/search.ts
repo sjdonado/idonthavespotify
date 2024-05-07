@@ -12,6 +12,7 @@ import { getDeezerLink } from '~/adapters/deezer';
 import { getSoundCloudLink } from '~/adapters/soundcloud';
 import { getTidalLink } from '~/adapters/tidal';
 import { getSpotifyLink } from '~/adapters/spotify';
+import { generateId } from '~/utils/encoding';
 
 export type SearchMetadata = {
   title: string;
@@ -80,7 +81,7 @@ export const search = async (link?: string, searchId?: string) => {
   }
 
   const searchResult: SearchResult = {
-    id: searchService.id,
+    id: generateId(searchService.source),
     type: metadata.type,
     title: metadata.title,
     description: metadata.description,
