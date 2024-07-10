@@ -1,8 +1,8 @@
-import { ERROR_CODE, Elysia, ValidationError, redirect } from 'elysia';
+import { Elysia } from 'elysia';
 
 import { logger } from '~/utils/logger';
 
-import { searchPayloadValidator } from '~/validations/search';
+import { searchPayloadValidator, searchQueryValidator } from '~/validations/search';
 
 import { search } from '~/services/search';
 
@@ -32,17 +32,36 @@ export const pageRouter = new Elysia()
 
     return <ErrorMessage message="Something went wrong, try again later." />;
   })
-  .get('/', async () => {
-    return (
-      <MainLayout>
-        <Home />
-      </MainLayout>
-    );
-  })
+  .get(
+    '/',
+    async ({ query: { id }, redirect }) => {
+      try {
+        const searchResult = id ? await search(undefined, id) : undefined;
+
+        return (
+          <MainLayout
+            title={searchResult?.title}
+            description={searchResult?.description}
+            image={searchResult?.image}
+          >
+            <Home source={searchResult?.source}>
+              {searchResult && <SearchCard searchResult={searchResult} />}
+            </Home>
+          </MainLayout>
+        );
+      } catch (err) {
+        logger.error(err);
+        return redirect('/', 404);
+      }
+    },
+    {
+      query: searchQueryValidator,
+    }
+  )
   .post(
     '/search',
-    async ({ body: { link, searchId } }) => {
-      const searchResult = await search(link, searchId);
+    async ({ body: { link } }) => {
+      const searchResult = await search(link);
       return <SearchCard searchResult={searchResult} />;
     },
     {

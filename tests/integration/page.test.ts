@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, mock, jest, spyOn } from 'bun:test';
+import { beforeEach, describe, expect, it, spyOn } from 'bun:test';
 
 import { getCheerioDoc } from '~/utils/scraper';
 import { formDataRequest } from '../utils/request';
@@ -7,12 +7,7 @@ import { app } from '~/index';
 
 import { MetadataType, ServiceType } from '~/config/enum';
 
-import {
-  cacheSearchMetadata,
-  cacheSearchResultLink,
-  cacheSearchService,
-  cacheStore,
-} from '~/services/cache';
+import { cacheSearchMetadata, cacheSearchResultLink, cacheStore } from '~/services/cache';
 
 import * as linkParser from '~/parsers/link';
 
@@ -22,20 +17,13 @@ describe('Page router', () => {
   beforeEach(async () => {
     cacheStore.reset();
 
-    await Promise.all([
-      cacheSearchService('2KvHC9z14GSl4YpkNMX384', {
-        id: '2KvHC9z14GSl4YpkNMX384',
-        type: 'spotify',
-        source: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
-      }),
-      cacheSearchMetadata('2KvHC9z14GSl4YpkNMX384', {
-        title: 'Do Not Disturb',
-        description: 'Drake · Song · 2017',
-        type: MetadataType.Song,
-        image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
-        audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
-      }),
-    ]);
+    await cacheSearchMetadata('2KvHC9z14GSl4YpkNMX384', {
+      title: 'Do Not Disturb',
+      description: 'Drake · Song · 2017',
+      type: MetadataType.Song,
+      image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
+      audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
+    });
   });
 
   describe('GET /', () => {
