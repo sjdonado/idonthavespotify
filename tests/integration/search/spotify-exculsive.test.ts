@@ -67,7 +67,7 @@ describe('GET /search - Spotify Exclusive Content', () => {
     const response = await app.handle(request).then(res => res.json());
 
     expect(response).toEqual({
-      id: 'b3Blbi5zcG90aWZ5LmNvbS9zaG93LzdMdVF2NDAwSkZ6emxKck91TXVrUmo=',
+      id: 'b3Blbi5zcG90aWZ5LmNvbS9zaG93LzdMdVF2NDAwSkZ6emxKck91TXVrUmo%3D',
       type: 'show',
       title: 'The Louis Theroux Podcast',
       description:
