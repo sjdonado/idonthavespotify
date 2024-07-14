@@ -9,7 +9,7 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
       data-id={props.searchResult.id}
       class="m-4 flex max-w-2xl flex-wrap items-start justify-center rounded-lg border border-white md:p-4"
     >
-      <div class="w-full m-4 md:w-44">
+      <div class="m-4 w-full md:w-44">
         <img
           class="mx-auto w-28 md:w-44"
           src={props.searchResult.image}
@@ -27,7 +27,7 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
           </p>
         )}
         {props.searchResult.links.length > 0 && (
-          <ul class="mt-4 min-w-[12rem] text-base">
+          <ul class="mt-4 min-w-48 text-base">
             <li class="flex flex-col items-start">
               {props.searchResult.links.map(({ type, url, isVerified }) => (
                 <SearchLink type={type} url={url} isVerified={isVerified} />

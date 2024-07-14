@@ -37,6 +37,7 @@ export async function getLinkWithPuppeteer(
   await page.goto(url, { waitUntil: 'networkidle0' });
 
   const href = await page.evaluate(
+    // eslint-disable-next-line
     // @ts-ignore
     selector => document.querySelector(selector)?.href,
     linkQuerySelector

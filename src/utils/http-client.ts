@@ -1,4 +1,5 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
+import axiosRetry from 'axios-retry';
 import randUserAgent from 'rand-user-agent';
 
 import { DEFAULT_TIMEOUT } from '~/config/constants';
@@ -11,6 +12,18 @@ type HttpClientOptions = {
   timeout?: number;
   retries?: number;
 };
+
+axiosRetry(axios, {
+  retries: 2,
+  retryCondition: error => {
+    // Retry on network errors or 5xx status codes
+    return axiosRetry.isNetworkError(error) || axiosRetry.isRetryableError(error);
+  },
+  retryDelay: retryCount => {
+    // Exponential backoff delay
+    return retryCount * 1000;
+  },
+});
 
 export default class HttpClient {
   static defaultHeaders = {
@@ -32,36 +45,31 @@ export default class HttpClient {
     method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     url: string,
     options?: HttpClientOptions
-  ) {
+  ): Promise<T> {
     const headers = {
       ...HttpClient.defaultHeaders,
       ...(options?.headers ?? {}),
     };
 
-    const retries = options?.retries ?? 1;
+    try {
+      const { status, data } = await axios.request({
+        url,
+        method,
+        data: options?.payload,
+        headers,
+        timeout: options?.timeout ?? DEFAULT_TIMEOUT,
+        signal: AbortSignal.timeout(options?.timeout ?? DEFAULT_TIMEOUT),
+      });
 
-    for (let i = 0; i < retries; i++) {
-      try {
-        const { data } = await axios.request({
-          url,
-          method,
-          data: options?.payload,
-          headers,
-          timeout: options?.timeout ?? DEFAULT_TIMEOUT * (i + 1),
-          signal: AbortSignal.timeout(options?.timeout ?? DEFAULT_TIMEOUT),
-        });
-
-        return data as T;
-      } catch (err) {
-        logger.error(`[${HttpClient.request.name}] Attempt ${i + 1} failed. Retrying...`);
-        logger.error(err);
-
-        await new Promise(res => setTimeout(res, 1000 * (i + 1)));
+      if (![200, 201, 204].includes(status)) {
+        throw new AxiosError(`Unexpected status code: ${status}`);
       }
-    }
 
-    throw new Error(
-      `[${HttpClient.request.name}] Failed to fetch ${url} after ${retries} retries`
-    );
+      return data as T;
+    } catch (err) {
+      logger.error(`[${HttpClient.request.name}] Request failed.`);
+      logger.error(err);
+      throw err;
+    }
   }
 }
