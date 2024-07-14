@@ -1,10 +1,10 @@
-import * as config from '~/config/default';
+import { ENV } from '~/config/env';
 
 export default function Footer() {
   return (
-    <footer class="flex flex-col text-center text-[0.7rem] md:text-sm mb-2">
-      <div class="flex justify-center items-center gap-2">
-        <p>v{config.metadata.appVersion}</p>
+    <footer class="mb-2 flex flex-col text-center text-[0.7rem] md:text-sm">
+      <div class="flex items-center justify-center gap-2">
+        <p>v{ENV.app.version}</p>
         <span>•</span>
         <a href="https://sjdonado.com" target="_blank" rel="noreferrer" class="underline">
           @sjdonado
@@ -40,7 +40,7 @@ export default function Footer() {
               fill="currentColor"
             />
           </svg>
-          <span>View on Raycast</span>
+          <span>Install Extension</span>
         </a>
         <span class="mx-2 text-gray-500">|</span>
         <a

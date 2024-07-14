@@ -1,14 +1,13 @@
-import * as config from '~/config/default';
-
 const sqliteStore = require('cache-manager-sqlite');
 const cacheManager = require('cache-manager');
 
+import { ENV } from '~/config/env';
 import { SearchMetadata, SearchResultLink } from './search';
 
 export const cacheStore = cacheManager.caching({
   store: sqliteStore,
   name: 'cache',
-  path: config.cache.databasePath,
+  path: ENV.cache.databasePath,
 });
 
 export const cacheSearchResultLink = async (
@@ -16,7 +15,7 @@ export const cacheSearchResultLink = async (
   searchResultLink: SearchResultLink
 ) => {
   await cacheStore.set(`search:${url.toString()}`, searchResultLink, {
-    ttl: config.cache.expTime,
+    ttl: ENV.cache.expTime,
   });
 };
 
@@ -28,7 +27,7 @@ export const getCachedSearchResultLink = async (url: URL) => {
 
 export const cacheSearchMetadata = async (id: string, searchMetadata: SearchMetadata) => {
   await cacheStore.set(`metadata:${id}`, searchMetadata, {
-    ttl: config.cache.expTime,
+    ttl: ENV.cache.expTime,
   });
 };
 

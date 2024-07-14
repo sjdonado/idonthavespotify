@@ -1,4 +1,4 @@
-import * as config from '~/config/default';
+import { ENV } from '~/config/env';
 import { MetadataType, ServiceType } from '~/config/enum';
 import { RESPONSE_COMPARE_MIN_SCORE } from '~/config/constants';
 
@@ -31,7 +31,7 @@ export async function getAppleMusicLink(query: string, metadata: SearchMetadata)
   // apple music does not support x-www-form-urlencoded encoding
   const params = `term=${encodeURIComponent(query)}`;
 
-  const url = new URL(`${config.services.appleMusic.apiUrl}/search?${params}`);
+  const url = new URL(`${ENV.services.appleMusic.apiUrl}/search?${params}`);
 
   const cache = await getCachedSearchResultLink(url);
   if (cache) {

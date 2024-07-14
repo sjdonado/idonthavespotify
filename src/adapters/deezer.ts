@@ -1,4 +1,4 @@
-import * as config from '~/config/default';
+import { ENV } from '~/config/env';
 import { MetadataType, ServiceType } from '~/config/enum';
 import { ADAPTERS_QUERY_LIMIT } from '~/config/constants';
 
@@ -41,7 +41,7 @@ export async function getDeezerLink(query: string, metadata: SearchMetadata) {
     limit: String(ADAPTERS_QUERY_LIMIT),
   });
 
-  const url = new URL(`${config.services.deezer.apiUrl}/${searchType}`);
+  const url = new URL(`${ENV.services.deezer.apiUrl}/${searchType}`);
   url.search = params.toString();
 
   const cache = await getCachedSearchResultLink(url);
