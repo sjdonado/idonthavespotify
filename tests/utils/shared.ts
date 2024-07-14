@@ -3,16 +3,28 @@ import { ENV } from '~/config/env';
 export const API_ENDPOINT = 'http://localhost/api';
 export const API_SEARCH_ENDPOINT = `${API_ENDPOINT}/search?v=1`;
 
+export const urlShortenerLink = ENV.utils.urlShortener.apiUrl;
+export const urlShortenerResponseMock = {
+  data: {
+    id: '6ce3f2d6-d73c-4c7f-b622-3b30e34d70dd',
+    refer: 'http://localhost:4000/2saYhYg',
+    origin:
+      'http://localhost:3000/?id=b3Blbi5zcG90aWZ5LmNvbS90cmFjay8yS3ZIQzl6MTRHU2w0WXBrTk1YMzg0',
+    clicks: [],
+  },
+};
+
 export const cachedSpotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
 
 export const cachedResponse = {
-  id: '2KvHC9z14GSl4YpkNMX384',
+  id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8yS3ZIQzl6MTRHU2w0WXBrTk1YMzg0',
   type: 'song',
   title: 'Do Not Disturb',
   description: 'Drake · Song · 2017',
   image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
   audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
   source: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
+  universalLink: 'http://localhost:4000/2saYhYg',
   links: [
     {
       type: 'appleMusic',

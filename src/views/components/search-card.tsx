@@ -12,7 +12,7 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
       <button
         type="button"
         class="absolute right-2 top-2 p-1 text-white"
-        onclick={`shareLink('${props.searchResult.unversalLink}')`}
+        onclick={`shareLink('${props.searchResult.universalLink}')`}
       >
         <i class="fas fa-up-right-from-square" />
       </button>

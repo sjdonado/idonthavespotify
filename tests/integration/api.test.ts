@@ -25,6 +25,8 @@ import {
   getDeezerSearchLink,
   getSoundCloudSearchLink,
   getYouTubeSearchLink,
+  urlShortenerLink,
+  urlShortenerResponseMock,
 } from '../utils/shared';
 
 import deezerSongResponseMock from '../fixtures/deezer/songResponseMock.json';
@@ -76,6 +78,8 @@ describe('Api router', () => {
       mock.onGet(appleMusicSearchLink).reply(500);
       mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
       mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
+      mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
+      mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
       const mockedYoutubeLink = 'https://music.youtube.com/watch?v=zhY_0DoQCQs';
       getLinkWithPuppeteerMock.mockResolvedValueOnce(mockedYoutubeLink);
@@ -90,6 +94,7 @@ describe('Api router', () => {
         image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
         audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
         source: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
+        universalLink: urlShortenerResponseMock.data.refer,
         links: [
           {
             type: 'youTube',
@@ -113,7 +118,7 @@ describe('Api router', () => {
         ],
       });
 
-      expect(mock.history.get).toHaveLength(4);
+      expect(mock.history.get).toHaveLength(5);
       expect(getLinkWithPuppeteerMock).toHaveBeenCalled();
       // expect(getLinkWithPuppeteerMock).toHaveBeenCalledWith(
       //   expect.stringContaining(youtubeSearchLink),
@@ -137,6 +142,7 @@ describe('Api router', () => {
       mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
       mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
       mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
+      mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
       getLinkWithPuppeteerMock.mockImplementationOnce(() => {
         throw new Error('Injected Error');
@@ -152,6 +158,7 @@ describe('Api router', () => {
         image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
         audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
         source: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
+        universalLink: urlShortenerResponseMock.data.refer,
         links: [
           {
             type: 'appleMusic',
@@ -199,6 +206,7 @@ describe('Api router', () => {
       mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
       mock.onGet(deezerSearchLink).reply(500);
       mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
+      mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
       const mockedYoutubeLink = 'https://music.youtube.com/watch?v=zhY_0DoQCQs';
       getLinkWithPuppeteerMock.mockResolvedValueOnce(mockedYoutubeLink);
@@ -213,6 +221,7 @@ describe('Api router', () => {
         image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
         audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
         source: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
+        universalLink: urlShortenerResponseMock.data.refer,
         links: [
           {
             type: 'youTube',
@@ -236,7 +245,7 @@ describe('Api router', () => {
         ],
       });
 
-      expect(mock.history.get).toHaveLength(4);
+      expect(mock.history.get).toHaveLength(5);
       expect(getLinkWithPuppeteerMock).toHaveBeenCalled();
       // expect(getLinkWithPuppeteerMock).toHaveBeenCalledWith(
       //   expect.stringContaining(youtubeSearchLink),
@@ -260,6 +269,7 @@ describe('Api router', () => {
       mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
       mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
       mock.onGet(soundCloudSearchLink).reply(500);
+      mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
       const mockedYoutubeLink = 'https://music.youtube.com/watch?v=zhY_0DoQCQs';
       getLinkWithPuppeteerMock.mockResolvedValueOnce(mockedYoutubeLink);
@@ -274,6 +284,7 @@ describe('Api router', () => {
         image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
         audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
         source: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
+        universalLink: urlShortenerResponseMock.data.refer,
         links: [
           {
             type: 'youTube',
@@ -297,7 +308,7 @@ describe('Api router', () => {
         ],
       });
 
-      expect(mock.history.get).toHaveLength(4);
+      expect(mock.history.get).toHaveLength(5);
       expect(getLinkWithPuppeteerMock).toHaveBeenCalled();
       // expect(getLinkWithPuppeteerMock).toHaveBeenCalledWith(
       //   expect.stringContaining(youtubeSearchLink),

@@ -13,6 +13,8 @@ import {
   getAppleMusicSearchLink,
   getDeezerSearchLink,
   getSoundCloudSearchLink,
+  urlShortenerLink,
+  urlShortenerResponseMock,
 } from '../utils/shared';
 
 import { cacheStore } from '~/services/cache';
@@ -55,6 +57,7 @@ describe('Searches cache', () => {
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
+    mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
     getLinkWithPuppeteerMock.mockResolvedValueOnce(
       'https://music.youtube.com/watch?v=zhY_0DoQCQs'
