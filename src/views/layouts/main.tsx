@@ -54,17 +54,23 @@ export default function MainLayout({
 
         <script src="https://unpkg.com/htmx.org@1.9.12"></script>
 
-        <link href="https://fonts.cdnfonts.com/css/montserrat" rel="stylesheet" />
         <link href="/assets/index.min.css" rel="stylesheet" />
+        <link href="https://fonts.cdnfonts.com/css/montserrat" rel="stylesheet" />
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css"
+        />
       </head>
 
       <body class="bg-black font-light text-white">{children}</body>
 
       <script
         defer
-        src="https://kit.fontawesome.com/f559975e2f.js"
+        src="https://kit.fontawesome.com/fe8414cd80.js"
         crossorigin="anonymous"
       />
+
+      <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js" defer />
 
       <script src="assets/entry.js" />
     </html>

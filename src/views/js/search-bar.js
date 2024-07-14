@@ -46,3 +46,49 @@ document.addEventListener('htmx:timeout', function () {
 document.addEventListener('DOMContentLoaded', async () => {
   await getSpotifyLinkFromClipboard();
 });
+
+window.shareLink = async universalLink => {
+  if (!universalLink) {
+    console.error('Universal link not found');
+    return;
+  }
+
+  const notyf = new Notyf({
+    riple: false,
+    dismissible: true,
+    duration: 2000,
+    types: [
+      {
+        type: 'success',
+        background: 'black',
+      },
+    ],
+  });
+
+  try {
+    if (navigator.share) {
+      await navigator.share({
+        title:
+          "Check out this song available on multiple platforms via I Don't Have Spotify",
+        url: universalLink,
+      });
+      return;
+    }
+
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(universalLink);
+    } else {
+      // Older browser fallback
+      const textArea = document.createElement('textarea');
+      textArea.value = universalLink;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    }
+
+    notyf.success('Link copied to clipboard!');
+  } catch (err) {
+    console.error(err);
+  }
+};

@@ -1,3 +1,4 @@
+import { ENV } from '~/config/env';
 import { MetadataType, ServiceType } from '~/config/enum';
 
 import { logger } from '~/utils/logger';
@@ -13,6 +14,7 @@ import { getSoundCloudLink } from '~/adapters/soundcloud';
 import { getTidalLink } from '~/adapters/tidal';
 import { getSpotifyLink } from '~/adapters/spotify';
 import { generateId } from '~/utils/encoding';
+import { shortenLink } from '~/utils/url-shortener';
 
 export type SearchMetadata = {
   title: string;
@@ -82,6 +84,7 @@ export const search = async (link?: string, searchId?: string) => {
   }
 
   const id = generateId(searchService.source);
+  const unversalLink = await shortenLink(`${ENV.app.url}?id=${id}`);
 
   const searchResult: SearchResult = {
     id,
@@ -91,6 +94,7 @@ export const search = async (link?: string, searchId?: string) => {
     image: metadata.image,
     audio: metadata.audio,
     source: searchService.source,
+    unversalLink,
     links: links as SearchResultLink[],
   };
 

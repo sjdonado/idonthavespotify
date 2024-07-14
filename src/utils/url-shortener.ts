@@ -1,4 +1,4 @@
-import * as config from '~/config/default';
+import { ENV } from '~/config/env';
 
 import HttpClient from './http-client';
 
@@ -12,14 +12,14 @@ interface ApiResponse {
 
 export async function shortenLink(link: string) {
   const response = await HttpClient.post<ApiResponse>(
-    config.utils.urlShortener.apiUrl,
+    ENV.utils.urlShortener.apiUrl,
     {
       url: link,
     },
     {
       headers: {
         'Content-Type': 'application/json',
-        'X-Api-Key': config.utils.urlShortener.apiKey,
+        'X-Api-Key': ENV.utils.urlShortener.apiKey,
       },
     }
   );

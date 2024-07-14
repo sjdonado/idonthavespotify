@@ -40,13 +40,13 @@ export default function SearchLink(props: {
       target="_blank"
       rel="noreferrer"
       aria-label={searchResult.label}
-      class="flex items-center hover:text-gray-300 text-sm sm:text-base"
+      class="flex items-center text-sm hover:text-gray-300 sm:text-base"
     >
-      <i class={`${searchResult.icon} w-6 mr-1`} />
+      <i class={`${searchResult.icon} mr-1 w-6`} />
       <p class="underline decoration-0 underline-offset-2">{searchResult.label}</p>
       {props.isVerified && (
         <span
-          class="inline-flex items-center justify-center ml-1 p-1 rounded-full text-[0.56rem] bg-green-500"
+          class="ml-1 inline-flex items-center justify-center rounded-full bg-green-500 p-1 text-[0.56rem]"
           aria-label="Verified"
         >
           <i class="fas fa-check" />
