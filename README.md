@@ -14,6 +14,10 @@
 
 ![Uptime Badge](https://uptime.donado.co/api/badge/2/uptime/24?labelPrefix=Web%20Page%20&labelSuffix=h) ![Uptime Badge](https://uptime.donado.co/api/badge/2/ping/24?labelPrefix=Web%20Page%20)
 
+<div align="center">
+  <img width=1200 src="https://firebasestorage.googleapis.com/v0/b/rule-of-thumb-1c13c.appspot.com/o/idonthavespotify.webp?alt=media"/>
+</div>
+
 ## Raycast
 
 ![Uptime Badge](https://uptime.donado.co/api/badge/3/uptime/24?labelPrefix=API%20&labelSuffix=h) ![Uptime Badge](https://uptime.donado.co/api/badge/3/ping/24?labelPrefix=API%20)
