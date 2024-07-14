@@ -20,21 +20,27 @@ export async function shortenLink(link: string) {
     return cache;
   }
 
-  const response = await HttpClient.post<ApiResponse>(
-    ENV.utils.urlShortener.apiUrl,
-    {
-      url: link,
-    },
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Api-Key': ENV.utils.urlShortener.apiKey,
-      },
-    }
-  );
+  let refer = link;
 
-  const { refer } = response.data;
-  await cacheShortenLink(link, refer);
+  try {
+    const response = await HttpClient.post<ApiResponse>(
+      ENV.utils.urlShortener.apiUrl,
+      {
+        url: link,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Api-Key': ENV.utils.urlShortener.apiKey,
+        },
+      }
+    );
+
+    refer = response.data.refer;
+    await cacheShortenLink(link, refer);
+  } catch (err) {
+    logger.error(`[url-shortener] (${link}) request failed ${err}`);
+  }
 
   return refer;
 }

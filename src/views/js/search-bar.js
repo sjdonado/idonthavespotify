@@ -68,8 +68,7 @@ window.shareLink = async universalLink => {
   try {
     if (navigator.share) {
       await navigator.share({
-        title:
-          "Check out this song available on multiple platforms via I Don't Have Spotify",
+        title: 'Share this universal link',
         url: universalLink,
       });
       return;
