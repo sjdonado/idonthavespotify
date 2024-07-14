@@ -36,6 +36,7 @@ export type SearchResult = {
   image: string;
   audio?: string;
   source: string;
+  unversalLink: string;
   links: SearchResultLink[];
 };
 
@@ -80,8 +81,10 @@ export const search = async (link?: string, searchId?: string) => {
     links.push(tidalLink);
   }
 
+  const id = generateId(searchService.source);
+
   const searchResult: SearchResult = {
-    id: generateId(searchService.source),
+    id,
     type: metadata.type,
     title: metadata.title,
     description: metadata.description,
