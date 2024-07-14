@@ -46,3 +46,13 @@ export const cacheSpotifyAccessToken = async (accessToken: string, expTime: numb
 export const getCachedSpotifyAccessToken = async () => {
   return cacheStore.get('spotify:accessToken');
 };
+
+export const cacheShortenLink = async (link: string, refer: string) => {
+  await cacheStore.set(`url-shortener:${link}`, refer, {
+    ttl: ENV.cache.expTime,
+  });
+};
+
+export const getCachedShortenLink = async (link: string) => {
+  return cacheStore.get(`url-shortener:${link}`);
+};

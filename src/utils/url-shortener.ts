@@ -1,6 +1,9 @@
 import { ENV } from '~/config/env';
 
+import { cacheShortenLink, getCachedShortenLink } from '~/services/cache';
+
 import HttpClient from './http-client';
+import { logger } from './logger';
 
 interface ApiResponse {
   data: {
@@ -11,6 +14,12 @@ interface ApiResponse {
 }
 
 export async function shortenLink(link: string) {
+  const cache = await getCachedShortenLink(link);
+  if (cache) {
+    logger.info(`[url-shortener] (${link}) cache hit`);
+    return cache;
+  }
+
   const response = await HttpClient.post<ApiResponse>(
     ENV.utils.urlShortener.apiUrl,
     {
@@ -24,5 +33,8 @@ export async function shortenLink(link: string) {
     }
   );
 
-  return response.data.refer;
+  const { refer } = response.data;
+  await cacheShortenLink(link, refer);
+
+  return refer;
 }

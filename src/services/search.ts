@@ -38,7 +38,7 @@ export type SearchResult = {
   image: string;
   audio?: string;
   source: string;
-  unversalLink: string;
+  universalLink: string;
   links: SearchResultLink[];
 };
 
@@ -65,12 +65,20 @@ export const search = async (link?: string, searchId?: string) => {
     `[${search.name}] (params) ${JSON.stringify({ searchService, metadata, query }, null, 2)}`
   );
 
-  const searchResults = await Promise.all([
+  const id = generateId(searchService.source);
+  const universalLinkPromise = shortenLink(`${ENV.app.url}?id=${id}`);
+
+  const searchResultsPromise = Promise.all([
     searchService.type !== ServiceType.Spotify ? getSpotifyLink(query, metadata) : null,
     searchService.type !== ServiceType.YouTube ? getYouTubeLink(query, metadata) : null,
     getAppleMusicLink(query, metadata),
     getDeezerLink(query, metadata),
     getSoundCloudLink(query, metadata),
+  ]);
+
+  const [searchResults, universalLink] = await Promise.all([
+    searchResultsPromise,
+    universalLinkPromise,
   ]);
 
   const links = searchResults.filter(Boolean);
@@ -83,9 +91,6 @@ export const search = async (link?: string, searchId?: string) => {
     links.push(tidalLink);
   }
 
-  const id = generateId(searchService.source);
-  const unversalLink = await shortenLink(`${ENV.app.url}?id=${id}`);
-
   const searchResult: SearchResult = {
     id,
     type: metadata.type,
@@ -94,7 +99,7 @@ export const search = async (link?: string, searchId?: string) => {
     image: metadata.image,
     audio: metadata.audio,
     source: searchService.source,
-    unversalLink,
+    universalLink,
     links: links as SearchResultLink[],
   };
 
