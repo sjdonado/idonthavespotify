@@ -1,4 +1,4 @@
-import * as config from '~/config/default';
+import { ENV } from '~/config/env';
 import { ServiceType } from '~/config/enum';
 
 import { SearchResultLink } from '~/services/search';
@@ -8,7 +8,7 @@ export function getTidalLink(query: string) {
     q: query,
   });
 
-  const url = new URL(`${config.services.tidal.baseUrl}/search`);
+  const url = new URL(`${ENV.services.tidal.baseUrl}/search`);
   url.search = params.toString();
 
   return {

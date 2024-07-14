@@ -14,6 +14,8 @@ import {
   getDeezerSearchLink,
   getSoundCloudSearchLink,
   getYouTubeSearchLink,
+  urlShortenerLink,
+  urlShortenerResponseMock,
 } from '../../utils/shared';
 
 import deezerArtistResponseMock from '../../fixtures/deezer/artistResponseMock.json';
@@ -61,6 +63,7 @@ describe('GET /search - Artist', () => {
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicArtistResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerArtistResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudArtistResponseMock);
+    mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
     const mockedYoutubeLink =
       'https://music.youtube.com/channel/UC0ajkOzj8xE3Gs3LHCE243A';
@@ -75,6 +78,7 @@ describe('GET /search - Artist', () => {
       description: 'Artist · 45.1M monthly listeners.',
       image: 'https://i.scdn.co/image/ab6761610000e5ebadd503b411a712e277895c8a',
       source: 'https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5',
+      universalLink: urlShortenerResponseMock.data.refer,
       links: [
         {
           type: 'youTube',

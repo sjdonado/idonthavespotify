@@ -14,6 +14,8 @@ import {
   getDeezerSearchLink,
   getSoundCloudSearchLink,
   getYouTubeSearchLink,
+  urlShortenerLink,
+  urlShortenerResponseMock,
 } from '../../utils/shared';
 
 import deezerExclusiveContentResponseMock from '../../fixtures/deezer/emptyResponseMock.json';
@@ -61,6 +63,7 @@ describe('GET /search - Spotify Exclusive Content', () => {
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicExclusiveContentResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerExclusiveContentResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudExclusiveContentResponseMock);
+    mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
     getLinkWithPuppeteerMock.mockResolvedValueOnce(undefined);
 
@@ -74,6 +77,7 @@ describe('GET /search - Spotify Exclusive Content', () => {
         'Listen to The Louis Theroux Podcast on Spotify. Join Louis Theroux as he embarks on a series of in-depth and freewheeling conversations with a curated collection of fascinating figures from across the globe. The Louis Theroux Podcast is a Spotify Exclusive podcast from Mindhouse.',
       image: 'https://i.scdn.co/image/ab6765630000ba8a9f6908102653db4d1d168c59',
       source: 'https://open.spotify.com/show/7LuQv400JFzzlJrOuMukRj',
+      universalLink: urlShortenerResponseMock.data.refer,
       links: [],
     });
 

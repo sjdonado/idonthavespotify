@@ -13,6 +13,8 @@ import {
   getAppleMusicSearchLink,
   getSoundCloudSearchLink,
   getYouTubeSearchLink,
+  urlShortenerLink,
+  urlShortenerResponseMock,
 } from '../../utils/shared';
 
 const [
@@ -56,6 +58,7 @@ describe('GET /search - Podcast Episode', () => {
     mock.onGet(link).reply(200, spotifyPodcastHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicPodcastResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudPodcastResponseMock);
+    mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
     const mockedYoutubeLink =
       'https://music.youtube.com/watch?v=v4FYdo-oZQk&list=PL70yIS6vx_Y2xaKD3w2qb6Eu06jNBdNJb';
@@ -73,6 +76,7 @@ describe('GET /search - Podcast Episode', () => {
       audio:
         'https://podz-content.spotifycdn.com/audio/clips/0Dijh26Vc2UoFrsXfkACQ8/clip_2900584_2965529.mp3',
       source: 'https://open.spotify.com/episode/43TCrgmP23qkLcAXZQN8qT',
+      universalLink: urlShortenerResponseMock.data.refer,
       links: [
         {
           type: 'youTube',

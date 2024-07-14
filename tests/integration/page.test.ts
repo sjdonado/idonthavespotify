@@ -1,3 +1,4 @@
+import { ENV } from '~/config/env';
 import { beforeEach, describe, expect, it, spyOn } from 'bun:test';
 
 import { getCheerioDoc } from '~/utils/scraper';
@@ -7,9 +8,15 @@ import { app } from '~/index';
 
 import { MetadataType, ServiceType } from '~/config/enum';
 
-import { cacheSearchMetadata, cacheSearchResultLink, cacheStore } from '~/services/cache';
+import {
+  cacheSearchMetadata,
+  cacheSearchResultLink,
+  cacheShortenLink,
+  cacheStore,
+} from '~/services/cache';
 
 import * as linkParser from '~/parsers/link';
+import { urlShortenerResponseMock } from '../utils/shared';
 
 const INDEX_ENDPOINT = 'http://localhost';
 
@@ -17,13 +24,19 @@ describe('Page router', () => {
   beforeEach(async () => {
     cacheStore.reset();
 
-    await cacheSearchMetadata('2KvHC9z14GSl4YpkNMX384', {
-      title: 'Do Not Disturb',
-      description: 'Drake · Song · 2017',
-      type: MetadataType.Song,
-      image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
-      audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
-    });
+    await Promise.all([
+      cacheSearchMetadata('2KvHC9z14GSl4YpkNMX384', {
+        title: 'Do Not Disturb',
+        description: 'Drake · Song · 2017',
+        type: MetadataType.Song,
+        image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
+        audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
+      }),
+      cacheShortenLink(
+        `${ENV.app.url}?id=b3Blbi5zcG90aWZ5LmNvbS90cmFjay8yS3ZIQzl6MTRHU2w0WXBrTk1YMzg0`,
+        urlShortenerResponseMock.data.refer
+      ),
+    ]);
   });
 
   describe('GET /', () => {
@@ -42,14 +55,14 @@ describe('Page router', () => {
 
       expect(footerText).toContain('@sjdonado');
       expect(footerText).toContain('Status');
-      expect(footerText).toContain('View on Raycast');
+      expect(footerText).toContain('Install Extension');
       expect(footerText).toContain('Source Code');
     });
   });
 
   describe('POST /search', () => {
     const endpoint = `${INDEX_ENDPOINT}/search`;
-    const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
+    const spotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
 
     it('should return search card with a valid link', async () => {
       await Promise.all([
@@ -87,7 +100,7 @@ describe('Page router', () => {
         ),
       ]);
 
-      const request = formDataRequest(endpoint, { link });
+      const request = formDataRequest(endpoint, { link: spotifyLink });
       const response = await app.handle(request).then(res => res.text());
 
       const doc = getCheerioDoc(response);
@@ -97,7 +110,7 @@ describe('Page router', () => {
       expect(searchCardText).toContain('Do Not Disturb');
       expect(searchCardText).toContain('Drake · Song · 2017');
 
-      const searchLinks = doc('#search-card > div > ul > li >a').toArray();
+      const searchLinks = doc('#search-card > div.flex-1 > ul > a').toArray();
 
       expect(searchLinks).toHaveLength(5);
       expect(searchLinks[0].attribs['aria-label']).toContain('Listen on YouTube');
@@ -123,7 +136,7 @@ describe('Page router', () => {
     });
 
     it('should return search card when searchLinks are empty', async () => {
-      const request = formDataRequest(endpoint, { link });
+      const request = formDataRequest(endpoint, { link: spotifyLink });
       const response = await app.handle(request).then(res => res.text());
 
       const doc = getCheerioDoc(response);
@@ -133,7 +146,7 @@ describe('Page router', () => {
       expect(searchCardText).toContain('Do Not Disturb');
       expect(searchCardText).toContain('Drake · Song · 2017');
 
-      const searchLinks = doc('#search-card > div > ul > li >a').toArray();
+      const searchLinks = doc('#search-card > div.flex-1 > ul > a').toArray();
 
       expect(searchLinks).toHaveLength(0);
     });
@@ -159,7 +172,7 @@ describe('Page router', () => {
         throw new Error('Injected Error');
       });
 
-      const request = formDataRequest(endpoint, { link });
+      const request = formDataRequest(endpoint, { link: spotifyLink });
       const response = await app.handle(request).then(res => res.text());
 
       const doc = getCheerioDoc(response);

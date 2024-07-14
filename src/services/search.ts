@@ -1,3 +1,4 @@
+import { ENV } from '~/config/env';
 import { MetadataType, ServiceType } from '~/config/enum';
 
 import { logger } from '~/utils/logger';
@@ -13,6 +14,7 @@ import { getSoundCloudLink } from '~/adapters/soundcloud';
 import { getTidalLink } from '~/adapters/tidal';
 import { getSpotifyLink } from '~/adapters/spotify';
 import { generateId } from '~/utils/encoding';
+import { shortenLink } from '~/utils/url-shortener';
 
 export type SearchMetadata = {
   title: string;
@@ -36,6 +38,7 @@ export type SearchResult = {
   image: string;
   audio?: string;
   source: string;
+  universalLink: string;
   links: SearchResultLink[];
 };
 
@@ -62,12 +65,20 @@ export const search = async (link?: string, searchId?: string) => {
     `[${search.name}] (params) ${JSON.stringify({ searchService, metadata, query }, null, 2)}`
   );
 
-  const searchResults = await Promise.all([
+  const id = generateId(searchService.source);
+  const universalLinkPromise = shortenLink(`${ENV.app.url}?id=${id}`);
+
+  const searchResultsPromise = Promise.all([
     searchService.type !== ServiceType.Spotify ? getSpotifyLink(query, metadata) : null,
     searchService.type !== ServiceType.YouTube ? getYouTubeLink(query, metadata) : null,
     getAppleMusicLink(query, metadata),
     getDeezerLink(query, metadata),
     getSoundCloudLink(query, metadata),
+  ]);
+
+  const [searchResults, universalLink] = await Promise.all([
+    searchResultsPromise,
+    universalLinkPromise,
   ]);
 
   const links = searchResults.filter(Boolean);
@@ -81,13 +92,14 @@ export const search = async (link?: string, searchId?: string) => {
   }
 
   const searchResult: SearchResult = {
-    id: generateId(searchService.source),
+    id,
     type: metadata.type,
     title: metadata.title,
     description: metadata.description,
     image: metadata.image,
     audio: metadata.audio,
     source: searchService.source,
+    universalLink,
     links: links as SearchResultLink[],
   };
 

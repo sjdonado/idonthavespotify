@@ -14,6 +14,8 @@ import {
   getDeezerSearchLink,
   getSoundCloudSearchLink,
   getYouTubeSearchLink,
+  urlShortenerLink,
+  urlShortenerResponseMock,
 } from '../../utils/shared';
 
 import deezerPlaylistResponseMock from '../../fixtures/deezer/playlistResponseMock.json';
@@ -61,6 +63,7 @@ describe('GET /search - Playlist', () => {
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicPlaylistResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerPlaylistResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudPlaylistResponseMock);
+    mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
     const mockedYoutubeLink =
       'https://music.youtube.com/playlist?list=RDCLAK5uy_k3jElZuYeDhqZsFkUnRf519q4CD52CaRY';
@@ -75,6 +78,7 @@ describe('GET /search - Playlist', () => {
       description: 'This Is Bad Bunny · Playlist · 109 songs · 5.2M likes',
       image: 'https://i.scdn.co/image/ab67706f000000029c0eb2fdff534f803ea018e1',
       source: 'https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ',
+      universalLink: urlShortenerResponseMock.data.refer,
       links: [
         {
           type: 'youTube',

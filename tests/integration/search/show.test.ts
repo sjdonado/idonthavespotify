@@ -13,6 +13,8 @@ import {
   getAppleMusicSearchLink,
   getDeezerSearchLink,
   getYouTubeSearchLink,
+  urlShortenerLink,
+  urlShortenerResponseMock,
 } from '../../utils/shared';
 
 import deezerShowResponseMock from '../../fixtures/deezer/showResponseMock.json';
@@ -53,6 +55,7 @@ describe('GET /search - Podcast Show', () => {
     mock.onGet(link).reply(200, spotifyShowHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicShowResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerShowResponseMock);
+    mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
     const mockedYoutubeLink =
       'https://music.youtube.com/watch?v=v4FYdo-oZQk&list=PL70yIS6vx_Y2xaKD3w2qb6Eu06jNBdNJb';
@@ -68,6 +71,7 @@ describe('GET /search - Podcast Show', () => {
         'Listen to Waveform: The MKBHD Podcast on Spotify. A tech podcast for the gadget lovers and tech heads among us from the mind of Marques Brownlee, better known as MKBHD. MKBHD has made a name for himself on YouTube reviewing everything from the newest smartphones to cameras to electric cars. Pulling from over 10 years of experience covering the tech industry, MKBHD and co-hosts Andrew Manganelli and David Imel will keep you informed and entertained as they take a deep dive into the latest and greatest in tech and what deserves your hard earned cash. New episodes every week. Waveform is part of the Vox Media Podcast Network. We wanna make the podcast even better, help us learn how we can: https://bit.ly/2EcYbu4 ',
       image: 'https://i.scdn.co/image/ab6765630000ba8aa05ac56dbc44378f45ef693a',
       source: 'https://open.spotify.com/show/6o81QuW22s5m2nfcXWjucc',
+      universalLink: urlShortenerResponseMock.data.refer,
       links: [
         {
           type: 'youTube',

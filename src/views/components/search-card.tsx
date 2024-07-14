@@ -7,9 +7,16 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
     <div
       id="search-card"
       data-id={props.searchResult.id}
-      class="m-4 flex max-w-2xl flex-wrap items-start justify-center rounded-lg border border-white md:p-4"
+      class="relative m-4 flex max-w-2xl flex-wrap items-start justify-center rounded-lg border border-white md:p-4"
     >
-      <div class="w-full m-4 md:w-44">
+      <button
+        type="button"
+        class="absolute right-2 top-2 p-1 text-white"
+        onclick={`shareLink('${props.searchResult.universalLink}')`}
+      >
+        <i class="fas fa-up-right-from-square" />
+      </button>
+      <div class="m-4 w-full md:w-44">
         <img
           class="mx-auto w-28 md:w-44"
           src={props.searchResult.image}
@@ -27,12 +34,10 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
           </p>
         )}
         {props.searchResult.links.length > 0 && (
-          <ul class="mt-4 min-w-[12rem] text-base">
-            <li class="flex flex-col items-start">
-              {props.searchResult.links.map(({ type, url, isVerified }) => (
-                <SearchLink type={type} url={url} isVerified={isVerified} />
-              ))}
-            </li>
+          <ul class="mt-4 min-w-48 text-base">
+            {props.searchResult.links.map(({ type, url, isVerified }) => (
+              <SearchLink type={type} url={url} isVerified={isVerified} />
+            ))}
           </ul>
         )}
       </div>

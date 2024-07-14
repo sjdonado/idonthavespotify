@@ -14,6 +14,8 @@ import {
   getDeezerSearchLink,
   getSoundCloudSearchLink,
   getYouTubeSearchLink,
+  urlShortenerLink,
+  urlShortenerResponseMock,
 } from '../../utils/shared';
 
 import deezerSongResponseMock from '../../fixtures/deezer/songResponseMock.json';
@@ -63,6 +65,7 @@ describe('GET /search - Song', () => {
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
+    mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
     const mockedYoutubeLink = 'https://music.youtube.com/watch?v=zhY_0DoQCQs';
     getLinkWithPuppeteerMock.mockResolvedValue(mockedYoutubeLink);
@@ -77,6 +80,7 @@ describe('GET /search - Song', () => {
       image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
       audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
       source: link,
+      universalLink: urlShortenerResponseMock.data.refer,
       links: [
         {
           type: 'youTube',
@@ -132,6 +136,7 @@ describe('GET /search - Song', () => {
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
+    mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
     const mockedYoutubeLink = 'https://music.youtube.com/watch?v=zhY_0DoQCQs';
     getLinkWithPuppeteerMock.mockResolvedValue(mockedYoutubeLink);
@@ -139,13 +144,14 @@ describe('GET /search - Song', () => {
     const response = await app.handle(request).then(res => res.json());
 
     expect(response).toEqual({
-      id: 'mOQKfqJZ1Db',
+      id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8yS3ZIQzl6MTRHU2w0WXBrTk1YMzg0',
       type: 'song',
       title: 'Do Not Disturb',
       description: 'Drake · Song · 2017',
       image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
       audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
       source: mobileSpotifyLink,
+      universalLink: urlShortenerResponseMock.data.refer,
       links: [
         {
           type: 'youTube',

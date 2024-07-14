@@ -19,7 +19,7 @@ export const generateId = (source: string) => {
 };
 
 export const getSourceFromId = (id: string) => {
-  const decoded = decodeURIComponent(Buffer.from(id, 'base64').toString('utf8'));
+  const decoded = Buffer.from(decodeURIComponent(id), 'base64').toString('utf8');
 
   return `https://${decoded}`;
 };

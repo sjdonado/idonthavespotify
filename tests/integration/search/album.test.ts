@@ -14,6 +14,8 @@ import {
   getDeezerSearchLink,
   getSoundCloudSearchLink,
   getYouTubeSearchLink,
+  urlShortenerLink,
+  urlShortenerResponseMock,
 } from '../../utils/shared';
 
 import deezerAlbumResponseMock from '../../fixtures/deezer/albumResponseMock.json';
@@ -61,6 +63,7 @@ describe('GET /search - Album', () => {
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicAlbumResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerAlbumResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudAlbumResponseMock);
+    mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
     const mockedYoutubeLink =
       'https://music.youtube.com/watch?v=k20wnICXpps&list=OLAK5uy_lRly1oG8OVTI3C2gZv0pPjYxH-Q3U6GrM';
@@ -75,6 +78,7 @@ describe('GET /search - Album', () => {
       description: 'Drake · Album · 2023 · 23 songs.',
       image: 'https://i.scdn.co/image/ab67616d0000b2730062621987df634efede0e6c',
       source: 'https://open.spotify.com/album/4czdORdCWP9umpbhFXK2fW',
+      universalLink: urlShortenerResponseMock.data.refer,
       links: [
         {
           type: 'youTube',

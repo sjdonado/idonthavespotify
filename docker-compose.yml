@@ -1,6 +1,19 @@
+version: '3.8'
+
 services:
   app:
     image: idonthavespotify
     env_file: .env
     ports:
       - 3000:3000
+  bit:
+    image: sjdonado/bit
+    environment:
+      APP_URL: http://localhost:4001
+    ports:
+      - 4001:4000
+    volumes:
+      - sqlite_data:/app/sqlite
+
+volumes:
+  sqlite_data:
