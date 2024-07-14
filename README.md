@@ -1,24 +1,24 @@
 # I don't have Spotify
 
-| Raycast API                                                                                                                                                                       | Web Page                                                                                                                                                                                        |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ![Uptime Badge](https://uptime.donado.co/api/badge/3/uptime/24?labelPrefix=API%20&labelSuffix=h) ![Uptime Badge](https://uptime.donado.co/api/badge/3/ping/24?labelPrefix=API%20) | ![Uptime Badge](https://uptime.donado.co/api/badge/2/uptime/24?labelPrefix=Web%20Page%20&labelSuffix=h) ![Uptime Badge](https://uptime.donado.co/api/badge/2/ping/24?labelPrefix=Web%20Page%20) |
+## Adapters
 
-## Spotify Search
+| Adapters      | Inverted Search | Official API | Verified Link |
+| ------------- | --------------- | ------------ | ------------- |
+| Youtube Music | Yes             | No           | Yes           |
+| Apple Music   | No              | No           | Yes           |
+| Deezer        | Yes             | Yes          | Yes           |
+| SoundCloud    | No              | No           | Yes           |
+| Tidal         | Yes             | No           | No            |
 
-<img width="2032" alt="Screenshot 2024-05-04 at 12 52 36" src="https://github.com/sjdonado/idonthavespotify/assets/27580836/842c5aa5-d0ac-4bb8-938c-ce22d1d522c5">
+## Web Page
 
-## Youtube Music Search (beta)
+![Uptime Badge](https://uptime.donado.co/api/badge/2/uptime/24?labelPrefix=Web%20Page%20&labelSuffix=h) ![Uptime Badge](https://uptime.donado.co/api/badge/2/ping/24?labelPrefix=Web%20Page%20)
 
-<img width="2032" alt="Screenshot 2024-05-04 at 12 50 22" src="https://github.com/sjdonado/idonthavespotify/assets/27580836/2fce2d17-938a-402e-8b66-47ed6b12f6b0">
+## Raycast
 
-## Raycast Extension
+![Uptime Badge](https://uptime.donado.co/api/badge/3/uptime/24?labelPrefix=API%20&labelSuffix=h) ![Uptime Badge](https://uptime.donado.co/api/badge/3/ping/24?labelPrefix=API%20)
 
-<a href="https://raycast.com/sjdonado/idonthavespotify" target="_blank">
-  <div align="center">
-    <img width="862" alt="Raycast Extension screenshot" src="https://github.com/sjdonado/idonthavespotify/assets/27580836/0edcb1da-f3f4-4a0b-be2f-e767dbbb62b5">
-  </div>
-</a>
+<a title="Install idonthavespotify Raycast Extension" href="https://www.raycast.com/sjdonado/idonthavespotify"><img src="https://www.raycast.com/sjdonado/idonthavespotify/install_button@2x.png?v=1.1" height="64" style="height: 64px;" alt=""></a>
 
 ## More info
 
