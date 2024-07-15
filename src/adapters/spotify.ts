@@ -5,7 +5,7 @@ import {
   SPOTIFY_LINK_DESKTOP_REGEX,
   SPOTIFY_LINK_MOBILE_REGEX,
 } from '~/config/constants';
-import { MetadataType, ServiceType } from '~/config/enum';
+import { MetadataType, Adapter } from '~/config/enum';
 
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
@@ -61,7 +61,7 @@ export async function getSpotifyLink(query: string, metadata: SearchMetadata) {
     limit: String(ADAPTERS_QUERY_LIMIT),
   });
 
-  const url = new URL(ENV.services.spotify.apiUrl);
+  const url = new URL(ENV.adapters.spotify.apiUrl);
   url.search = params.toString();
 
   const cache = await getCachedSearchResultLink(url);
@@ -86,7 +86,7 @@ export async function getSpotifyLink(query: string, metadata: SearchMetadata) {
     const { name, external_urls } = data.items[0];
 
     const searchResultLink = {
-      type: ServiceType.Spotify,
+      type: Adapter.Spotify,
       url: external_urls.spotify,
       isVerified: responseMatchesQuery(name ?? '', query),
     } as SearchResultLink;
@@ -103,7 +103,7 @@ export async function fetchSpotifyMetadata(spotifyLink: string) {
   let url = spotifyLink;
 
   const spotifyHeaders = {
-    'User-Agent': `${ENV.services.spotify.clientVersion} (Macintosh; Apple Silicon)`,
+    'User-Agent': `${ENV.adapters.spotify.clientVersion} (Macintosh; Apple Silicon)`,
   };
 
   let html = await HttpClient.get<string>(url, {
@@ -145,7 +145,7 @@ export async function getOrUpdateSpotifyAccessToken() {
   });
 
   const response = await HttpClient.post<SpotifyAuthResponse>(
-    ENV.services.spotify.authUrl,
+    ENV.adapters.spotify.authUrl,
     data,
     {
       headers: {
@@ -154,7 +154,7 @@ export async function getOrUpdateSpotifyAccessToken() {
         Authorization:
           'Basic ' +
           Buffer.from(
-            ENV.services.spotify.clientId + ':' + ENV.services.spotify.clientSecret
+            ENV.adapters.spotify.clientId + ':' + ENV.adapters.spotify.clientSecret
           ).toString('base64'),
       },
     }

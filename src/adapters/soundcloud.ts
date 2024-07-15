@@ -1,5 +1,5 @@
 import { ENV } from '~/config/env';
-import { MetadataType, ServiceType } from '~/config/enum';
+import { MetadataType, Adapter } from '~/config/enum';
 import { RESPONSE_COMPARE_MIN_SCORE } from '~/config/constants';
 
 import HttpClient from '~/utils/http-client';
@@ -19,7 +19,7 @@ export async function getSoundCloudLink(query: string, metadata: SearchMetadata)
     q: query,
   });
 
-  const url = new URL(`${ENV.services.soundCloud.baseUrl}/search`);
+  const url = new URL(`${ENV.adapters.soundCloud.baseUrl}/search`);
   url.search = params.toString();
 
   const cache = await getCachedSearchResultLink(url);
@@ -45,8 +45,8 @@ export async function getSoundCloudLink(query: string, metadata: SearchMetadata)
     }
 
     const searchResultLink = {
-      type: ServiceType.SoundCloud,
-      url: `${ENV.services.soundCloud.baseUrl}${href}`,
+      type: Adapter.SoundCloud,
+      url: `${ENV.adapters.soundCloud.baseUrl}${href}`,
       isVerified: true,
     } as SearchResultLink;
 

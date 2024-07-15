@@ -1,7 +1,7 @@
 import { version } from '../../package.json';
 
 export const ENV = {
-  services: {
+  adapters: {
     spotify: {
       authUrl: Bun.env.SPOTIFY_AUTH_URL!,
       clientId: Bun.env.SPOTIFY_CLIENT_ID!,

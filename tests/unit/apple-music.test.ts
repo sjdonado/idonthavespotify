@@ -3,7 +3,7 @@ import { beforeAll, afterEach, describe, expect, it } from 'bun:test';
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
-import { MetadataType, ServiceType } from '~/config/enum';
+import { MetadataType, Adapter } from '~/config/enum';
 import { getAppleMusicLink } from '~/adapters/apple-music';
 import { SearchMetadata } from '~/services/search';
 
@@ -35,7 +35,7 @@ describe('Adapter - Apple Music', () => {
     } as SearchMetadata);
 
     expect(appleMusicLink).toEqual({
-      type: ServiceType.AppleMusic,
+      type: Adapter.AppleMusic,
       url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
       isVerified: true,
     });

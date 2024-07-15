@@ -1,5 +1,5 @@
 import { ENV } from '~/config/env';
-import { MetadataType, ServiceType } from '~/config/enum';
+import { MetadataType, Adapter } from '~/config/enum';
 
 import { logger } from '~/utils/logger';
 
@@ -23,7 +23,7 @@ export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
     q: `${query} ${YOUTUBE_SEARCH_TYPES[metadata.type]}`,
   });
 
-  const url = new URL(ENV.services.youTube.musicUrl);
+  const url = new URL(ENV.adapters.youTube.musicUrl);
   url.search = params.toString();
 
   const cache = await getCachedSearchResultLink(url);
@@ -40,7 +40,7 @@ export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
       secure: true,
     };
 
-    const cookies = ENV.services.youTube.cookies.split(';').map(cookie => {
+    const cookies = ENV.adapters.youTube.cookies.split(';').map(cookie => {
       const [name, value] = cookie.split('=');
       return {
         ...youtubeCookie,
@@ -60,7 +60,7 @@ export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
     }
 
     const searchResultLink = {
-      type: ServiceType.YouTube,
+      type: Adapter.YouTube,
       url: link,
       isVerified: true,
     } as SearchResultLink;
@@ -78,7 +78,7 @@ export async function fetchYoutubeMetadata(youtubeLink: string) {
 
   const html = await HttpClient.get<string>(youtubeLink, {
     headers: {
-      Cookie: ENV.services.youTube.cookies,
+      Cookie: ENV.adapters.youTube.cookies,
     },
   });
 

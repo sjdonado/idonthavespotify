@@ -1,25 +1,25 @@
 import { ParseError } from 'elysia';
 
 import { SPOTIFY_LINK_REGEX, YOUTUBE_LINK_REGEX } from '~/config/constants';
-import { ServiceType } from '~/config/enum';
+import { Adapter } from '~/config/enum';
 import { getSourceFromId } from '~/utils/encoding';
 
 import { logger } from '~/utils/logger';
 
-export type SearchService = {
+export type SearchParser = {
   id: string;
   type: string;
   source: string;
 };
 
-export const getSearchService = async (link?: string, searchId?: string) => {
+export const getSearchParser = async (link?: string, searchId?: string) => {
   const decodedSource = searchId ? getSourceFromId(searchId) : undefined;
 
   let source = link;
 
   if (searchId && decodedSource) {
     logger.info(
-      `[${getSearchService.name}] (${searchId}) source decoded: ${decodedSource}`
+      `[${getSearchParser.name}] (${searchId}) source decoded: ${decodedSource}`
     );
     source = decodedSource;
   }
@@ -29,24 +29,24 @@ export const getSearchService = async (link?: string, searchId?: string) => {
   const spotifyId = source!.match(SPOTIFY_LINK_REGEX)?.[3];
   if (spotifyId) {
     id = spotifyId;
-    type = ServiceType.Spotify;
+    type = Adapter.Spotify;
   }
 
   const youtubeId = source!.match(YOUTUBE_LINK_REGEX)?.[1];
   if (youtubeId) {
     id = youtubeId;
-    type = ServiceType.YouTube;
+    type = Adapter.YouTube;
   }
 
   if (!id || !type) {
     throw new ParseError('Service id could not be extracted from source.');
   }
 
-  const searchService = {
+  const searchParser = {
     id,
     type,
     source,
-  } as SearchService;
+  } as SearchParser;
 
-  return searchService;
+  return searchParser;
 };
