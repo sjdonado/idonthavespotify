@@ -67,8 +67,10 @@ export default class HttpClient {
 
       return data as T;
     } catch (err) {
-      logger.error(`[${HttpClient.request.name}] Request failed.`);
-      logger.error(err);
+      logger.error(
+        `[${HttpClient.request.name}] Request failed ${(err as Error).message}`
+      );
+      logger.debug(err);
       throw err;
     }
   }
