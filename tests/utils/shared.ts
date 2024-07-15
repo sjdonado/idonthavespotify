@@ -58,7 +58,7 @@ export const getYouTubeSearchLink = (query: string, type: string) => {
     q: `${query} ${type}`,
   });
 
-  const url = new URL(ENV.services.youTube.musicUrl);
+  const url = new URL(ENV.adapters.youTube.musicUrl);
   url.search = params.toString();
 
   return url.toString();
@@ -67,7 +67,7 @@ export const getYouTubeSearchLink = (query: string, type: string) => {
 export const getAppleMusicSearchLink = (query: string) => {
   const params = `?term=${encodeURIComponent(query)}`;
 
-  const url = new URL(`${ENV.services.appleMusic.apiUrl}/search${params}`);
+  const url = new URL(`${ENV.adapters.appleMusic.apiUrl}/search${params}`);
   url.search = params.toString();
 
   return url.toString();
@@ -79,7 +79,7 @@ export const getDeezerSearchLink = (query: string, type: string) => {
     limit: '1',
   });
 
-  const url = new URL(`${ENV.services.deezer.apiUrl}/${type}`);
+  const url = new URL(`${ENV.adapters.deezer.apiUrl}/${type}`);
   url.search = params.toString();
 
   return url.toString();
@@ -90,7 +90,7 @@ export const getSoundCloudSearchLink = (query: string) => {
     q: query,
   });
 
-  const url = new URL(`${ENV.services.soundCloud.baseUrl}/search`);
+  const url = new URL(`${ENV.adapters.soundCloud.baseUrl}/search`);
   url.search = params.toString();
 
   return url.toString();

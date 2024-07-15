@@ -1,6 +1,7 @@
 import { Elysia } from 'elysia';
 
 import { logger } from '~/utils/logger';
+import { Adapter } from '~/config/enum';
 
 import { apiVersionValidator, searchPayloadValidator } from '~/validations/search';
 
@@ -18,8 +19,8 @@ export const apiRouter = new Elysia().group('/api', app =>
     })
     .post(
       '/search',
-      async ({ body: { link } }) => {
-        const searchResult = await search(link);
+      async ({ body: { link, adapters } }) => {
+        const searchResult = await search({ link, adapters: adapters as Adapter[] });
 
         return searchResult;
       },

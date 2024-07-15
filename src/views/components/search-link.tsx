@@ -1,34 +1,34 @@
-import { ServiceType } from '~/config/enum';
+import { Adapter } from '~/config/enum';
 
 const SEARCH_LINK_DICT = {
-  [ServiceType.Spotify]: {
+  [Adapter.Spotify]: {
     icon: 'fab fa-spotify',
     label: 'Listen on Spotify',
   },
-  [ServiceType.YouTube]: {
+  [Adapter.YouTube]: {
     icon: 'fab fa-youtube',
     label: 'Listen on YouTube Music',
   },
-  [ServiceType.Deezer]: {
+  [Adapter.Deezer]: {
     icon: 'fab fa-deezer',
     label: 'Listen on Deezer',
   },
-  [ServiceType.AppleMusic]: {
+  [Adapter.AppleMusic]: {
     icon: 'fab fa-apple',
     label: 'Listen on Apple Music',
   },
-  [ServiceType.Tidal]: {
+  [Adapter.Tidal]: {
     icon: 'fa fa-music',
     label: 'Listen on Tidal',
   },
-  [ServiceType.SoundCloud]: {
+  [Adapter.SoundCloud]: {
     icon: 'fab fa-soundcloud',
     label: 'Listen on SoundCloud',
   },
 };
 
 export default function SearchLink(props: {
-  type: ServiceType;
+  type: Adapter;
   url: string;
   isVerified?: boolean;
 }) {

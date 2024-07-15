@@ -1,5 +1,5 @@
 import { ENV } from '~/config/env';
-import { MetadataType, ServiceType } from '~/config/enum';
+import { MetadataType, Adapter } from '~/config/enum';
 import { RESPONSE_COMPARE_MIN_SCORE } from '~/config/constants';
 
 import HttpClient from '~/utils/http-client';
@@ -31,7 +31,7 @@ export async function getAppleMusicLink(query: string, metadata: SearchMetadata)
   // apple music does not support x-www-form-urlencoded encoding
   const params = `term=${encodeURIComponent(query)}`;
 
-  const url = new URL(`${ENV.services.appleMusic.apiUrl}/search?${params}`);
+  const url = new URL(`${ENV.adapters.appleMusic.apiUrl}/search?${params}`);
 
   const cache = await getCachedSearchResultLink(url);
   if (cache) {
@@ -50,7 +50,7 @@ export async function getAppleMusicLink(query: string, metadata: SearchMetadata)
     const { href, score } = getResultWithBestScore(doc, listElements, query);
 
     const searchResultLink = {
-      type: ServiceType.AppleMusic,
+      type: Adapter.AppleMusic,
       url: href,
       isVerified: score > RESPONSE_COMPARE_MIN_SCORE,
     } as SearchResultLink;

@@ -6,7 +6,7 @@ import { formDataRequest } from '../utils/request';
 
 import { app } from '~/index';
 
-import { MetadataType, ServiceType } from '~/config/enum';
+import { MetadataType, Adapter } from '~/config/enum';
 
 import {
   cacheSearchMetadata,
@@ -69,7 +69,7 @@ describe('Page router', () => {
         cacheSearchResultLink(
           new URL('https://music.youtube.com/search?q=Do+Not+Disturb+Drake+song'),
           {
-            type: ServiceType.YouTube,
+            type: Adapter.YouTube,
             url: 'https://music.youtube.com/watch?v=zhY_0DoQCQs',
             isVerified: true,
           }
@@ -77,7 +77,7 @@ describe('Page router', () => {
         cacheSearchResultLink(
           new URL('https://music.apple.com/ca/search?term=Do%20Not%20Disturb%20Drake'),
           {
-            type: ServiceType.AppleMusic,
+            type: Adapter.AppleMusic,
             url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
             isVerified: true,
           }
@@ -85,7 +85,7 @@ describe('Page router', () => {
         cacheSearchResultLink(
           new URL('https://api.deezer.com/search/track?q=Do+Not+Disturb+Drake&limit=1'),
           {
-            type: ServiceType.Deezer,
+            type: Adapter.Deezer,
             url: 'https://www.deezer.com/track/144572248',
             isVerified: true,
           }
@@ -93,7 +93,7 @@ describe('Page router', () => {
         cacheSearchResultLink(
           new URL('https://soundcloud.com/search?q=Do+Not+Disturb+Drake'),
           {
-            type: ServiceType.SoundCloud,
+            type: Adapter.SoundCloud,
             url: 'https://soundcloud.com/octobersveryown/drake-do-not-disturb',
             isVerified: true,
           }
@@ -166,9 +166,9 @@ describe('Page router', () => {
     });
 
     it('should return error message when internal server error', async () => {
-      const getSearchServiceMock = spyOn(linkParser, 'getSearchService');
+      const getSearchParserMock = spyOn(linkParser, 'getSearchParser');
 
-      getSearchServiceMock.mockImplementationOnce(() => {
+      getSearchParserMock.mockImplementationOnce(() => {
         throw new Error('Injected Error');
       });
 
@@ -180,7 +180,7 @@ describe('Page router', () => {
       const errorMessage = doc('p').text();
       expect(errorMessage).toContain('Something went wrong, try again later.');
 
-      expect(getSearchServiceMock).toHaveBeenCalledTimes(1);
+      expect(getSearchParserMock).toHaveBeenCalledTimes(1);
     });
   });
 });

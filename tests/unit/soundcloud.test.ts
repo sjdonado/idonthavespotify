@@ -3,7 +3,7 @@ import { beforeAll, afterEach, describe, expect, it } from 'bun:test';
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
-import { MetadataType, ServiceType } from '~/config/enum';
+import { MetadataType, Adapter } from '~/config/enum';
 import { getSoundCloudLink } from '~/adapters/soundcloud';
 import { SearchMetadata } from '~/services/search';
 
@@ -35,7 +35,7 @@ describe('Adapter - SoundCloud', () => {
     } as SearchMetadata);
 
     expect(soundCloudLink).toEqual({
-      type: ServiceType.SoundCloud,
+      type: Adapter.SoundCloud,
       url: 'https://soundcloud.com/octobersveryown/drake-do-not-disturb',
       isVerified: true,
     });

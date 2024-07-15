@@ -1,9 +1,9 @@
 import { ENV } from '~/config/env';
-import { MetadataType, ServiceType } from '~/config/enum';
+import { MetadataType, Adapter } from '~/config/enum';
 
 import { logger } from '~/utils/logger';
 
-import { getSearchService } from '~/parsers/link';
+import { getSearchParser } from '~/parsers/link';
 import { getSpotifyMetadata, getSpotifyQueryFromMetadata } from '~/parsers/spotify';
 import { getYouTubeMetadata, getYouTubeQueryFromMetadata } from '~/parsers/youtube';
 
@@ -25,7 +25,7 @@ export type SearchMetadata = {
 };
 
 export type SearchResultLink = {
-  type: ServiceType;
+  type: Adapter;
   url: string;
   isVerified?: boolean;
 };
@@ -42,18 +42,35 @@ export type SearchResult = {
   links: SearchResultLink[];
 };
 
-export const search = async (link?: string, searchId?: string) => {
-  const searchService = await getSearchService(link, searchId);
+export const search = async ({
+  link,
+  searchId,
+  adapters,
+}: {
+  link?: string;
+  searchId?: string;
+  adapters?: Adapter[];
+}) => {
+  const searchAdapters = adapters ?? [
+    Adapter.Spotify,
+    Adapter.YouTube,
+    Adapter.AppleMusic,
+    Adapter.Deezer,
+    Adapter.SoundCloud,
+    Adapter.Tidal,
+  ];
+
+  const searchParser = await getSearchParser(link, searchId);
 
   let metadata, query;
 
-  if (searchService.type === ServiceType.Spotify) {
-    metadata = await getSpotifyMetadata(searchService.id, link!);
+  if (searchParser.type === Adapter.Spotify) {
+    metadata = await getSpotifyMetadata(searchParser.id, link!);
     query = getSpotifyQueryFromMetadata(metadata);
   }
 
-  if (searchService.type === ServiceType.YouTube) {
-    metadata = await getYouTubeMetadata(searchService.id, link!);
+  if (searchParser.type === Adapter.YouTube) {
+    metadata = await getYouTubeMetadata(searchParser.id, link!);
     query = getYouTubeQueryFromMetadata(metadata);
   }
 
@@ -62,32 +79,62 @@ export const search = async (link?: string, searchId?: string) => {
   }
 
   logger.info(
-    `[${search.name}] (params) ${JSON.stringify({ searchService, metadata, query }, null, 2)}`
+    `[${search.name}] (params) ${JSON.stringify({ searchParser, metadata, query }, null, 2)}`
   );
 
-  const id = generateId(searchService.source);
-  const universalLinkPromise = shortenLink(`${ENV.app.url}?id=${id}`);
+  const id = generateId(searchParser.source);
+  const universalLink = `${ENV.app.url}?id=${id}`;
+
+  if (searchAdapters.length === 1 && searchAdapters[0] === searchParser.type) {
+    logger.info(`[${search.name}] early return - adapter is equal to parser type`);
+
+    return {
+      id,
+      type: metadata.type,
+      title: metadata.title,
+      description: metadata.description,
+      image: metadata.image,
+      audio: metadata.audio,
+      source: searchParser.source,
+      universalLink,
+      links: [
+        {
+          type: searchParser.type,
+          url: link,
+          isVerified: true,
+        },
+      ],
+    };
+  }
 
   const searchResultsPromise = Promise.all([
-    searchService.type !== ServiceType.Spotify ? getSpotifyLink(query, metadata) : null,
-    searchService.type !== ServiceType.YouTube ? getYouTubeLink(query, metadata) : null,
-    getAppleMusicLink(query, metadata),
-    getDeezerLink(query, metadata),
-    getSoundCloudLink(query, metadata),
+    searchAdapters.includes(Adapter.Spotify) && searchParser.type !== Adapter.Spotify
+      ? getSpotifyLink(query, metadata)
+      : null,
+    searchAdapters.includes(Adapter.YouTube) && searchParser.type !== Adapter.YouTube
+      ? getYouTubeLink(query, metadata)
+      : null,
+    searchAdapters.includes(Adapter.AppleMusic)
+      ? getAppleMusicLink(query, metadata)
+      : null,
+    searchAdapters.includes(Adapter.Deezer) ? getDeezerLink(query, metadata) : null,
+    searchAdapters.includes(Adapter.SoundCloud)
+      ? getSoundCloudLink(query, metadata)
+      : null,
   ]);
 
-  const [searchResults, universalLink] = await Promise.all([
+  const [searchResults, shortLink] = await Promise.all([
     searchResultsPromise,
-    universalLinkPromise,
+    shortenLink(`${ENV.app.url}?id=${id}`),
   ]);
 
   const links = searchResults.filter(Boolean);
 
   logger.info(`[${search.name}] (results) ${JSON.stringify(links, null, 2)}`);
 
-  // add no-verified links if at least one link is verified
-  const tidalLink = getTidalLink(query);
-  if (links.some(link => link?.isVerified)) {
+  // Add Tidal link if at least one link is verified and Tidal is included in the adapters
+  if (links.some(link => link?.isVerified) && searchAdapters.includes(Adapter.Tidal)) {
+    const tidalLink = getTidalLink(query);
     links.push(tidalLink);
   }
 
@@ -98,8 +145,8 @@ export const search = async (link?: string, searchId?: string) => {
     description: metadata.description,
     image: metadata.image,
     audio: metadata.audio,
-    source: searchService.source,
-    universalLink,
+    source: searchParser.source,
+    universalLink: shortLink,
     links: links as SearchResultLink[],
   };
 

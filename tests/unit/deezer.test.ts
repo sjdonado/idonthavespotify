@@ -3,7 +3,7 @@ import { beforeAll, afterEach, describe, expect, it } from 'bun:test';
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
-import { MetadataType, ServiceType } from '~/config/enum';
+import { MetadataType, Adapter } from '~/config/enum';
 import { getDeezerLink } from '~/adapters/deezer';
 import { SearchMetadata } from '~/services/search';
 
@@ -33,7 +33,7 @@ describe('Adapter - Deezer', () => {
     } as SearchMetadata);
 
     expect(deezerLink).toEqual({
-      type: ServiceType.Deezer,
+      type: Adapter.Deezer,
       url: 'https://www.deezer.com/track/144572248',
       isVerified: true,
     });

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, mock, jest } from 'bun:test';
 
-import { MetadataType, ServiceType } from '~/config/enum';
+import { MetadataType, Adapter } from '~/config/enum';
 import { getYouTubeLink } from '~/adapters/youtube';
 import { getLinkWithPuppeteer } from '~/utils/scraper';
 import { SearchMetadata } from '~/services/search';
@@ -31,7 +31,7 @@ describe('Adapter - YouTube', () => {
     } as SearchMetadata);
 
     expect(youTubeLink).toEqual({
-      type: ServiceType.YouTube,
+      type: Adapter.YouTube,
       url: mockedYoutubeLink,
       isVerified: true,
     });

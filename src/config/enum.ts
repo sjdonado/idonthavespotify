@@ -1,4 +1,4 @@
-export enum ServiceType {
+export enum Adapter {
   Spotify = 'spotify',
   YouTube = 'youTube',
   AppleMusic = 'appleMusic',

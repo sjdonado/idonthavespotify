@@ -33,5 +33,9 @@ export function getResultWithBestScore(
     }
   });
 
+  if (resultWithBestScore.href === '') {
+    throw new Error(`Result with best score not found for: ${query}`);
+  }
+
   return resultWithBestScore;
 }
