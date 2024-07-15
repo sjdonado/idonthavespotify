@@ -1,9 +1,9 @@
 import { ENV } from '~/config/env';
-import { MetadataType, ServiceType } from '~/config/enum';
+import { MetadataType, Adapter } from '~/config/enum';
 
 import { logger } from '~/utils/logger';
 
-import { getSearchService } from '~/parsers/link';
+import { getSearchParser } from '~/parsers/link';
 import { getSpotifyMetadata, getSpotifyQueryFromMetadata } from '~/parsers/spotify';
 import { getYouTubeMetadata, getYouTubeQueryFromMetadata } from '~/parsers/youtube';
 
@@ -25,7 +25,7 @@ export type SearchMetadata = {
 };
 
 export type SearchResultLink = {
-  type: ServiceType;
+  type: Adapter;
   url: string;
   isVerified?: boolean;
 };
@@ -42,18 +42,26 @@ export type SearchResult = {
   links: SearchResultLink[];
 };
 
-export const search = async (link?: string, searchId?: string) => {
-  const searchService = await getSearchService(link, searchId);
+export const search = async ({
+  link,
+  searchId,
+  adapters,
+}: {
+  link?: string;
+  searchId?: string;
+  adapters?: Adapter[];
+}) => {
+  const searchParser = await getSearchParser(link, searchId);
 
   let metadata, query;
 
-  if (searchService.type === ServiceType.Spotify) {
-    metadata = await getSpotifyMetadata(searchService.id, link!);
+  if (searchParser.type === Adapter.Spotify) {
+    metadata = await getSpotifyMetadata(searchParser.id, link!);
     query = getSpotifyQueryFromMetadata(metadata);
   }
 
-  if (searchService.type === ServiceType.YouTube) {
-    metadata = await getYouTubeMetadata(searchService.id, link!);
+  if (searchParser.type === Adapter.YouTube) {
+    metadata = await getYouTubeMetadata(searchParser.id, link!);
     query = getYouTubeQueryFromMetadata(metadata);
   }
 
@@ -62,15 +70,15 @@ export const search = async (link?: string, searchId?: string) => {
   }
 
   logger.info(
-    `[${search.name}] (params) ${JSON.stringify({ searchService, metadata, query }, null, 2)}`
+    `[${search.name}] (params) ${JSON.stringify({ searchParser, metadata, query }, null, 2)}`
   );
 
-  const id = generateId(searchService.source);
+  const id = generateId(searchParser.source);
   const universalLinkPromise = shortenLink(`${ENV.app.url}?id=${id}`);
 
   const searchResultsPromise = Promise.all([
-    searchService.type !== ServiceType.Spotify ? getSpotifyLink(query, metadata) : null,
-    searchService.type !== ServiceType.YouTube ? getYouTubeLink(query, metadata) : null,
+    searchParser.type !== Adapter.Spotify ? getSpotifyLink(query, metadata) : null,
+    searchParser.type !== Adapter.YouTube ? getYouTubeLink(query, metadata) : null,
     getAppleMusicLink(query, metadata),
     getDeezerLink(query, metadata),
     getSoundCloudLink(query, metadata),
@@ -98,7 +106,7 @@ export const search = async (link?: string, searchId?: string) => {
     description: metadata.description,
     image: metadata.image,
     audio: metadata.audio,
-    source: searchService.source,
+    source: searchParser.source,
     universalLink,
     links: links as SearchResultLink[],
   };

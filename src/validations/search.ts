@@ -1,5 +1,27 @@
 import { t } from 'elysia';
 import { SPOTIFY_LINK_REGEX, YOUTUBE_LINK_REGEX } from '~/config/constants';
+import { Adapter } from '~/config/enum';
+
+const allowedAdapters = Object.values(Adapter).filter(
+  adapter => adapter !== Adapter.Spotify
+);
+
+const adaptersValidator = t.Union([
+  t.Array(
+    t.String({
+      validate: (value: string) => allowedAdapters.includes(value as Adapter),
+      error: 'Invalid adapter, please use one of the allowed adapters.',
+    }),
+    {
+      error: 'Invalid adapters array, please provide an array of adapter types.',
+    }
+  ),
+  t.String({
+    validate: (value: string) =>
+      value.split(',').every(adapter => allowedAdapters.includes(adapter as Adapter)),
+    error: 'Invalid adapter, please use a comma-separated list of allowed adapters.',
+  }),
+]);
 
 export const searchQueryValidator = t.Object({
   id: t.Optional(t.String({ minLength: 1, error: 'Invalid search id' })),
@@ -11,6 +33,9 @@ export const searchPayloadValidator = t.Object({
     {
       error: 'Invalid link, please try with Spotify or Youtube links.',
     }
+  ),
+  adapters: t.Optional(
+    adaptersValidator.transform((value: string) => value.split(',') as Adapter[])
   ),
 });
 
