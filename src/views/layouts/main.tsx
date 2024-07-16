@@ -62,7 +62,7 @@ export default function MainLayout({
         />
       </head>
 
-      <body class="bg-black font-light text-white">{children}</body>
+      <body class="h-screen bg-black font-light text-white">{children}</body>
 
       <script
         defer
