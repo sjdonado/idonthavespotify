@@ -108,9 +108,7 @@ export const search = async ({
   }
 
   const searchResultsPromise = Promise.all([
-    searchAdapters.includes(Adapter.Spotify) && searchParser.type !== Adapter.Spotify
-      ? getSpotifyLink(query, metadata)
-      : null,
+    searchParser.type !== Adapter.Spotify ? getSpotifyLink(query, metadata) : null,
     searchAdapters.includes(Adapter.YouTube) && searchParser.type !== Adapter.YouTube
       ? getYouTubeLink(query, metadata)
       : null,
@@ -127,6 +125,17 @@ export const search = async ({
     searchResultsPromise,
     shortenLink(`${ENV.app.url}?id=${id}`),
   ]);
+
+  if (searchParser.type !== Adapter.Spotify) {
+    const spotifySearchResult = searchResults.find(
+      searchResult => searchResult?.type === Adapter.Spotify
+    );
+
+    if (!spotifySearchResult) return;
+
+    const spotifySearchParser = await getSearchParser(spotifySearchResult.url);
+    metadata = await getSpotifyMetadata(spotifySearchParser.id, spotifySearchResult.url);
+  }
 
   const links = searchResults.filter(Boolean);
 
