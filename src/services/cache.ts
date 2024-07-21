@@ -1,22 +1,21 @@
-const sqliteStore = require('cache-manager-sqlite');
-const cacheManager = require('cache-manager');
+import { caching } from 'cache-manager';
+import bunSqliteStore from 'cache-manager-bun-sqlite3';
 
 import { ENV } from '~/config/env';
 import { SearchMetadata, SearchResultLink } from './search';
 
-export const cacheStore = cacheManager.caching({
-  store: sqliteStore,
+export const cacheStore = await caching(bunSqliteStore, {
   name: 'cache',
   path: ENV.cache.databasePath,
+  ttl: ENV.cache.expTime,
+  serializer: 'json',
 });
 
 export const cacheSearchResultLink = async (
   url: URL,
   searchResultLink: SearchResultLink
 ) => {
-  await cacheStore.set(`search:${url.toString()}`, searchResultLink, {
-    ttl: ENV.cache.expTime,
-  });
+  await cacheStore.set(`search:${url.toString()}`, searchResultLink);
 };
 
 export const getCachedSearchResultLink = async (url: URL) => {
@@ -26,9 +25,7 @@ export const getCachedSearchResultLink = async (url: URL) => {
 };
 
 export const cacheSearchMetadata = async (id: string, searchMetadata: SearchMetadata) => {
-  await cacheStore.set(`metadata:${id}`, searchMetadata, {
-    ttl: ENV.cache.expTime,
-  });
+  await cacheStore.set(`metadata:${id}`, searchMetadata);
 };
 
 export const getCachedSearchMetadata = async (id: string) => {
@@ -38,9 +35,7 @@ export const getCachedSearchMetadata = async (id: string) => {
 };
 
 export const cacheSpotifyAccessToken = async (accessToken: string, expTime: number) => {
-  await cacheStore.set('spotify:accessToken', accessToken, {
-    ttl: expTime,
-  });
+  await cacheStore.set('spotify:accessToken', accessToken, expTime);
 };
 
 export const getCachedSpotifyAccessToken = async () => {
@@ -48,9 +43,7 @@ export const getCachedSpotifyAccessToken = async () => {
 };
 
 export const cacheShortenLink = async (link: string, refer: string) => {
-  await cacheStore.set(`url-shortener:${link}`, refer, {
-    ttl: ENV.cache.expTime,
-  });
+  await cacheStore.set(`url-shortener:${link}`, refer);
 };
 
 export const getCachedShortenLink = async (link: string) => {

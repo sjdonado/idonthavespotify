@@ -29,7 +29,6 @@ const SEARCH_LINK_DICT = {
 };
 
 export default function SearchCard(props: { searchResult: SearchResult }) {
-  console.log('searchResult', props.searchResult);
   return (
     <div
       data-controller="search-card"

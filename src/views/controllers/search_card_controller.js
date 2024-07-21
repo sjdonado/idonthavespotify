@@ -42,24 +42,24 @@ export default class extends Controller {
   }
 
   toggleAudio() {
+    this.updateAudioPreviewIcon();
+
     if (this.soundPlayer.playing()) {
       this.soundPlayer.pause();
     } else {
       this.soundPlayer.play();
     }
-
-    this.updateAudioPreviewIcon();
   }
 
   updateAudioPreviewIcon() {
     const iconElement = this.iconTarget;
 
     if (this.soundPlayer.playing()) {
-      iconElement.classList.remove('fa-play');
-      iconElement.classList.add('fa-pause');
-    } else {
       iconElement.classList.remove('fa-pause');
       iconElement.classList.add('fa-play');
+    } else {
+      iconElement.classList.remove('fa-play');
+      iconElement.classList.add('fa-pause');
     }
   }
 }
