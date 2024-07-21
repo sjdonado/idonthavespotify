@@ -28,7 +28,7 @@ export default function Home({
             hx-target="#search-results"
             hx-swap="innerHTML"
             hx-indicator="#loading-indicator"
-            hx-request='\"timeout\":6000'
+            hx-request='\"timeout\":8000'
             class="flex w-full max-w-3xl items-center justify-center px-2"
           >
             <label for="song-link" class="sr-only">
@@ -39,7 +39,7 @@ export default function Home({
               data-search-target="link"
               type="text"
               name="link"
-              class="flex-1 rounded-lg border bg-white p-2.5 text-sm font-normal text-black placeholder:text-gray-400 lg:text-base"
+              class="flex-1 rounded-lg border bg-white p-2.5 font-normal text-black placeholder:text-gray-400"
               placeholder="https://open.spotify.com/track/7A8MwSsu9efJXP6xvZfRN3?si=d4f1e2eb324c43df"
               value={source}
             />

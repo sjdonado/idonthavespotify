@@ -5,16 +5,26 @@ import { copyToClipboard } from './helpers';
 
 export default class extends Controller {
   static values = { id: String, universalLink: String, audio: String };
-  static targets = ['icon'];
+  static targets = ['icon', 'audioProgress'];
 
   async connect() {
     this.soundPlayer = new Howl({
       src: [this.audioValue],
       html5: true,
       volume: 0.7,
-      onend: function () {
-        this.updateAudioPreviewIcon();
-      },
+    });
+
+    this.soundPlayer.on('end', () => {
+      this.resetProgressBar();
+      this.updateAudioPreviewIcon(true);
+    });
+
+    this.soundPlayer.on('play', () => {
+      this.startAudioProgress();
+    });
+
+    this.soundPlayer.on('pause', () => {
+      this.stopProgressUpdate();
     });
   }
 
@@ -42,19 +52,36 @@ export default class extends Controller {
   }
 
   toggleAudio() {
-    this.updateAudioPreviewIcon();
-
-    if (this.soundPlayer.playing()) {
+    const isPlaying = this.soundPlayer.playing();
+    if (isPlaying) {
       this.soundPlayer.pause();
     } else {
       this.soundPlayer.play();
     }
+    this.updateAudioPreviewIcon(isPlaying);
   }
 
-  updateAudioPreviewIcon() {
-    const iconElement = this.iconTarget;
+  startAudioProgress() {
+    this.audioProgressInterval = setInterval(() => {
+      const duration = this.soundPlayer.duration();
+      const seek = this.soundPlayer.seek();
+      const progress = (seek / duration) * 100;
+      this.audioProgressTarget.style.width = `${progress}%`;
+    }, 10);
+  }
 
-    if (this.soundPlayer.playing()) {
+  stopProgressUpdate() {
+    clearInterval(this.audioProgressInterval);
+  }
+
+  resetProgressBar() {
+    clearInterval(this.audioProgressInterval);
+    this.audioProgressTarget.style.width = '0%';
+  }
+
+  updateAudioPreviewIcon(playing) {
+    const iconElement = this.iconTarget;
+    if (playing) {
       iconElement.classList.remove('fa-pause');
       iconElement.classList.add('fa-play');
     } else {

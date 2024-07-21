@@ -52,10 +52,17 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
             <button
               data-action="search-card#toggleAudio"
               type="button"
-              class="flex items-center justify-center gap-2 rounded-lg bg-zinc-700 px-3 py-1 text-sm font-semibold"
+              class="relative flex items-center justify-center gap-2 rounded-lg bg-zinc-700 px-3 py-1 text-sm font-semibold"
             >
-              <i data-search-card-target="icon" class="fas fa-play" />
+              <i data-search-card-target="icon" class="fas fa-play w-3" />
               Audio Preview
+              <div className="absolute bottom-0 left-0 mx-[0.3rem] my-[0.01rem] h-[0.15rem] w-[93%] rounded-lg bg-zinc-600">
+                <div
+                  data-search-card-target="audioProgress"
+                  class="h-full rounded-lg bg-white"
+                  style={{ width: '0%' }}
+                ></div>
+              </div>
             </button>
             <button
               data-action="search-card#share"
@@ -105,7 +112,7 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
                     )}
                   </a>
                   <button type="button" data-action="search-link#share">
-                    <i class="fa fa-regular fa-copy" />
+                    <i class="fa fa-regular fa-copy px-2" />
                   </button>
                 </li>
               );
