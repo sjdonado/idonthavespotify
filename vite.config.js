@@ -25,7 +25,7 @@ export default defineConfig({
     target: 'esnext',
     rollupOptions: {
       input: {
-        'assets/app': './src/views/app.js',
+        'assets/app': './src/views/controllers/index.js',
         'assets/index': './src/views/css/index.css',
       },
       output: {

@@ -7,7 +7,19 @@ registerControllers(application, controllers);
 
 // helpers
 document.addEventListener('DOMContentLoaded', () => {
-  window.copyLinkToClipboard = async link => {
+  window.toast = new Notyf({
+    riple: false,
+    dismissible: true,
+    duration: 2000,
+    types: [
+      {
+        type: 'success',
+        background: 'black',
+      },
+    ],
+  });
+
+  window.copyToClipboard = async link => {
     // Older browser fallback
     if (!navigator.clipboard) {
       const textArea = document.createElement('textarea');
@@ -22,16 +34,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.toast.success('Link copied to clipboard!');
   };
-
-  window.toast = new Notyf({
-    riple: false,
-    dismissible: true,
-    duration: 2000,
-    types: [
-      {
-        type: 'success',
-        background: 'black',
-      },
-    ],
-  });
 });

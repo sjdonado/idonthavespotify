@@ -28,63 +28,30 @@ const SEARCH_LINK_DICT = {
   },
 };
 
-function SearchLink(props: { type: Adapter; url: string; isVerified?: boolean }) {
-  const searchResult = SEARCH_LINK_DICT[props.type];
-
-  return (
-    <li class="flex items-center justify-between gap-1 rounded-lg p-2 text-sm hover:bg-zinc-700 sm:text-base">
-      <a
-        href={props.url}
-        target="_blank"
-        rel="noreferrer"
-        aria-label={searchResult.label}
-        class="flex items-center"
-      >
-        <i class={`${searchResult.icon} w-8`} />
-        <p class="underline decoration-0 underline-offset-2">{searchResult.label}</p>
-        {props.isVerified && (
-          <span
-            class="ml-1 inline-flex items-center justify-center rounded-full bg-green-500 p-1 text-[0.56rem]"
-            aria-label="Verified"
-          >
-            <i class="fas fa-check" />
-          </span>
-        )}
-      </a>
-      <button type="button" onclick={`copyLinkToClipboard('${props.url}')`}>
-        <i class="fa fa-regular fa-copy" />
-      </button>
-    </li>
-  );
-}
-
 export default function SearchCard(props: { searchResult: SearchResult }) {
   return (
     <div
       data-controller="search-card"
-      data-search-card-universal-link={props.searchResult.universalLink}
-      data-search-card-id={props.searchResult.id}
-      class="relative m-4 flex flex-wrap items-start justify-center gap-4 rounded-lg shadow-lg md:p-4"
+      data-search-card-universal-link-value={props.searchResult.universalLink}
+      data-search-card-id-value={props.searchResult.id}
+      class="relative m-4 flex max-w-3xl flex-wrap items-start justify-center gap-4 rounded-lg shadow-lg md:p-4"
     >
       <div class="flex w-full items-center justify-start gap-4">
         <img
-          class="w-28 rounded-lg"
+          class="w-24 rounded-lg md:w-28"
           src={props.searchResult.image}
           alt={props.searchResult.title}
         />
         <div class="flex flex-col gap-1">
-          <h3 class="hyphens-auto text-center text-2xl font-normal md:text-start">
+          <h3 class="hyphens-auto text-center text-lg font-normal md:text-start md:text-2xl">
             {props.searchResult.title}
           </h3>
-          <p class="text-center text-sm text-zinc-400 md:text-start">
-            {props.searchResult.description}
-          </p>
+          <p class="text-sm text-zinc-400">{props.searchResult.description}</p>
           <div class="mt-2 flex">
             <button
+              data-action="search-card#share"
               type="button"
               class="flex items-center justify-center gap-2 rounded-lg bg-zinc-700 px-3 py-1 text-sm font-semibold"
-              data-action="search-card#shareLink"
-              // onclick={`shareLink('${props.searchResult.universalLink}')`}
             >
               <i class="fas fa-arrow-up-from-bracket" />
               Share
@@ -100,9 +67,40 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
         )}
         {props.searchResult.links.length > 0 && (
           <ul class="w-full">
-            {props.searchResult.links.map(({ type, url, isVerified }) => (
-              <SearchLink type={type} url={url} isVerified={isVerified} />
-            ))}
+            {props.searchResult.links.map(({ type, url, isVerified }) => {
+              const searchResult = SEARCH_LINK_DICT[type];
+              return (
+                <li
+                  data-controller="search-link"
+                  data-search-link-url-value={url}
+                  class="flex items-center justify-between gap-1 rounded-lg p-2 hover:bg-zinc-700"
+                >
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={searchResult.label}
+                    class="flex items-center"
+                  >
+                    <i class={`${searchResult.icon} w-8`} />
+                    <p class="underline decoration-0 underline-offset-2">
+                      {searchResult.label}
+                    </p>
+                    {isVerified && (
+                      <span
+                        class="ml-1 inline-flex items-center justify-center rounded-full bg-green-500 p-1 text-[0.56rem]"
+                        aria-label="Verified"
+                      >
+                        <i class="fas fa-check" />
+                      </span>
+                    )}
+                  </a>
+                  <button type="button" data-action="search-link#share">
+                    <i class="fa fa-regular fa-copy" />
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>

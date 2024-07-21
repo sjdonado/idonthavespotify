@@ -1,9 +1,9 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-  static values = { universalLink: String };
+  static values = { id: String, universalLink: String };
 
-  async shareLink() {
+  async share() {
     const universalLink = this.universalLinkValue;
 
     if (!universalLink) {
@@ -20,7 +20,7 @@ export default class extends Controller {
         return;
       }
 
-      await window.copyLinkToClipboard(universalLink);
+      await window.copyToClipboard(universalLink);
     } catch (err) {
       console.error(err);
     }
