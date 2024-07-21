@@ -1,6 +1,5 @@
 import { Controller } from '@hotwired/stimulus';
 import { Howl } from 'howler';
-
 import { copyToClipboard } from './helpers';
 
 export default class extends Controller {
@@ -28,6 +27,9 @@ export default class extends Controller {
     });
   }
 
+  /**
+   * Shares the universal link using the Web Share API or copies it to the clipboard.
+   */
   async share() {
     const universalLink = this.universalLinkValue;
 
@@ -51,6 +53,9 @@ export default class extends Controller {
     }
   }
 
+  /**
+   * Toggles the audio playback state and updates the play/pause icon.
+   */
   toggleAudio() {
     const isPlaying = this.soundPlayer.playing();
     if (isPlaying) {
@@ -61,6 +66,9 @@ export default class extends Controller {
     this.updateAudioPreviewIcon(isPlaying);
   }
 
+  /**
+   * Starts updating the audio progress bar.
+   */
   startAudioProgress() {
     this.audioProgressInterval = setInterval(() => {
       const duration = this.soundPlayer.duration();
@@ -70,15 +78,25 @@ export default class extends Controller {
     }, 10);
   }
 
+  /**
+   * Stops updating the audio progress bar.
+   */
   stopProgressUpdate() {
     clearInterval(this.audioProgressInterval);
   }
 
+  /**
+   * Resets the audio progress bar.
+   */
   resetProgressBar() {
     clearInterval(this.audioProgressInterval);
     this.audioProgressTarget.style.width = '0%';
   }
 
+  /**
+   * Updates the audio preview icon based on the playback state.
+   * @param {boolean} playing - Indicates if the audio is currently playing.
+   */
   updateAudioPreviewIcon(playing) {
     const iconElement = this.iconTarget;
     if (playing) {

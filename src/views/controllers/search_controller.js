@@ -29,6 +29,12 @@ export default class extends Controller {
     });
   }
 
+  /**
+   * Submits the form using a link obtained from the clipboard if it matches
+   * specific patterns and no search ID is present in the URL.
+   *
+   * @returns {Promise<void>}
+   */
   async submitFromClipboard() {
     if ('clipboard' in navigator) {
       const searchParams = new URLSearchParams(window.location.search);
