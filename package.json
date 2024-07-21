@@ -17,6 +17,7 @@
     "cache-manager-sqlite": "^0.2.0",
     "cheerio": "^1.0.0-rc.12",
     "elysia": "^1.0.14",
+    "notyf": "^3.10.0",
     "pino": "^8.20.0",
     "pino-pretty": "^11.0.0",
     "puppeteer": "^22.7.0",

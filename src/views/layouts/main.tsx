@@ -70,7 +70,6 @@ export default function MainLayout({
         crossorigin="anonymous"
       />
 
-      <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js" defer />
       <script src="assets/app.js" />
     </html>
   );

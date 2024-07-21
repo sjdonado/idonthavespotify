@@ -1,5 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 
+import { copyToClipboard } from './shared';
+
 export default class extends Controller {
   static values = { id: String, universalLink: String };
 
@@ -20,7 +22,7 @@ export default class extends Controller {
         return;
       }
 
-      await window.copyToClipboard(universalLink);
+      await copyToClipboard(universalLink);
     } catch (err) {
       console.error(err);
     }

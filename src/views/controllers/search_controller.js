@@ -1,5 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 
+import { toast } from './shared';
+
 import { SPOTIFY_LINK_REGEX, YOUTUBE_LINK_REGEX } from '~/config/constants';
 
 export default class extends Controller {
@@ -23,7 +25,7 @@ export default class extends Controller {
     });
 
     document.addEventListener('htmx:timeout', function () {
-      window.toast.error('Something went wrong, please try again later');
+      toast().error('Something went wrong, please try again later.');
     });
   }
 
@@ -43,10 +45,10 @@ export default class extends Controller {
           this.formTarget.submit();
         }
       } catch (error) {
-        window.toast.error('Clipboard access error');
+        toast().error('Clipboard access error');
       }
     } else {
-      window.toast.error('Feature not supported in your browser');
+      toast().error('Feature not supported in your browser');
     }
   }
 }

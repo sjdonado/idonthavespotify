@@ -103,7 +103,7 @@ export const search = async ({
           url: link,
           isVerified: true,
         },
-      ],
+      ] as SearchResultLink[],
     };
   }
 
@@ -131,10 +131,13 @@ export const search = async ({
       searchResult => searchResult?.type === Adapter.Spotify
     );
 
-    if (!spotifySearchResult) return;
-
-    const spotifySearchParser = await getSearchParser(spotifySearchResult.url);
-    metadata = await getSpotifyMetadata(spotifySearchParser.id, spotifySearchResult.url);
+    if (spotifySearchResult) {
+      const spotifySearchParser = await getSearchParser(spotifySearchResult.url);
+      metadata = await getSpotifyMetadata(
+        spotifySearchParser.id,
+        spotifySearchResult.url
+      );
+    }
   }
 
   const links = searchResults.filter(Boolean);

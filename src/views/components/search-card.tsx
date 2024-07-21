@@ -38,7 +38,7 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
     >
       <div class="flex w-full items-center justify-start gap-4">
         <img
-          class="w-24 rounded-lg md:w-28"
+          class="w-24 max-w-24 rounded-lg md:w-28"
           src={props.searchResult.image}
           alt={props.searchResult.title}
         />
