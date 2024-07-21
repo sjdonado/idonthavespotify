@@ -29,11 +29,13 @@ const SEARCH_LINK_DICT = {
 };
 
 export default function SearchCard(props: { searchResult: SearchResult }) {
+  console.log('searchResult', props.searchResult);
   return (
     <div
       data-controller="search-card"
-      data-search-card-universal-link-value={props.searchResult.universalLink}
       data-search-card-id-value={props.searchResult.id}
+      data-search-card-universal-link-value={props.searchResult.universalLink}
+      data-search-card-audio-value={props.searchResult.audio}
       class="relative m-4 flex max-w-3xl flex-wrap items-start justify-center gap-4 rounded-lg shadow-lg md:p-4"
     >
       <div class="flex w-full items-center justify-start gap-4">
@@ -47,7 +49,15 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
             {props.searchResult.title}
           </h3>
           <p class="text-sm text-zinc-400">{props.searchResult.description}</p>
-          <div class="mt-2 flex">
+          <div class="mt-2 flex gap-2">
+            <button
+              data-action="search-card#toggleAudio"
+              type="button"
+              class="flex items-center justify-center gap-2 rounded-lg bg-zinc-700 px-3 py-1 text-sm font-semibold"
+            >
+              <i data-search-card-target="icon" class="fas fa-play" />
+              Audio Preview
+            </button>
             <button
               data-action="search-card#share"
               type="button"

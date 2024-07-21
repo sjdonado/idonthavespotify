@@ -1,6 +1,6 @@
 import { Controller } from '@hotwired/stimulus';
 
-import { toast } from './shared';
+import { toast } from './helpers';
 
 import { SPOTIFY_LINK_REGEX, YOUTUBE_LINK_REGEX } from '~/config/constants';
 

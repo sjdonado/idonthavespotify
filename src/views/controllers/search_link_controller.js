@@ -1,6 +1,6 @@
 import { Controller } from '@hotwired/stimulus';
 
-import { copyToClipboard } from './shared';
+import { copyToClipboard } from './helpers';
 
 export default class extends Controller {
   static values = { url: String };
