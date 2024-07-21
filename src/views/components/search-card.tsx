@@ -61,8 +61,9 @@ function SearchLink(props: { type: Adapter; url: string; isVerified?: boolean })
 export default function SearchCard(props: { searchResult: SearchResult }) {
   return (
     <div
-      id="search-card"
-      data-id={props.searchResult.id}
+      data-controller="search-card"
+      data-search-card-universal-link={props.searchResult.universalLink}
+      data-search-card-id={props.searchResult.id}
       class="relative m-4 flex flex-wrap items-start justify-center gap-4 rounded-lg shadow-lg md:p-4"
     >
       <div class="flex w-full items-center justify-start gap-4">
@@ -82,7 +83,8 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
             <button
               type="button"
               class="flex items-center justify-center gap-2 rounded-lg bg-zinc-700 px-3 py-1 text-sm font-semibold"
-              onclick={`shareLink('${props.searchResult.universalLink}')`}
+              data-action="search-card#shareLink"
+              // onclick={`shareLink('${props.searchResult.universalLink}')`}
             >
               <i class="fas fa-arrow-up-from-bracket" />
               Share

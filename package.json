@@ -10,6 +10,7 @@
   "dependencies": {
     "@elysiajs/html": "^1.0.2",
     "@elysiajs/static": "^1.0.2",
+    "@hotwired/stimulus": "^3.2.2",
     "axios": "^1.6.8",
     "axios-retry": "^4.4.1",
     "cache-manager": "~4.1.0",
@@ -38,6 +39,7 @@
     "postcss": "^8.4.38",
     "prettier": "^3.2.5",
     "rollup-plugin-copy": "^3.5.0",
+    "stimulus-vite-helpers": "^3.1.0",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.5",
     "vite": "^5.2.10"

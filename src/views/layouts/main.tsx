@@ -71,8 +71,7 @@ export default function MainLayout({
       />
 
       <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js" defer />
-
-      <script src="assets/entry.js" />
+      <script src="assets/app.js" />
     </html>
   );
 }
