@@ -53,6 +53,22 @@ window.shareLink = async universalLink => {
     return;
   }
 
+  try {
+    if (navigator.share) {
+      await navigator.share({
+        title: 'Share this universal link',
+        url: universalLink,
+      });
+      return;
+    }
+
+    await copyLinkToClipboard(universalLink);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+window.copyLinkToClipboard = async link => {
   const notyf = new Notyf({
     riple: false,
     dismissible: true,
@@ -65,29 +81,17 @@ window.shareLink = async universalLink => {
     ],
   });
 
-  try {
-    if (navigator.share) {
-      await navigator.share({
-        title: 'Share this universal link',
-        url: universalLink,
-      });
-      return;
-    }
-
-    if (navigator.clipboard) {
-      await navigator.clipboard.writeText(universalLink);
-    } else {
-      // Older browser fallback
-      const textArea = document.createElement('textarea');
-      textArea.value = universalLink;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textArea);
-    }
-
-    notyf.success('Link copied to clipboard!');
-  } catch (err) {
-    console.error(err);
+  // Older browser fallback
+  if (!navigator.clipboard) {
+    const textArea = document.createElement('textarea');
+    textArea.value = link;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+  } else {
+    await navigator.clipboard.writeText(link);
   }
+
+  notyf.success('Link copied to clipboard!');
 };
