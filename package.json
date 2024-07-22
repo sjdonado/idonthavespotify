@@ -1,6 +1,6 @@
 {
   "name": "idonthavespotify",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "scripts": {
     "dev": "concurrently \"bun run build:dev\" \"bun run --watch www/bin.ts\"",
     "build:dev": "vite build --mode=development --watch",

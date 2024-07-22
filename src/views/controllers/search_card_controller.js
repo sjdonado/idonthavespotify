@@ -41,7 +41,7 @@ export default class extends Controller {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: 'Share this universal link',
+          title: 'Share this Universal Link',
           url: universalLink,
         });
         return;
@@ -70,6 +70,7 @@ export default class extends Controller {
    * Starts updating the audio progress bar.
    */
   startAudioProgress() {
+    this.audioProgressTarget.parentNode.classList.remove('hidden');
     this.audioProgressInterval = setInterval(() => {
       const duration = this.soundPlayer.duration();
       const seek = this.soundPlayer.seek();
@@ -91,20 +92,20 @@ export default class extends Controller {
   resetProgressBar() {
     clearInterval(this.audioProgressInterval);
     this.audioProgressTarget.style.width = '0%';
+    this.audioProgressTarget.parentNode.classList.add('hidden');
   }
 
   /**
    * Updates the audio preview icon based on the playback state.
-   * @param {boolean} playing - Indicates if the audio is currently playing.
+   * @param {boolean} isPlaying - Indicates if the audio is currently playing.
    */
-  updateAudioPreviewIcon(playing) {
-    const iconElement = this.iconTarget;
-    if (playing) {
-      iconElement.classList.remove('fa-pause');
-      iconElement.classList.add('fa-play');
+  updateAudioPreviewIcon(isPlaying) {
+    if (isPlaying) {
+      this.iconTarget.classList.remove('fa-pause');
+      this.iconTarget.classList.add('fa-play');
     } else {
-      iconElement.classList.remove('fa-play');
-      iconElement.classList.add('fa-pause');
+      this.iconTarget.classList.remove('fa-play');
+      this.iconTarget.classList.add('fa-pause');
     }
   }
 }
