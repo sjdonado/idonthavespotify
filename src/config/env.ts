@@ -37,7 +37,7 @@ export const ENV = {
     version: version,
   },
   cache: {
-    databasePath: Bun.env.DATABASE_PATH!,
+    databasePath: Bun.env.DATABASE_PATH ?? ':memory:',
     expTime: 60 * 60 * 24 * 7, // 1 week in seconds
   },
 };

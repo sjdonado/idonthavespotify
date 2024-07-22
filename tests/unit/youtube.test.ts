@@ -1,8 +1,9 @@
-import { afterEach, describe, expect, it, mock, jest } from 'bun:test';
+import { afterEach, describe, expect, it, mock, jest, beforeAll } from 'bun:test';
 
 import { MetadataType, Adapter } from '~/config/enum';
 import { getYouTubeLink } from '~/adapters/youtube';
 import { getLinkWithPuppeteer } from '~/utils/scraper';
+import { cacheStore } from '~/services/cache';
 import { SearchMetadata } from '~/services/search';
 
 import { getYouTubeSearchLink } from '../utils/shared';
@@ -13,6 +14,10 @@ mock.module('~/utils/scraper', () => ({
 
 describe('Adapter - YouTube', () => {
   const getLinkWithPuppeteerMock = getLinkWithPuppeteer as jest.Mock;
+
+  beforeAll(() => {
+    cacheStore.reset();
+  });
 
   afterEach(() => {
     getLinkWithPuppeteerMock.mockClear();
