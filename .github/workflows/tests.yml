@@ -6,7 +6,7 @@ on:
 
 env:
   SPOTIFY_AUTH_URL: https://accounts.spotify.com/api/token
-  SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }} 
+  SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
   SPOTIFY_CLIENT_SECRET: ${{ secrets.YOUTUBE_COOKIES }}
   SPOTIFY_CLIENT_VERSION: ${{ secrets.SPOTIFY_CLIENT_VERSION }}
   SPOTIFY_API_URL: https://api.spotify.com/v1/search

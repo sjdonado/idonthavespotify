@@ -1,5 +1,2 @@
 [test]
 coverage = true
-
-[define]
-"process.env.NODE_ENV" = "'test'"

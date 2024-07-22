@@ -65,12 +65,12 @@ export const search = async ({
   let metadata, query;
 
   if (searchParser.type === Adapter.Spotify) {
-    metadata = await getSpotifyMetadata(searchParser.id, link!);
+    metadata = await getSpotifyMetadata(searchParser.id, searchParser.source);
     query = getSpotifyQueryFromMetadata(metadata);
   }
 
   if (searchParser.type === Adapter.YouTube) {
-    metadata = await getYouTubeMetadata(searchParser.id, link!);
+    metadata = await getYouTubeMetadata(searchParser.id, searchParser.source);
     query = getYouTubeQueryFromMetadata(metadata);
   }
 

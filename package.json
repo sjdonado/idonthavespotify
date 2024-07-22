@@ -5,7 +5,7 @@
     "dev": "concurrently \"bun run build:dev\" \"bun run --watch www/bin.ts\"",
     "build:dev": "vite build --mode=development --watch",
     "build": "vite build",
-    "test": "bun test"
+    "test": "NODE_ENV=test bun test"
   },
   "dependencies": {
     "@elysiajs/html": "^1.0.2",
