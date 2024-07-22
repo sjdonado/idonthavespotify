@@ -44,7 +44,7 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
           alt={props.searchResult.title}
         />
         <div class="flex flex-col gap-1">
-          <h3 class="hyphens-auto text-center text-lg font-normal md:text-start md:text-2xl">
+          <h3 class="hyphens-auto text-lg font-normal md:text-start md:text-2xl">
             {props.searchResult.title}
           </h3>
           <p class="text-sm text-zinc-400">{props.searchResult.description}</p>
@@ -75,7 +75,7 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
           </div>
         </div>
       </div>
-      <div class="flex min-h-12 flex-1 flex-col items-start p-2">
+      <div class="mt-2 flex min-h-12 flex-1 flex-col items-start p-2">
         {props.searchResult.links.length === 0 && (
           <p class="w-full text-center text-sm md:text-start">
             Not available on other platforms
