@@ -105,12 +105,12 @@ describe('Page router', () => {
 
       const doc = getCheerioDoc(response);
 
-      const searchCardText = doc('#search-card').text();
+      const searchCardText = doc('[data-controller="search-card"]').text();
 
       expect(searchCardText).toContain('Do Not Disturb');
       expect(searchCardText).toContain('Drake · Song · 2017');
 
-      const searchLinks = doc('#search-card > div.flex-1 > ul > a').toArray();
+      const searchLinks = doc('[data-controller="search-link"] > a').toArray();
 
       expect(searchLinks).toHaveLength(5);
       expect(searchLinks[0].attribs['aria-label']).toContain('Listen on YouTube');
@@ -141,7 +141,7 @@ describe('Page router', () => {
 
       const doc = getCheerioDoc(response);
 
-      const searchCardText = doc('#search-card').text();
+      const searchCardText = doc('[data-controller="search-card"]').text();
 
       expect(searchCardText).toContain('Do Not Disturb');
       expect(searchCardText).toContain('Drake · Song · 2017');
@@ -178,7 +178,7 @@ describe('Page router', () => {
       const doc = getCheerioDoc(response);
 
       const errorMessage = doc('p').text();
-      expect(errorMessage).toContain('Something went wrong, try again later.');
+      expect(errorMessage).toContain('Something went wrong, please try again later.');
 
       expect(getSearchParserMock).toHaveBeenCalledTimes(1);
     });

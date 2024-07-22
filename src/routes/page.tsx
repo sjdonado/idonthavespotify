@@ -30,7 +30,7 @@ export const pageRouter = new Elysia()
       return <ErrorMessage message={error.message} />;
     }
 
-    return <ErrorMessage message="Something went wrong, try again later." />;
+    return <ErrorMessage message="Something went wrong, please try again later." />;
   })
   .get(
     '/',
@@ -62,6 +62,7 @@ export const pageRouter = new Elysia()
     '/search',
     async ({ body: { link } }) => {
       const searchResult = await search({ link });
+
       return <SearchCard searchResult={searchResult} />;
     },
     {

@@ -62,7 +62,7 @@ export default function MainLayout({
         />
       </head>
 
-      <body class="bg-black font-light text-white">{children}</body>
+      <body class="h-screen bg-black font-light text-white">{children}</body>
 
       <script
         defer
@@ -70,9 +70,7 @@ export default function MainLayout({
         crossorigin="anonymous"
       />
 
-      <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js" defer />
-
-      <script src="assets/entry.js" />
+      <script src="assets/app.js" />
     </html>
   );
 }
