@@ -15,7 +15,7 @@ ENV NODE_ENV production
 COPY package.json .
 COPY bun.lockb .
 
-RUN bun install --verbose
+RUN bun install
 
 COPY src src
 COPY www www
