@@ -1,14 +1,12 @@
-# I don't have Spotify
-
 ## Adapters
 
 | Adapters      | Inverted Search | Official API | Verified Link |
 | ------------- | --------------- | ------------ | ------------- |
 | Youtube Music | Yes             | No           | Yes           |
 | Apple Music   | No              | No           | Yes           |
-| Deezer        | Yes             | Yes          | Yes           |
+| Deezer        | No              | Yes          | Yes           |
 | SoundCloud    | No              | No           | Yes           |
-| Tidal         | Yes             | No           | No            |
+| Tidal         | No              | No           | No            |
 
 ## Web Page
 

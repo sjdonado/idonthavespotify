@@ -4,7 +4,7 @@ EXPOSE 3000/tcp
 
 WORKDIR /usr/src/app
 
-RUN apk update && apk add --no-cache chromium
+RUN apk update && apk add --no-cache chromium nodejs python3
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV CHROME_PATH=/usr/bin/chromium
@@ -15,7 +15,7 @@ ENV NODE_ENV production
 COPY package.json .
 COPY bun.lockb .
 
-RUN bun install
+RUN bun install --verbose
 
 COPY src src
 COPY www www
