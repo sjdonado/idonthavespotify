@@ -14,7 +14,7 @@
     "axios": "^1.6.8",
     "axios-retry": "^4.4.1",
     "cache-manager": "^5.7.3",
-    "cache-manager-bun-sqlite3": "^0.1.0",
+    "cache-manager-bun-sqlite3": "^0.2.0",
     "cheerio": "^1.0.0-rc.12",
     "elysia": "^1.0.14",
     "howler": "^2.2.4",

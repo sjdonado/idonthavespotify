@@ -8,7 +8,6 @@ export const cacheStore = await caching(bunSqliteStore, {
   name: 'cache',
   path: ENV.cache.databasePath,
   ttl: ENV.cache.expTime,
-  serializer: 'json',
 });
 
 export const cacheSearchResultLink = async (
