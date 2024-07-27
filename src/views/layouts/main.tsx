@@ -55,11 +55,7 @@ export default function MainLayout({
         <script src="https://unpkg.com/htmx.org@1.9.12"></script>
 
         <link href="/assets/index.min.css" rel="stylesheet" />
-        <link href="https://fonts.cdnfonts.com/css/montserrat" rel="stylesheet" />
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css"
-        />
+        <link href="https://fonts.cdnfonts.com/css/poppins" rel="stylesheet" />
       </head>
 
       <body class="h-screen bg-black font-light text-white">{children}</body>
