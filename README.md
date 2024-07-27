@@ -2,6 +2,7 @@
 
 | Adapters      | Inverted Search | Official API | Verified Link |
 | ------------- | --------------- | ------------ | ------------- |
+| Spotify       | Yes             | Yes          | Yes           |
 | Youtube Music | Yes             | No           | Yes           |
 | Apple Music   | No              | No           | Yes           |
 | Deezer        | No              | Yes          | Yes           |

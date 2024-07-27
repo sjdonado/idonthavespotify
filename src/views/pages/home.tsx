@@ -13,7 +13,7 @@ export default function Home({
       <LoadingIndicator />
       <main class="flex flex-1 flex-col items-center justify-start">
         <div class="my-8 flex flex-col gap-4 text-center sm:my-12">
-          <h1 class="text-4xl uppercase md:text-5xl lg:text-6xl">I don't have Spotify</h1>
+          <h1 class="text-4xl uppercase md:text-5xl lg:text-6xl">I Don't Have Spotify</h1>
           <h2 class="text-sm lg:text-lg">
             Paste a Spotify link and listen on other platforms.
           </h2>

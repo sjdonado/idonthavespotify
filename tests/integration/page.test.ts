@@ -46,7 +46,7 @@ describe('Page router', () => {
 
       const doc = getCheerioDoc(response);
 
-      expect(doc('h1').text()).toEqual("I don't have Spotify");
+      expect(doc('h1').text()).toEqual("I Don't Have Spotify");
       expect(doc('h2').text()).toEqual(
         'Paste a Spotify link and listen on other platforms.'
       );
