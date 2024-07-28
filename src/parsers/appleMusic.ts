@@ -43,11 +43,14 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
     }
 
     const parsedTitle = title?.replace(/on\sApple\sMusic/i, '').trim();
+    const parsedDescription = description
+      ?.replace(/(Listen to\s|on\sApple\sMusic|[.,!?])/gi, '')
+      .trim();
 
     const metadata = {
       id,
       title: parsedTitle,
-      description,
+      description: parsedDescription,
       type: APPLE_MUSIC_METADATA_TO_METADATA_TYPE[type as AppleMusicMetadataType],
       image,
     } as SearchMetadata;
@@ -64,7 +67,7 @@ export const getAppleMusicQueryFromMetadata = (metadata: SearchMetadata) => {
   let query = metadata.title;
 
   if (metadata.type === MetadataType.Album) {
-    query = `${query} album`;
+    query = metadata.description;
   }
 
   if (metadata.type === MetadataType.Playlist) {
