@@ -7,6 +7,12 @@ export enum Adapter {
   Deezer = 'deezer',
 }
 
+export enum Parser {
+  Spotify = 'spotify',
+  YouTube = 'youTube',
+  AppleMusic = 'appleMusic',
+}
+
 export enum MetadataType {
   Song = 'song',
   Album = 'album',

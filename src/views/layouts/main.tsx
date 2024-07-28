@@ -34,8 +34,8 @@ export default function MainLayout({
 
         <CustomMetaTag property="og:type" content="website" />
         <CustomMetaTag property="og:url" content="https://idonthavespotify.donado.co" />
-        <CustomMetaTag property="og:site_name" content="I don't have Spotify" />
-        <CustomMetaTag property="og:title" content={title ?? "I don't have Spotify"} />
+        <CustomMetaTag property="og:site_name" content="I Don't Have Spotify" />
+        <CustomMetaTag property="og:title" content={title ?? "I Don't Have Spotify"} />
         <CustomMetaTag
           property="og:description"
           content={
@@ -50,16 +50,12 @@ export default function MainLayout({
             'https://user-images.githubusercontent.com/27580836/227801051-a71d389e-2510-4965-a23e-d7478fe28f13.jpeg'
           }
         />
-        <CustomMetaTag property="og:image:alt" content="I don't have Spotify favicon" />
+        <CustomMetaTag property="og:image:alt" content="I Don't Have Spotify favicon" />
 
         <script src="https://unpkg.com/htmx.org@1.9.12"></script>
 
         <link href="/assets/index.min.css" rel="stylesheet" />
-        <link href="https://fonts.cdnfonts.com/css/montserrat" rel="stylesheet" />
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css"
-        />
+        <link href="https://fonts.cdnfonts.com/css/poppins" rel="stylesheet" />
       </head>
 
       <body class="h-screen bg-black font-light text-white">{children}</body>

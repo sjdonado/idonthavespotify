@@ -6,7 +6,12 @@ import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
 import { SearchMetadata } from '~/services/search';
 import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
 
-import { fetchSpotifyMetadata } from '~/adapters/spotify';
+import {
+  SPOTIFY_LINK_DESKTOP_REGEX,
+  SPOTIFY_LINK_MOBILE_REGEX,
+} from '~/config/constants';
+import { defaultHeaders, fetchMetadata } from '~/services/metadata';
+import HttpClient from '~/utils/http-client';
 
 enum SpotifyMetadataType {
   Song = 'music.song',
@@ -34,7 +39,25 @@ export const getSpotifyMetadata = async (id: string, link: string) => {
   }
 
   try {
-    const html = await fetchSpotifyMetadata(link);
+    let html = await fetchMetadata(link);
+
+    if (SPOTIFY_LINK_MOBILE_REGEX.test(link)) {
+      link = html.match(SPOTIFY_LINK_DESKTOP_REGEX)?.[0] ?? '';
+
+      if (!link) {
+        throw new Error('Invalid mobile spotify link');
+      }
+
+      // wait a random amount of time to avoid rate limiting
+      await new Promise(res => setTimeout(res, Math.random() * 1000));
+
+      logger.info(`[${getSpotifyMetadata.name}] parse metadata (desktop): ${link}`);
+
+      html = await HttpClient.get<string>(link, {
+        headers: defaultHeaders,
+        retries: 2,
+      });
+    }
 
     const doc = getCheerioDoc(html);
 

@@ -12,11 +12,12 @@ export default function Home({
     <div class="flex h-svh flex-col gap-2 p-2">
       <LoadingIndicator />
       <main class="flex flex-1 flex-col items-center justify-start">
-        <div class="my-8 flex flex-col gap-4 text-center sm:my-12">
-          <h1 class="text-4xl uppercase md:text-5xl lg:text-6xl">I don't have Spotify</h1>
-          <h2 class="text-sm lg:text-lg">
-            Paste a Spotify link and listen on other platforms.
-          </h2>
+        <div class="my-8 flex flex-col gap-4 p-2 text-center sm:my-12">
+          <h1 class="text-4xl uppercase md:text-5xl lg:text-6xl">I Don't Have Spotify</h1>
+          <p class="text-justify text-sm text-zinc-400 lg:text-base">
+            Paste a Spotify, YouTube, or Apple Music link to enjoy music across different
+            platforms.
+          </p>
         </div>
         <div
           data-controller="search"
@@ -39,15 +40,15 @@ export default function Home({
               data-search-target="link"
               type="text"
               name="link"
-              class="flex-1 rounded-lg border bg-white p-2.5 font-normal text-black placeholder:text-gray-400"
+              class="flex-1 rounded-lg bg-zinc-700 p-2.5 font-normal text-white placeholder:text-zinc-400"
               placeholder="https://open.spotify.com/track/7A8MwSsu9efJXP6xvZfRN3?si=d4f1e2eb324c43df"
               value={source}
             />
             <button
               type="submit"
-              class="ml-2 rounded-lg border border-green-500 bg-green-500 p-2.5 text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-white"
+              class="ml-2 rounded-lg border border-green-500 bg-green-500 p-2.5 text-sm font-medium text-black focus:outline-none focus:ring-1 focus:ring-white"
             >
-              <i class="fas fa-search p-1 text-black" />
+              <i class="fas fa-search p-1" />
               <span class="sr-only">Search</span>
             </button>
           </form>

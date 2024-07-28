@@ -99,40 +99,6 @@ export async function getSpotifyLink(query: string, metadata: SearchMetadata) {
   }
 }
 
-export async function fetchSpotifyMetadata(spotifyLink: string) {
-  let url = spotifyLink;
-
-  const spotifyHeaders = {
-    'User-Agent': `${ENV.adapters.spotify.clientVersion} (Macintosh; Apple Silicon)`,
-  };
-
-  let html = await HttpClient.get<string>(url, {
-    headers: spotifyHeaders,
-  });
-
-  logger.info(`[${fetchSpotifyMetadata.name}] parse metadata: ${url}`);
-
-  if (SPOTIFY_LINK_MOBILE_REGEX.test(spotifyLink)) {
-    url = html.match(SPOTIFY_LINK_DESKTOP_REGEX)?.[0] ?? '';
-
-    if (!url) {
-      throw new Error('Invalid mobile spotify link');
-    }
-
-    // wait a random amount of time to avoid rate limiting
-    await new Promise(res => setTimeout(res, Math.random() * 1000));
-
-    logger.info(`[${fetchSpotifyMetadata.name}] parse metadata (desktop): ${url}`);
-
-    html = await HttpClient.get<string>(url, {
-      headers: spotifyHeaders,
-      retries: 2,
-    });
-  }
-
-  return html;
-}
-
 export async function getOrUpdateSpotifyAccessToken() {
   const cache = await getCachedSpotifyAccessToken();
 
