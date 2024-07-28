@@ -15,7 +15,7 @@ export const DEEZER_LINK_REGEX =
   /^https:\/\/www\.deezer\.com\/(?:[a-z]{2}\/)?(?:track|album|playlist|artist|episode|show)\/(\d+)/;
 
 export const SOUNDCLOUD_LINK_REGEX =
-  /^https:\/\/soundcloud\.com\/([\w-]+)\/([\w-]+)(?:\/sets\/([\w-]+))?(?:[\?#].*)?$/;
+  /^https:\/\/soundcloud\.com\/([\w-]+)\/([\w-]+)(?:\/sets\/([\w-]+))?(?:[\?#].*)?/;
 
 export const ALLOWED_LINKS_REGEX = `${SPOTIFY_LINK_REGEX.source}|${YOUTUBE_LINK_REGEX.source}|${APPLE_MUSIC_LINK_REGEX.source}|${DEEZER_LINK_REGEX.source}|${SOUNDCLOUD_LINK_REGEX.source}`;
 

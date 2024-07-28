@@ -13,6 +13,10 @@ import {
   getAppleMusicQueryFromMetadata,
 } from '~/parsers/apple-music';
 import { getDeezerMetadata, getDeezerQueryFromMetadata } from '~/parsers/deezer';
+import {
+  getSoundCloudMetadata,
+  getSoundCloudQueryFromMetadata,
+} from '~/parsers/sound-cloud';
 
 import { getAppleMusicLink } from '~/adapters/apple-music';
 import { getYouTubeLink } from '~/adapters/youtube';
@@ -86,6 +90,10 @@ export const search = async ({
       metadata = await getDeezerMetadata(searchParser.id, searchParser.source);
       query = getDeezerQueryFromMetadata(metadata);
       break;
+    case Parser.SoundCloud:
+      metadata = await getSoundCloudMetadata(searchParser.id, searchParser.source);
+      query = getSoundCloudQueryFromMetadata(metadata);
+      break;
   }
 
   if (!metadata || !query) {
@@ -139,7 +147,7 @@ export const search = async ({
     searchParser.type !== Parser.Deezer && searchAdapters.includes(Adapter.Deezer)
       ? getDeezerLink(query, metadata)
       : null,
-    searchAdapters.includes(Adapter.SoundCloud)
+    searchParser.type !== Parser.SoundCloud && searchAdapters.includes(Adapter.SoundCloud)
       ? getSoundCloudLink(query, metadata)
       : null,
     shortenLink(`${ENV.app.url}?id=${id}`),
