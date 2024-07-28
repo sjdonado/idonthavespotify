@@ -17,7 +17,7 @@ import { getDeezerMetadata, getDeezerQueryFromMetadata } from '~/parsers/deezer'
 import { getAppleMusicLink } from '~/adapters/apple-music';
 import { getYouTubeLink } from '~/adapters/youtube';
 import { getDeezerLink } from '~/adapters/deezer';
-import { getSoundCloudLink } from '~/adapters/soundcloud';
+import { getSoundCloudLink } from '~/adapters/sound-cloud';
 import { getTidalLink } from '~/adapters/tidal';
 import { getSpotifyLink } from '~/adapters/spotify';
 

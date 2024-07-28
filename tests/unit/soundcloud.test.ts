@@ -4,7 +4,7 @@ import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
 import { MetadataType, Adapter } from '~/config/enum';
-import { getSoundCloudLink } from '~/adapters/soundcloud';
+import { getSoundCloudLink } from '~/adapters/sound-cloud';
 import { SearchMetadata } from '~/services/search';
 
 import { getSoundCloudSearchLink } from '../utils/shared';

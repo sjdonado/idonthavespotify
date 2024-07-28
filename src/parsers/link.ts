@@ -3,6 +3,7 @@ import { ParseError } from 'elysia';
 import {
   APPLE_MUSIC_LINK_REGEX,
   DEEZER_LINK_REGEX,
+  SOUNDCLOUD_LINK_REGEX,
   SPOTIFY_LINK_REGEX,
   YOUTUBE_LINK_REGEX,
 } from '~/config/constants';
@@ -47,8 +48,10 @@ export const getSearchParser = (link?: string, searchId?: string) => {
     type = Parser.YouTube;
   }
 
-  const match = source.match(APPLE_MUSIC_LINK_REGEX);
-  const appleMusicId = match ? match[3] || match[2] || match[1] : null;
+  const appleMusicMatch = source.match(APPLE_MUSIC_LINK_REGEX);
+  const appleMusicId = appleMusicMatch
+    ? appleMusicMatch[3] || appleMusicMatch[2] || appleMusicMatch[1]
+    : null;
   if (appleMusicId) {
     id = appleMusicId;
     type = Parser.AppleMusic;
@@ -58,6 +61,13 @@ export const getSearchParser = (link?: string, searchId?: string) => {
   if (deezerId) {
     id = deezerId;
     type = Parser.Deezer;
+  }
+
+  const soundCloudMatch = source.match(SOUNDCLOUD_LINK_REGEX);
+  const soundCloudId = soundCloudMatch ? soundCloudMatch[3] || soundCloudMatch[2] : null;
+  if (soundCloudId) {
+    id = soundCloudId;
+    type = Parser.SoundCloud;
   }
 
   if (!id || !type) {
