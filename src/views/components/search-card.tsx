@@ -106,7 +106,7 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
                     </p>
                     {isVerified && (
                       <span
-                        class="ml-1 inline-flex items-center justify-center rounded-full bg-green-500 p-1 text-[0.56rem]"
+                        class="ml-1 inline-flex items-center justify-center rounded-full bg-green-500 p-1 text-[0.56rem] text-black"
                         aria-label="Verified"
                       >
                         <i class="fas fa-check" />

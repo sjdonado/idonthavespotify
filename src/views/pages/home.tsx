@@ -39,15 +39,15 @@ export default function Home({
               data-search-target="link"
               type="text"
               name="link"
-              class="flex-1 rounded-lg border bg-white p-2.5 font-normal text-black placeholder:text-gray-400"
+              class="flex-1 rounded-lg bg-zinc-700 p-2.5 font-normal text-white placeholder:text-zinc-400"
               placeholder="https://open.spotify.com/track/7A8MwSsu9efJXP6xvZfRN3?si=d4f1e2eb324c43df"
               value={source}
             />
             <button
               type="submit"
-              class="ml-2 rounded-lg border border-green-500 bg-green-500 p-2.5 text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-white"
+              class="ml-2 rounded-lg border border-green-500 bg-green-500 p-2.5 text-sm font-medium text-black focus:outline-none focus:ring-1 focus:ring-white"
             >
-              <i class="fas fa-search p-1 text-black" />
+              <i class="fas fa-search p-1" />
               <span class="sr-only">Search</span>
             </button>
           </form>
