@@ -5,8 +5,7 @@ import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
 
 import { SearchMetadata } from '~/services/search';
 import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
-
-import { fetchSpotifyMetadata } from '~/adapters/spotify';
+import { fetchMetadata } from '~/services/metadata';
 
 enum YoutubeMetadataType {
   Song = 'video.other',
@@ -34,7 +33,7 @@ export const getYouTubeMetadata = async (id: string, link: string) => {
   }
 
   try {
-    const html = await fetchSpotifyMetadata(link);
+    const html = await fetchMetadata(link, {});
 
     const doc = getCheerioDoc(html);
 
