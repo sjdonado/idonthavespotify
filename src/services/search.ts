@@ -166,7 +166,7 @@ export const search = async ({
     soundCloudLink,
   ].filter(Boolean);
 
-  logger.info(`[${search.name}] (results) ${JSON.stringify(links, null, 2)}`);
+  logger.info(`[${search.name}] (results) ${links.map(link => link?.url)}`);
 
   // Add Tidal link if at least one link is verified and Tidal is included in the adapters
   if (links.some(link => link?.isVerified) && searchAdapters.includes(Adapter.Tidal)) {
