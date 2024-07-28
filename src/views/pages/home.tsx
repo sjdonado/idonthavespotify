@@ -12,11 +12,12 @@ export default function Home({
     <div class="flex h-svh flex-col gap-2 p-2">
       <LoadingIndicator />
       <main class="flex flex-1 flex-col items-center justify-start">
-        <div class="my-8 flex flex-col gap-4 text-center sm:my-12">
+        <div class="my-8 flex flex-col gap-4 p-2 text-center sm:my-12">
           <h1 class="text-4xl uppercase md:text-5xl lg:text-6xl">I Don't Have Spotify</h1>
-          <h2 class="text-sm lg:text-lg">
-            Paste a Spotify link and listen on other platforms.
-          </h2>
+          <p class="text-justify text-sm text-zinc-400 lg:text-base">
+            Paste a Spotify, YouTube, or Apple Music link to enjoy music across different
+            platforms.
+          </p>
         </div>
         <div
           data-controller="search"

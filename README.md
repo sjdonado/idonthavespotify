@@ -4,7 +4,7 @@
 | ------------- | --------------- | ------------ | ------------- |
 | Spotify       | Yes             | Yes          | Yes           |
 | Youtube Music | Yes             | No           | Yes           |
-| Apple Music   | No              | No           | Yes           |
+| Apple Music   | Yes             | No           | Yes           |
 | Deezer        | No              | Yes          | Yes           |
 | SoundCloud    | No              | No           | Yes           |
 | Tidal         | No              | No           | No            |
