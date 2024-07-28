@@ -1,5 +1,5 @@
 import { t } from 'elysia';
-import { SPOTIFY_LINK_REGEX, YOUTUBE_LINK_REGEX } from '~/config/constants';
+import { ALLOWED_LINKS_REGEX } from '~/config/constants';
 import { Adapter } from '~/config/enum';
 
 const allowedAdapters = Object.values(Adapter);
@@ -9,12 +9,9 @@ export const searchQueryValidator = t.Object({
 });
 
 export const searchPayloadValidator = t.Object({
-  link: t.RegExp(
-    new RegExp(`${SPOTIFY_LINK_REGEX.source}|${YOUTUBE_LINK_REGEX.source}`),
-    {
-      error: 'Invalid link, please try with Spotify or Youtube links.',
-    }
-  ),
+  link: t.RegExp(new RegExp(ALLOWED_LINKS_REGEX), {
+    error: 'Invalid link, please try with Spotify or Youtube links.',
+  }),
   adapters: t.Optional(
     t.Array(
       t.String({

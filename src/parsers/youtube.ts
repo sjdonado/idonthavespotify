@@ -7,7 +7,7 @@ import { SearchMetadata } from '~/services/search';
 import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
 import { fetchMetadata } from '~/services/metadata';
 
-enum YoutubeMetadataType {
+enum YouTubeMetadataType {
   Song = 'video.other',
   Album = 'album',
   Playlist = 'playlist',
@@ -17,12 +17,12 @@ enum YoutubeMetadataType {
 }
 
 const YOUTUBE_METADATA_TO_METADATA_TYPE = {
-  [YoutubeMetadataType.Song]: MetadataType.Song,
-  [YoutubeMetadataType.Album]: MetadataType.Album,
-  [YoutubeMetadataType.Playlist]: MetadataType.Playlist,
-  [YoutubeMetadataType.Artist]: MetadataType.Artist,
-  [YoutubeMetadataType.Podcast]: MetadataType.Podcast,
-  [YoutubeMetadataType.Show]: MetadataType.Show,
+  [YouTubeMetadataType.Song]: MetadataType.Song,
+  [YouTubeMetadataType.Album]: MetadataType.Album,
+  [YouTubeMetadataType.Playlist]: MetadataType.Playlist,
+  [YouTubeMetadataType.Artist]: MetadataType.Artist,
+  [YouTubeMetadataType.Podcast]: MetadataType.Podcast,
+  [YouTubeMetadataType.Show]: MetadataType.Show,
 };
 
 export const getYouTubeMetadata = async (id: string, link: string) => {
@@ -43,7 +43,7 @@ export const getYouTubeMetadata = async (id: string, link: string) => {
     const type = metaTagContent(doc, 'og:type', 'property');
 
     if (!title || !type || !image) {
-      throw new Error('Youtube metadata not found');
+      throw new Error('YouTube metadata not found');
     }
 
     const parsedTitle = title?.replace('- YouTube Music', '').trim();
@@ -52,7 +52,7 @@ export const getYouTubeMetadata = async (id: string, link: string) => {
       id,
       title: parsedTitle,
       description,
-      type: YOUTUBE_METADATA_TO_METADATA_TYPE[type as YoutubeMetadataType],
+      type: YOUTUBE_METADATA_TO_METADATA_TYPE[type as YouTubeMetadataType],
       image,
     } as SearchMetadata;
 

@@ -1,5 +1,5 @@
 import { ENV } from '~/config/env';
-import { MetadataType, Adapter } from '~/config/enum';
+import { MetadataType, Adapter, Parser } from '~/config/enum';
 
 import { logger } from '~/utils/logger';
 
@@ -15,6 +15,10 @@ import { getTidalLink } from '~/adapters/tidal';
 import { getSpotifyLink } from '~/adapters/spotify';
 import { generateId } from '~/utils/encoding';
 import { shortenLink } from '~/utils/url-shortener';
+import {
+  getAppleMusicMetadata,
+  getAppleMusicQueryFromMetadata,
+} from '~/parsers/appleMusic';
 
 export type SearchMetadata = {
   title: string;
@@ -64,14 +68,19 @@ export const search = async ({
 
   let metadata, query;
 
-  if (searchParser.type === Adapter.Spotify) {
+  if (searchParser.type === Parser.Spotify) {
     metadata = await getSpotifyMetadata(searchParser.id, searchParser.source);
     query = getSpotifyQueryFromMetadata(metadata);
   }
 
-  if (searchParser.type === Adapter.YouTube) {
+  if (searchParser.type === Parser.YouTube) {
     metadata = await getYouTubeMetadata(searchParser.id, searchParser.source);
     query = getYouTubeQueryFromMetadata(metadata);
+  }
+
+  if (searchParser.type === Parser.AppleMusic) {
+    metadata = await getAppleMusicMetadata(searchParser.id, searchParser.source);
+    query = getAppleMusicQueryFromMetadata(metadata);
   }
 
   if (!metadata || !query) {
@@ -115,11 +124,11 @@ export const search = async ({
     soundCloudLink,
     shortLink,
   ] = await Promise.all([
-    searchParser.type !== Adapter.Spotify ? getSpotifyLink(query, metadata) : null,
-    searchAdapters.includes(Adapter.YouTube) && searchParser.type !== Adapter.YouTube
+    searchParser.type !== Parser.Spotify ? getSpotifyLink(query, metadata) : null,
+    searchParser.type !== Parser.YouTube && searchAdapters.includes(Adapter.YouTube)
       ? getYouTubeLink(query, metadata)
       : null,
-    searchAdapters.includes(Adapter.AppleMusic)
+    searchParser.type !== Parser.AppleMusic && searchAdapters.includes(Adapter.AppleMusic)
       ? getAppleMusicLink(query, metadata)
       : null,
     searchAdapters.includes(Adapter.Deezer) ? getDeezerLink(query, metadata) : null,
@@ -129,7 +138,7 @@ export const search = async ({
     shortenLink(`${ENV.app.url}?id=${id}`),
   ]);
 
-  if (searchParser.type !== Adapter.Spotify && spotifyLink) {
+  if (searchParser.type !== Parser.Spotify && spotifyLink) {
     const spotifySearchParser = getSearchParser(spotifyLink.url);
     metadata = await getSpotifyMetadata(spotifySearchParser.id, spotifyLink.url);
   }

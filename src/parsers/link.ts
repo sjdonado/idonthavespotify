@@ -1,6 +1,10 @@
 import { ParseError } from 'elysia';
 
-import { SPOTIFY_LINK_REGEX, YOUTUBE_LINK_REGEX } from '~/config/constants';
+import {
+  APPLE_MUSIC_LINK_REGEX,
+  SPOTIFY_LINK_REGEX,
+  YOUTUBE_LINK_REGEX,
+} from '~/config/constants';
 import { Adapter } from '~/config/enum';
 import { getSourceFromId } from '~/utils/encoding';
 
@@ -24,18 +28,28 @@ export const getSearchParser = (link?: string, searchId?: string) => {
     source = decodedSource;
   }
 
+  if (!source) {
+    throw new ParseError('Source not found');
+  }
+
   let id, type;
 
-  const spotifyId = source!.match(SPOTIFY_LINK_REGEX)?.[3];
+  const spotifyId = source.match(SPOTIFY_LINK_REGEX)?.[3];
   if (spotifyId) {
     id = spotifyId;
     type = Adapter.Spotify;
   }
 
-  const youtubeId = source!.match(YOUTUBE_LINK_REGEX)?.[1];
+  const youtubeId = source.match(YOUTUBE_LINK_REGEX)?.[1];
   if (youtubeId) {
     id = youtubeId;
     type = Adapter.YouTube;
+  }
+
+  const appleMusicId = source.match(APPLE_MUSIC_LINK_REGEX)?.[1];
+  if (appleMusicId) {
+    id = appleMusicId;
+    type = Adapter.AppleMusic;
   }
 
   if (!id || !type) {
