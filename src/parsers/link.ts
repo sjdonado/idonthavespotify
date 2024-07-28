@@ -46,7 +46,8 @@ export const getSearchParser = (link?: string, searchId?: string) => {
     type = Adapter.YouTube;
   }
 
-  const appleMusicId = source.match(APPLE_MUSIC_LINK_REGEX)?.[1];
+  const match = source.match(APPLE_MUSIC_LINK_REGEX);
+  const appleMusicId = match ? match[3] || match[2] || match[1] : null;
   if (appleMusicId) {
     id = appleMusicId;
     type = Adapter.AppleMusic;

@@ -46,7 +46,10 @@ export const getYouTubeMetadata = async (id: string, link: string) => {
       throw new Error('YouTube metadata not found');
     }
 
-    const parsedTitle = title?.replace('- YouTube Music', '').trim();
+    const parsedTitle = title
+      ?.replace(/-?\s*on\sApple\sMusic/i, '')
+      .replace(/-?\s*YouTube\sMusic/i, '')
+      .trim();
 
     const metadata = {
       id,

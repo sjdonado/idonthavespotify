@@ -34,7 +34,7 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
     const doc = getCheerioDoc(html);
 
     const title = metaTagContent(doc, 'og:title', 'property');
-    const description = metaTagContent(doc, 'og:description', 'property') ?? '';
+    const description = metaTagContent(doc, 'og:description', 'property');
     const image = metaTagContent(doc, 'og:image', 'property');
     const type = metaTagContent(doc, 'og:type', 'property');
 
@@ -42,7 +42,7 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
       throw new Error('AppleMusic metadata not found');
     }
 
-    const parsedTitle = title?.replace('on Apple Music', '').trim();
+    const parsedTitle = title?.replace(/on\sApple\sMusic/i, '').trim();
 
     const metadata = {
       id,
