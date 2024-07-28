@@ -1,4 +1,4 @@
-import { MetadataType } from '~/config/enum';
+import { MetadataType, Parser } from '~/config/enum';
 
 import { logger } from '~/utils/logger';
 import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
@@ -22,7 +22,7 @@ const APPLE_MUSIC_METADATA_TO_METADATA_TYPE = {
 };
 
 export const getAppleMusicMetadata = async (id: string, link: string) => {
-  const cached = await getCachedSearchMetadata(id);
+  const cached = await getCachedSearchMetadata(id, Parser.AppleMusic);
   if (cached) {
     logger.info(`[AppleMusic] (${id}) metadata cache hit`);
     return cached;
@@ -44,7 +44,7 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
 
     const parsedTitle = title?.replace(/on\sApple\sMusic/i, '').trim();
     const parsedDescription = description
-      ?.replace(/(Listen to\s|on\sApple\sMusic|[.,!?])/gi, '')
+      ?.replace(/(Listen to\s|on\sApple\sMusic)/gi, '')
       .trim();
 
     const metadata = {
@@ -55,7 +55,7 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
       image,
     } as SearchMetadata;
 
-    await cacheSearchMetadata(id, metadata);
+    await cacheSearchMetadata(id, Parser.AppleMusic, metadata);
 
     return metadata;
   } catch (err) {

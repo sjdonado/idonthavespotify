@@ -1,4 +1,4 @@
-import { MetadataType } from '~/config/enum';
+import { MetadataType, Parser } from '~/config/enum';
 
 import { logger } from '~/utils/logger';
 import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
@@ -24,9 +24,8 @@ const YOUTUBE_METADATA_TO_METADATA_TYPE = {
   [YouTubeMetadataType.Podcast]: MetadataType.Podcast,
   [YouTubeMetadataType.Show]: MetadataType.Show,
 };
-
 export const getYouTubeMetadata = async (id: string, link: string) => {
-  const cached = await getCachedSearchMetadata(id);
+  const cached = await getCachedSearchMetadata(id, Parser.YouTube);
   if (cached) {
     logger.info(`[YouTube] (${id}) metadata cache hit`);
     return cached;
@@ -59,7 +58,7 @@ export const getYouTubeMetadata = async (id: string, link: string) => {
       image,
     } as SearchMetadata;
 
-    await cacheSearchMetadata(id, metadata);
+    await cacheSearchMetadata(id, Parser.YouTube, metadata);
 
     return metadata;
   } catch (err) {

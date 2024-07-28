@@ -2,6 +2,8 @@ import { caching } from 'cache-manager';
 import bunSqliteStore from 'cache-manager-bun-sqlite3';
 
 import { ENV } from '~/config/env';
+import type { Parser } from '~/config/enum';
+
 import { SearchMetadata, SearchResultLink } from './search';
 
 export const cacheStore = await caching(bunSqliteStore, {
@@ -23,12 +25,16 @@ export const getCachedSearchResultLink = async (url: URL) => {
   return data;
 };
 
-export const cacheSearchMetadata = async (id: string, searchMetadata: SearchMetadata) => {
-  await cacheStore.set(`metadata:${id}`, searchMetadata);
+export const cacheSearchMetadata = async (
+  id: string,
+  parser: Parser,
+  searchMetadata: SearchMetadata
+) => {
+  await cacheStore.set(`metadata:${parser}:${id}`, searchMetadata);
 };
 
-export const getCachedSearchMetadata = async (id: string) => {
-  const data = (await cacheStore.get(`metadata:${id}`)) as SearchMetadata;
+export const getCachedSearchMetadata = async (id: string, parser: Parser) => {
+  const data = (await cacheStore.get(`metadata:${parser}:${id}`)) as SearchMetadata;
 
   return data;
 };
