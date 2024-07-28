@@ -6,7 +6,7 @@ import { formDataRequest } from '../utils/request';
 
 import { app } from '~/index';
 
-import { MetadataType, Adapter } from '~/config/enum';
+import { MetadataType, Adapter, Parser } from '~/config/enum';
 
 import {
   cacheSearchMetadata,
@@ -25,7 +25,7 @@ describe('Page router', () => {
     cacheStore.reset();
 
     await Promise.all([
-      cacheSearchMetadata('2KvHC9z14GSl4YpkNMX384', {
+      cacheSearchMetadata('2KvHC9z14GSl4YpkNMX384', Parser.Spotify, {
         title: 'Do Not Disturb',
         description: 'Drake · Song · 2017',
         type: MetadataType.Song,
@@ -48,7 +48,7 @@ describe('Page router', () => {
 
       expect(doc('h1').text()).toEqual("I Don't Have Spotify");
       expect(doc('p').text()).toContain(
-        'Paste a Spotify, YouTube, or Apple Music link to enjoy music across different platforms.'
+        'Paste a link from Spotify, YouTube, Apple Music, or Deezer to enjoy your music across multiple platforms.'
       );
 
       const footerText = doc('footer').text();

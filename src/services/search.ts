@@ -19,6 +19,7 @@ import {
   getAppleMusicMetadata,
   getAppleMusicQueryFromMetadata,
 } from '~/parsers/appleMusic';
+import { getDeezerMetadata, getDeezerQueryFromMetadata } from '~/parsers/deezer';
 
 export type SearchMetadata = {
   title: string;
@@ -68,23 +69,27 @@ export const search = async ({
 
   let metadata, query;
 
-  if (searchParser.type === Parser.Spotify) {
-    metadata = await getSpotifyMetadata(searchParser.id, searchParser.source);
-    query = getSpotifyQueryFromMetadata(metadata);
-  }
-
-  if (searchParser.type === Parser.YouTube) {
-    metadata = await getYouTubeMetadata(searchParser.id, searchParser.source);
-    query = getYouTubeQueryFromMetadata(metadata);
-  }
-
-  if (searchParser.type === Parser.AppleMusic) {
-    metadata = await getAppleMusicMetadata(searchParser.id, searchParser.source);
-    query = getAppleMusicQueryFromMetadata(metadata);
+  switch (searchParser.type) {
+    case Parser.Spotify:
+      metadata = await getSpotifyMetadata(searchParser.id, searchParser.source);
+      query = getSpotifyQueryFromMetadata(metadata);
+      break;
+    case Parser.YouTube:
+      metadata = await getYouTubeMetadata(searchParser.id, searchParser.source);
+      query = getYouTubeQueryFromMetadata(metadata);
+      break;
+    case Parser.AppleMusic:
+      metadata = await getAppleMusicMetadata(searchParser.id, searchParser.source);
+      query = getAppleMusicQueryFromMetadata(metadata);
+      break;
+    case Parser.Deezer:
+      metadata = await getDeezerMetadata(searchParser.id, searchParser.source);
+      query = getDeezerQueryFromMetadata(metadata);
+      break;
   }
 
   if (!metadata || !query) {
-    throw new Error('Adapter not implemented yet');
+    throw new Error('Parser not implemented yet');
   }
 
   logger.info(
@@ -131,7 +136,9 @@ export const search = async ({
     searchParser.type !== Parser.AppleMusic && searchAdapters.includes(Adapter.AppleMusic)
       ? getAppleMusicLink(query, metadata)
       : null,
-    searchAdapters.includes(Adapter.Deezer) ? getDeezerLink(query, metadata) : null,
+    searchParser.type !== Parser.Deezer && searchAdapters.includes(Adapter.Deezer)
+      ? getDeezerLink(query, metadata)
+      : null,
     searchAdapters.includes(Adapter.SoundCloud)
       ? getSoundCloudLink(query, metadata)
       : null,

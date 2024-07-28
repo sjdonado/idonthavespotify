@@ -1,4 +1,4 @@
-import { MetadataType } from '~/config/enum';
+import { MetadataType, Parser } from '~/config/enum';
 
 import { logger } from '~/utils/logger';
 import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
@@ -32,7 +32,7 @@ const SPOTIFY_METADATA_TO_METADATA_TYPE = {
 };
 
 export const getSpotifyMetadata = async (id: string, link: string) => {
-  const cached = await getCachedSearchMetadata(id);
+  const cached = await getCachedSearchMetadata(id, Parser.Spotify);
   if (cached) {
     logger.info(`[Spotify] (${id}) metadata cache hit`);
     return cached;
@@ -83,7 +83,7 @@ export const getSpotifyMetadata = async (id: string, link: string) => {
       audio,
     } as SearchMetadata;
 
-    await cacheSearchMetadata(id, metadata);
+    await cacheSearchMetadata(id, Parser.Spotify, metadata);
 
     return metadata;
   } catch (err) {

@@ -7,24 +7,24 @@ import { SearchMetadata } from '~/services/search';
 import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
 import { fetchMetadata } from '~/services/metadata';
 
-enum AppleMusicMetadataType {
+enum DeezerMetadataType {
   Song = 'music.song',
   Album = 'music.album',
   Playlist = 'music.playlist',
   Artist = 'music.musician',
 }
 
-const APPLE_MUSIC_METADATA_TO_METADATA_TYPE = {
-  [AppleMusicMetadataType.Song]: MetadataType.Song,
-  [AppleMusicMetadataType.Album]: MetadataType.Album,
-  [AppleMusicMetadataType.Playlist]: MetadataType.Playlist,
-  [AppleMusicMetadataType.Artist]: MetadataType.Artist,
+const DEEZER_METADATA_TO_METADATA_TYPE = {
+  [DeezerMetadataType.Song]: MetadataType.Song,
+  [DeezerMetadataType.Album]: MetadataType.Album,
+  [DeezerMetadataType.Playlist]: MetadataType.Playlist,
+  [DeezerMetadataType.Artist]: MetadataType.Artist,
 };
 
-export const getAppleMusicMetadata = async (id: string, link: string) => {
-  const cached = await getCachedSearchMetadata(id, Parser.AppleMusic);
+export const getDeezerMetadata = async (id: string, link: string) => {
+  const cached = await getCachedSearchMetadata(id, Parser.Deezer);
   if (cached) {
-    logger.info(`[AppleMusic] (${id}) metadata cache hit`);
+    logger.info(`[Deezer] (${id}) metadata cache hit`);
     return cached;
   }
 
@@ -37,37 +37,42 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
     const description = metaTagContent(doc, 'og:description', 'property');
     const image = metaTagContent(doc, 'og:image', 'property');
     const type = metaTagContent(doc, 'og:type', 'property');
+    const audio = metaTagContent(doc, 'og:audio', 'property');
 
     if (!title || !type || !image) {
-      throw new Error('AppleMusic metadata not found');
+      throw new Error('Deezer metadata not found');
     }
 
-    const parsedTitle = title?.replace(/on\sApple\sMusic/i, '').trim();
-    const parsedDescription = description
-      ?.replace(/(Listen to\s|on\sApple\sMusic)/gi, '')
-      .trim();
+    const parsedTitle = title?.trim();
 
     const metadata = {
       id,
       title: parsedTitle,
-      description: parsedDescription,
-      type: APPLE_MUSIC_METADATA_TO_METADATA_TYPE[type as AppleMusicMetadataType],
+      description,
+      type: DEEZER_METADATA_TO_METADATA_TYPE[type as DeezerMetadataType],
       image,
+      audio,
     } as SearchMetadata;
 
-    await cacheSearchMetadata(id, Parser.AppleMusic, metadata);
+    await cacheSearchMetadata(id, Parser.Deezer, metadata);
 
     return metadata;
   } catch (err) {
-    throw new Error(`[${getAppleMusicMetadata.name}] (${link}) ${err}`);
+    throw new Error(`[${getDeezerMetadata.name}] (${link}) ${err}`);
   }
 };
 
-export const getAppleMusicQueryFromMetadata = (metadata: SearchMetadata) => {
+export const getDeezerQueryFromMetadata = (metadata: SearchMetadata) => {
   let query = metadata.title;
 
+  const artists = metadata.description.match(/^([^ -]+(?: [^ -]+)*)/)?.[1];
+
+  if (metadata.type === MetadataType.Song) {
+    query = [query, artists].join(' ');
+  }
+
   if (metadata.type === MetadataType.Album) {
-    query = metadata.description;
+    query = [query, artists].join(' ');
   }
 
   if (metadata.type === MetadataType.Playlist) {
