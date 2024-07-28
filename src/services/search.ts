@@ -2,10 +2,17 @@ import { ENV } from '~/config/env';
 import { MetadataType, Adapter, Parser } from '~/config/enum';
 
 import { logger } from '~/utils/logger';
+import { generateId } from '~/utils/encoding';
+import { shortenLink } from '~/utils/url-shortener';
 
 import { getSearchParser } from '~/parsers/link';
 import { getSpotifyMetadata, getSpotifyQueryFromMetadata } from '~/parsers/spotify';
 import { getYouTubeMetadata, getYouTubeQueryFromMetadata } from '~/parsers/youtube';
+import {
+  getAppleMusicMetadata,
+  getAppleMusicQueryFromMetadata,
+} from '~/parsers/apple-music';
+import { getDeezerMetadata, getDeezerQueryFromMetadata } from '~/parsers/deezer';
 
 import { getAppleMusicLink } from '~/adapters/apple-music';
 import { getYouTubeLink } from '~/adapters/youtube';
@@ -13,13 +20,6 @@ import { getDeezerLink } from '~/adapters/deezer';
 import { getSoundCloudLink } from '~/adapters/soundcloud';
 import { getTidalLink } from '~/adapters/tidal';
 import { getSpotifyLink } from '~/adapters/spotify';
-import { generateId } from '~/utils/encoding';
-import { shortenLink } from '~/utils/url-shortener';
-import {
-  getAppleMusicMetadata,
-  getAppleMusicQueryFromMetadata,
-} from '~/parsers/appleMusic';
-import { getDeezerMetadata, getDeezerQueryFromMetadata } from '~/parsers/deezer';
 
 export type SearchMetadata = {
   title: string;
