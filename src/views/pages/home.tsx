@@ -15,8 +15,8 @@ export default function Home({
         <div class="mb-4 mt-8 flex flex-col gap-4 p-2 text-center sm:mt-12">
           <h1 class="text-4xl uppercase md:text-5xl lg:text-6xl">I Don't Have Spotify</h1>
           <p class="text-justify text-sm text-zinc-400 lg:text-base">
-            Paste a link from Spotify, YouTube, Apple Music, or Deezer to enjoy your music
-            across multiple platforms.
+            Paste a link from Spotify, YouTube Music, Apple Music, Deezer or SoundCloud to
+            start.
           </p>
         </div>
         <div

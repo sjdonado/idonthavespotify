@@ -6,7 +6,7 @@
 | Youtube Music | Yes             | No           | Yes           |
 | Apple Music   | Yes             | No           | Yes           |
 | Deezer        | Yes             | Yes          | Yes           |
-| SoundCloud    | No              | No           | Yes           |
+| SoundCloud    | Yes             | No           | Yes           |
 | Tidal         | No              | No           | No            |
 
 ## Web Page

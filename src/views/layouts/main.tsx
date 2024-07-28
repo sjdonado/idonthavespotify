@@ -25,7 +25,7 @@ export default function MainLayout({
 
         <meta
           name="description"
-          content="Find Spotify content on YouTube, Deezer, Apple Music, Tidal, SoundCloud and more."
+          content="Effortlessly convert Spotify links to your preferred streaming service"
         />
         <meta
           name="keywords"
@@ -40,7 +40,7 @@ export default function MainLayout({
           property="og:description"
           content={
             description ??
-            'Find Spotify content on YouTube, Deezer, Apple Music, Tidal, SoundCloud and more.'
+            'Effortlessly convert Spotify links to your preferred streaming service'
           }
         />
         <CustomMetaTag
