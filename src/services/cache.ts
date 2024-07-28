@@ -42,7 +42,6 @@ export const getCachedSearchMetadata = async (id: string, parser: Parser) => {
 export const cacheSpotifyAccessToken = async (accessToken: string, expTime: number) => {
   await cacheStore.set('spotify:accessToken', accessToken, expTime);
 };
-
 export const getCachedSpotifyAccessToken = async (): Promise<string | undefined> => {
   return cacheStore.get('spotify:accessToken');
 };

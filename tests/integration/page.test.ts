@@ -48,7 +48,7 @@ describe('Page router', () => {
 
       expect(doc('h1').text()).toEqual("I Don't Have Spotify");
       expect(doc('p').text()).toContain(
-        'Paste a Spotify, YouTube, or Apple Music link to enjoy music across different platforms.'
+        'Paste a link from Spotify, YouTube, Apple Music, or Deezer to enjoy your music across multiple platforms.'
       );
 
       const footerText = doc('footer').text();
