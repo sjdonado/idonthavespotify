@@ -60,7 +60,7 @@ export const search = async ({
     Adapter.Tidal,
   ];
 
-  const searchParser = await getSearchParser(link, searchId);
+  const searchParser = getSearchParser(link, searchId);
 
   let metadata, query;
 
@@ -107,7 +107,14 @@ export const search = async ({
     };
   }
 
-  const searchResultsPromise = Promise.all([
+  const [
+    spotifyLink,
+    youtubeLink,
+    appleMusicLink,
+    deezerLink,
+    soundCloudLink,
+    shortLink,
+  ] = await Promise.all([
     searchParser.type !== Adapter.Spotify ? getSpotifyLink(query, metadata) : null,
     searchAdapters.includes(Adapter.YouTube) && searchParser.type !== Adapter.YouTube
       ? getYouTubeLink(query, metadata)
@@ -119,28 +126,21 @@ export const search = async ({
     searchAdapters.includes(Adapter.SoundCloud)
       ? getSoundCloudLink(query, metadata)
       : null,
-  ]);
-
-  const [searchResults, shortLink] = await Promise.all([
-    searchResultsPromise,
     shortenLink(`${ENV.app.url}?id=${id}`),
   ]);
 
-  if (searchParser.type !== Adapter.Spotify) {
-    const spotifySearchResult = searchResults.find(
-      searchResult => searchResult?.type === Adapter.Spotify
-    );
-
-    if (spotifySearchResult) {
-      const spotifySearchParser = await getSearchParser(spotifySearchResult.url);
-      metadata = await getSpotifyMetadata(
-        spotifySearchParser.id,
-        spotifySearchResult.url
-      );
-    }
+  if (searchParser.type !== Adapter.Spotify && spotifyLink) {
+    const spotifySearchParser = getSearchParser(spotifyLink.url);
+    metadata = await getSpotifyMetadata(spotifySearchParser.id, spotifyLink.url);
   }
 
-  const links = searchResults.filter(Boolean);
+  const links = [
+    spotifyLink,
+    youtubeLink,
+    appleMusicLink,
+    deezerLink,
+    soundCloudLink,
+  ].filter(Boolean);
 
   logger.info(`[${search.name}] (results) ${JSON.stringify(links, null, 2)}`);
 

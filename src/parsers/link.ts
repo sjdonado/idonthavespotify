@@ -12,7 +12,7 @@ export type SearchParser = {
   source: string;
 };
 
-export const getSearchParser = async (link?: string, searchId?: string) => {
+export const getSearchParser = (link?: string, searchId?: string) => {
   const decodedSource = searchId ? getSourceFromId(searchId) : undefined;
 
   let source = link;

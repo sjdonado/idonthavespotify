@@ -37,7 +37,7 @@ export const cacheSpotifyAccessToken = async (accessToken: string, expTime: numb
   await cacheStore.set('spotify:accessToken', accessToken, expTime);
 };
 
-export const getCachedSpotifyAccessToken = async () => {
+export const getCachedSpotifyAccessToken = async (): Promise<string | undefined> => {
   return cacheStore.get('spotify:accessToken');
 };
 
@@ -45,6 +45,6 @@ export const cacheShortenLink = async (link: string, refer: string) => {
   await cacheStore.set(`url-shortener:${link}`, refer);
 };
 
-export const getCachedShortenLink = async (link: string) => {
+export const getCachedShortenLink = async (link: string): Promise<string | undefined> => {
   return cacheStore.get(`url-shortener:${link}`);
 };
