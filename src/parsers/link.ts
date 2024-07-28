@@ -2,12 +2,13 @@ import { ParseError } from 'elysia';
 
 import {
   APPLE_MUSIC_LINK_REGEX,
+  DEEZER_LINK_REGEX,
   SPOTIFY_LINK_REGEX,
   YOUTUBE_LINK_REGEX,
 } from '~/config/constants';
-import { Adapter } from '~/config/enum';
-import { getSourceFromId } from '~/utils/encoding';
+import { Parser } from '~/config/enum';
 
+import { getSourceFromId } from '~/utils/encoding';
 import { logger } from '~/utils/logger';
 
 export type SearchParser = {
@@ -37,20 +38,26 @@ export const getSearchParser = (link?: string, searchId?: string) => {
   const spotifyId = source.match(SPOTIFY_LINK_REGEX)?.[3];
   if (spotifyId) {
     id = spotifyId;
-    type = Adapter.Spotify;
+    type = Parser.Spotify;
   }
 
   const youtubeId = source.match(YOUTUBE_LINK_REGEX)?.[1];
   if (youtubeId) {
     id = youtubeId;
-    type = Adapter.YouTube;
+    type = Parser.YouTube;
   }
 
   const match = source.match(APPLE_MUSIC_LINK_REGEX);
   const appleMusicId = match ? match[3] || match[2] || match[1] : null;
   if (appleMusicId) {
     id = appleMusicId;
-    type = Adapter.AppleMusic;
+    type = Parser.AppleMusic;
+  }
+
+  const deezerId = source.match(DEEZER_LINK_REGEX)?.[1];
+  if (deezerId) {
+    id = deezerId;
+    type = Parser.Deezer;
   }
 
   if (!id || !type) {

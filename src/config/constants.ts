@@ -11,7 +11,10 @@ export const YOUTUBE_LINK_REGEX =
 export const APPLE_MUSIC_LINK_REGEX =
   /^https:\/\/music\.apple\.com\/(?:[a-z]{2}\/)?(?:album|playlist|station|artist|music-video|video-playlist|show)\/([\w-]+)(?:\/([\w-]+))?(?:\?i=(\d+))?(?:\?.*)?$/;
 
-export const ALLOWED_LINKS_REGEX = `${SPOTIFY_LINK_REGEX.source}|${YOUTUBE_LINK_REGEX.source}|${APPLE_MUSIC_LINK_REGEX.source}`;
+export const DEEZER_LINK_REGEX =
+  /^https:\/\/www\.deezer\.com\/(?:[a-z]{2}\/)?(?:track|album|playlist|artist|episode|show)\/(\d+)$/;
+
+export const ALLOWED_LINKS_REGEX = `${SPOTIFY_LINK_REGEX.source}|${YOUTUBE_LINK_REGEX.source}|${APPLE_MUSIC_LINK_REGEX.source}|${DEEZER_LINK_REGEX.source}`;
 
 export const ADAPTERS_QUERY_LIMIT = 1;
 export const RESPONSE_COMPARE_MIN_SCORE = 0.4;

@@ -2,15 +2,16 @@ export enum Adapter {
   Spotify = 'spotify',
   YouTube = 'youTube',
   AppleMusic = 'appleMusic',
-  Tidal = 'tidal',
-  SoundCloud = 'soundCloud',
   Deezer = 'deezer',
+  SoundCloud = 'soundCloud',
+  Tidal = 'tidal',
 }
 
 export enum Parser {
   Spotify = 'spotify',
   YouTube = 'youTube',
   AppleMusic = 'appleMusic',
+  Deezer = 'deezer',
 }
 
 export enum MetadataType {
