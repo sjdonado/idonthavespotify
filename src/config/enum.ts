@@ -12,6 +12,7 @@ export enum Parser {
   YouTube = 'youTube',
   AppleMusic = 'appleMusic',
   Deezer = 'deezer',
+  SoundCloud = 'soundCloud',
 }
 
 export enum MetadataType {

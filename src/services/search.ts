@@ -2,24 +2,28 @@ import { ENV } from '~/config/env';
 import { MetadataType, Adapter, Parser } from '~/config/enum';
 
 import { logger } from '~/utils/logger';
+import { generateId } from '~/utils/encoding';
+import { shortenLink } from '~/utils/url-shortener';
 
 import { getSearchParser } from '~/parsers/link';
 import { getSpotifyMetadata, getSpotifyQueryFromMetadata } from '~/parsers/spotify';
 import { getYouTubeMetadata, getYouTubeQueryFromMetadata } from '~/parsers/youtube';
+import {
+  getAppleMusicMetadata,
+  getAppleMusicQueryFromMetadata,
+} from '~/parsers/apple-music';
+import { getDeezerMetadata, getDeezerQueryFromMetadata } from '~/parsers/deezer';
+import {
+  getSoundCloudMetadata,
+  getSoundCloudQueryFromMetadata,
+} from '~/parsers/sound-cloud';
 
 import { getAppleMusicLink } from '~/adapters/apple-music';
 import { getYouTubeLink } from '~/adapters/youtube';
 import { getDeezerLink } from '~/adapters/deezer';
-import { getSoundCloudLink } from '~/adapters/soundcloud';
+import { getSoundCloudLink } from '~/adapters/sound-cloud';
 import { getTidalLink } from '~/adapters/tidal';
 import { getSpotifyLink } from '~/adapters/spotify';
-import { generateId } from '~/utils/encoding';
-import { shortenLink } from '~/utils/url-shortener';
-import {
-  getAppleMusicMetadata,
-  getAppleMusicQueryFromMetadata,
-} from '~/parsers/appleMusic';
-import { getDeezerMetadata, getDeezerQueryFromMetadata } from '~/parsers/deezer';
 
 export type SearchMetadata = {
   title: string;
@@ -86,6 +90,10 @@ export const search = async ({
       metadata = await getDeezerMetadata(searchParser.id, searchParser.source);
       query = getDeezerQueryFromMetadata(metadata);
       break;
+    case Parser.SoundCloud:
+      metadata = await getSoundCloudMetadata(searchParser.id, searchParser.source);
+      query = getSoundCloudQueryFromMetadata(metadata);
+      break;
   }
 
   if (!metadata || !query) {
@@ -139,7 +147,7 @@ export const search = async ({
     searchParser.type !== Parser.Deezer && searchAdapters.includes(Adapter.Deezer)
       ? getDeezerLink(query, metadata)
       : null,
-    searchAdapters.includes(Adapter.SoundCloud)
+    searchParser.type !== Parser.SoundCloud && searchAdapters.includes(Adapter.SoundCloud)
       ? getSoundCloudLink(query, metadata)
       : null,
     shortenLink(`${ENV.app.url}?id=${id}`),
@@ -158,7 +166,7 @@ export const search = async ({
     soundCloudLink,
   ].filter(Boolean);
 
-  logger.info(`[${search.name}] (results) ${JSON.stringify(links, null, 2)}`);
+  logger.info(`[${search.name}] (results) ${links.map(link => link?.url)}`);
 
   // Add Tidal link if at least one link is verified and Tidal is included in the adapters
   if (links.some(link => link?.isVerified) && searchAdapters.includes(Adapter.Tidal)) {
