@@ -66,6 +66,12 @@ export default function MainLayout({
         crossorigin="anonymous"
       />
 
+      <script
+        defer
+        src="https://umami.sjdonado.com/script.js"
+        data-website-id="da89a7a2-dd17-4c7f-b7ff-de28a7046a0e"
+      />
+
       <script src="assets/app.js" />
     </html>
   );
