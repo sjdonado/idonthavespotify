@@ -1,6 +1,5 @@
 import axios, { AxiosError } from 'axios';
 import axiosRetry from 'axios-retry';
-import randUserAgent from 'rand-user-agent';
 
 import { DEFAULT_TIMEOUT } from '~/config/constants';
 
@@ -12,6 +11,39 @@ type HttpClientOptions = {
   timeout?: number;
   retries?: number;
 };
+
+function getRandomUserAgent() {
+  const osOptions = [
+    'Windows NT 10.0; Win64; x64',
+    'Macintosh; Intel Mac OS X 10_15_7',
+    'X11; Linux x86_64',
+  ];
+
+  const chromeVersions = [
+    '86.0.4240.198',
+    '87.0.4280.88',
+    '88.0.4324.96',
+    '89.0.4389.72',
+    '90.0.4430.85',
+  ];
+
+  const firefoxVersions = ['84.0', '85.0', '86.0', '87.0', '88.0'];
+
+  const isChrome = Math.random() > 0.5;
+
+  const os = osOptions[Math.floor(Math.random() * osOptions.length)];
+
+  if (isChrome) {
+    const chromeVersion =
+      chromeVersions[Math.floor(Math.random() * chromeVersions.length)];
+
+    return `Mozilla/5.0 (${os}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${chromeVersion} Safari/537.36`;
+  }
+  const firefoxVersion =
+    firefoxVersions[Math.floor(Math.random() * firefoxVersions.length)];
+
+  return `Mozilla/5.0 (${os}; rv:${firefoxVersion}) Gecko/20100101 Firefox/${firefoxVersion}`;
+}
 
 axiosRetry(axios, {
   retries: 2,
@@ -28,7 +60,7 @@ axiosRetry(axios, {
 export default class HttpClient {
   static defaultHeaders = {
     'Accept-Encoding': 'gzip',
-    'User-Agent': randUserAgent('desktop', 'chrome'),
+    'User-Agent': getRandomUserAgent(),
   };
 
   static async get<T>(url: string, options?: HttpClientOptions) {
