@@ -11,7 +11,7 @@
 
 ## Web Page
 
-![Uptime Badge](https://uptime.donado.co/api/badge/2/uptime/24?labelPrefix=Web%20Page%20&labelSuffix=h) ![Uptime Badge](https://uptime.donado.co/api/badge/2/ping/24?labelPrefix=Web%20Page%20)
+![Uptime Badge](https://uptime.sjdonado.com/api/badge/2/uptime/24?labelPrefix=Web%20Page%20&labelSuffix=h) ![Uptime Badge](https://uptime.sjdonado.com/api/badge/2/ping/24?labelPrefix=Web%20Page%20)
 
 <div align="center">
   <img width=1200 src="https://firebasestorage.googleapis.com/v0/b/rule-of-thumb-1c13c.appspot.com/o/idonthavespotify.webp?alt=media"/>
@@ -19,7 +19,7 @@
 
 ## Raycast
 
-![Uptime Badge](https://uptime.donado.co/api/badge/3/uptime/24?labelPrefix=API%20&labelSuffix=h) ![Uptime Badge](https://uptime.donado.co/api/badge/3/ping/24?labelPrefix=API%20)
+![Uptime Badge](https://uptime.sjdonado.com/api/badge/3/uptime/24?labelPrefix=API%20&labelSuffix=h) ![Uptime Badge](https://uptime.sjdonado.com/api/badge/3/ping/24?labelPrefix=API%20)
 
 <a title="Install idonthavespotify Raycast Extension" href="https://www.raycast.com/sjdonado/idonthavespotify"><img src="https://www.raycast.com/sjdonado/idonthavespotify/install_button@2x.png?v=1.1" height="64" style="height: 64px;" alt=""></a>
 

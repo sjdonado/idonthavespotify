@@ -1,4 +1,4 @@
-name: Deploy to donado.co
+name: Deploy to sjdonado.com
 
 on:
   push:
