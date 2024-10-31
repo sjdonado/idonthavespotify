@@ -10,12 +10,8 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV CHROME_PATH=/usr/bin/chromium
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-ENV NODE_ENV production
-
-COPY package.json .
-COPY bun.lockb .
-
-RUN bun install
+COPY package.json bun.lockb .
+RUN bun install --frozen-lockfile
 
 COPY src src
 COPY www www
@@ -28,5 +24,7 @@ COPY vite.config.js .
 RUN bun run build
 
 COPY public public
+
+ENV NODE_ENV production
 
 CMD ["bun", "www/bin.ts"]
