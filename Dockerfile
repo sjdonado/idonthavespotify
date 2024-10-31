@@ -1,4 +1,4 @@
-FROM oven/bun:alpine
+FROM oven/bun:1.1.5-alpine
 
 EXPOSE 3000/tcp
 

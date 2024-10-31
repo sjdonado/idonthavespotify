@@ -34,7 +34,7 @@ export const pageRouter = new Elysia()
   })
   .get(
     '/',
-    async ({ query: { id }, redirect }) => {
+    async ({ query: { id }, redirect, set }) => {
       try {
         const searchResult = id ? await search({ searchId: id }) : undefined;
 
@@ -51,7 +51,10 @@ export const pageRouter = new Elysia()
         );
       } catch (err) {
         logger.error(err);
-        return redirect('/', 404);
+
+        set.status = 404;
+
+        return redirect('/');
       }
     },
     {
