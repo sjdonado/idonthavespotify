@@ -1,4 +1,6 @@
-Copy a link from your favorite streaming service, paste it into the app, and voilà! The app instantly provides links to the song or track on all other supported platforms. If the original link is from Spotify, you'll even get a quick audio preview to make sure it's the right track. Then, just share the generated links with friends, no hassle required!
+> Effortlessly convert Spotify links to your preferred streaming service
+
+Copy a link from your favorite streaming service, paste it into the app, and voilà! The app instantly provides links to the song or track on all other supported platforms. If the original link is from Spotify, you'll even get a quick audio preview to make sure it's the right track.
 
 ## Supported Streaming Services (Adapters)
 
@@ -29,10 +31,10 @@ Adapters represent the streaming services supported by the app, each adapter all
 
 ## Local setup
 
-There are a few environment variables you can mock. If you one to do an update or a new feature, we can always rely on the test outputs without needing to run the project. If you'd like to replicate the production environment locally, email me and I’ll provide you with all the environment variables.
+There are a few environment variables you can mock (see `.env.example`). If you would like to contribute, we can always rely on the tests output without needing to run the project. If you'd like to replicate the production environment locally, email me and I’ll provide you with the missing ones.
 
 ```sh
-docker compose up -d redis
+docker compose up -d
 
 bun install
 bun dev
