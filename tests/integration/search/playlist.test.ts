@@ -72,7 +72,7 @@ describe('GET /search - Playlist', () => {
     const response = await app.handle(request).then(res => res.json());
 
     expect(response).toEqual({
-      id: '37i9dQZF1DX2apWzyECwyZ',
+      id: 'b3Blbi5zcG90aWZ5LmNvbS9wbGF5bGlzdC8zN2k5ZFFaRjFEWDJhcFd6eUVDd3la',
       type: 'playlist',
       title: 'This Is Bad Bunny',
       description: 'This Is Bad Bunny · Playlist · 109 songs · 5.2M likes',

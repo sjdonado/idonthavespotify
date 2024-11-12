@@ -64,7 +64,7 @@ describe('GET /search - Podcast Show', () => {
     const response = await app.handle(request).then(res => res.json());
 
     expect(response).toEqual({
-      id: '6o81QuW22s5m2nfcXWjucc',
+      id: 'b3Blbi5zcG90aWZ5LmNvbS9zaG93LzZvODFRdVcyMnM1bTJuZmNYV2p1Y2M%3D',
       type: 'show',
       title: 'Waveform: The MKBHD Podcast',
       description:

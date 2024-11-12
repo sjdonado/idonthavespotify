@@ -72,7 +72,7 @@ describe('GET /search - Artist', () => {
     const response = await app.handle(request).then(res => res.json());
 
     expect(response).toEqual({
-      id: '6l3HvQ5sa6mXTsMTB19rO5',
+      id: 'b3Blbi5zcG90aWZ5LmNvbS9hcnRpc3QvNmwzSHZRNXNhNm1YVHNNVEIxOXJPNQ%3D%3D',
       type: 'artist',
       title: 'J. Cole',
       description: 'Artist · 45.1M monthly listeners.',
