@@ -1,13 +1,17 @@
-## Adapters
+Copy a link from your favorite streaming service, paste it into the app, and voilà! The app instantly provides links to the song or track on all other supported platforms. If the original link is from Spotify, you'll even get a quick audio preview to make sure it's the right track. Then, just share the generated links with friends, no hassle required!
 
-| Adapters      | Inverted Search | Official API | Verified Link |
-| ------------- | --------------- | ------------ | ------------- |
-| Spotify       | Yes             | Yes          | Yes           |
-| Youtube Music | Yes             | No           | Yes           |
-| Apple Music   | Yes             | No           | Yes           |
-| Deezer        | Yes             | Yes          | Yes           |
-| SoundCloud    | Yes             | No           | Yes           |
-| Tidal         | No              | No           | No            |
+## Supported Streaming Services (Adapters)
+
+Adapters represent the streaming services supported by the app, each adapter allows the app to convert links from one platform to other platforms. The table below shows which features are available for each service:
+
+| Adapter | Inverted Search | Official API           | Verified Links |
+| ----------------- | --------------- | ----------------------- | -------------- |
+| Spotify           | Yes             | Yes                    | Yes            |
+| YouTube Music     | Yes             | No                     | Yes            |
+| Apple Music       | Yes             | No                     | Yes            |
+| Deezer            | Yes             | Yes                    | Yes            |
+| SoundCloud        | Yes             | No                     | Yes            |
+| Tidal             | No              | No (coming soon)       | No             |
 
 ## Web Page
 
@@ -22,6 +26,17 @@
 ![Uptime Badge](https://uptime.sjdonado.com/api/badge/3/uptime/24?labelPrefix=API%20&labelSuffix=h) ![Uptime Badge](https://uptime.sjdonado.com/api/badge/3/ping/24?labelPrefix=API%20)
 
 <a title="Install idonthavespotify Raycast Extension" href="https://www.raycast.com/sjdonado/idonthavespotify"><img src="https://www.raycast.com/sjdonado/idonthavespotify/install_button@2x.png?v=1.1" height="64" style="height: 64px;" alt=""></a>
+
+## Local setup
+
+There are a few environment variables you can mock. If you one to do an update or a new feature, we can always rely on the test outputs without needing to run the project. If you'd like to replicate the production environment locally, email me and I’ll provide you with all the environment variables.
+
+```sh
+docker compose up -d redis
+
+bun install
+bun dev
+```
 
 ## More info
 
