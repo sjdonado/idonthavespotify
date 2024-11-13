@@ -54,17 +54,13 @@ export default function MainLayout({
 
         <script src="https://unpkg.com/htmx.org@1.9.12"></script>
 
+        <link href="/assets/css/fontawesome.css" rel="stylesheet" />
         <link href="/assets/index.min.css" rel="stylesheet" />
+
         <link href="https://fonts.cdnfonts.com/css/poppins" rel="stylesheet" />
       </head>
 
       <body class="h-screen bg-black font-light text-white">{children}</body>
-
-      <script
-        defer
-        src="https://kit.fontawesome.com/fe8414cd80.js"
-        crossorigin="anonymous"
-      />
 
       <script
         defer
