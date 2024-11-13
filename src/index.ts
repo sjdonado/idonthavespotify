@@ -1,6 +1,7 @@
 import { Elysia } from 'elysia';
 import { html } from '@elysiajs/html';
 import { staticPlugin } from '@elysiajs/static';
+import compression from 'elysia-compress';
 
 import { logger } from './utils/logger';
 
@@ -9,6 +10,11 @@ import { pageRouter } from './routes/page';
 
 export const app = new Elysia()
   .use(html())
+  .use(
+    compression({
+      as: 'scoped',
+    })
+  )
   .use(
     staticPlugin({
       prefix: '',
