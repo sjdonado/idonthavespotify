@@ -1,3 +1,5 @@
+import { Html } from '@elysiajs/html';
+
 export default function LoadingIndicator() {
   return (
     <div

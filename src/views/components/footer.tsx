@@ -1,3 +1,5 @@
+import { Html } from '@elysiajs/html';
+
 import { ENV } from '~/config/env';
 
 export default function Footer() {

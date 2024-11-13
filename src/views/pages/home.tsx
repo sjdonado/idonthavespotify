@@ -1,3 +1,5 @@
+import { Html } from '@elysiajs/html';
+
 import LoadingIndicator from '../components/loading-indicator';
 import Footer from '../components/footer';
 

@@ -1,3 +1,5 @@
+import { Html } from '@elysiajs/html';
+
 import CustomMetaTag from '../components/custom-meta-tag';
 
 export default function MainLayout({

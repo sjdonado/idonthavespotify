@@ -1,3 +1,5 @@
+import { Html } from '@elysiajs/html';
+
 import { Adapter } from '~/config/enum';
 import { SearchResult } from '~/services/search';
 

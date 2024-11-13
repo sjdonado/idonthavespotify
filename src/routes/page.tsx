@@ -1,4 +1,5 @@
 import { Elysia } from 'elysia';
+import { Html } from '@elysiajs/html';
 
 import { logger } from '~/utils/logger';
 
