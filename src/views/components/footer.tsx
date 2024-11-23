@@ -19,8 +19,16 @@ export default function Footer() {
           target="_blank"
           rel="noreferrer"
         >
-          <i class="fas fa-server mr-1" />
           Status
+        </a>
+        <span class="mx-2 text-gray-500">|</span>
+        <a
+          href="https://github.com/sjdonado/idonthavespotify"
+          class="text-green-500 hover:underline"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Source Code
         </a>
         <span class="mx-2 text-gray-500">|</span>
         <a
@@ -42,17 +50,7 @@ export default function Footer() {
               fill="currentColor"
             />
           </svg>
-          <span>Install Extension</span>
-        </a>
-        <span class="mx-2 text-gray-500">|</span>
-        <a
-          href="https://github.com/sjdonado/idonthavespotify"
-          class="text-green-500 hover:underline"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <i class="fab fa-github mr-1" />
-          Source Code
+          <span>Raycast Extension</span>
         </a>
       </p>
     </footer>
