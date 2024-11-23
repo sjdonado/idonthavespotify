@@ -5,27 +5,27 @@ import { SearchResult } from '~/services/search';
 
 const SEARCH_LINK_DICT = {
   [Adapter.Spotify]: {
-    icon: 'fab fa-spotify',
+    icon: 'ti ti-brand-spotify-filled',
     label: 'Listen on Spotify',
   },
   [Adapter.YouTube]: {
-    icon: 'fab fa-youtube',
+    icon: 'ti ti-brand-youtube-filled',
     label: 'Listen on YouTube Music',
   },
   [Adapter.Deezer]: {
-    icon: 'fab fa-deezer',
+    icon: 'ti ti-brand-deezer',
     label: 'Listen on Deezer',
   },
   [Adapter.AppleMusic]: {
-    icon: 'fab fa-apple',
+    icon: 'ti ti-brand-apple-filled',
     label: 'Listen on Apple Music',
   },
   [Adapter.Tidal]: {
-    icon: 'fa fa-music',
+    icon: 'ti ti-brand-tidal',
     label: 'Listen on Tidal',
   },
   [Adapter.SoundCloud]: {
-    icon: 'fab fa-soundcloud',
+    icon: 'ti ti-brand-soundcloud',
     label: 'Listen on SoundCloud',
   },
 };
@@ -57,7 +57,7 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
                 type="button"
                 class="relative flex items-center justify-center gap-2 rounded-lg bg-zinc-700 px-3 py-1 text-sm font-semibold"
               >
-                <i data-search-card-target="icon" class="fas fa-play w-3" />
+                <i data-search-card-target="icon" class="ti ti-player-play-filled w-3" />
                 Audio Preview
                 <div class="absolute bottom-0 left-0 mx-[0.3rem] my-[0.01rem] hidden h-[0.15rem] w-[93%] rounded-lg bg-zinc-600 duration-300 ease-in-out">
                   <div
@@ -73,7 +73,7 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
               type="button"
               class="flex items-center justify-center gap-2 rounded-lg bg-zinc-700 px-3 py-1 text-sm font-semibold"
             >
-              <i class="fas fa-arrow-up-from-bracket" />
+              <i class="ti ti-share-2" />
               Share
             </button>
           </div>
@@ -102,7 +102,7 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
                     aria-label={searchResult.label}
                     class="flex items-center"
                   >
-                    <i class={`${searchResult.icon} w-8`} />
+                    <i class={`${searchResult.icon} w-8 text-lg`} />
                     <p class="underline decoration-0 underline-offset-2">
                       {searchResult.label}
                     </p>
@@ -111,12 +111,12 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
                         class="ml-1 inline-flex items-center justify-center rounded-full bg-green-500 p-1 text-[0.56rem] text-black"
                         aria-label="Verified"
                       >
-                        <i class="fas fa-check" />
+                        <i class="ti ti-check" />
                       </span>
                     )}
                   </a>
                   <button type="button" data-action="search-link#share">
-                    <i class="fa fa-regular fa-copy px-2" />
+                    <i class="ti ti-copy px-2" />
                   </button>
                 </li>
               );

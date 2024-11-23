@@ -19,6 +19,7 @@ export default function Footer() {
           target="_blank"
           rel="noreferrer"
         >
+          <i class="ti ti-server mr-1" />
           Status
         </a>
         <span class="mx-2 text-gray-500">|</span>
@@ -28,6 +29,7 @@ export default function Footer() {
           target="_blank"
           rel="noreferrer"
         >
+          <i class="ti ti-brand-github mr-1" />
           Source Code
         </a>
         <span class="mx-2 text-gray-500">|</span>

@@ -54,12 +54,14 @@ export default function MainLayout({
         />
         <CustomMetaTag property="og:image:alt" content="I Don't Have Spotify favicon" />
 
-        <link href="/assets/css/fontawesome.css" rel="stylesheet" />
-        <link href="/assets/index.min.css" rel="stylesheet" />
-
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+        />
         <link href="https://fonts.cdnfonts.com/css/poppins" rel="stylesheet" />
-
         <script src="https://unpkg.com/htmx.org@2.0.3"></script>
+
+        <link href="/assets/index.min.css" rel="stylesheet" />
       </head>
 
       <body class="h-screen bg-black font-light text-white">{children}</body>

@@ -50,7 +50,7 @@ export default function Home({
               type="submit"
               class="ml-2 rounded-lg border border-green-500 bg-green-500 p-2.5 text-sm font-medium text-black focus:outline-none focus:ring-1 focus:ring-white"
             >
-              <i class="fas fa-search p-1" />
+              <i class="ti ti-search p-1" />
               <span class="sr-only">Search</span>
             </button>
           </form>
@@ -59,7 +59,7 @@ export default function Home({
           {/*   type="button" */}
           {/*   class="flex items-center justify-center gap-2 rounded-lg bg-zinc-700 px-3 py-1 text-sm font-semibold sm:hidden" */}
           {/* > */}
-          {/*   <i class="fas fa-search" /> */}
+          {/*   <i class="ti ti-search" /> */}
           {/*   Search from Clipboard */}
           {/* </button> */}
           <div id="search-results">{children}</div>

@@ -101,11 +101,11 @@ export default class extends Controller {
    */
   updateAudioPreviewIcon(isPlaying) {
     if (isPlaying) {
-      this.iconTarget.classList.remove('fa-pause');
-      this.iconTarget.classList.add('fa-play');
+      this.iconTarget.classList.remove('ti-player-pause-filled');
+      this.iconTarget.classList.add('ti-player-play-filled');
     } else {
-      this.iconTarget.classList.remove('fa-play');
-      this.iconTarget.classList.add('fa-pause');
+      this.iconTarget.classList.remove('ti-player-play-filled');
+      this.iconTarget.classList.add('ti-player-pause-filled');
     }
   }
 }
