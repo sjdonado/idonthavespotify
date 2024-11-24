@@ -49,6 +49,7 @@ export async function getTidalLink(query: string, metadata: SearchMetadata) {
 
   const params = new URLSearchParams({
     countryCode: 'US',
+    include: searchType,
   });
 
   const url = new URL(
@@ -75,13 +76,12 @@ export async function getTidalLink(query: string, metadata: SearchMetadata) {
       throw new Error(`No results found: ${JSON.stringify(response)}`);
     }
 
-    const parsedQuery = query.toLowerCase();
     let bestMatch: SearchResultLink | null = null;
     let highestScore = 0;
 
     for (const item of included) {
       const title = item.attributes.title;
-      const score = compareTwoStrings(title.toLowerCase(), parsedQuery);
+      const score = compareTwoStrings(title.toLowerCase(), query.toLowerCase());
 
       if (score > highestScore) {
         highestScore = score;
