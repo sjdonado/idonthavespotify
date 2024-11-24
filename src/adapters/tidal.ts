@@ -1,3 +1,6 @@
+import { compareTwoStrings } from 'string-similarity';
+
+import { RESPONSE_COMPARE_MIN_SCORE } from '~/config/constants';
 import { Adapter, MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
 import {
@@ -21,6 +24,11 @@ interface TidalSearchResponse {
     id: string;
     type: string;
   }>;
+  included: Array<{
+    attributes: {
+      title: string;
+    };
+  }>;
 }
 
 const TIDAL_SEARCH_TYPES = {
@@ -28,8 +36,8 @@ const TIDAL_SEARCH_TYPES = {
   [MetadataType.Album]: 'albums',
   [MetadataType.Playlist]: 'playlists',
   [MetadataType.Artist]: 'artists',
-  [MetadataType.Show]: '',
-  [MetadataType.Podcast]: '',
+  [MetadataType.Show]: null,
+  [MetadataType.Podcast]: null,
 };
 
 export async function getTidalLink(query: string, metadata: SearchMetadata) {
@@ -61,23 +69,37 @@ export async function getTidalLink(query: string, metadata: SearchMetadata) {
       },
     });
 
-    const data = response.data;
+    const { data, included } = response;
 
-    if (data.length === 0) {
+    if (!data || data.length === 0) {
       throw new Error(`No results found: ${JSON.stringify(response)}`);
     }
 
-    const { id, type } = data[0];
+    const parsedQuery = query.toLowerCase();
+    let bestMatch: SearchResultLink | null = null;
+    let highestScore = 0;
 
-    const searchResultLink = {
-      type: Adapter.Tidal,
-      url: `${ENV.adapters.tidal.baseUrl}/${type.slice(0, -1)}/${id}`,
-      isVerified: type === searchType,
-    } as SearchResultLink;
+    for (const item of included) {
+      const title = item.attributes.title;
+      const score = compareTwoStrings(title.toLowerCase(), parsedQuery);
 
-    await cacheSearchResultLink(url, searchResultLink);
+      if (score > highestScore) {
+        highestScore = score;
+        bestMatch = {
+          type: Adapter.Tidal,
+          url: `${ENV.adapters.tidal.baseUrl}/${searchType.slice(0, -1)}/${data[0].id}`,
+          isVerified: score > RESPONSE_COMPARE_MIN_SCORE,
+        };
+      }
+    }
 
-    return searchResultLink;
+    if (!bestMatch) {
+      throw new Error('No valid matches found.');
+    }
+
+    await cacheSearchResultLink(url, bestMatch);
+
+    return bestMatch;
   } catch (error) {
     logger.error(`[Tidal] (${url}) ${error}`);
     return null;
