@@ -1,17 +1,14 @@
-import { MetadataType, Parser } from '~/config/enum';
-
-import { logger } from '~/utils/logger';
-import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
-
-import { SearchMetadata } from '~/services/search';
-import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
-
 import {
   SPOTIFY_LINK_DESKTOP_REGEX,
   SPOTIFY_LINK_MOBILE_REGEX,
 } from '~/config/constants';
+import { MetadataType, Parser } from '~/config/enum';
+import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
 import { defaultHeaders, fetchMetadata } from '~/services/metadata';
+import { SearchMetadata } from '~/services/search';
 import HttpClient from '~/utils/http-client';
+import { logger } from '~/utils/logger';
+import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
 
 enum SpotifyMetadataType {
   Song = 'music.song',

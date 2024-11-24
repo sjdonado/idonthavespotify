@@ -13,6 +13,7 @@ export enum Parser {
   AppleMusic = 'appleMusic',
   Deezer = 'deezer',
   SoundCloud = 'soundCloud',
+  Tidal = 'tidal',
 }
 
 export enum MetadataType {

@@ -1,13 +1,10 @@
+import { Adapter, MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
-import { MetadataType, Adapter } from '~/config/enum';
-
-import { logger } from '~/utils/logger';
-
-import { SearchMetadata, SearchResultLink } from '~/services/search';
-import { getLinkWithPuppeteer } from '~/utils/scraper';
-import HttpClient from '~/utils/http-client';
-
 import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
+import { SearchMetadata, SearchResultLink } from '~/services/search';
+import HttpClient from '~/utils/http-client';
+import { logger } from '~/utils/logger';
+import { getLinkWithPuppeteer } from '~/utils/scraper';
 
 const YOUTUBE_SEARCH_TYPES = {
   [MetadataType.Song]: 'song',

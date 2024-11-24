@@ -3,11 +3,18 @@ import { version } from '../../package.json';
 export const ENV = {
   adapters: {
     spotify: {
+      apiUrl: Bun.env.SPOTIFY_API_URL!,
       authUrl: Bun.env.SPOTIFY_AUTH_URL!,
       clientId: Bun.env.SPOTIFY_CLIENT_ID!,
       clientSecret: Bun.env.SPOTIFY_CLIENT_SECRET!,
-      apiUrl: Bun.env.SPOTIFY_API_URL!,
       clientVersion: Bun.env.SPOTIFY_CLIENT_VERSION!,
+    },
+    tidal: {
+      baseUrl: Bun.env.TIDAL_BASE_URL!,
+      apiUrl: Bun.env.TIDAL_API_URL!,
+      authUrl: Bun.env.TIDAL_AUTH_URL!,
+      clientId: Bun.env.TIDAL_CLIENT_ID!,
+      clientSecret: Bun.env.TIDAL_CLIENT_SECRET!,
     },
     youTube: {
       musicUrl: Bun.env.YOUTUBE_MUSIC_URL!,
@@ -18,9 +25,6 @@ export const ENV = {
     },
     appleMusic: {
       apiUrl: Bun.env.APPLE_MUSIC_API_URL!,
-    },
-    tidal: {
-      baseUrl: Bun.env.TIDAL_BASE_URL!,
     },
     soundCloud: {
       baseUrl: Bun.env.SOUNDCLOUD_BASE_URL!,

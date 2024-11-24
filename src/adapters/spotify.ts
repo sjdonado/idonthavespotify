@@ -1,23 +1,16 @@
+import { ADAPTERS_QUERY_LIMIT } from '~/config/constants';
+import { Adapter, MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
-
-import {
-  ADAPTERS_QUERY_LIMIT,
-  SPOTIFY_LINK_DESKTOP_REGEX,
-  SPOTIFY_LINK_MOBILE_REGEX,
-} from '~/config/constants';
-import { MetadataType, Adapter } from '~/config/enum';
-
-import HttpClient from '~/utils/http-client';
-import { logger } from '~/utils/logger';
-import { responseMatchesQuery } from '~/utils/compare';
-
-import { SearchMetadata, SearchResultLink } from '~/services/search';
 import {
   cacheSearchResultLink,
   cacheSpotifyAccessToken,
   getCachedSearchResultLink,
   getCachedSpotifyAccessToken,
 } from '~/services/cache';
+import { SearchMetadata, SearchResultLink } from '~/services/search';
+import { responseMatchesQuery } from '~/utils/compare';
+import HttpClient from '~/utils/http-client';
+import { logger } from '~/utils/logger';
 
 interface SpotifyAuthResponse {
   access_token: string;

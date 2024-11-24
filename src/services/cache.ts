@@ -1,8 +1,8 @@
 import { caching } from 'cache-manager';
 import bunSqliteStore from 'cache-manager-bun-sqlite3';
 
-import { ENV } from '~/config/env';
 import type { Parser } from '~/config/enum';
+import { ENV } from '~/config/env';
 
 import { SearchMetadata, SearchResultLink } from './search';
 
@@ -42,8 +42,17 @@ export const getCachedSearchMetadata = async (id: string, parser: Parser) => {
 export const cacheSpotifyAccessToken = async (accessToken: string, expTime: number) => {
   await cacheStore.set('spotify:accessToken', accessToken, expTime);
 };
+
 export const getCachedSpotifyAccessToken = async (): Promise<string | undefined> => {
   return cacheStore.get('spotify:accessToken');
+};
+
+export const cacheTidalAccessToken = async (accessToken: string, expTime: number) => {
+  await cacheStore.set('tidal:accessToken', accessToken, expTime);
+};
+
+export const getCachedTidalAccessToken = async (): Promise<string | undefined> => {
+  return cacheStore.get('tidal:accessToken');
 };
 
 export const cacheShortenLink = async (link: string, refer: string) => {

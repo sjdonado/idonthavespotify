@@ -8,7 +8,6 @@ import {
   YOUTUBE_LINK_REGEX,
 } from '~/config/constants';
 import { Parser } from '~/config/enum';
-
 import { getSourceFromId } from '~/utils/encoding';
 import { logger } from '~/utils/logger';
 
@@ -31,7 +30,10 @@ export const getSearchParser = (link?: string, searchId?: string) => {
   }
 
   if (!source) {
-    throw new ParseError('Source not found');
+    const error = new ParseError();
+    error.message = 'Source not found';
+
+    throw error;
   }
 
   let id, type;
@@ -71,7 +73,10 @@ export const getSearchParser = (link?: string, searchId?: string) => {
   }
 
   if (!id || !type) {
-    throw new ParseError('Service id could not be extracted from source.');
+    const error = new ParseError();
+    error.message = 'Service id could not be extracted from source.';
+
+    throw error;
   }
 
   const searchParser = {
