@@ -5,6 +5,7 @@ import {
   DEEZER_LINK_REGEX,
   SOUNDCLOUD_LINK_REGEX,
   SPOTIFY_LINK_REGEX,
+  TIDAL_LINK_REGEX,
   YOUTUBE_LINK_REGEX,
 } from '~/config/constants';
 import { Parser } from '~/config/enum';
@@ -70,6 +71,12 @@ export const getSearchParser = (link?: string, searchId?: string) => {
   if (soundCloudId) {
     id = soundCloudId;
     type = Parser.SoundCloud;
+  }
+
+  const tidalId = source.match(TIDAL_LINK_REGEX)?.[1];
+  if (tidalId) {
+    id = tidalId;
+    type = Parser.Tidal;
   }
 
   if (!id || !type) {

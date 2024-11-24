@@ -17,6 +17,7 @@ import {
   getSoundCloudQueryFromMetadata,
 } from '~/parsers/sound-cloud';
 import { getSpotifyMetadata, getSpotifyQueryFromMetadata } from '~/parsers/spotify';
+import { getTidalMetadata, getTidalQueryFromMetadata } from '~/parsers/tidal';
 import { getYouTubeMetadata, getYouTubeQueryFromMetadata } from '~/parsers/youtube';
 import { generateId } from '~/utils/encoding';
 import { logger } from '~/utils/logger';
@@ -90,6 +91,10 @@ export const search = async ({
     case Parser.SoundCloud:
       metadata = await getSoundCloudMetadata(searchParser.id, searchParser.source);
       query = getSoundCloudQueryFromMetadata(metadata);
+      break;
+    case Parser.Tidal:
+      metadata = await getTidalMetadata(searchParser.id, searchParser.source);
+      query = getTidalQueryFromMetadata(metadata);
       break;
   }
 

@@ -5,7 +5,7 @@ import { SearchResult } from '~/services/search';
 
 const SEARCH_LINK_DICT = {
   [Adapter.Spotify]: {
-    icon: 'ti ti-brand-spotify-filled',
+    icon: 'ti ti-brand-spotify',
     label: 'Listen on Spotify',
   },
   [Adapter.YouTube]: {
