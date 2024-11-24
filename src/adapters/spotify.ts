@@ -45,7 +45,7 @@ export async function getSpotifyLink(query: string, metadata: SearchMetadata) {
   const searchType = SPOTIFY_SEARCH_TYPES[metadata.type];
 
   if (!searchType) {
-    return;
+    return null;
   }
 
   const params = new URLSearchParams({
@@ -89,6 +89,7 @@ export async function getSpotifyLink(query: string, metadata: SearchMetadata) {
     return searchResultLink;
   } catch (error) {
     logger.error(`[Spotify] (${url}) ${error}`);
+    return null;
   }
 }
 

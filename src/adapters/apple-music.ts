@@ -23,7 +23,7 @@ export async function getAppleMusicLink(query: string, metadata: SearchMetadata)
   const searchType = APPLE_MUSIC_SEARCH_TYPES[metadata.type];
 
   if (!searchType) {
-    return;
+    return null;
   }
 
   // apple music does not support x-www-form-urlencoded encoding
@@ -58,5 +58,6 @@ export async function getAppleMusicLink(query: string, metadata: SearchMetadata)
     return searchResultLink;
   } catch (err) {
     logger.error(`[Apple Music] (${url}) ${err} `);
+    return null;
   }
 }

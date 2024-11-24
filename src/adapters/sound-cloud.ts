@@ -10,7 +10,7 @@ import { getCheerioDoc } from '~/utils/scraper';
 
 export async function getSoundCloudLink(query: string, metadata: SearchMetadata) {
   if (metadata.type === MetadataType.Show) {
-    return;
+    return null;
   }
 
   const params = new URLSearchParams({
@@ -39,7 +39,7 @@ export async function getSoundCloudLink(query: string, metadata: SearchMetadata)
     const { href, score } = getResultWithBestScore(noscriptDoc, listElements, query);
 
     if (score <= RESPONSE_COMPARE_MIN_SCORE) {
-      return;
+      return null;
     }
 
     const searchResultLink = {
@@ -53,5 +53,6 @@ export async function getSoundCloudLink(query: string, metadata: SearchMetadata)
     return searchResultLink;
   } catch (err) {
     logger.error(`[SoundCloud] (${url}) ${err}`);
+    return null;
   }
 }

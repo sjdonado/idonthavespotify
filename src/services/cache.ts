@@ -1,7 +1,7 @@
 import { caching } from 'cache-manager';
 import bunSqliteStore from 'cache-manager-bun-sqlite3';
 
-import type { Parser } from '~/config/enum';
+import type { Adapter, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 
 import { SearchMetadata, SearchResultLink } from './search';
@@ -53,6 +53,19 @@ export const cacheTidalAccessToken = async (accessToken: string, expTime: number
 
 export const getCachedTidalAccessToken = async (): Promise<string | undefined> => {
   return cacheStore.get('tidal:accessToken');
+};
+
+export const cacheTidalUniversalLinkResponse = async (
+  link: string,
+  response: Record<Adapter, SearchResultLink | null>
+) => {
+  await cacheStore.set(`tidal:universalLink:${link}`, response);
+};
+
+export const getCachedTidalUniversalLinkResponse = async (
+  link: string
+): Promise<Record<Adapter, SearchResultLink | null> | undefined> => {
+  return cacheStore.get(`tidal:universalLink:${link}`);
 };
 
 export const cacheShortenLink = async (link: string, refer: string) => {

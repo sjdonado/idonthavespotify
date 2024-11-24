@@ -16,6 +16,8 @@ const YOUTUBE_SEARCH_TYPES = {
 };
 
 export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
+  return null; // TEMPFIX: youtube blocked the server ip
+
   const params = new URLSearchParams({
     q: `${query} ${YOUTUBE_SEARCH_TYPES[metadata.type]}`,
   });
@@ -46,8 +48,6 @@ export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
       };
     });
 
-    return; // TEMPFIX: youtube is blocked
-
     const link = await getLinkWithPuppeteer(
       url.toString(),
       'ytmusic-card-shelf-renderer a',
@@ -55,7 +55,7 @@ export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
     );
 
     if (!link) {
-      return;
+      return null;
     }
 
     const searchResultLink = {
@@ -69,6 +69,7 @@ export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
     return searchResultLink;
   } catch (error) {
     logger.error(`[YouTube] (${url}) ${error}`);
+    return null;
   }
 }
 
