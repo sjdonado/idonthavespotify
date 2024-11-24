@@ -49,6 +49,8 @@ export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
       };
     });
 
+    return; // TEMPFIX: youtube is blocked
+
     const link = await getLinkWithPuppeteer(
       url.toString(),
       'ytmusic-card-shelf-renderer a',
