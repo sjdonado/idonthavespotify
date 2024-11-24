@@ -92,7 +92,8 @@ export const getTidalQueryFromMetadata = (metadata: SearchMetadata) => {
 };
 
 export const getUniversalMetadataFromTidal = async (
-  link: string
+  link: string,
+  isVerified: boolean
 ): Promise<Record<Adapter, SearchResultLink | null> | undefined> => {
   const cached = await getCachedTidalUniversalLinkResponse(link);
   if (cached) {
@@ -110,7 +111,7 @@ export const getUniversalMetadataFromTidal = async (
       ? {
           type,
           url,
-          isVerified: true,
+          isVerified,
         }
       : null;
   };
@@ -126,11 +127,12 @@ export const getUniversalMetadataFromTidal = async (
         'a[href*="music.youtube.com"]',
         Adapter.YouTube
       ),
-      [Adapter.AppleMusic]: extractLink(
-        doc,
-        'a[href*="music.apple.com"]',
-        Adapter.AppleMusic
-      ),
+      // [Adapter.AppleMusic]: extractLink(
+      //   doc,
+      //   'a[href*="music.apple.com"]',
+      //   Adapter.AppleMusic
+      // ),
+      [Adapter.AppleMusic]: null,
       [Adapter.Deezer]: null,
       [Adapter.SoundCloud]: null,
       [Adapter.Tidal]: null,

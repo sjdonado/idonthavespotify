@@ -38,14 +38,10 @@ export async function getSoundCloudLink(query: string, metadata: SearchMetadata)
 
     const { href, score } = getResultWithBestScore(noscriptDoc, listElements, query);
 
-    if (score <= RESPONSE_COMPARE_MIN_SCORE) {
-      return null;
-    }
-
     const searchResultLink = {
       type: Adapter.SoundCloud,
       url: `${ENV.adapters.soundCloud.baseUrl}${href}`,
-      isVerified: true,
+      isVerified: score > RESPONSE_COMPARE_MIN_SCORE,
     } as SearchResultLink;
 
     await cacheSearchResultLink(url, searchResultLink);

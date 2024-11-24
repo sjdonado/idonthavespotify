@@ -154,10 +154,13 @@ export const search = async ({
   }
 
   if (tidalLink) {
-    links.push({ type: Adapter.Tidal, url: tidalLink.url, isVerified: true });
+    links.push(tidalLink);
 
     // Fetch universal links from Tidal
-    const fromTidalULink = await getUniversalMetadataFromTidal(`${tidalLink.url}/u`);
+    const fromTidalULink = await getUniversalMetadataFromTidal(
+      `${tidalLink.url}/u`,
+      tidalLink.isVerified as boolean
+    );
 
     logger.info(
       `[${search.name}] (tidal universalLink results) ${Object.values(
@@ -212,6 +215,13 @@ export const search = async ({
   ]);
 
   metadata = updatedMetadata;
+  links.sort((a, b) => {
+    // Prioritize verified links
+    if (a.isVerified && !b.isVerified) return -1;
+    if (!a.isVerified && b.isVerified) return 1;
+
+    return a.type.localeCompare(b.type);
+  });
 
   logger.info(`[${search.name}] (results) ${links.map(link => link?.url)}`);
 
