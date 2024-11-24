@@ -14,7 +14,7 @@ import { logger } from '~/utils/logger';
 
 export type SearchParser = {
   id: string;
-  type: string;
+  type: Parser;
   source: string;
 };
 
@@ -73,7 +73,7 @@ export const getSearchParser = (link?: string, searchId?: string) => {
     type = Parser.SoundCloud;
   }
 
-  const tidalId = source.match(TIDAL_LINK_REGEX)?.[1];
+  const tidalId = source.match(TIDAL_LINK_REGEX)?.[2];
   if (tidalId) {
     id = tidalId;
     type = Parser.Tidal;
