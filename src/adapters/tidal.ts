@@ -10,6 +10,7 @@ import {
   getCachedTidalAccessToken,
 } from '~/services/cache';
 import { SearchMetadata, SearchResultLink } from '~/services/search';
+import { getOrUpdateAccessToken } from '~/utils/access-token';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 
@@ -107,33 +108,34 @@ export async function getTidalLink(query: string, metadata: SearchMetadata) {
 }
 
 export async function getOrUpdateTidalAccessToken() {
-  const cache = await getCachedTidalAccessToken();
+  return getOrUpdateAccessToken(
+    getCachedTidalAccessToken,
+    async () => {
+      const data = new URLSearchParams({
+        grant_type: 'client_credentials',
+      });
 
-  if (cache) {
-    return cache;
-  }
+      const response = await HttpClient.post<TidalAuthResponse>(
+        ENV.adapters.tidal.authUrl,
+        data,
+        {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Authorization:
+              'Basic ' +
+              Buffer.from(
+                ENV.adapters.tidal.clientId + ':' + ENV.adapters.tidal.clientSecret
+              ).toString('base64'),
+          },
+        }
+      );
 
-  const data = new URLSearchParams({
-    grant_type: 'client_credentials',
-  });
-
-  const response = await HttpClient.post<TidalAuthResponse>(
-    ENV.adapters.tidal.authUrl,
-    data,
-    {
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/x-www-form-urlencoded',
-        Authorization:
-          'Basic ' +
-          Buffer.from(
-            ENV.adapters.tidal.clientId + ':' + ENV.adapters.tidal.clientSecret
-          ).toString('base64'),
-      },
-    }
+      return {
+        accessToken: response.access_token,
+        expiresIn: response.expires_in,
+      };
+    },
+    cacheTidalAccessToken
   );
-
-  await cacheTidalAccessToken(response.access_token, response.expires_in);
-
-  return response.access_token;
 }

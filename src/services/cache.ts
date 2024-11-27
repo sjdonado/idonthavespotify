@@ -6,6 +6,11 @@ import { ENV } from '~/config/env';
 
 import { SearchMetadata, SearchResultLink } from './search';
 
+export type AccessToken = {
+  accessToken: string;
+  expiresAt: number;
+};
+
 export const cacheStore = await caching(bunSqliteStore, {
   name: 'cache',
   path: ENV.cache.databasePath,
@@ -39,20 +44,20 @@ export const getCachedSearchMetadata = async (id: string, parser: Parser) => {
   return data;
 };
 
-export const cacheSpotifyAccessToken = async (accessToken: string, expTime: number) => {
-  await cacheStore.set('spotify:accessToken', accessToken, expTime);
+export const cacheSpotifyAccessToken = async (token: AccessToken, expTime: number) => {
+  await cacheStore.set('spotify:accessToken', token, expTime);
 };
 
-export const getCachedSpotifyAccessToken = async (): Promise<string | undefined> => {
-  return cacheStore.get('spotify:accessToken');
+export const getCachedSpotifyAccessToken = async (): Promise<AccessToken | undefined> => {
+  return await cacheStore.get<AccessToken>('spotify:accessToken');
 };
 
-export const cacheTidalAccessToken = async (accessToken: string, expTime: number) => {
-  await cacheStore.set('tidal:accessToken', accessToken, expTime);
+export const cacheTidalAccessToken = async (token: AccessToken, expTime: number) => {
+  await cacheStore.set('tidal:accessToken', token, expTime);
 };
 
-export const getCachedTidalAccessToken = async (): Promise<string | undefined> => {
-  return cacheStore.get('tidal:accessToken');
+export const getCachedTidalAccessToken = async (): Promise<AccessToken | undefined> => {
+  return await cacheStore.get<AccessToken>('tidal:accessToken');
 };
 
 export const cacheTidalUniversalLinkResponse = async (
