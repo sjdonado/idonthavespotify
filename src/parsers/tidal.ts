@@ -127,12 +127,11 @@ export const getUniversalMetadataFromTidal = async (
         'a[href*="music.youtube.com"]',
         Adapter.YouTube
       ),
-      // [Adapter.AppleMusic]: extractLink(
-      //   doc,
-      //   'a[href*="music.apple.com"]',
-      //   Adapter.AppleMusic
-      // ),
-      [Adapter.AppleMusic]: null,
+      [Adapter.AppleMusic]: extractLink(
+        doc,
+        'a[href*="music.apple.com"]',
+        Adapter.AppleMusic
+      ),
       [Adapter.Deezer]: null,
       [Adapter.SoundCloud]: null,
       [Adapter.Tidal]: null,
