@@ -1,4 +1,4 @@
-export enum Adapter {
+export enum StreamingService {
   Spotify = 'spotify',
   YouTube = 'youTube',
   AppleMusic = 'appleMusic',
@@ -7,13 +7,25 @@ export enum Adapter {
   Tidal = 'tidal',
 }
 
-export enum Parser {
-  Spotify = 'spotify',
-  YouTube = 'youTube',
-  AppleMusic = 'appleMusic',
-  Deezer = 'deezer',
-  SoundCloud = 'soundCloud',
+export enum Adapter {
+  Spotify = StreamingService.Spotify,
+  YouTube = StreamingService.YouTube,
+  AppleMusic = StreamingService.AppleMusic,
+  Deezer = StreamingService.Deezer,
+  SoundCloud = StreamingService.SoundCloud,
+  Tidal = StreamingService.Tidal,
 }
+
+export enum Parser {
+  Spotify = StreamingService.Spotify,
+  YouTube = StreamingService.YouTube,
+  AppleMusic = StreamingService.AppleMusic,
+  Deezer = StreamingService.Deezer,
+  SoundCloud = StreamingService.SoundCloud,
+  Tidal = StreamingService.Tidal,
+}
+
+export type StreamingServiceType = Adapter & Parser;
 
 export enum MetadataType {
   Song = 'song',

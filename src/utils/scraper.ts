@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import puppeteer, { Browser, Page, CookieParam } from 'puppeteer';
+import puppeteer, { Browser, CookieParam, Page } from 'puppeteer';
 
 let browser: Browser | null = null;
 
@@ -46,10 +46,8 @@ export async function getLinkWithPuppeteer(
 
     await page.setViewport({ width: 768, height: 600 });
 
-    // Use timeout for the page.goto operation
     await withTimeout(page.goto(url, { waitUntil: 'networkidle0' }), timeout);
 
-    // Use timeout for the page.evaluate operation
     const href = await withTimeout(
       page.evaluate(
         // eslint-disable-next-line

@@ -13,6 +13,8 @@ services:
     image: sjdonado/bit
     environment:
       APP_URL: http://localhost:4001
+      ADMIN_NAME: 'Admin'
+      ADMIN_API_KEY: 'E7gWaEu8JOIGKR/jTmOOgbmBCup2h48jmux2YvIzpxk='
     volumes:
       - sqlite_data:/app/sqlite
     ports:

@@ -1,23 +1,17 @@
+import { ADAPTERS_QUERY_LIMIT } from '~/config/constants';
+import { Adapter, MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
-
-import {
-  ADAPTERS_QUERY_LIMIT,
-  SPOTIFY_LINK_DESKTOP_REGEX,
-  SPOTIFY_LINK_MOBILE_REGEX,
-} from '~/config/constants';
-import { MetadataType, Adapter } from '~/config/enum';
-
-import HttpClient from '~/utils/http-client';
-import { logger } from '~/utils/logger';
-import { responseMatchesQuery } from '~/utils/compare';
-
-import { SearchMetadata, SearchResultLink } from '~/services/search';
 import {
   cacheSearchResultLink,
   cacheSpotifyAccessToken,
   getCachedSearchResultLink,
   getCachedSpotifyAccessToken,
 } from '~/services/cache';
+import { SearchMetadata, SearchResultLink } from '~/services/search';
+import { getOrUpdateAccessToken } from '~/utils/access-token';
+import { responseMatchesQuery } from '~/utils/compare';
+import HttpClient from '~/utils/http-client';
+import { logger } from '~/utils/logger';
 
 interface SpotifyAuthResponse {
   access_token: string;
@@ -52,7 +46,7 @@ export async function getSpotifyLink(query: string, metadata: SearchMetadata) {
   const searchType = SPOTIFY_SEARCH_TYPES[metadata.type];
 
   if (!searchType) {
-    return;
+    return null;
   }
 
   const params = new URLSearchParams({
@@ -96,37 +90,39 @@ export async function getSpotifyLink(query: string, metadata: SearchMetadata) {
     return searchResultLink;
   } catch (error) {
     logger.error(`[Spotify] (${url}) ${error}`);
+    return null;
   }
 }
 
 export async function getOrUpdateSpotifyAccessToken() {
-  const cache = await getCachedSpotifyAccessToken();
+  return getOrUpdateAccessToken(
+    getCachedSpotifyAccessToken,
+    async () => {
+      const data = new URLSearchParams({
+        grant_type: 'client_credentials',
+      });
 
-  if (cache) {
-    return cache;
-  }
+      const response = await HttpClient.post<SpotifyAuthResponse>(
+        ENV.adapters.spotify.authUrl,
+        data,
+        {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Authorization:
+              'Basic ' +
+              Buffer.from(
+                ENV.adapters.spotify.clientId + ':' + ENV.adapters.spotify.clientSecret
+              ).toString('base64'),
+          },
+        }
+      );
 
-  const data = new URLSearchParams({
-    grant_type: 'client_credentials',
-  });
-
-  const response = await HttpClient.post<SpotifyAuthResponse>(
-    ENV.adapters.spotify.authUrl,
-    data,
-    {
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/x-www-form-urlencoded',
-        Authorization:
-          'Basic ' +
-          Buffer.from(
-            ENV.adapters.spotify.clientId + ':' + ENV.adapters.spotify.clientSecret
-          ).toString('base64'),
-      },
-    }
+      return {
+        accessToken: response.access_token,
+        expiresIn: response.expires_in,
+      };
+    },
+    cacheSpotifyAccessToken
   );
-
-  await cacheSpotifyAccessToken(response.access_token, response.expires_in);
-
-  return response.access_token;
 }

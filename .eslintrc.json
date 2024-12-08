@@ -15,7 +15,8 @@
     "sourceType": "module"
   },
   "plugins": [
-    "jsx"
+    "jsx",
+    "simple-import-sort"
   ],
   "rules": {
     "no-unused-vars": "off",
@@ -24,6 +25,8 @@
       {
         "varsIgnorePattern": "^Html$"
       }
-    ]
+    ],
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error"
   }
 }

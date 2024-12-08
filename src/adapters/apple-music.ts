@@ -1,14 +1,12 @@
-import { ENV } from '~/config/env';
-import { MetadataType, Adapter } from '~/config/enum';
 import { RESPONSE_COMPARE_MIN_SCORE } from '~/config/constants';
-
+import { Adapter, MetadataType } from '~/config/enum';
+import { ENV } from '~/config/env';
+import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
+import { SearchMetadata, SearchResultLink } from '~/services/search';
+import { getResultWithBestScore } from '~/utils/compare';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { getCheerioDoc } from '~/utils/scraper';
-import { getResultWithBestScore } from '~/utils/compare';
-
-import { SearchMetadata, SearchResultLink } from '~/services/search';
-import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
 
 export const APPLE_MUSIC_LINK_SELECTOR = 'a[href^="https://music.apple.com/"]';
 
@@ -25,7 +23,7 @@ export async function getAppleMusicLink(query: string, metadata: SearchMetadata)
   const searchType = APPLE_MUSIC_SEARCH_TYPES[metadata.type];
 
   if (!searchType) {
-    return;
+    return null;
   }
 
   // apple music does not support x-www-form-urlencoded encoding
@@ -60,5 +58,6 @@ export async function getAppleMusicLink(query: string, metadata: SearchMetadata)
     return searchResultLink;
   } catch (err) {
     logger.error(`[Apple Music] (${url}) ${err} `);
+    return null;
   }
 }
