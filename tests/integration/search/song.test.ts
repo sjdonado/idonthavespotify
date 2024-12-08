@@ -11,7 +11,7 @@ import { cacheStore } from '~/services/cache';
 import deezerSongResponseMock from '../../fixtures/deezer/songResponseMock.json';
 import tidalSongResponseMock from '../../fixtures/tidal/songResponseMock.json';
 import youtubeSongResponseMock from '../../fixtures/youtube/songResponseMock.json';
-import { JSONRequest } from '../../utils/request';
+import { jsonRequest } from '../../utils/request';
 import {
   API_SEARCH_ENDPOINT,
   getAppleMusicSearchLink,
@@ -52,10 +52,9 @@ describe('GET /search - Song', () => {
     mock.reset();
     cacheStore.reset();
 
+    getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
     mock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
     mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
-
-    getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
   });
 
   it('should return 200', async () => {
@@ -68,7 +67,7 @@ describe('GET /search - Song', () => {
     const deezerSearchLink = getDeezerSearchLink(query, 'track');
     const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
+    const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
 
     mock.onGet(link).reply(200, spotifySongHeadResponseMock);
 
@@ -133,7 +132,7 @@ describe('GET /search - Song', () => {
     const deezerSearchLink = getDeezerSearchLink(query, 'track');
     const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(API_SEARCH_ENDPOINT, { link: mobileSpotifyLink });
+    const request = jsonRequest(API_SEARCH_ENDPOINT, { link: mobileSpotifyLink });
 
     mock.onGet(mobileSpotifyLink).reply(200, spotifyMobileHeadResponseMock);
     mock.onGet(desktopSpotifyLink).reply(200, spotifySongHeadResponseMock);
@@ -200,7 +199,7 @@ describe('GET /search - Song', () => {
     const deezerSearchLink = getDeezerSearchLink(query, 'track');
     const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
+    const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
 
     mock.onGet(link).reply(200, spotifySongHeadResponseMock);
 

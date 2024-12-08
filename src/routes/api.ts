@@ -1,4 +1,4 @@
-import { Elysia, InternalServerError } from 'elysia';
+import { Elysia } from 'elysia';
 
 import { Adapter } from '~/config/enum';
 import { search } from '~/services/search';

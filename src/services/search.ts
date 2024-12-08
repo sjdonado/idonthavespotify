@@ -1,3 +1,5 @@
+import { InternalServerError } from 'elysia';
+
 import { getAppleMusicLink } from '~/adapters/apple-music';
 import { getDeezerLink } from '~/adapters/deezer';
 import { getSoundCloudLink } from '~/adapters/sound-cloud';
@@ -101,7 +103,7 @@ export const search = async ({
   const extractQuery = queryExtractors[searchParser.type];
 
   if (!fetchMetadata || !extractQuery) {
-    throw new Error('Parser not implemented yet');
+    throw new InternalServerError('Parser not implemented yet');
   }
 
   let metadata = await fetchMetadata(searchParser.id, searchParser.source);

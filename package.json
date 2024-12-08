@@ -19,7 +19,6 @@
     "cache-manager-bun-sqlite3": "^0.2.0",
     "cheerio": "^1.0.0",
     "elysia": "^1.1.26",
-    "elysia-compress": "^1.2.1",
     "howler": "^2.2.4",
     "notyf": "^3.10.0",
     "pino": "^8.20.0",

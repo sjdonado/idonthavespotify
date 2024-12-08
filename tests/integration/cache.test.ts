@@ -1,12 +1,15 @@
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
-import { afterAll, beforeAll, describe, expect, it, jest, mock } from 'bun:test';
+import { afterAll, beforeAll, describe, expect, it, spyOn } from 'bun:test';
 
+import { MetadataType } from '~/config/enum';
 import { app } from '~/index';
+import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
-import { getLinkWithPuppeteer } from '~/utils/scraper';
 
 import deezerSongResponseMock from '../fixtures/deezer/songResponseMock.json';
+import tidalSongResponseMock from '../fixtures/tidal/songResponseMock.json';
+import youtubeSongResponseMock from '../fixtures/youtube/songResponseMock.json';
 import { jsonRequest } from '../utils/request';
 import {
   API_SEARCH_ENDPOINT,
@@ -14,6 +17,8 @@ import {
   getAppleMusicSearchLink,
   getDeezerSearchLink,
   getSoundCloudSearchLink,
+  getTidalSearchLink,
+  getYouTubeSearchLink,
   urlShortenerLink,
   urlShortenerResponseMock,
 } from '../utils/shared';
@@ -29,13 +34,12 @@ const [
   Bun.file('tests/fixtures/soundcloud/songResponseMock.html').text(),
 ]);
 
-mock.module('~/utils/scraper', () => ({
-  getLinkWithPuppeteer: jest.fn(),
-}));
-
 describe('Searches cache', () => {
   let mock: AxiosMockAdapter;
-  const getLinkWithPuppeteerMock = getLinkWithPuppeteer as jest.Mock;
+  const getUniversalMetadataFromTidalMock = spyOn(
+    tidalUniversalLinkParser,
+    'getUniversalMetadataFromTidal'
+  );
 
   beforeAll(async () => {
     cacheStore.reset();
@@ -44,27 +48,29 @@ describe('Searches cache', () => {
 
     const query = 'Do Not Disturb Drake';
 
+    const tidalSearchLink = getTidalSearchLink(query, MetadataType.Song);
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
+    const youtubeSearchLink = getYouTubeSearchLink(query, MetadataType.Song);
     const deezerSearchLink = getDeezerSearchLink(query, 'track');
     const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
     const request = jsonRequest(API_SEARCH_ENDPOINT, { link: cachedSpotifyLink });
 
     mock.onGet(cachedSpotifyLink).reply(200, spotifySongHeadResponseMock);
+
+    mock.onGet(tidalSearchLink).reply(200, tidalSongResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
+    mock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
+
+    getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
     mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
-    getLinkWithPuppeteerMock.mockResolvedValueOnce(
-      'https://music.youtube.com/watch?v=zhY_0DoQCQs'
-    );
-
     // fill cache
-    await app.handle(request).then(res => res.json());
+    await app.handle(request);
 
-    expect(mock.history.get).toHaveLength(4);
-    expect(getLinkWithPuppeteerMock).toHaveBeenCalledTimes(1);
+    expect(mock.history.get).toHaveLength(5);
   });
 
   afterAll(() => {

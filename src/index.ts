@@ -1,20 +1,13 @@
-import { Elysia } from 'elysia';
 import { html } from '@elysiajs/html';
 import { staticPlugin } from '@elysiajs/static';
-import compression from 'elysia-compress';
-
-import { logger } from './utils/logger';
+import { Elysia } from 'elysia';
 
 import { apiRouter } from './routes/api';
 import { pageRouter } from './routes/page';
+import { logger } from './utils/logger';
 
 export const app = new Elysia()
   .use(html())
-  .use(
-    compression({
-      as: 'scoped',
-    })
-  )
   .use(
     staticPlugin({
       prefix: '',
