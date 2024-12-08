@@ -11,11 +11,16 @@ import {
   mock,
 } from 'bun:test';
 
+import { MetadataType } from '~/config/enum';
+import { ENV } from '~/config/env';
 import { app } from '~/index';
+import { getUniversalMetadataFromTidal } from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
 
 import deezerSongResponseMock from '../fixtures/deezer/songResponseMock.json';
-import { JSONRequest } from '../utils/request';
+import tidalSongResponseMock from '../fixtures/tidal/songResponseMock.json';
+import youtubeSongResponseMock from '../fixtures/youtube/songResponseMock.json';
+import { jsonRequest } from '../utils/request';
 import {
   API_ENDPOINT,
   API_SEARCH_ENDPOINT,
@@ -23,6 +28,7 @@ import {
   getAppleMusicSearchLink,
   getDeezerSearchLink,
   getSoundCloudSearchLink,
+  getTidalSearchLink,
   getYouTubeSearchLink,
   urlShortenerLink,
   urlShortenerResponseMock,
@@ -38,16 +44,26 @@ const [
   Bun.file('tests/fixtures/soundcloud/songResponseMock.html').text(),
 ]);
 
+mock.module('~/parsers/tidal-universal-link', () => ({
+  getUniversalMetadataFromTidal: jest.fn(),
+}));
+
 describe('Api router', () => {
   let mock: AxiosMockAdapter;
+  const getUniversalMetadataFromTidalMock = getUniversalMetadataFromTidal as jest.Mock;
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
   });
 
   beforeEach(() => {
+    getUniversalMetadataFromTidalMock.mockReset();
     cacheStore.reset();
     mock.reset();
+
+    getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
+    mock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
+    mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
   });
 
   afterEach(() => {
@@ -59,25 +75,26 @@ describe('Api router', () => {
       const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
       const query = 'Do Not Disturb Drake';
 
+      const tidalSearchLink = getTidalSearchLink(query, MetadataType.Song);
       const appleMusicSearchLink = getAppleMusicSearchLink(query);
-      const youtubeSearchLink = getYouTubeSearchLink(query, 'song');
+      const youtubeSearchLink = getYouTubeSearchLink(query, MetadataType.Song);
       const deezerSearchLink = getDeezerSearchLink(query, 'track');
       const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-      const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
+      const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
 
       mock.onGet(link).reply(200, spotifySongHeadResponseMock);
+
+      mock.onGet(tidalSearchLink).reply(200, tidalSongResponseMock);
       mock.onGet(appleMusicSearchLink).reply(500);
       mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
       mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
-      mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
-      mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
+      mock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
 
-      const mockedYoutubeLink = 'https://music.youtube.com/watch?v=zhY_0DoQCQs';
+      const response = await app.handle(request);
+      const data = await response.json();
 
-      const response = await app.handle(request).then(res => res.json());
-
-      expect(response).toEqual({
+      expect(data).toEqual({
         id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8yS3ZIQzl6MTRHU2w0WXBrTk1YMzg0',
         type: 'song',
         title: 'Do Not Disturb',
@@ -87,11 +104,6 @@ describe('Api router', () => {
         source: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
         universalLink: urlShortenerResponseMock.data.refer,
         links: [
-          {
-            type: 'youTube',
-            url: mockedYoutubeLink,
-            isVerified: true,
-          },
           {
             type: 'deezer',
             url: 'https://www.deezer.com/track/144572248',
@@ -104,34 +116,44 @@ describe('Api router', () => {
           },
           {
             type: 'tidal',
-            url: 'https://listen.tidal.com/search?q=Do+Not+Disturb+Drake',
+            url: 'https://tidal.com/browse/track/71717750',
+            isVerified: true,
+          },
+          {
+            type: 'youTube',
+            url: 'https://music.youtube.com/watch?v=vVd4T5NxLgI',
+            isVerified: true,
           },
         ],
       });
 
-      expect(mock.history.get).toHaveLength(5);
+      expect(mock.history.get).toHaveLength(7);
     });
 
     it('should return 200 when adapter returns error - Youtube', async () => {
       const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
       const query = 'Do Not Disturb Drake';
 
+      const tidalSearchLink = getTidalSearchLink(query, MetadataType.Song);
       const appleMusicSearchLink = getAppleMusicSearchLink(query);
-      // const youtubeSearchLink = getYouTubeSearchLink(query, 'video');
+      const youtubeSearchLink = getYouTubeSearchLink(query, MetadataType.Song);
       const deezerSearchLink = getDeezerSearchLink(query, 'track');
       const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-      const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
+      const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
 
       mock.onGet(link).reply(200, spotifySongHeadResponseMock);
+
+      mock.onGet(tidalSearchLink).reply(200, tidalSongResponseMock);
       mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
       mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
       mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
-      mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
+      mock.onGet(youtubeSearchLink).reply(500);
 
-      const response = await app.handle(request).then(res => res.json());
+      const response = await app.handle(request);
+      const data = await response.json();
 
-      expect(response).toEqual({
+      expect(data).toEqual({
         id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8yS3ZIQzl6MTRHU2w0WXBrTk1YMzg0',
         type: 'song',
         title: 'Do Not Disturb',
@@ -158,36 +180,39 @@ describe('Api router', () => {
           },
           {
             type: 'tidal',
-            url: 'https://listen.tidal.com/search?q=Do+Not+Disturb+Drake',
+            url: 'https://tidal.com/browse/track/71717750',
+            isVerified: true,
           },
         ],
       });
 
-      expect(mock.history.get).toHaveLength(4);
+      expect(mock.history.get).toHaveLength(7);
     });
 
     it('should return 200 when adapter returns error - Deezer', async () => {
       const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
       const query = 'Do Not Disturb Drake';
 
+      const tidalSearchLink = getTidalSearchLink(query, MetadataType.Song);
       const appleMusicSearchLink = getAppleMusicSearchLink(query);
-      const youtubeSearchLink = getYouTubeSearchLink(query, 'video');
+      const youtubeSearchLink = getYouTubeSearchLink(query, MetadataType.Song);
       const deezerSearchLink = getDeezerSearchLink(query, 'track');
       const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-      const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
+      const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
 
       mock.onGet(link).reply(200, spotifySongHeadResponseMock);
+
+      mock.onGet(tidalSearchLink).reply(200, tidalSongResponseMock);
       mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
       mock.onGet(deezerSearchLink).reply(500);
       mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
-      mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
+      mock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
 
-      const mockedYoutubeLink = 'https://music.youtube.com/watch?v=zhY_0DoQCQs';
+      const response = await app.handle(request);
+      const data = await response.json();
 
-      const response = await app.handle(request).then(res => res.json());
-
-      expect(response).toEqual({
+      expect(data).toEqual({
         id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8yS3ZIQzl6MTRHU2w0WXBrTk1YMzg0',
         type: 'song',
         title: 'Do Not Disturb',
@@ -197,11 +222,6 @@ describe('Api router', () => {
         source: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
         universalLink: urlShortenerResponseMock.data.refer,
         links: [
-          {
-            type: 'youTube',
-            url: mockedYoutubeLink,
-            isVerified: true,
-          },
           {
             type: 'appleMusic',
             url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
@@ -214,36 +234,44 @@ describe('Api router', () => {
           },
           {
             type: 'tidal',
-            url: 'https://listen.tidal.com/search?q=Do+Not+Disturb+Drake',
+            url: 'https://tidal.com/browse/track/71717750',
+            isVerified: true,
+          },
+          {
+            type: 'youTube',
+            url: 'https://music.youtube.com/watch?v=vVd4T5NxLgI',
+            isVerified: true,
           },
         ],
       });
 
-      expect(mock.history.get).toHaveLength(5);
+      expect(mock.history.get).toHaveLength(7);
     });
 
     it('should return 200 when adapter returns error - SoundCloud', async () => {
       const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
       const query = 'Do Not Disturb Drake';
 
+      const tidalSearchLink = getTidalSearchLink(query, MetadataType.Song);
       const appleMusicSearchLink = getAppleMusicSearchLink(query);
-      const youtubeSearchLink = getYouTubeSearchLink(query, 'video');
+      const youtubeSearchLink = getYouTubeSearchLink(query, MetadataType.Song);
       const deezerSearchLink = getDeezerSearchLink(query, 'track');
       const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-      const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
+      const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
 
       mock.onGet(link).reply(200, spotifySongHeadResponseMock);
+
+      mock.onGet(tidalSearchLink).reply(200, tidalSongResponseMock);
       mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
       mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
       mock.onGet(soundCloudSearchLink).reply(500);
-      mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
+      mock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
 
-      const mockedYoutubeLink = 'https://music.youtube.com/watch?v=zhY_0DoQCQs';
+      const response = await app.handle(request);
+      const data = await response.json();
 
-      const response = await app.handle(request).then(res => res.json());
-
-      expect(response).toEqual({
+      expect(data).toEqual({
         id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8yS3ZIQzl6MTRHU2w0WXBrTk1YMzg0',
         type: 'song',
         title: 'Do Not Disturb',
@@ -253,11 +281,6 @@ describe('Api router', () => {
         source: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
         universalLink: urlShortenerResponseMock.data.refer,
         links: [
-          {
-            type: 'youTube',
-            url: mockedYoutubeLink,
-            isVerified: true,
-          },
           {
             type: 'appleMusic',
             url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
@@ -270,25 +293,31 @@ describe('Api router', () => {
           },
           {
             type: 'tidal',
-            url: 'https://listen.tidal.com/search?q=Do+Not+Disturb+Drake',
+            url: 'https://tidal.com/browse/track/71717750',
+            isVerified: true,
+          },
+          {
+            type: 'youTube',
+            url: 'https://music.youtube.com/watch?v=vVd4T5NxLgI',
+            isVerified: true,
           },
         ],
       });
 
-      expect(mock.history.get).toHaveLength(5);
+      expect(mock.history.get).toHaveLength(7);
     });
 
     it('should return unknown error - could not parse Spotify metadata', async () => {
-      const request = JSONRequest(API_SEARCH_ENDPOINT, {
+      const request = jsonRequest(API_SEARCH_ENDPOINT, {
         link: cachedSpotifyLink,
       });
 
       mock.onGet(cachedSpotifyLink).reply(200, '<html></html>');
 
-      const response = await app.handle(request).then(res => res.json());
+      const response = await app.handle(request);
 
-      expect(response).toEqual({
-        code: 'UNKNOWN',
+      expect(response.text()).resolves.toThrow({
+        code: 'INTERNAL_SERVER_ERROR',
         message:
           '[getSpotifyMetadata] (https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384) Error: Spotify metadata not found',
       });
@@ -297,10 +326,11 @@ describe('Api router', () => {
     it('should return bad request - invalid link', async () => {
       const link = 'https://open.spotify.com/invalid';
 
-      const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
-      const response = await app.handle(request).then(res => res.json());
+      const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
 
-      expect(response).toEqual({
+      const response = await app.handle(request);
+
+      expect(response.text()).resolves.toThrow({
         code: 'VALIDATION',
         message: 'Invalid link, please try with Spotify or Youtube links.',
       });
@@ -309,44 +339,47 @@ describe('Api router', () => {
     it('should return bad request - invalid searchId', async () => {
       const searchId = 123;
 
-      const request = JSONRequest(API_SEARCH_ENDPOINT, { searchId });
-      const response = await app.handle(request).then(res => res.json());
+      const request = jsonRequest(API_SEARCH_ENDPOINT, { searchId });
+      const response = await app.handle(request);
 
-      expect(response).toEqual({
+      expect(response.text()).resolves.toThrow({
         code: 'VALIDATION',
         message: 'Invalid link, please try with Spotify or Youtube links.',
       });
     });
 
     it('should return bad request - unknown body param', async () => {
-      const request = JSONRequest(API_SEARCH_ENDPOINT, { foo: 'bar' });
-      const response = await app.handle(request).then(res => res.json());
+      const request = jsonRequest(API_SEARCH_ENDPOINT, { foo: 'bar' });
 
-      expect(response).toEqual({
+      const response = await app.handle(request);
+
+      expect(response.text()).resolves.toThrow({
         code: 'VALIDATION',
         message: 'Invalid link, please try with Spotify or Youtube links.',
       });
     });
 
     it('should return bad request - unsupported API version', async () => {
-      const request = JSONRequest(`${API_ENDPOINT}/search?v=2`, {
+      const request = jsonRequest(`${API_ENDPOINT}/search?v=2`, {
         link: cachedSpotifyLink,
       });
-      const response = await app.handle(request).then(res => res.json());
 
-      expect(response).toEqual({
+      const response = await app.handle(request);
+
+      expect(response.text()).resolves.toThrow({
         code: 'VALIDATION',
         message: 'Unsupported API version',
       });
     });
 
     it('should return bad request - missing API version query param', async () => {
-      const request = JSONRequest(`${API_ENDPOINT}/search`, {
+      const request = jsonRequest(`${API_ENDPOINT}/search`, {
         link: cachedSpotifyLink,
       });
-      const response = await app.handle(request).then(res => res.json());
 
-      expect(response).toEqual({
+      const response = await app.handle(request);
+
+      expect(response.text()).resolves.toThrow({
         code: 'VALIDATION',
         message: 'Unsupported API version',
       });

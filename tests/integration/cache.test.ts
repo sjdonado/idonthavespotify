@@ -1,12 +1,13 @@
-import { beforeAll, describe, expect, it, mock, jest, afterAll } from 'bun:test';
-
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import { afterAll, beforeAll, describe, expect, it, jest, mock } from 'bun:test';
 
 import { app } from '~/index';
+import { cacheStore } from '~/services/cache';
 import { getLinkWithPuppeteer } from '~/utils/scraper';
 
-import { JSONRequest } from '../utils/request';
+import deezerSongResponseMock from '../fixtures/deezer/songResponseMock.json';
+import { jsonRequest } from '../utils/request';
 import {
   API_SEARCH_ENDPOINT,
   cachedSpotifyLink,
@@ -16,10 +17,6 @@ import {
   urlShortenerLink,
   urlShortenerResponseMock,
 } from '../utils/shared';
-
-import { cacheStore } from '~/services/cache';
-
-import deezerSongResponseMock from '../fixtures/deezer/songResponseMock.json';
 
 const [
   spotifySongHeadResponseMock,
@@ -51,7 +48,7 @@ describe('Searches cache', () => {
     const deezerSearchLink = getDeezerSearchLink(query, 'track');
     const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(API_SEARCH_ENDPOINT, { link: cachedSpotifyLink });
+    const request = jsonRequest(API_SEARCH_ENDPOINT, { link: cachedSpotifyLink });
 
     mock.onGet(cachedSpotifyLink).reply(200, spotifySongHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
@@ -75,7 +72,7 @@ describe('Searches cache', () => {
   });
 
   it('should return 200 from cache', async () => {
-    const request = JSONRequest(API_SEARCH_ENDPOINT, { link: cachedSpotifyLink });
+    const request = jsonRequest(API_SEARCH_ENDPOINT, { link: cachedSpotifyLink });
     const response = await app.handle(request).then(res => res.json());
 
     expect(response.source).toEqual(cachedSpotifyLink);

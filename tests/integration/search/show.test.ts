@@ -1,12 +1,12 @@
-import { beforeAll, beforeEach, describe, expect, it, mock, jest } from 'bun:test';
-
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import { beforeAll, beforeEach, describe, expect, it, jest, mock } from 'bun:test';
 
 import { app } from '~/index';
-import { getLinkWithPuppeteer } from '~/utils/scraper';
+import { getUniversalMetadataFromTidal } from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
 
+import deezerShowResponseMock from '../../fixtures/deezer/showResponseMock.json';
 import { JSONRequest } from '../../utils/request';
 import {
   API_SEARCH_ENDPOINT,
@@ -17,27 +17,25 @@ import {
   urlShortenerResponseMock,
 } from '../../utils/shared';
 
-import deezerShowResponseMock from '../../fixtures/deezer/showResponseMock.json';
-
 const [spotifyShowHeadResponseMock, appleMusicShowResponseMock] = await Promise.all([
   Bun.file('tests/fixtures/spotify/showHeadResponseMock.html').text(),
   Bun.file('tests/fixtures/apple-music/showResponseMock.html').text(),
 ]);
 
-mock.module('~/utils/scraper', () => ({
-  getLinkWithPuppeteer: jest.fn(),
+mock.module('~/parsers/tidal-universal-link', () => ({
+  getUniversalMetadataFromTidal: jest.fn(),
 }));
 
 describe('GET /search - Podcast Show', () => {
   let mock: AxiosMockAdapter;
-  const getLinkWithPuppeteerMock = getLinkWithPuppeteer as jest.Mock;
+  const getUniversalMetadataFromTidalMock = getUniversalMetadataFromTidal as jest.Mock;
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
   });
 
   beforeEach(() => {
-    getLinkWithPuppeteerMock.mockReset();
+    getUniversalMetadataFromTidalMock.mockReset();
     mock.reset();
     cacheStore.reset();
   });

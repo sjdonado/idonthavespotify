@@ -1,21 +1,18 @@
-import { ENV } from '~/config/env';
 import { beforeEach, describe, expect, it, spyOn } from 'bun:test';
 
-import { getCheerioDoc } from '~/utils/scraper';
-import { formDataRequest } from '../utils/request';
-
+import { Adapter, MetadataType, Parser } from '~/config/enum';
+import { ENV } from '~/config/env';
 import { app } from '~/index';
-
-import { MetadataType, Adapter, Parser } from '~/config/enum';
-
+import * as linkParser from '~/parsers/link';
 import {
   cacheSearchMetadata,
   cacheSearchResultLink,
   cacheShortenLink,
   cacheStore,
 } from '~/services/cache';
+import { getCheerioDoc } from '~/utils/scraper';
 
-import * as linkParser from '~/parsers/link';
+import { formDataRequest } from '../utils/request';
 import { urlShortenerResponseMock } from '../utils/shared';
 
 const INDEX_ENDPOINT = 'http://localhost';
