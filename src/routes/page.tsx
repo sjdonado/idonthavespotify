@@ -1,4 +1,4 @@
-import html, { Html } from '@elysiajs/html';
+import { Html } from '@elysiajs/html';
 import { Elysia, InternalServerError } from 'elysia';
 
 import { search } from '~/services/search';
