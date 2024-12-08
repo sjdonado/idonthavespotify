@@ -72,7 +72,6 @@ export async function getSpotifyLink(query: string, metadata: SearchMetadata) {
     });
 
     const [[, data]] = Object.entries(response);
-
     if (data.total === 0) {
       throw new Error(`No results found: ${JSON.stringify(response)}`);
     }

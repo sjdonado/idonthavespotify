@@ -6,11 +6,16 @@ import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 
 interface YoutubeSearchResponse {
+  kind: string;
+  etag: string;
+  nextPageToken?: string;
+  regionCode: string;
   pageInfo: {
     totalResults: number;
     resultsPerPage: number;
   };
   items: Array<{
+    kind: string;
     etag: string;
     id: {
       kind: string;
@@ -47,10 +52,10 @@ export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
   }
 
   const params = new URLSearchParams({
-    q: encodeURIComponent(query),
     type: searchType,
-    part: 'id',
     regionCode: 'US',
+    q: query,
+    part: 'id',
     key: ENV.adapters.youTube.apiKey,
   });
 
@@ -67,8 +72,7 @@ export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
     const response = await HttpClient.get<YoutubeSearchResponse>(url.toString());
 
     const { items } = response;
-
-    if (!items || items[0]) {
+    if (!items || !items[0]) {
       throw new Error(`No results found: ${JSON.stringify(response)}`);
     }
 

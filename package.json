@@ -24,7 +24,6 @@
     "notyf": "^3.10.0",
     "pino": "^8.20.0",
     "pino-pretty": "^11.0.0",
-    "puppeteer": "^22.7.0",
     "string-similarity": "^4.0.4"
   },
   "devDependencies": {

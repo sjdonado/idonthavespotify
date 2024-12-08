@@ -72,7 +72,6 @@ export async function getTidalLink(query: string, metadata: SearchMetadata) {
     });
 
     const { data, included } = response;
-
     if (!data || data.length === 0) {
       throw new Error(`No results found: ${JSON.stringify(response)}`);
     }
