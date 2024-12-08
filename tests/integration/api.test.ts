@@ -1,21 +1,20 @@
+import axios from 'axios';
+import AxiosMockAdapter from 'axios-mock-adapter';
 import {
+  afterEach,
   beforeAll,
   beforeEach,
   describe,
   expect,
   it,
-  mock,
   jest,
-  afterEach,
+  mock,
 } from 'bun:test';
 
-import axios from 'axios';
-import AxiosMockAdapter from 'axios-mock-adapter';
-
 import { app } from '~/index';
-import { getLinkWithPuppeteer } from '~/utils/scraper';
 import { cacheStore } from '~/services/cache';
 
+import deezerSongResponseMock from '../fixtures/deezer/songResponseMock.json';
 import { JSONRequest } from '../utils/request';
 import {
   API_ENDPOINT,
@@ -29,8 +28,6 @@ import {
   urlShortenerResponseMock,
 } from '../utils/shared';
 
-import deezerSongResponseMock from '../fixtures/deezer/songResponseMock.json';
-
 const [
   spotifySongHeadResponseMock,
   appleMusicSongResponseMock,
@@ -41,13 +38,8 @@ const [
   Bun.file('tests/fixtures/soundcloud/songResponseMock.html').text(),
 ]);
 
-mock.module('~/utils/scraper', () => ({
-  getLinkWithPuppeteer: jest.fn(),
-}));
-
 describe('Api router', () => {
   let mock: AxiosMockAdapter;
-  const getLinkWithPuppeteerMock = getLinkWithPuppeteer as jest.Mock;
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
@@ -82,7 +74,6 @@ describe('Api router', () => {
       mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
       const mockedYoutubeLink = 'https://music.youtube.com/watch?v=zhY_0DoQCQs';
-      getLinkWithPuppeteerMock.mockResolvedValueOnce(mockedYoutubeLink);
 
       const response = await app.handle(request).then(res => res.json());
 
@@ -119,12 +110,6 @@ describe('Api router', () => {
       });
 
       expect(mock.history.get).toHaveLength(5);
-      expect(getLinkWithPuppeteerMock).toHaveBeenCalled();
-      // expect(getLinkWithPuppeteerMock).toHaveBeenCalledWith(
-      //   expect.stringContaining(youtubeSearchLink),
-      //   'ytmusic-card-shelf-renderer a',
-      //   expect.any(Array)
-      // );
     });
 
     it('should return 200 when adapter returns error - Youtube', async () => {
@@ -143,10 +128,6 @@ describe('Api router', () => {
       mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
       mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
       mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
-
-      getLinkWithPuppeteerMock.mockImplementationOnce(() => {
-        throw new Error('Injected Error');
-      });
 
       const response = await app.handle(request).then(res => res.json());
 
@@ -183,12 +164,6 @@ describe('Api router', () => {
       });
 
       expect(mock.history.get).toHaveLength(4);
-      expect(getLinkWithPuppeteerMock).toHaveBeenCalled();
-      // expect(getLinkWithPuppeteerMock).toHaveBeenCalledWith(
-      //   expect.stringContaining(youtubeSearchLink),
-      //   'ytmusic-card-shelf-renderer a',
-      //   expect.any(Array)
-      // );
     });
 
     it('should return 200 when adapter returns error - Deezer', async () => {
@@ -209,7 +184,6 @@ describe('Api router', () => {
       mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
       const mockedYoutubeLink = 'https://music.youtube.com/watch?v=zhY_0DoQCQs';
-      getLinkWithPuppeteerMock.mockResolvedValueOnce(mockedYoutubeLink);
 
       const response = await app.handle(request).then(res => res.json());
 
@@ -246,12 +220,6 @@ describe('Api router', () => {
       });
 
       expect(mock.history.get).toHaveLength(5);
-      expect(getLinkWithPuppeteerMock).toHaveBeenCalled();
-      // expect(getLinkWithPuppeteerMock).toHaveBeenCalledWith(
-      //   expect.stringContaining(youtubeSearchLink),
-      //   'ytmusic-card-shelf-renderer a',
-      //   expect.any(Array)
-      // );
     });
 
     it('should return 200 when adapter returns error - SoundCloud', async () => {
@@ -272,7 +240,6 @@ describe('Api router', () => {
       mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
       const mockedYoutubeLink = 'https://music.youtube.com/watch?v=zhY_0DoQCQs';
-      getLinkWithPuppeteerMock.mockResolvedValueOnce(mockedYoutubeLink);
 
       const response = await app.handle(request).then(res => res.json());
 
@@ -309,12 +276,6 @@ describe('Api router', () => {
       });
 
       expect(mock.history.get).toHaveLength(5);
-      expect(getLinkWithPuppeteerMock).toHaveBeenCalled();
-      // expect(getLinkWithPuppeteerMock).toHaveBeenCalledWith(
-      //   expect.stringContaining(youtubeSearchLink),
-      //   'ytmusic-card-shelf-renderer a',
-      //   expect.any(Array)
-      // );
     });
 
     it('should return unknown error - could not parse Spotify metadata', async () => {

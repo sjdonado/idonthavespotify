@@ -146,7 +146,6 @@ export const search = async ({
   const links: SearchResultLink[] = [];
   const existingAdapters = new Set(links.map(link => link.type));
 
-  // Fetch from Tidal first
   let tidalLink: SearchResultLink | null = linkSearchResult;
   if (parserType !== Adapter.Tidal) {
     tidalLink = await getTidalLink(query, metadata);

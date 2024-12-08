@@ -2,7 +2,6 @@ import axios, { AxiosError } from 'axios';
 import axiosRetry from 'axios-retry';
 
 import { DEFAULT_TIMEOUT } from '~/config/constants';
-
 import { logger } from '~/utils/logger';
 
 type HttpClientOptions = {
@@ -46,7 +45,7 @@ function getRandomUserAgent() {
 }
 
 axiosRetry(axios, {
-  retries: 2,
+  retries: 1,
   retryCondition: error => {
     // Retry on network errors or 5xx status codes
     return axiosRetry.isNetworkError(error) || axiosRetry.isRetryableError(error);
