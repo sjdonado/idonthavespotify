@@ -98,8 +98,9 @@ export default class HttpClient {
 
       return data as T;
     } catch (err) {
+      const axiosError = err as AxiosError;
       logger.error(
-        `[${HttpClient.request.name}] Request failed ${(err as Error).message}`
+        `[${HttpClient.request.name}] Request failed ${axiosError.message} ${axiosError.response?.data}`
       );
       logger.debug(err);
       throw err;
