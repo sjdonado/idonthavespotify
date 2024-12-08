@@ -32,8 +32,8 @@ describe('Adapter - Youtube', () => {
 
     expect(youtubeLink).toEqual({
       type: Adapter.YouTube,
-      url: 'https://www.youtube.com/track/144572248',
-      isVerified: true,
+      url: 'https://music.youtube.com/watch?v=vVd4T5NxLgI',
+      isVerified: false,
     });
 
     expect(mock.history.get).toHaveLength(1);
