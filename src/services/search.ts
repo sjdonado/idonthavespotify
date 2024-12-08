@@ -17,11 +17,8 @@ import {
   getSoundCloudQueryFromMetadata,
 } from '~/parsers/sound-cloud';
 import { getSpotifyMetadata, getSpotifyQueryFromMetadata } from '~/parsers/spotify';
-import {
-  getTidalMetadata,
-  getTidalQueryFromMetadata,
-  getUniversalMetadataFromTidal,
-} from '~/parsers/tidal';
+import { getTidalMetadata, getTidalQueryFromMetadata } from '~/parsers/tidal';
+import { getUniversalMetadataFromTidal } from '~/parsers/tidal-universal-link';
 import { getYouTubeMetadata, getYouTubeQueryFromMetadata } from '~/parsers/youtube';
 import { generateId } from '~/utils/encoding';
 import { logger } from '~/utils/logger';

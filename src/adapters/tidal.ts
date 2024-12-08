@@ -32,7 +32,7 @@ interface TidalSearchResponse {
   }>;
 }
 
-const TIDAL_SEARCH_TYPES = {
+export const TIDAL_SEARCH_TYPES = {
   [MetadataType.Song]: 'tracks',
   [MetadataType.Album]: 'albums',
   [MetadataType.Playlist]: 'playlists',
@@ -43,10 +43,9 @@ const TIDAL_SEARCH_TYPES = {
 
 export async function getTidalLink(query: string, metadata: SearchMetadata) {
   const searchType = TIDAL_SEARCH_TYPES[metadata.type];
+  if (!searchType) return null;
 
-  if (!searchType) {
-    return null;
-  }
+  console.log('authToken', await getOrUpdateTidalAccessToken());
 
   const params = new URLSearchParams({
     countryCode: 'US',

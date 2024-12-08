@@ -2,12 +2,12 @@ import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
 import { afterEach, beforeAll, describe, expect, it } from 'bun:test';
 
-import { getYouTubeLink } from '~/adapters/youtube';
+import { getTidalLink } from '~/adapters/tidal';
 import { Adapter, MetadataType } from '~/config/enum';
 import { SearchMetadata } from '~/services/search';
 
-import youtubeSongResponseMock from '../fixtures/youtube/songResponseMock.json';
-import { getYouTubeSearchLink } from '../utils/shared';
+import tidalSongResponseMock from '../fixtures/tidal/songResponseMock.json';
+import { getTidalSearchLink } from '../utils/shared';
 
 describe('Adapter - Youtube', () => {
   let mock: AxiosMockAdapter;
@@ -23,16 +23,16 @@ describe('Adapter - Youtube', () => {
   it('should return verified link', async () => {
     const query = 'Do Not Disturb Drake';
 
-    const youtubeSearchLink = getYouTubeSearchLink(query, MetadataType.Song);
-    mock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
+    const tidalSearchLink = getTidalSearchLink(query, MetadataType.Song);
+    mock.onGet(tidalSearchLink).reply(200, tidalSongResponseMock);
 
-    const youtubeLink = await getYouTubeLink(query, {
+    const tidalLink = await getTidalLink(query, {
       type: MetadataType.Song,
     } as SearchMetadata);
 
-    expect(youtubeLink).toEqual({
-      type: Adapter.YouTube,
-      url: 'https://www.youtube.com/track/144572248',
+    expect(tidalLink).toEqual({
+      type: Adapter.Tidal,
+      url: 'https://www.tidal.com/track/144572248',
       isVerified: true,
     });
 

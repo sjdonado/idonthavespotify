@@ -1,0 +1,192 @@
+{
+  "data": [
+    {
+      "id": "71717750",
+      "type": "tracks"
+    },
+    {
+      "id": "234416610",
+      "type": "tracks"
+    },
+    {
+      "id": "71989673",
+      "type": "tracks"
+    }
+  ],
+  "links": {
+    "self": "/searchresults/Do Not Disturb Drake/relationships/tracks?include=tracks&countryCode=US"
+  },
+  "included": [
+    {
+      "attributes": {
+        "title": "Do Not Disturb",
+        "isrc": "USCM51700050",
+        "duration": "PT4M43S",
+        "copyright": "℗ 2017 Young Money Entertainment/Cash Money Records",
+        "explicit": false,
+        "popularity": 0.27,
+        "availability": [
+          "STREAM",
+          "DJ"
+        ],
+        "mediaTags": [
+          "LOSSLESS"
+        ],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/track/71989673",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ]
+      },
+      "relationships": {
+        "albums": {
+          "links": {
+            "self": "/tracks/71989673/relationships/albums?countryCode=US"
+          }
+        },
+        "artists": {
+          "links": {
+            "self": "/tracks/71989673/relationships/artists?countryCode=US"
+          }
+        },
+        "similarTracks": {
+          "links": {
+            "self": "/tracks/71989673/relationships/similarTracks?countryCode=US"
+          }
+        },
+        "providers": {
+          "links": {
+            "self": "/tracks/71989673/relationships/providers?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/tracks/71989673/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/tracks/71989673?countryCode=US"
+      },
+      "id": "71989673",
+      "type": "tracks"
+    },
+    {
+      "attributes": {
+        "title": "Do Not Disturb",
+        "isrc": "USCM51700049",
+        "duration": "PT4M44S",
+        "copyright": "℗ 2017 Young Money Entertainment/Cash Money Records",
+        "explicit": true,
+        "popularity": 0.6,
+        "availability": [
+          "STREAM",
+          "DJ"
+        ],
+        "mediaTags": [
+          "LOSSLESS"
+        ],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/track/71717750",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ]
+      },
+      "relationships": {
+        "albums": {
+          "links": {
+            "self": "/tracks/71717750/relationships/albums?countryCode=US"
+          }
+        },
+        "artists": {
+          "links": {
+            "self": "/tracks/71717750/relationships/artists?countryCode=US"
+          }
+        },
+        "similarTracks": {
+          "links": {
+            "self": "/tracks/71717750/relationships/similarTracks?countryCode=US"
+          }
+        },
+        "providers": {
+          "links": {
+            "self": "/tracks/71717750/relationships/providers?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/tracks/71717750/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/tracks/71717750?countryCode=US"
+      },
+      "id": "71717750",
+      "type": "tracks"
+    },
+    {
+      "attributes": {
+        "title": "Do Not Disturb (Drake Remix)",
+        "isrc": "QZK6L2266049",
+        "duration": "PT2M48S",
+        "copyright": "SelfMade.",
+        "explicit": true,
+        "popularity": 0.0,
+        "availability": [
+          "STREAM",
+          "DJ"
+        ],
+        "mediaTags": [
+          "LOSSLESS"
+        ],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/track/234416610",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ]
+      },
+      "relationships": {
+        "albums": {
+          "links": {
+            "self": "/tracks/234416610/relationships/albums?countryCode=US"
+          }
+        },
+        "artists": {
+          "links": {
+            "self": "/tracks/234416610/relationships/artists?countryCode=US"
+          }
+        },
+        "similarTracks": {
+          "links": {
+            "self": "/tracks/234416610/relationships/similarTracks?countryCode=US"
+          }
+        },
+        "providers": {
+          "links": {
+            "self": "/tracks/234416610/relationships/providers?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/tracks/234416610/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/tracks/234416610?countryCode=US"
+      },
+      "id": "234416610",
+      "type": "tracks"
+    }
+  ]
+}
