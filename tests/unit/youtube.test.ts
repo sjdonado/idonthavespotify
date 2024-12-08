@@ -1,51 +1,41 @@
-import { afterEach, describe, expect, it, mock, jest, beforeAll } from 'bun:test';
+import axios from 'axios';
+import AxiosMockAdapter from 'axios-mock-adapter';
+import { afterEach, beforeAll, describe, expect, it } from 'bun:test';
 
-import { MetadataType, Adapter } from '~/config/enum';
 import { getYouTubeLink } from '~/adapters/youtube';
-import { getLinkWithPuppeteer } from '~/utils/scraper';
-import { cacheStore } from '~/services/cache';
+import { Adapter, MetadataType } from '~/config/enum';
 import { SearchMetadata } from '~/services/search';
 
+import youtubeSongResponseMock from '../fixtures/youtube/songResponseMock.json';
 import { getYouTubeSearchLink } from '../utils/shared';
 
-mock.module('~/utils/scraper', () => ({
-  getLinkWithPuppeteer: jest.fn(),
-}));
-
-describe('Adapter - YouTube', () => {
-  const getLinkWithPuppeteerMock = getLinkWithPuppeteer as jest.Mock;
+describe('Adapter - Youtube', () => {
+  let mock: AxiosMockAdapter;
 
   beforeAll(() => {
-    cacheStore.reset();
+    mock = new AxiosMockAdapter(axios);
   });
 
   afterEach(() => {
-    getLinkWithPuppeteerMock.mockClear();
+    mock.reset();
   });
 
   it('should return verified link', async () => {
     const query = 'Do Not Disturb Drake';
 
-    const searchLink = getYouTubeSearchLink(query, 'song');
+    const youtubeSearchLink = getYouTubeSearchLink(query, MetadataType.Song)!;
+    mock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
 
-    const mockedYoutubeLink = 'https://music.youtube.com/watch?v=zhY_0DoQCQs';
-    getLinkWithPuppeteerMock.mockResolvedValueOnce(mockedYoutubeLink);
-
-    const youTubeLink = await getYouTubeLink(query, {
+    const youtubeLink = await getYouTubeLink(query, {
       type: MetadataType.Song,
     } as SearchMetadata);
 
-    expect(youTubeLink).toEqual({
+    expect(youtubeLink).toEqual({
       type: Adapter.YouTube,
-      url: mockedYoutubeLink,
+      url: 'https://www.youtube.com/track/144572248',
       isVerified: true,
     });
 
-    expect(getLinkWithPuppeteerMock).toHaveBeenCalledTimes(1);
-    expect(getLinkWithPuppeteerMock).toHaveBeenCalledWith(
-      expect.stringContaining(searchLink),
-      'ytmusic-card-shelf-renderer a',
-      expect.any(Array)
-    );
+    expect(mock.history.get).toHaveLength(1);
   });
 });

@@ -26,7 +26,7 @@ interface YoutubeSearchResponse {
   }>;
 }
 
-const YOUTUBE_SEARCH_TYPES = {
+export const YOUTUBE_SEARCH_TYPES = {
   [MetadataType.Song]: 'video',
   [MetadataType.Album]: 'playlist',
   [MetadataType.Playlist]: 'playlist',
@@ -46,16 +46,14 @@ const YOUTUBE_SEARCH_LINK_TYPE = (item: YoutubeSearchResponse['items'][number]) 
 
 export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
   const searchType = YOUTUBE_SEARCH_TYPES[metadata.type];
-
-  if (!searchType) {
-    return null;
-  }
+  if (!searchType) return null;
 
   const params = new URLSearchParams({
     type: searchType,
     regionCode: 'US',
     q: query,
     part: 'id',
+    safeSearch: 'none',
     key: ENV.adapters.youTube.apiKey,
   });
 
