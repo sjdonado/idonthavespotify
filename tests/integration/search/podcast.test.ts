@@ -46,6 +46,7 @@ describe('GET /search - Podcast Episode', () => {
     cacheStore.reset();
 
     getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
+    mock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
     mock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
     mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
   });
@@ -66,9 +67,10 @@ describe('GET /search - Podcast Episode', () => {
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudPodcastResponseMock);
     mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
-    const response = await app.handle(request).then(res => res.json());
+    const response = await app.handle(request);
+    const data = await response.json();
 
-    expect(response).toEqual({
+    expect(data).toEqual({
       id: 'b3Blbi5zcG90aWZ5LmNvbS9lcGlzb2RlLzQzVENyZ21QMjNxa0xjQVhaUU44cVQ%3D',
       type: 'podcast',
       title: 'The End of Twitter as We Know It',

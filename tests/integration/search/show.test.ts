@@ -1,7 +1,8 @@
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
-import { beforeAll, beforeEach, describe, expect, it, jest, mock, spyOn } from 'bun:test';
+import { beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test';
 
+import { ENV } from '~/config/env';
 import { app } from '~/index';
 import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
@@ -36,6 +37,11 @@ describe('GET /search - Podcast Show', () => {
     getUniversalMetadataFromTidalMock.mockReset();
     mock.reset();
     cacheStore.reset();
+
+    getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
+    mock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
+    mock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
+    mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
   });
 
   it('should return 200', async () => {
@@ -52,9 +58,10 @@ describe('GET /search - Podcast Show', () => {
     mock.onGet(deezerSearchLink).reply(200, deezerShowResponseMock);
     mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
-    const response = await app.handle(request).then(res => res.json());
+    const response = await app.handle(request);
+    const data = await response.json();
 
-    expect(response).toEqual({
+    expect(data).toEqual({
       id: 'b3Blbi5zcG90aWZ5LmNvbS9zaG93LzZvODFRdVcyMnM1bTJuZmNYV2p1Y2M%3D',
       type: 'show',
       title: 'Waveform: The MKBHD Podcast',

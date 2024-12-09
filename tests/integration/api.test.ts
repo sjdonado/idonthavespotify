@@ -52,6 +52,7 @@ describe('Api router', () => {
     mock.reset();
 
     getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
+    mock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
     mock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
     mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
   });

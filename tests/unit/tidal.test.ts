@@ -4,6 +4,7 @@ import { afterEach, beforeAll, describe, expect, it } from 'bun:test';
 
 import { getTidalLink } from '~/adapters/tidal';
 import { Adapter, MetadataType } from '~/config/enum';
+import { ENV } from '~/config/env';
 import { SearchMetadata } from '~/services/search';
 
 import tidalSongResponseMock from '../fixtures/tidal/songResponseMock.json';
@@ -24,6 +25,7 @@ describe('Adapter - Youtube', () => {
     const query = 'Do Not Disturb Drake';
 
     const tidalSearchLink = getTidalSearchLink(query, MetadataType.Song);
+    mock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
     mock.onGet(tidalSearchLink).reply(200, tidalSongResponseMock);
 
     const tidalLink = await getTidalLink(query, {
@@ -32,7 +34,7 @@ describe('Adapter - Youtube', () => {
 
     expect(tidalLink).toEqual({
       type: Adapter.Tidal,
-      url: 'https://www.tidal.com/track/144572248',
+      url: 'https://tidal.com/browse/track/71717750',
       isVerified: true,
     });
 

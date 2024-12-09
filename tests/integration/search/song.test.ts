@@ -52,6 +52,7 @@ describe('GET /search - Song', () => {
     cacheStore.reset();
 
     getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
+    mock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
     mock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
     mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
   });
@@ -76,9 +77,10 @@ describe('GET /search - Song', () => {
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
     mock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
 
-    const response = await app.handle(request).then(res => res.json());
+    const response = await app.handle(request);
+    const data = await response.json();
 
-    expect(response).toEqual({
+    expect(data).toEqual({
       id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8yS3ZIQzl6MTRHU2w0WXBrTk1YMzg0',
       type: 'song',
       title: 'Do Not Disturb',

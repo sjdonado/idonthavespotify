@@ -3,6 +3,7 @@ import AxiosMockAdapter from 'axios-mock-adapter';
 import { afterAll, beforeAll, describe, expect, it, spyOn } from 'bun:test';
 
 import { MetadataType } from '~/config/enum';
+import { ENV } from '~/config/env';
 import { app } from '~/index';
 import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
@@ -65,12 +66,14 @@ describe('Searches cache', () => {
     mock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
 
     getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
+    mock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
+    mock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
     mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
     // fill cache
     await app.handle(request);
 
-    expect(mock.history.get).toHaveLength(5);
+    expect(mock.history.get).toHaveLength(6);
   });
 
   afterAll(() => {

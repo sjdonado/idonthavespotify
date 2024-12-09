@@ -1,6 +1,6 @@
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
-import { beforeAll, beforeEach, describe, expect, it, jest, mock, spyOn } from 'bun:test';
+import { beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test';
 
 import { MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
@@ -50,6 +50,7 @@ describe('GET /search - Artist', () => {
     cacheStore.reset();
 
     getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
+    mock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
     mock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
     mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
   });
@@ -75,9 +76,10 @@ describe('GET /search - Artist', () => {
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudArtistResponseMock);
     mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
-    const response = await app.handle(request).then(res => res.json());
+    const response = await app.handle(request);
+    const data = await response.json();
 
-    expect(response).toEqual({
+    expect(data).toEqual({
       id: 'b3Blbi5zcG90aWZ5LmNvbS9hcnRpc3QvNmwzSHZRNXNhNm1YVHNNVEIxOXJPNQ%3D%3D',
       type: 'artist',
       title: 'J. Cole',

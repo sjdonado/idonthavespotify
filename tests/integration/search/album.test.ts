@@ -50,6 +50,7 @@ describe('GET /search - Album', () => {
     mock.reset();
 
     getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
+    mock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
     mock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
     mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
   });
@@ -74,9 +75,10 @@ describe('GET /search - Album', () => {
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudAlbumResponseMock);
     mock.onGet(youtubeSearchLink).reply(200, youtubeAlbumResponseMock);
 
-    const response = await app.handle(request).then(res => res.json());
+    const response = await app.handle(request);
+    const data = await response.json();
 
-    expect(response).toEqual({
+    expect(data).toEqual({
       id: 'b3Blbi5zcG90aWZ5LmNvbS9hbGJ1bS80Y3pkT1JkQ1dQOXVtcGJoRlhLMmZX',
       type: 'album',
       title: 'For All The Dogs',
