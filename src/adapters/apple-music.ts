@@ -21,12 +21,9 @@ const APPLE_MUSIC_SEARCH_TYPES = {
 
 export async function getAppleMusicLink(query: string, metadata: SearchMetadata) {
   const searchType = APPLE_MUSIC_SEARCH_TYPES[metadata.type];
+  if (!searchType) return null;
 
-  if (!searchType) {
-    return null;
-  }
-
-  // apple music does not support x-www-form-urlencoded encoding
+  // x-www-form-urlencoded encoding required for browser url
   const params = `term=${encodeURIComponent(query)}`;
 
   const url = new URL(`${ENV.adapters.appleMusic.apiUrl}/search?${params}`);

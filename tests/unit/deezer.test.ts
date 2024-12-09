@@ -1,15 +1,13 @@
-import { beforeAll, afterEach, describe, expect, it } from 'bun:test';
-
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import { afterEach, beforeAll, describe, expect, it } from 'bun:test';
 
-import { MetadataType, Adapter } from '~/config/enum';
 import { getDeezerLink } from '~/adapters/deezer';
+import { Adapter, MetadataType } from '~/config/enum';
 import { SearchMetadata } from '~/services/search';
 
-import { getDeezerSearchLink } from '../utils/shared';
-
 import deezerSongResponseMock from '../fixtures/deezer/songResponseMock.json';
+import { getDeezerSearchLink } from '../utils/shared';
 
 describe('Adapter - Deezer', () => {
   let mock: AxiosMockAdapter;

@@ -1,5 +1,6 @@
 import { Controller } from '@hotwired/stimulus';
 import { Howl } from 'howler';
+
 import { copyToClipboard } from './helpers';
 
 export default class extends Controller {

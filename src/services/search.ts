@@ -1,3 +1,5 @@
+import { InternalServerError } from 'elysia';
+
 import { getAppleMusicLink } from '~/adapters/apple-music';
 import { getDeezerLink } from '~/adapters/deezer';
 import { getSoundCloudLink } from '~/adapters/sound-cloud';
@@ -17,11 +19,8 @@ import {
   getSoundCloudQueryFromMetadata,
 } from '~/parsers/sound-cloud';
 import { getSpotifyMetadata, getSpotifyQueryFromMetadata } from '~/parsers/spotify';
-import {
-  getTidalMetadata,
-  getTidalQueryFromMetadata,
-  getUniversalMetadataFromTidal,
-} from '~/parsers/tidal';
+import { getTidalMetadata, getTidalQueryFromMetadata } from '~/parsers/tidal';
+import { getUniversalMetadataFromTidal } from '~/parsers/tidal-universal-link';
 import { getYouTubeMetadata, getYouTubeQueryFromMetadata } from '~/parsers/youtube';
 import { generateId } from '~/utils/encoding';
 import { logger } from '~/utils/logger';
@@ -104,7 +103,7 @@ export const search = async ({
   const extractQuery = queryExtractors[searchParser.type];
 
   if (!fetchMetadata || !extractQuery) {
-    throw new Error('Parser not implemented yet');
+    throw new InternalServerError('Parser not implemented yet');
   }
 
   let metadata = await fetchMetadata(searchParser.id, searchParser.source);
@@ -146,7 +145,6 @@ export const search = async ({
   const links: SearchResultLink[] = [];
   const existingAdapters = new Set(links.map(link => link.type));
 
-  // Fetch from Tidal first
   let tidalLink: SearchResultLink | null = linkSearchResult;
   if (parserType !== Adapter.Tidal) {
     tidalLink = await getTidalLink(query, metadata);

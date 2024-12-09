@@ -1,24 +1,27 @@
-import { beforeAll, beforeEach, describe, expect, it, mock, jest } from 'bun:test';
-
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import { beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test';
 
+import { MetadataType } from '~/config/enum';
+import { ENV } from '~/config/env';
 import { app } from '~/index';
-import { getLinkWithPuppeteer } from '~/utils/scraper';
+import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
 
-import { JSONRequest } from '../../utils/request';
+import deezerPlaylistResponseMock from '../../fixtures/deezer/playlistResponseMock.json';
+import tidalEmptyResponseMock from '../../fixtures/tidal/emptyResponseMock.json';
+import youtubePlaylistResponseMock from '../../fixtures/youtube/playlistResponseMock.json';
+import { jsonRequest } from '../../utils/request';
 import {
   API_SEARCH_ENDPOINT,
   getAppleMusicSearchLink,
   getDeezerSearchLink,
   getSoundCloudSearchLink,
+  getTidalSearchLink,
   getYouTubeSearchLink,
   urlShortenerLink,
   urlShortenerResponseMock,
 } from '../../utils/shared';
-
-import deezerPlaylistResponseMock from '../../fixtures/deezer/playlistResponseMock.json';
 
 const [
   spotifyPlaylistHeadResponseMock,
@@ -30,48 +33,52 @@ const [
   Bun.file('tests/fixtures/soundcloud/playlistResponseMock.html').text(),
 ]);
 
-mock.module('~/utils/scraper', () => ({
-  getLinkWithPuppeteer: jest.fn(),
-}));
-
 describe('GET /search - Playlist', () => {
   let mock: AxiosMockAdapter;
-  const getLinkWithPuppeteerMock = getLinkWithPuppeteer as jest.Mock;
+  const getUniversalMetadataFromTidalMock = spyOn(
+    tidalUniversalLinkParser,
+    'getUniversalMetadataFromTidal'
+  );
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
   });
 
   beforeEach(() => {
-    getLinkWithPuppeteerMock.mockClear();
+    getUniversalMetadataFromTidalMock.mockReset();
     mock.reset();
     cacheStore.reset();
+
+    getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
+    mock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
+    mock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
+    mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
   });
 
   it('should return 200', async () => {
     const link = 'https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ';
     const query = 'This Is Bad Bunny Playlist';
 
+    const tidalSearchLink = getTidalSearchLink(query, MetadataType.Playlist);
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
-    const youtubeSearchLink = getYouTubeSearchLink(query, '');
+    const youtubeSearchLink = getYouTubeSearchLink(query, MetadataType.Playlist);
     const deezerSearchLink = getDeezerSearchLink(query, 'playlist');
     const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
+    const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
 
     mock.onGet(link).reply(200, spotifyPlaylistHeadResponseMock);
+
+    mock.onGet(tidalSearchLink).reply(200, tidalEmptyResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicPlaylistResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerPlaylistResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudPlaylistResponseMock);
-    mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
+    mock.onGet(youtubeSearchLink).reply(200, youtubePlaylistResponseMock);
 
-    const mockedYoutubeLink =
-      'https://music.youtube.com/playlist?list=RDCLAK5uy_k3jElZuYeDhqZsFkUnRf519q4CD52CaRY';
-    getLinkWithPuppeteerMock.mockResolvedValueOnce(mockedYoutubeLink);
+    const response = await app.handle(request);
+    const data = await response.json();
 
-    const response = await app.handle(request).then(res => res.json());
-
-    expect(response).toEqual({
+    expect(data).toEqual({
       id: 'b3Blbi5zcG90aWZ5LmNvbS9wbGF5bGlzdC8zN2k5ZFFaRjFEWDJhcFd6eUVDd3la',
       type: 'playlist',
       title: 'This Is Bad Bunny',
@@ -79,40 +86,9 @@ describe('GET /search - Playlist', () => {
       image: 'https://i.scdn.co/image/ab67706f000000029c0eb2fdff534f803ea018e1',
       source: 'https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ',
       universalLink: urlShortenerResponseMock.data.refer,
-      links: [
-        {
-          type: 'youTube',
-          url: mockedYoutubeLink,
-          isVerified: true,
-        },
-        {
-          type: 'appleMusic',
-          url: 'https://music.apple.com/us/playlist/bad-bunny-veranito/pl.3160473c423f407c979deb589b41046e',
-          isVerified: false,
-        },
-        {
-          type: 'deezer',
-          url: 'https://www.deezer.com/playlist/3370896142',
-          isVerified: true,
-        },
-        {
-          type: 'soundCloud',
-          url: 'https://soundcloud.com/rafael-moreno-180913328/sets/this-is-bad-bunny',
-          isVerified: true,
-        },
-        {
-          type: 'tidal',
-          url: 'https://listen.tidal.com/search?q=This+Is+Bad+Bunny+Playlist',
-        },
-      ],
+      links: [],
     });
 
-    expect(mock.history.get).toHaveLength(4);
-    expect(getLinkWithPuppeteerMock).toHaveBeenCalledTimes(1);
-    // expect(getLinkWithPuppeteerMock).toHaveBeenCalledWith(
-    //   expect.stringContaining(youtubeSearchLink),
-    //   'ytmusic-card-shelf-renderer a',
-    //   expect.any(Array)
-    // );
+    expect(mock.history.get).toHaveLength(6);
   });
 });

@@ -1,4 +1,4 @@
-import { ParseError } from 'elysia';
+import { InternalServerError } from 'elysia';
 
 import {
   APPLE_MUSIC_LINK_REGEX,
@@ -31,10 +31,7 @@ export const getSearchParser = (link?: string, searchId?: string) => {
   }
 
   if (!source) {
-    const error = new ParseError();
-    error.message = 'Source not found';
-
-    throw error;
+    throw new InternalServerError('Source not found');
   }
 
   let id, type;
@@ -80,10 +77,7 @@ export const getSearchParser = (link?: string, searchId?: string) => {
   }
 
   if (!id || !type) {
-    const error = new ParseError();
-    error.message = 'Service id could not be extracted from source.';
-
-    throw error;
+    throw new InternalServerError('Service id could not be extracted from source.');
   }
 
   const searchParser = {

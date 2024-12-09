@@ -1,13 +1,16 @@
-import { beforeAll, beforeEach, describe, expect, it, mock, jest } from 'bun:test';
-
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import { beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test';
 
+import { MetadataType } from '~/config/enum';
+import { ENV } from '~/config/env';
 import { app } from '~/index';
-import { getLinkWithPuppeteer } from '~/utils/scraper';
+import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
 
-import { JSONRequest } from '../../utils/request';
+import deezerExclusiveContentResponseMock from '../../fixtures/deezer/emptyResponseMock.json';
+import youtubeEmptyResponseMock from '../../fixtures/youtube/emptyResponseMock.json';
+import { jsonRequest } from '../../utils/request';
 import {
   API_SEARCH_ENDPOINT,
   getAppleMusicSearchLink,
@@ -17,8 +20,6 @@ import {
   urlShortenerLink,
   urlShortenerResponseMock,
 } from '../../utils/shared';
-
-import deezerExclusiveContentResponseMock from '../../fixtures/deezer/emptyResponseMock.json';
 
 const [
   spotifyExclusiveContentHeadResponseMock,
@@ -30,22 +31,26 @@ const [
   Bun.file('tests/fixtures/soundcloud/emptyResponseMock.html').text(),
 ]);
 
-mock.module('~/utils/scraper', () => ({
-  getLinkWithPuppeteer: jest.fn(),
-}));
-
 describe('GET /search - Spotify Exclusive Content', () => {
   let mock: AxiosMockAdapter;
-  const getLinkWithPuppeteerMock = getLinkWithPuppeteer as jest.Mock;
+  const getUniversalMetadataFromTidalMock = spyOn(
+    tidalUniversalLinkParser,
+    'getUniversalMetadataFromTidal'
+  );
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
   });
 
   beforeEach(() => {
-    getLinkWithPuppeteerMock.mockClear();
+    getUniversalMetadataFromTidalMock.mockReset();
     mock.reset();
     cacheStore.reset();
+
+    getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
+    mock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
+    mock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
+    mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
   });
 
   it('should return 200', async () => {
@@ -53,23 +58,23 @@ describe('GET /search - Spotify Exclusive Content', () => {
     const query = 'The Louis Theroux Podcast';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
-    const youtubeSearchLink = getYouTubeSearchLink(query, '');
+    const youtubeSearchLink = getYouTubeSearchLink(query, MetadataType.Podcast);
     const deezerSearchLink = getDeezerSearchLink(query, 'podcast');
     const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
+    const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
 
     mock.onGet(link).reply(200, spotifyExclusiveContentHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicExclusiveContentResponseMock);
+    mock.onGet(youtubeSearchLink).reply(200, youtubeEmptyResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerExclusiveContentResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudExclusiveContentResponseMock);
     mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
-    getLinkWithPuppeteerMock.mockResolvedValueOnce(undefined);
+    const response = await app.handle(request);
+    const data = await response.json();
 
-    const response = await app.handle(request).then(res => res.json());
-
-    expect(response).toEqual({
+    expect(data).toEqual({
       id: 'b3Blbi5zcG90aWZ5LmNvbS9zaG93LzdMdVF2NDAwSkZ6emxKck91TXVrUmo%3D',
       type: 'show',
       title: 'The Louis Theroux Podcast',
@@ -82,11 +87,5 @@ describe('GET /search - Spotify Exclusive Content', () => {
     });
 
     expect(mock.history.get).toHaveLength(2);
-    expect(getLinkWithPuppeteerMock).toHaveBeenCalledTimes(1);
-    expect(getLinkWithPuppeteerMock).toHaveBeenCalledWith(
-      expect.stringContaining(youtubeSearchLink),
-      'ytmusic-card-shelf-renderer a',
-      expect.any(Array)
-    );
   });
 });

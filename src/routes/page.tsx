@@ -1,31 +1,24 @@
-import { Elysia } from 'elysia';
 import { Html } from '@elysiajs/html';
-
-import { logger } from '~/utils/logger';
-
-import { searchPayloadValidator, searchQueryValidator } from '~/validations/search';
+import { Elysia, InternalServerError } from 'elysia';
 
 import { search } from '~/services/search';
-
+import { logger } from '~/utils/logger';
+import { searchPayloadValidator, searchQueryValidator } from '~/validations/search';
+import ErrorMessage from '~/views/components/error-message';
+import SearchCard from '~/views/components/search-card';
 import MainLayout from '~/views/layouts/main';
 import Home from '~/views/pages/home';
 
-import SearchCard from '~/views/components/search-card';
-import ErrorMessage from '~/views/components/error-message';
-
 export const pageRouter = new Elysia()
   .onError(({ error, code, set }) => {
-    logger.error(`[pageRouter]: ${error}`);
+    logger.error(`[pageRouter]: ${code}:${error}`);
 
     if (code === 'NOT_FOUND') {
       set.headers = {
         'HX-Location': '/',
       };
-
       return;
     }
-
-    set.status = 200;
 
     if (code === 'VALIDATION' || code === 'PARSE') {
       return <ErrorMessage message={error.message} />;
@@ -50,12 +43,21 @@ export const pageRouter = new Elysia()
             </Home>
           </MainLayout>
         );
-      } catch (err) {
-        logger.error(err);
+      } catch (error) {
+        logger.error(`[indexRoute]: ${error}`);
 
-        set.status = 404;
+        if (error instanceof InternalServerError) {
+          set.status = 404;
+          return redirect('/');
+        }
 
-        return redirect('/');
+        return (
+          <MainLayout>
+            <Home>
+              <ErrorMessage message="Something went wrong, please try again later." />
+            </Home>
+          </MainLayout>
+        );
       }
     },
     {
@@ -66,7 +68,6 @@ export const pageRouter = new Elysia()
     '/search',
     async ({ body: { link } }) => {
       const searchResult = await search({ link });
-
       return <SearchCard searchResult={searchResult} />;
     },
     {

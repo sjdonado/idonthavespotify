@@ -1,4 +1,4 @@
-export const JSONRequest = (endpoint: string, body: object) => {
+export const jsonRequest = (endpoint: string, body: object) => {
   return new Request(endpoint, {
     method: 'POST',
     headers: {

@@ -1,0 +1,1332 @@
+{
+  "data": [
+    {
+      "id": "3652822",
+      "type": "artists"
+    },
+    {
+      "id": "38702458",
+      "type": "artists"
+    },
+    {
+      "id": "3610096",
+      "type": "artists"
+    },
+    {
+      "id": "4801418",
+      "type": "artists"
+    },
+    {
+      "id": "8686233",
+      "type": "artists"
+    },
+    {
+      "id": "17797474",
+      "type": "artists"
+    },
+    {
+      "id": "15275831",
+      "type": "artists"
+    },
+    {
+      "id": "37628112",
+      "type": "artists"
+    },
+    {
+      "id": "16845889",
+      "type": "artists"
+    },
+    {
+      "id": "12786709",
+      "type": "artists"
+    },
+    {
+      "id": "16148702",
+      "type": "artists"
+    },
+    {
+      "id": "36838746",
+      "type": "artists"
+    },
+    {
+      "id": "28583973",
+      "type": "artists"
+    },
+    {
+      "id": "19685416",
+      "type": "artists"
+    },
+    {
+      "id": "45743262",
+      "type": "artists"
+    },
+    {
+      "id": "23962961",
+      "type": "artists"
+    },
+    {
+      "id": "36722767",
+      "type": "artists"
+    },
+    {
+      "id": "28974977",
+      "type": "artists"
+    },
+    {
+      "id": "47244196",
+      "type": "artists"
+    },
+    {
+      "id": "11462555",
+      "type": "artists"
+    }
+  ],
+  "links": {
+    "self": "/searchresults/J. Cole/relationships/artists?include=artists&countryCode=US",
+    "next": "/searchresults/J. Cole/relationships/artists?include=artists&countryCode=US&page%5Bcursor%5D=3nI1Esi"
+  },
+  "included": [
+    {
+      "attributes": {
+        "name": "Tijuan J Cole",
+        "popularity": 0.0,
+        "imageLinks": [],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/artist/16148702",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ],
+        "roles": [
+          "SONGWRITER"
+        ]
+      },
+      "relationships": {
+        "similarArtists": {
+          "links": {
+            "self": "/artists/16148702/relationships/similarArtists?countryCode=US"
+          }
+        },
+        "albums": {
+          "links": {
+            "self": "/artists/16148702/relationships/albums?countryCode=US"
+          }
+        },
+        "roles": {
+          "links": {
+            "self": "/artists/16148702/relationships/roles?countryCode=US"
+          }
+        },
+        "videos": {
+          "links": {
+            "self": "/artists/16148702/relationships/videos?countryCode=US"
+          }
+        },
+        "trackProviders": {
+          "links": {
+            "self": "/artists/16148702/relationships/trackProviders?countryCode=US"
+          }
+        },
+        "tracks": {
+          "links": {
+            "self": "/artists/16148702/relationships/tracks?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/artists/16148702/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/artists/16148702?countryCode=US"
+      },
+      "id": "16148702",
+      "type": "artists"
+    },
+    {
+      "attributes": {
+        "name": "J. Cole and Nas",
+        "popularity": 0.0,
+        "imageLinks": [],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/artist/23962961",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ],
+        "roles": [
+          "SONGWRITER"
+        ]
+      },
+      "relationships": {
+        "similarArtists": {
+          "links": {
+            "self": "/artists/23962961/relationships/similarArtists?countryCode=US"
+          }
+        },
+        "albums": {
+          "links": {
+            "self": "/artists/23962961/relationships/albums?countryCode=US"
+          }
+        },
+        "roles": {
+          "links": {
+            "self": "/artists/23962961/relationships/roles?countryCode=US"
+          }
+        },
+        "videos": {
+          "links": {
+            "self": "/artists/23962961/relationships/videos?countryCode=US"
+          }
+        },
+        "trackProviders": {
+          "links": {
+            "self": "/artists/23962961/relationships/trackProviders?countryCode=US"
+          }
+        },
+        "tracks": {
+          "links": {
+            "self": "/artists/23962961/relationships/tracks?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/artists/23962961/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/artists/23962961?countryCode=US"
+      },
+      "id": "23962961",
+      "type": "artists"
+    },
+    {
+      "attributes": {
+        "name": "D J Cole",
+        "popularity": 0.0,
+        "imageLinks": [],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/artist/37628112",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ],
+        "roles": [
+          "SONGWRITER"
+        ]
+      },
+      "relationships": {
+        "similarArtists": {
+          "links": {
+            "self": "/artists/37628112/relationships/similarArtists?countryCode=US"
+          }
+        },
+        "albums": {
+          "links": {
+            "self": "/artists/37628112/relationships/albums?countryCode=US"
+          }
+        },
+        "roles": {
+          "links": {
+            "self": "/artists/37628112/relationships/roles?countryCode=US"
+          }
+        },
+        "videos": {
+          "links": {
+            "self": "/artists/37628112/relationships/videos?countryCode=US"
+          }
+        },
+        "trackProviders": {
+          "links": {
+            "self": "/artists/37628112/relationships/trackProviders?countryCode=US"
+          }
+        },
+        "tracks": {
+          "links": {
+            "self": "/artists/37628112/relationships/tracks?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/artists/37628112/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/artists/37628112?countryCode=US"
+      },
+      "id": "37628112",
+      "type": "artists"
+    },
+    {
+      "attributes": {
+        "name": "J- Cole",
+        "popularity": 0.0,
+        "imageLinks": [],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/artist/15275831",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ],
+        "roles": [
+          "SONGWRITER"
+        ]
+      },
+      "relationships": {
+        "similarArtists": {
+          "links": {
+            "self": "/artists/15275831/relationships/similarArtists?countryCode=US"
+          }
+        },
+        "albums": {
+          "links": {
+            "self": "/artists/15275831/relationships/albums?countryCode=US"
+          }
+        },
+        "roles": {
+          "links": {
+            "self": "/artists/15275831/relationships/roles?countryCode=US"
+          }
+        },
+        "videos": {
+          "links": {
+            "self": "/artists/15275831/relationships/videos?countryCode=US"
+          }
+        },
+        "trackProviders": {
+          "links": {
+            "self": "/artists/15275831/relationships/trackProviders?countryCode=US"
+          }
+        },
+        "tracks": {
+          "links": {
+            "self": "/artists/15275831/relationships/tracks?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/artists/15275831/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/artists/15275831?countryCode=US"
+      },
+      "id": "15275831",
+      "type": "artists"
+    },
+    {
+      "attributes": {
+        "name": "B. J. Cole",
+        "popularity": 0.0,
+        "imageLinks": [],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/artist/3610096",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ],
+        "roles": [
+          "ARTIST",
+          "PERFORMER"
+        ]
+      },
+      "relationships": {
+        "similarArtists": {
+          "links": {
+            "self": "/artists/3610096/relationships/similarArtists?countryCode=US"
+          }
+        },
+        "albums": {
+          "links": {
+            "self": "/artists/3610096/relationships/albums?countryCode=US"
+          }
+        },
+        "roles": {
+          "links": {
+            "self": "/artists/3610096/relationships/roles?countryCode=US"
+          }
+        },
+        "videos": {
+          "links": {
+            "self": "/artists/3610096/relationships/videos?countryCode=US"
+          }
+        },
+        "trackProviders": {
+          "links": {
+            "self": "/artists/3610096/relationships/trackProviders?countryCode=US"
+          }
+        },
+        "tracks": {
+          "links": {
+            "self": "/artists/3610096/relationships/tracks?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/artists/3610096/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/artists/3610096?countryCode=US"
+      },
+      "id": "3610096",
+      "type": "artists"
+    },
+    {
+      "attributes": {
+        "name": "J Cole x Isaiah Rashad x Joey Badass",
+        "popularity": 0.0,
+        "imageLinks": [],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/artist/45743262",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ],
+        "roles": [
+          "PRODUCER"
+        ]
+      },
+      "relationships": {
+        "similarArtists": {
+          "links": {
+            "self": "/artists/45743262/relationships/similarArtists?countryCode=US"
+          }
+        },
+        "albums": {
+          "links": {
+            "self": "/artists/45743262/relationships/albums?countryCode=US"
+          }
+        },
+        "roles": {
+          "links": {
+            "self": "/artists/45743262/relationships/roles?countryCode=US"
+          }
+        },
+        "videos": {
+          "links": {
+            "self": "/artists/45743262/relationships/videos?countryCode=US"
+          }
+        },
+        "trackProviders": {
+          "links": {
+            "self": "/artists/45743262/relationships/trackProviders?countryCode=US"
+          }
+        },
+        "tracks": {
+          "links": {
+            "self": "/artists/45743262/relationships/tracks?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/artists/45743262/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/artists/45743262?countryCode=US"
+      },
+      "id": "45743262",
+      "type": "artists"
+    },
+    {
+      "attributes": {
+        "name": "B J Cole",
+        "popularity": 0.0,
+        "imageLinks": [],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/artist/11462555",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ],
+        "roles": [
+          "PERFORMER",
+          "SONGWRITER"
+        ]
+      },
+      "relationships": {
+        "similarArtists": {
+          "links": {
+            "self": "/artists/11462555/relationships/similarArtists?countryCode=US"
+          }
+        },
+        "albums": {
+          "links": {
+            "self": "/artists/11462555/relationships/albums?countryCode=US"
+          }
+        },
+        "roles": {
+          "links": {
+            "self": "/artists/11462555/relationships/roles?countryCode=US"
+          }
+        },
+        "videos": {
+          "links": {
+            "self": "/artists/11462555/relationships/videos?countryCode=US"
+          }
+        },
+        "trackProviders": {
+          "links": {
+            "self": "/artists/11462555/relationships/trackProviders?countryCode=US"
+          }
+        },
+        "tracks": {
+          "links": {
+            "self": "/artists/11462555/relationships/tracks?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/artists/11462555/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/artists/11462555?countryCode=US"
+      },
+      "id": "11462555",
+      "type": "artists"
+    },
+    {
+      "attributes": {
+        "name": "Thomas J Cole",
+        "popularity": 0.0,
+        "imageLinks": [],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/artist/28583973",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ],
+        "roles": [
+          "SONGWRITER"
+        ]
+      },
+      "relationships": {
+        "similarArtists": {
+          "links": {
+            "self": "/artists/28583973/relationships/similarArtists?countryCode=US"
+          }
+        },
+        "albums": {
+          "links": {
+            "self": "/artists/28583973/relationships/albums?countryCode=US"
+          }
+        },
+        "roles": {
+          "links": {
+            "self": "/artists/28583973/relationships/roles?countryCode=US"
+          }
+        },
+        "videos": {
+          "links": {
+            "self": "/artists/28583973/relationships/videos?countryCode=US"
+          }
+        },
+        "trackProviders": {
+          "links": {
+            "self": "/artists/28583973/relationships/trackProviders?countryCode=US"
+          }
+        },
+        "tracks": {
+          "links": {
+            "self": "/artists/28583973/relationships/tracks?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/artists/28583973/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/artists/28583973?countryCode=US"
+      },
+      "id": "28583973",
+      "type": "artists"
+    },
+    {
+      "attributes": {
+        "name": "G-Money / Bryson Tiller / J Cole",
+        "popularity": 0.0,
+        "imageLinks": [],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/artist/17797474",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ],
+        "roles": [
+          "SONGWRITER"
+        ]
+      },
+      "relationships": {
+        "similarArtists": {
+          "links": {
+            "self": "/artists/17797474/relationships/similarArtists?countryCode=US"
+          }
+        },
+        "albums": {
+          "links": {
+            "self": "/artists/17797474/relationships/albums?countryCode=US"
+          }
+        },
+        "roles": {
+          "links": {
+            "self": "/artists/17797474/relationships/roles?countryCode=US"
+          }
+        },
+        "videos": {
+          "links": {
+            "self": "/artists/17797474/relationships/videos?countryCode=US"
+          }
+        },
+        "trackProviders": {
+          "links": {
+            "self": "/artists/17797474/relationships/trackProviders?countryCode=US"
+          }
+        },
+        "tracks": {
+          "links": {
+            "self": "/artists/17797474/relationships/tracks?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/artists/17797474/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/artists/17797474?countryCode=US"
+      },
+      "id": "17797474",
+      "type": "artists"
+    },
+    {
+      "attributes": {
+        "name": "Cameron J Cole",
+        "popularity": 0.0,
+        "imageLinks": [],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/artist/28974977",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ],
+        "roles": [
+          "SONGWRITER"
+        ]
+      },
+      "relationships": {
+        "similarArtists": {
+          "links": {
+            "self": "/artists/28974977/relationships/similarArtists?countryCode=US"
+          }
+        },
+        "albums": {
+          "links": {
+            "self": "/artists/28974977/relationships/albums?countryCode=US"
+          }
+        },
+        "roles": {
+          "links": {
+            "self": "/artists/28974977/relationships/roles?countryCode=US"
+          }
+        },
+        "videos": {
+          "links": {
+            "self": "/artists/28974977/relationships/videos?countryCode=US"
+          }
+        },
+        "trackProviders": {
+          "links": {
+            "self": "/artists/28974977/relationships/trackProviders?countryCode=US"
+          }
+        },
+        "tracks": {
+          "links": {
+            "self": "/artists/28974977/relationships/tracks?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/artists/28974977/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/artists/28974977?countryCode=US"
+      },
+      "id": "28974977",
+      "type": "artists"
+    },
+    {
+      "attributes": {
+        "name": "Sandra J Cole",
+        "popularity": 0.0,
+        "imageLinks": [],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/artist/36838746",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ],
+        "roles": [
+          "ARTIST"
+        ]
+      },
+      "relationships": {
+        "similarArtists": {
+          "links": {
+            "self": "/artists/36838746/relationships/similarArtists?countryCode=US"
+          }
+        },
+        "albums": {
+          "links": {
+            "self": "/artists/36838746/relationships/albums?countryCode=US"
+          }
+        },
+        "roles": {
+          "links": {
+            "self": "/artists/36838746/relationships/roles?countryCode=US"
+          }
+        },
+        "videos": {
+          "links": {
+            "self": "/artists/36838746/relationships/videos?countryCode=US"
+          }
+        },
+        "trackProviders": {
+          "links": {
+            "self": "/artists/36838746/relationships/trackProviders?countryCode=US"
+          }
+        },
+        "tracks": {
+          "links": {
+            "self": "/artists/36838746/relationships/tracks?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/artists/36838746/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/artists/36838746?countryCode=US"
+      },
+      "id": "36838746",
+      "type": "artists"
+    },
+    {
+      "attributes": {
+        "name": "Teagan J Cole",
+        "popularity": 0.0,
+        "imageLinks": [],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/artist/47244196",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ],
+        "roles": [
+          "SONGWRITER"
+        ]
+      },
+      "relationships": {
+        "similarArtists": {
+          "links": {
+            "self": "/artists/47244196/relationships/similarArtists?countryCode=US"
+          }
+        },
+        "albums": {
+          "links": {
+            "self": "/artists/47244196/relationships/albums?countryCode=US"
+          }
+        },
+        "roles": {
+          "links": {
+            "self": "/artists/47244196/relationships/roles?countryCode=US"
+          }
+        },
+        "videos": {
+          "links": {
+            "self": "/artists/47244196/relationships/videos?countryCode=US"
+          }
+        },
+        "trackProviders": {
+          "links": {
+            "self": "/artists/47244196/relationships/trackProviders?countryCode=US"
+          }
+        },
+        "tracks": {
+          "links": {
+            "self": "/artists/47244196/relationships/tracks?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/artists/47244196/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/artists/47244196?countryCode=US"
+      },
+      "id": "47244196",
+      "type": "artists"
+    },
+    {
+      "attributes": {
+        "name": "John J. Cole",
+        "popularity": 0.0,
+        "imageLinks": [],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/artist/16845889",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ],
+        "roles": [
+          "SONGWRITER"
+        ]
+      },
+      "relationships": {
+        "similarArtists": {
+          "links": {
+            "self": "/artists/16845889/relationships/similarArtists?countryCode=US"
+          }
+        },
+        "albums": {
+          "links": {
+            "self": "/artists/16845889/relationships/albums?countryCode=US"
+          }
+        },
+        "roles": {
+          "links": {
+            "self": "/artists/16845889/relationships/roles?countryCode=US"
+          }
+        },
+        "videos": {
+          "links": {
+            "self": "/artists/16845889/relationships/videos?countryCode=US"
+          }
+        },
+        "trackProviders": {
+          "links": {
+            "self": "/artists/16845889/relationships/trackProviders?countryCode=US"
+          }
+        },
+        "tracks": {
+          "links": {
+            "self": "/artists/16845889/relationships/tracks?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/artists/16845889/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/artists/16845889?countryCode=US"
+      },
+      "id": "16845889",
+      "type": "artists"
+    },
+    {
+      "attributes": {
+        "name": "C J Cole",
+        "popularity": 0.0,
+        "imageLinks": [],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/artist/4801418",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ],
+        "roles": [
+          "ARTIST"
+        ]
+      },
+      "relationships": {
+        "similarArtists": {
+          "links": {
+            "self": "/artists/4801418/relationships/similarArtists?countryCode=US"
+          }
+        },
+        "albums": {
+          "links": {
+            "self": "/artists/4801418/relationships/albums?countryCode=US"
+          }
+        },
+        "roles": {
+          "links": {
+            "self": "/artists/4801418/relationships/roles?countryCode=US"
+          }
+        },
+        "videos": {
+          "links": {
+            "self": "/artists/4801418/relationships/videos?countryCode=US"
+          }
+        },
+        "trackProviders": {
+          "links": {
+            "self": "/artists/4801418/relationships/trackProviders?countryCode=US"
+          }
+        },
+        "tracks": {
+          "links": {
+            "self": "/artists/4801418/relationships/tracks?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/artists/4801418/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/artists/4801418?countryCode=US"
+      },
+      "id": "4801418",
+      "type": "artists"
+    },
+    {
+      "attributes": {
+        "name": "J Cole Nelson",
+        "popularity": 0.0,
+        "imageLinks": [],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/artist/12786709",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ],
+        "roles": [
+          "SONGWRITER"
+        ]
+      },
+      "relationships": {
+        "similarArtists": {
+          "links": {
+            "self": "/artists/12786709/relationships/similarArtists?countryCode=US"
+          }
+        },
+        "albums": {
+          "links": {
+            "self": "/artists/12786709/relationships/albums?countryCode=US"
+          }
+        },
+        "roles": {
+          "links": {
+            "self": "/artists/12786709/relationships/roles?countryCode=US"
+          }
+        },
+        "videos": {
+          "links": {
+            "self": "/artists/12786709/relationships/videos?countryCode=US"
+          }
+        },
+        "trackProviders": {
+          "links": {
+            "self": "/artists/12786709/relationships/trackProviders?countryCode=US"
+          }
+        },
+        "tracks": {
+          "links": {
+            "self": "/artists/12786709/relationships/tracks?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/artists/12786709/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/artists/12786709?countryCode=US"
+      },
+      "id": "12786709",
+      "type": "artists"
+    },
+    {
+      "attributes": {
+        "name": "Melvin J Cole",
+        "popularity": 0.0,
+        "imageLinks": [],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/artist/19685416",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ],
+        "roles": [
+          "SONGWRITER"
+        ]
+      },
+      "relationships": {
+        "similarArtists": {
+          "links": {
+            "self": "/artists/19685416/relationships/similarArtists?countryCode=US"
+          }
+        },
+        "albums": {
+          "links": {
+            "self": "/artists/19685416/relationships/albums?countryCode=US"
+          }
+        },
+        "roles": {
+          "links": {
+            "self": "/artists/19685416/relationships/roles?countryCode=US"
+          }
+        },
+        "videos": {
+          "links": {
+            "self": "/artists/19685416/relationships/videos?countryCode=US"
+          }
+        },
+        "trackProviders": {
+          "links": {
+            "self": "/artists/19685416/relationships/trackProviders?countryCode=US"
+          }
+        },
+        "tracks": {
+          "links": {
+            "self": "/artists/19685416/relationships/tracks?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/artists/19685416/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/artists/19685416?countryCode=US"
+      },
+      "id": "19685416",
+      "type": "artists"
+    },
+    {
+      "attributes": {
+        "name": "J. Cole",
+        "popularity": 50.0,
+        "imageLinks": [
+          {
+            "href": "https://resources.tidal.com/images/99231b6e/176f/49cf/a978/b9c31308cb7b/750x750.jpg",
+            "meta": {
+              "width": 750,
+              "height": 750
+            }
+          },
+          {
+            "href": "https://resources.tidal.com/images/99231b6e/176f/49cf/a978/b9c31308cb7b/480x480.jpg",
+            "meta": {
+              "width": 480,
+              "height": 480
+            }
+          },
+          {
+            "href": "https://resources.tidal.com/images/99231b6e/176f/49cf/a978/b9c31308cb7b/320x320.jpg",
+            "meta": {
+              "width": 320,
+              "height": 320
+            }
+          },
+          {
+            "href": "https://resources.tidal.com/images/99231b6e/176f/49cf/a978/b9c31308cb7b/160x160.jpg",
+            "meta": {
+              "width": 160,
+              "height": 160
+            }
+          }
+        ],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/artist/3652822",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ],
+        "roles": [
+          "ARTIST",
+          "SONGWRITER",
+          "PRODUCER",
+          "PERFORMER",
+          "PRODUCTION_TEAM",
+          "ENGINEER",
+          null
+        ]
+      },
+      "relationships": {
+        "similarArtists": {
+          "links": {
+            "self": "/artists/3652822/relationships/similarArtists?countryCode=US"
+          }
+        },
+        "albums": {
+          "links": {
+            "self": "/artists/3652822/relationships/albums?countryCode=US"
+          }
+        },
+        "roles": {
+          "links": {
+            "self": "/artists/3652822/relationships/roles?countryCode=US"
+          }
+        },
+        "videos": {
+          "links": {
+            "self": "/artists/3652822/relationships/videos?countryCode=US"
+          }
+        },
+        "trackProviders": {
+          "links": {
+            "self": "/artists/3652822/relationships/trackProviders?countryCode=US"
+          }
+        },
+        "tracks": {
+          "links": {
+            "self": "/artists/3652822/relationships/tracks?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/artists/3652822/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/artists/3652822?countryCode=US"
+      },
+      "id": "3652822",
+      "type": "artists"
+    },
+    {
+      "attributes": {
+        "name": "Ian J Cole",
+        "popularity": 0.0,
+        "imageLinks": [],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/artist/8686233",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ],
+        "roles": [
+          "ARTIST",
+          "SONGWRITER",
+          "PRODUCER",
+          "PERFORMER",
+          "ENGINEER",
+          null
+        ]
+      },
+      "relationships": {
+        "similarArtists": {
+          "links": {
+            "self": "/artists/8686233/relationships/similarArtists?countryCode=US"
+          }
+        },
+        "albums": {
+          "links": {
+            "self": "/artists/8686233/relationships/albums?countryCode=US"
+          }
+        },
+        "roles": {
+          "links": {
+            "self": "/artists/8686233/relationships/roles?countryCode=US"
+          }
+        },
+        "videos": {
+          "links": {
+            "self": "/artists/8686233/relationships/videos?countryCode=US"
+          }
+        },
+        "trackProviders": {
+          "links": {
+            "self": "/artists/8686233/relationships/trackProviders?countryCode=US"
+          }
+        },
+        "tracks": {
+          "links": {
+            "self": "/artists/8686233/relationships/tracks?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/artists/8686233/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/artists/8686233?countryCode=US"
+      },
+      "id": "8686233",
+      "type": "artists"
+    },
+    {
+      "attributes": {
+        "name": "Nicholas J Cole",
+        "popularity": 0.0,
+        "imageLinks": [],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/artist/36722767",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ],
+        "roles": [
+          "SONGWRITER"
+        ]
+      },
+      "relationships": {
+        "similarArtists": {
+          "links": {
+            "self": "/artists/36722767/relationships/similarArtists?countryCode=US"
+          }
+        },
+        "albums": {
+          "links": {
+            "self": "/artists/36722767/relationships/albums?countryCode=US"
+          }
+        },
+        "roles": {
+          "links": {
+            "self": "/artists/36722767/relationships/roles?countryCode=US"
+          }
+        },
+        "videos": {
+          "links": {
+            "self": "/artists/36722767/relationships/videos?countryCode=US"
+          }
+        },
+        "trackProviders": {
+          "links": {
+            "self": "/artists/36722767/relationships/trackProviders?countryCode=US"
+          }
+        },
+        "tracks": {
+          "links": {
+            "self": "/artists/36722767/relationships/tracks?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/artists/36722767/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/artists/36722767?countryCode=US"
+      },
+      "id": "36722767",
+      "type": "artists"
+    },
+    {
+      "attributes": {
+        "name": "J. Cole -",
+        "popularity": 0.0,
+        "imageLinks": [],
+        "externalLinks": [
+          {
+            "href": "https://tidal.com/browse/artist/38702458",
+            "meta": {
+              "type": "TIDAL_SHARING"
+            }
+          }
+        ],
+        "roles": [
+          "SONGWRITER"
+        ]
+      },
+      "relationships": {
+        "similarArtists": {
+          "links": {
+            "self": "/artists/38702458/relationships/similarArtists?countryCode=US"
+          }
+        },
+        "albums": {
+          "links": {
+            "self": "/artists/38702458/relationships/albums?countryCode=US"
+          }
+        },
+        "roles": {
+          "links": {
+            "self": "/artists/38702458/relationships/roles?countryCode=US"
+          }
+        },
+        "videos": {
+          "links": {
+            "self": "/artists/38702458/relationships/videos?countryCode=US"
+          }
+        },
+        "trackProviders": {
+          "links": {
+            "self": "/artists/38702458/relationships/trackProviders?countryCode=US"
+          }
+        },
+        "tracks": {
+          "links": {
+            "self": "/artists/38702458/relationships/tracks?countryCode=US"
+          }
+        },
+        "radio": {
+          "links": {
+            "self": "/artists/38702458/relationships/radio?countryCode=US"
+          }
+        }
+      },
+      "links": {
+        "self": "/artists/38702458?countryCode=US"
+      },
+      "id": "38702458",
+      "type": "artists"
+    }
+  ]
+}

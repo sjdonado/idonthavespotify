@@ -1,8 +1,8 @@
 import { Controller } from '@hotwired/stimulus';
 
-import { toast } from './helpers';
-
 import { SPOTIFY_LINK_REGEX, YOUTUBE_LINK_REGEX } from '~/config/constants';
+
+import { toast } from './helpers';
 
 export default class extends Controller {
   static targets = ['form', 'link'];

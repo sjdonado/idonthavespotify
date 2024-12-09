@@ -1,3 +1,5 @@
+import { InternalServerError } from 'elysia';
+
 import {
   SPOTIFY_LINK_DESKTOP_REGEX,
   SPOTIFY_LINK_MOBILE_REGEX,
@@ -84,7 +86,7 @@ export const getSpotifyMetadata = async (id: string, link: string) => {
 
     return metadata;
   } catch (err) {
-    throw new Error(`[${getSpotifyMetadata.name}] (${link}) ${err}`);
+    throw new InternalServerError(`[${getSpotifyMetadata.name}] (${link}) ${err}`);
   }
 };
 
