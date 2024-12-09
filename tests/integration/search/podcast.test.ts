@@ -1,13 +1,15 @@
-import { beforeAll, beforeEach, describe, expect, it, mock, jest } from 'bun:test';
-
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import { beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test';
 
+import { MetadataType } from '~/config/enum';
+import { ENV } from '~/config/env';
 import { app } from '~/index';
-import { getLinkWithPuppeteer } from '~/utils/scraper';
+import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
 
-import { JSONRequest } from '../../utils/request';
+import youtubePodcastResponseMock from '../../fixtures/youtube/podcastResponseMock.json';
+import { jsonRequest } from '../../utils/request';
 import {
   API_SEARCH_ENDPOINT,
   getAppleMusicSearchLink,
@@ -27,22 +29,25 @@ const [
   Bun.file('tests/fixtures/soundcloud/emptyResponseMock.html').text(),
 ]);
 
-mock.module('~/utils/scraper', () => ({
-  getLinkWithPuppeteer: jest.fn(),
-}));
-
 describe('GET /search - Podcast Episode', () => {
   let mock: AxiosMockAdapter;
-  const getLinkWithPuppeteerMock = getLinkWithPuppeteer as jest.Mock;
+  const getUniversalMetadataFromTidalMock = spyOn(
+    tidalUniversalLinkParser,
+    'getUniversalMetadataFromTidal'
+  );
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
   });
 
   beforeEach(() => {
-    getLinkWithPuppeteerMock.mockClear();
+    getUniversalMetadataFromTidalMock.mockReset();
     mock.reset();
     cacheStore.reset();
+
+    getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
+    mock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
+    mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
   });
 
   it('should return 200', async () => {
@@ -50,19 +55,16 @@ describe('GET /search - Podcast Episode', () => {
     const query = 'The End of Twitter as We Know It Waveform: The MKBHD Podcast';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
-    const youtubeSearchLink = getYouTubeSearchLink(query, '');
+    const youtubeSearchLink = getYouTubeSearchLink(query, MetadataType.Podcast);
     const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
+    const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
 
     mock.onGet(link).reply(200, spotifyPodcastHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicPodcastResponseMock);
+    mock.onGet(youtubeSearchLink).reply(200, youtubePodcastResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudPodcastResponseMock);
     mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
-
-    const mockedYoutubeLink =
-      'https://music.youtube.com/watch?v=v4FYdo-oZQk&list=PL70yIS6vx_Y2xaKD3w2qb6Eu06jNBdNJb';
-    getLinkWithPuppeteerMock.mockResolvedValueOnce(mockedYoutubeLink);
 
     const response = await app.handle(request).then(res => res.json());
 
@@ -80,22 +82,12 @@ describe('GET /search - Podcast Episode', () => {
       links: [
         {
           type: 'youTube',
-          url: mockedYoutubeLink,
+          url: 'https://music.youtube.com/podcast/0atwuUWhKWs',
           isVerified: true,
-        },
-        {
-          type: 'tidal',
-          url: 'https://listen.tidal.com/search?q=The+End+of+Twitter+as+We+Know+It+Waveform%3A+The+MKBHD+Podcast',
         },
       ],
     });
 
-    expect(mock.history.get).toHaveLength(2);
-    expect(getLinkWithPuppeteerMock).toHaveBeenCalledTimes(1);
-    expect(getLinkWithPuppeteerMock).toHaveBeenCalledWith(
-      expect.stringContaining(youtubeSearchLink),
-      'ytmusic-card-shelf-renderer a',
-      expect.any(Array)
-    );
+    expect(mock.history.get).toHaveLength(3);
   });
 });

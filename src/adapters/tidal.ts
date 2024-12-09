@@ -27,7 +27,8 @@ interface TidalSearchResponse {
   }>;
   included: Array<{
     attributes: {
-      title: string;
+      title?: string;
+      name?: string;
     };
   }>;
 }
@@ -55,7 +56,7 @@ export async function getTidalLink(query: string, metadata: SearchMetadata) {
   );
   url.search = params.toString();
 
-  console.log('tidal', url.toString(), await getOrUpdateTidalAccessToken());
+  // console.log('tidal', url.toString(), await getOrUpdateTidalAccessToken());
   const cache = await getCachedSearchResultLink(url);
   if (cache) {
     logger.info(`[Tidal] (${url}) cache hit`);
@@ -78,7 +79,7 @@ export async function getTidalLink(query: string, metadata: SearchMetadata) {
     let highestScore = 0;
 
     for (const item of included) {
-      const title = item.attributes.title;
+      const title = item.attributes.title ?? item.attributes.name ?? '';
       const score = compareTwoStrings(title.toLowerCase(), query.toLowerCase());
 
       if (score > highestScore) {

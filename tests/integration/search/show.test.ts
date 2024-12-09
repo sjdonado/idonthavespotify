@@ -21,10 +21,6 @@ const [spotifyShowHeadResponseMock, appleMusicShowResponseMock] = await Promise.
   Bun.file('tests/fixtures/apple-music/showResponseMock.html').text(),
 ]);
 
-mock.module('~/parsers/tidal-universal-link', () => ({
-  getUniversalMetadataFromTidal: jest.fn(),
-}));
-
 describe('GET /search - Podcast Show', () => {
   let mock: AxiosMockAdapter;
   const getUniversalMetadataFromTidalMock = spyOn(

@@ -1,11 +1,11 @@
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
-import { beforeAll, beforeEach, describe, expect, it, jest, mock } from 'bun:test';
+import { beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test';
 
 import { MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { app } from '~/index';
-import { getUniversalMetadataFromTidal } from '~/parsers/tidal-universal-link';
+import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
 
 import deezerSongResponseMock from '../../fixtures/deezer/songResponseMock.json';
@@ -35,13 +35,12 @@ const [
   Bun.file('tests/fixtures/soundcloud/songResponseMock.html').text(),
 ]);
 
-mock.module('~/parsers/tidal-universal-link', () => ({
-  getUniversalMetadataFromTidal: jest.fn(),
-}));
-
 describe('GET /search - Song', () => {
   let mock: AxiosMockAdapter;
-  const getUniversalMetadataFromTidalMock = getUniversalMetadataFromTidal as jest.Mock;
+  const getUniversalMetadataFromTidalMock = spyOn(
+    tidalUniversalLinkParser,
+    'getUniversalMetadataFromTidal'
+  );
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);

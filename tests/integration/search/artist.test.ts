@@ -1,24 +1,27 @@
-import { beforeAll, beforeEach, describe, expect, it, mock, jest } from 'bun:test';
-
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import { beforeAll, beforeEach, describe, expect, it, jest, mock, spyOn } from 'bun:test';
 
+import { MetadataType } from '~/config/enum';
+import { ENV } from '~/config/env';
 import { app } from '~/index';
-import { getLinkWithPuppeteer } from '~/utils/scraper';
+import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
 
-import { JSONRequest } from '../../utils/request';
+import deezerArtistResponseMock from '../../fixtures/deezer/artistResponseMock.json';
+import tidalArtistResponseMock from '../../fixtures/tidal/artistResponseMock.json';
+import youtubeArtistResponseMock from '../../fixtures/youtube/artistResponseMock.json';
+import { jsonRequest } from '../../utils/request';
 import {
   API_SEARCH_ENDPOINT,
   getAppleMusicSearchLink,
   getDeezerSearchLink,
   getSoundCloudSearchLink,
+  getTidalSearchLink,
   getYouTubeSearchLink,
   urlShortenerLink,
   urlShortenerResponseMock,
 } from '../../utils/shared';
-
-import deezerArtistResponseMock from '../../fixtures/deezer/artistResponseMock.json';
 
 const [
   spotifyArtistHeadResponseMock,
@@ -30,44 +33,47 @@ const [
   Bun.file('tests/fixtures/soundcloud/artistResponseMock.html').text(),
 ]);
 
-mock.module('~/utils/scraper', () => ({
-  getLinkWithPuppeteer: jest.fn(),
-}));
-
 describe('GET /search - Artist', () => {
   let mock: AxiosMockAdapter;
-  const getLinkWithPuppeteerMock = getLinkWithPuppeteer as jest.Mock;
+  const getUniversalMetadataFromTidalMock = spyOn(
+    tidalUniversalLinkParser,
+    'getUniversalMetadataFromTidal'
+  );
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
   });
 
   beforeEach(() => {
-    getLinkWithPuppeteerMock.mockClear();
+    getUniversalMetadataFromTidalMock.mockReset();
     mock.reset();
     cacheStore.reset();
+
+    getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
+    mock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
+    mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
   });
 
   it('should return 200', async () => {
     const link = 'https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5';
     const query = 'J. Cole';
 
+    const tidalSearchLink = getTidalSearchLink(query, MetadataType.Artist);
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
-    const youtubeSearchLink = getYouTubeSearchLink(query, 'channel');
+    const youtubeSearchLink = getYouTubeSearchLink(query, MetadataType.Artist);
     const deezerSearchLink = getDeezerSearchLink(query, 'artist');
     const soundCloudSearchLink = getSoundCloudSearchLink(query);
 
-    const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
+    const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
 
     mock.onGet(link).reply(200, spotifyArtistHeadResponseMock);
+
+    mock.onGet(tidalSearchLink).reply(200, tidalArtistResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicArtistResponseMock);
+    mock.onGet(youtubeSearchLink).reply(200, youtubeArtistResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerArtistResponseMock);
     mock.onGet(soundCloudSearchLink).reply(200, soundCloudArtistResponseMock);
     mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
-
-    const mockedYoutubeLink =
-      'https://music.youtube.com/channel/UC0ajkOzj8xE3Gs3LHCE243A';
-    getLinkWithPuppeteerMock.mockResolvedValueOnce(mockedYoutubeLink);
 
     const response = await app.handle(request).then(res => res.json());
 
@@ -80,11 +86,6 @@ describe('GET /search - Artist', () => {
       source: 'https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5',
       universalLink: urlShortenerResponseMock.data.refer,
       links: [
-        {
-          type: 'youTube',
-          url: mockedYoutubeLink,
-          isVerified: true,
-        },
         {
           type: 'appleMusic',
           url: 'https://music.apple.com/us/artist/j-cole/73705833',
@@ -102,17 +103,17 @@ describe('GET /search - Artist', () => {
         },
         {
           type: 'tidal',
-          url: 'https://listen.tidal.com/search?q=J.+Cole',
+          url: 'https://tidal.com/browse/artist/3652822',
+          isVerified: true,
+        },
+        {
+          type: 'youTube',
+          url: 'https://music.youtube.com/channel/UCByOQJjav0CUDwxCk-jVNRQ',
+          isVerified: true,
         },
       ],
     });
 
-    expect(mock.history.get).toHaveLength(4);
-    expect(getLinkWithPuppeteerMock).toHaveBeenCalledTimes(1);
-    expect(getLinkWithPuppeteerMock).toHaveBeenCalledWith(
-      expect.stringContaining(youtubeSearchLink),
-      'ytmusic-card-shelf-renderer a',
-      expect.any(Array)
-    );
+    expect(mock.history.get).toHaveLength(6);
   });
 });
