@@ -12,7 +12,7 @@ import {
   spyOn,
 } from 'bun:test';
 
-import { MetadataType } from '~/config/enum';
+import { Adapter, MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { app } from '~/index';
 import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
@@ -313,6 +313,41 @@ describe('Api router', () => {
       });
 
       expect(axiosMock.history.get).toHaveLength(7);
+    });
+
+    it('should return 200 when adapter adapter matches the parser type', async () => {
+      const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
+
+      const request = jsonRequest(API_SEARCH_ENDPOINT, {
+        link,
+        adapters: [Adapter.Spotify],
+      });
+
+      axiosMock.onGet(link).reply(200, spotifySongHeadResponseMock);
+
+      const response = await app.handle(request);
+      const data = await response.json();
+
+      expect(data).toEqual({
+        id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8yS3ZIQzl6MTRHU2w0WXBrTk1YMzg0',
+        type: 'song',
+        title: 'Do Not Disturb',
+        description: 'Drake · Song · 2017',
+        image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
+        audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
+        source: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
+        universalLink:
+          'http://localhost:3000?id=b3Blbi5zcG90aWZ5LmNvbS90cmFjay8yS3ZIQzl6MTRHU2w0WXBrTk1YMzg0',
+        links: [
+          {
+            isVerified: true,
+            type: 'spotify',
+            url: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
+          },
+        ],
+      });
+
+      expect(axiosMock.history.get).toHaveLength(1);
     });
 
     it('should return unknown error - could not parse Spotify metadata', async () => {
