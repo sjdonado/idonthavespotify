@@ -1,6 +1,16 @@
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
-import { afterEach, beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  Mock,
+  spyOn,
+} from 'bun:test';
 
 import { MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
@@ -36,29 +46,36 @@ const [
 ]);
 
 describe('Api router', () => {
-  let mock: AxiosMockAdapter;
-  const getUniversalMetadataFromTidalMock = spyOn(
-    tidalUniversalLinkParser,
-    'getUniversalMetadataFromTidal'
-  );
+  let axiosMock: AxiosMockAdapter;
+  let getUniversalMetadataFromTidalaxiosMock: Mock<
+    typeof tidalUniversalLinkParser.getUniversalMetadataFromTidal
+  >;
 
   beforeAll(() => {
-    mock = new AxiosMockAdapter(axios);
+    axiosMock = new AxiosMockAdapter(axios);
+    getUniversalMetadataFromTidalaxiosMock = spyOn(
+      tidalUniversalLinkParser,
+      'getUniversalMetadataFromTidal'
+    );
+  });
+
+  afterAll(() => {
+    axiosMock.reset();
+    getUniversalMetadataFromTidalaxiosMock.mockReset();
   });
 
   beforeEach(() => {
-    getUniversalMetadataFromTidalMock.mockReset();
     cacheStore.reset();
-    mock.reset();
+    axiosMock.reset();
 
-    getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
-    mock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
-    mock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
-    mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
+    getUniversalMetadataFromTidalaxiosMock.mockResolvedValue(undefined);
+    axiosMock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
+    axiosMock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
+    axiosMock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
   });
 
   afterEach(() => {
-    mock.reset();
+    axiosMock.reset();
   });
 
   describe('GET /search', () => {
@@ -74,13 +91,13 @@ describe('Api router', () => {
 
       const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
 
-      mock.onGet(link).reply(200, spotifySongHeadResponseMock);
+      axiosMock.onGet(link).reply(200, spotifySongHeadResponseMock);
 
-      mock.onGet(tidalSearchLink).reply(200, tidalSongResponseMock);
-      mock.onGet(appleMusicSearchLink).reply(500);
-      mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
-      mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
-      mock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
+      axiosMock.onGet(tidalSearchLink).reply(200, tidalSongResponseMock);
+      axiosMock.onGet(appleMusicSearchLink).reply(500);
+      axiosMock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
+      axiosMock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
+      axiosMock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
 
       const response = await app.handle(request);
       const data = await response.json();
@@ -118,7 +135,7 @@ describe('Api router', () => {
         ],
       });
 
-      expect(mock.history.get).toHaveLength(7);
+      expect(axiosMock.history.get).toHaveLength(7);
     });
 
     it('should return 200 when adapter returns error - Youtube', async () => {
@@ -133,13 +150,13 @@ describe('Api router', () => {
 
       const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
 
-      mock.onGet(link).reply(200, spotifySongHeadResponseMock);
+      axiosMock.onGet(link).reply(200, spotifySongHeadResponseMock);
 
-      mock.onGet(tidalSearchLink).reply(200, tidalSongResponseMock);
-      mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
-      mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
-      mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
-      mock.onGet(youtubeSearchLink).reply(500);
+      axiosMock.onGet(tidalSearchLink).reply(200, tidalSongResponseMock);
+      axiosMock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
+      axiosMock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
+      axiosMock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
+      axiosMock.onGet(youtubeSearchLink).reply(500);
 
       const response = await app.handle(request);
       const data = await response.json();
@@ -177,7 +194,7 @@ describe('Api router', () => {
         ],
       });
 
-      expect(mock.history.get).toHaveLength(7);
+      expect(axiosMock.history.get).toHaveLength(7);
     });
 
     it('should return 200 when adapter returns error - Deezer', async () => {
@@ -192,13 +209,13 @@ describe('Api router', () => {
 
       const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
 
-      mock.onGet(link).reply(200, spotifySongHeadResponseMock);
+      axiosMock.onGet(link).reply(200, spotifySongHeadResponseMock);
 
-      mock.onGet(tidalSearchLink).reply(200, tidalSongResponseMock);
-      mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
-      mock.onGet(deezerSearchLink).reply(500);
-      mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
-      mock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
+      axiosMock.onGet(tidalSearchLink).reply(200, tidalSongResponseMock);
+      axiosMock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
+      axiosMock.onGet(deezerSearchLink).reply(500);
+      axiosMock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
+      axiosMock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
 
       const response = await app.handle(request);
       const data = await response.json();
@@ -236,7 +253,7 @@ describe('Api router', () => {
         ],
       });
 
-      expect(mock.history.get).toHaveLength(7);
+      expect(axiosMock.history.get).toHaveLength(7);
     });
 
     it('should return 200 when adapter returns error - SoundCloud', async () => {
@@ -251,13 +268,13 @@ describe('Api router', () => {
 
       const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
 
-      mock.onGet(link).reply(200, spotifySongHeadResponseMock);
+      axiosMock.onGet(link).reply(200, spotifySongHeadResponseMock);
 
-      mock.onGet(tidalSearchLink).reply(200, tidalSongResponseMock);
-      mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
-      mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
-      mock.onGet(soundCloudSearchLink).reply(500);
-      mock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
+      axiosMock.onGet(tidalSearchLink).reply(200, tidalSongResponseMock);
+      axiosMock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
+      axiosMock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
+      axiosMock.onGet(soundCloudSearchLink).reply(500);
+      axiosMock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
 
       const response = await app.handle(request);
       const data = await response.json();
@@ -295,7 +312,7 @@ describe('Api router', () => {
         ],
       });
 
-      expect(mock.history.get).toHaveLength(7);
+      expect(axiosMock.history.get).toHaveLength(7);
     });
 
     it('should return unknown error - could not parse Spotify metadata', async () => {
@@ -303,7 +320,7 @@ describe('Api router', () => {
         link: cachedSpotifyLink,
       });
 
-      mock.onGet(cachedSpotifyLink).reply(200, '<html></html>');
+      axiosMock.onGet(cachedSpotifyLink).reply(200, '<html></html>');
 
       const response = await app.handle(request);
 

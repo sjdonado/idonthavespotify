@@ -35,11 +35,6 @@ export const cachedResponse = {
       isVerified: true,
     },
     {
-      type: 'youTube',
-      url: 'https://music.youtube.com/watch?v=zhY_0DoQCQs',
-      isVerified: true,
-    },
-    {
       type: 'deezer',
       url: 'https://www.deezer.com/track/144572248',
       isVerified: true,
@@ -51,7 +46,13 @@ export const cachedResponse = {
     },
     {
       type: 'tidal',
-      url: 'https://listen.tidal.com/search?q=Do+Not+Disturb+Drake',
+      url: 'https://tidal.com/browse/track/71717750',
+      isVerified: true,
+    },
+    {
+      type: 'youTube',
+      url: 'https://music.youtube.com/watch?v=vVd4T5NxLgI',
+      isVerified: true,
     },
   ],
 };

@@ -1,4 +1,15 @@
-import { beforeEach, describe, expect, it, spyOn } from 'bun:test';
+import axios from 'axios';
+import AxiosMockAdapter from 'axios-mock-adapter';
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  mock,
+  spyOn,
+} from 'bun:test';
 
 import { Adapter, MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
@@ -19,6 +30,17 @@ import { urlShortenerResponseMock } from '../utils/shared';
 const INDEX_ENDPOINT = 'http://localhost';
 
 describe('Page router', () => {
+  let axiosMock: AxiosMockAdapter;
+
+  beforeAll(() => {
+    axiosMock = new AxiosMockAdapter(axios);
+    mock.restore();
+  });
+
+  afterEach(() => {
+    axiosMock.reset();
+  });
+
   beforeEach(async () => {
     cacheStore.reset();
 
@@ -31,7 +53,7 @@ describe('Page router', () => {
         audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
       }),
       cacheShortenLink(
-        `${ENV.app.url}?id=b3Blbi5zcG90aWZ5LmNvbS90cmFjay8yS3ZIQzl6MTRHU2w0WXBrTk1YMzg0`,
+        `${ENV.app.url}?id=2KvHC9z14GSl4YpkNMX384`,
         urlShortenerResponseMock.data.refer
       ),
     ]);
@@ -73,7 +95,9 @@ describe('Page router', () => {
           tidal: null,
         }),
         cacheSearchResultLink(
-          new URL('https://music.youtube.com/search?q=Do+Not+Disturb+Drake+song'),
+          new URL(
+            'https://content-youtube.googleapis.com/youtube/v3/search?type=video&regionCode=US&q=Do+Not+Disturb+Drake&part=id&safeSearch=none&key=AIzaSyBT3LRj9GtT9rWG4ByaZJozedSgJ3J4Ilw'
+          ),
           {
             type: Adapter.YouTube,
             url: 'https://music.youtube.com/watch?v=zhY_0DoQCQs',
@@ -84,12 +108,12 @@ describe('Page router', () => {
           new URL('https://music.apple.com/ca/search?term=Do%20Not%20Disturb%20Drake'),
           {
             type: Adapter.AppleMusic,
-            url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
+            url: 'https://music.apple.com/ca/album/do-not-disturb/1440890708?i=1440892237',
             isVerified: true,
           }
         ),
         cacheSearchResultLink(
-          new URL('https://api.deezer.com/search/track?q=Do+Not+Disturb+Drake&limit=1'),
+          new URL('https://api.deezer.com/search/track?q=Do+Not+Disturb+Drake&limit=4'),
           {
             type: Adapter.Deezer,
             url: 'https://www.deezer.com/track/144572248',
@@ -132,7 +156,7 @@ describe('Page router', () => {
       expect(searchLinks).toHaveLength(5);
       expect(searchLinks[0].attribs['aria-label']).toContain('Listen on Apple Music');
       expect(searchLinks[0].attribs['href']).toBe(
-        'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237'
+        'https://music.apple.com/ca/album/do-not-disturb/1440890708?i=1440892237'
       );
       expect(searchLinks[1].attribs['aria-label']).toContain('Listen on Deezer');
       expect(searchLinks[1].attribs['href']).toBe(
@@ -148,12 +172,22 @@ describe('Page router', () => {
       );
       expect(searchLinks[4].attribs['aria-label']).toContain('Listen on YouTube');
       expect(searchLinks[4].attribs['href']).toBe(
-        'https://music.youtube.com/watch?v=vVd4T5NxLgI'
+        'https://music.youtube.com/watch?v=zhY_0DoQCQs'
       );
     });
 
     it('should return search card with a valid link - From Universal link', async () => {
       await Promise.all([
+        cacheSearchResultLink(
+          new URL(
+            'https://openapi.tidal.com/v2/searchresults/Do%20Not%20Disturb%20Drake/relationships/tracks?countryCode=US&include=tracks'
+          ),
+          {
+            type: Adapter.Tidal,
+            url: 'https://tidal.com/browse/track/71717750',
+            isVerified: true,
+          }
+        ),
         cacheTidalUniversalLinkResponse('https://tidal.com/browse/track/71717750/u', {
           spotify: {
             type: Adapter.Spotify,
@@ -175,7 +209,7 @@ describe('Page router', () => {
           tidal: null,
         }),
         cacheSearchResultLink(
-          new URL('https://api.deezer.com/search/track?q=Do+Not+Disturb+Drake&limit=1'),
+          new URL('https://api.deezer.com/search/track?q=Do+Not+Disturb+Drake&limit=4'),
           {
             type: Adapter.Deezer,
             url: 'https://www.deezer.com/track/144572248',
@@ -187,16 +221,6 @@ describe('Page router', () => {
           {
             type: Adapter.SoundCloud,
             url: 'https://soundcloud.com/octobersveryown/drake-do-not-disturb',
-            isVerified: true,
-          }
-        ),
-        cacheSearchResultLink(
-          new URL(
-            'https://openapi.tidal.com/v2/searchresults/Do%20Not%20Disturb%20Drake/relationships/tracks?countryCode=US&include=tracks'
-          ),
-          {
-            type: Adapter.Tidal,
-            url: 'https://tidal.com/browse/track/71717750',
             isVerified: true,
           }
         ),
