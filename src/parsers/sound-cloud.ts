@@ -25,7 +25,7 @@ export const getSoundCloudMetadata = async (id: string, link: string) => {
   }
 
   try {
-    const html = await fetchMetadata(link, {});
+    const html = await fetchMetadata(link);
 
     const doc = getCheerioDoc(html);
 

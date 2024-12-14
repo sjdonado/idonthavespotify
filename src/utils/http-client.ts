@@ -19,29 +19,17 @@ function getRandomUserAgent() {
   ];
 
   const chromeVersions = [
-    '86.0.4240.198',
-    '87.0.4280.88',
-    '88.0.4324.96',
-    '89.0.4389.72',
-    '90.0.4430.85',
+    '91.0.4472.124',
+    '92.0.4515.107',
+    '93.0.4577.63',
+    '94.0.4606.71',
+    '95.0.4638.69',
   ];
 
-  const firefoxVersions = ['84.0', '85.0', '86.0', '87.0', '88.0'];
-
-  const isChrome = Math.random() > 0.5;
-
   const os = osOptions[Math.floor(Math.random() * osOptions.length)];
+  const chromeVersion = chromeVersions[Math.floor(Math.random() * chromeVersions.length)];
 
-  if (isChrome) {
-    const chromeVersion =
-      chromeVersions[Math.floor(Math.random() * chromeVersions.length)];
-
-    return `Mozilla/5.0 (${os}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${chromeVersion} Safari/537.36`;
-  }
-  const firefoxVersion =
-    firefoxVersions[Math.floor(Math.random() * firefoxVersions.length)];
-
-  return `Mozilla/5.0 (${os}; rv:${firefoxVersion}) Gecko/20100101 Firefox/${firefoxVersion}`;
+  return `Mozilla/5.0 (${os}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${chromeVersion} Safari/537.36 Edg/91.0.864.67`;
 }
 
 axiosRetry(axios, {

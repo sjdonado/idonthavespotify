@@ -30,7 +30,8 @@ export const getYouTubeMetadata = async (id: string, link: string) => {
   }
 
   try {
-    const html = await fetchMetadata(link, {});
+    const rawLink = link.replace('music.youtube', 'www.youtube');
+    const html = await fetchMetadata(rawLink);
 
     const doc = getCheerioDoc(html);
 
