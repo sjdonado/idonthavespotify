@@ -96,7 +96,7 @@ describe('Page router', () => {
         }),
         cacheSearchResultLink(
           new URL(
-            'https://content-youtube.googleapis.com/youtube/v3/search?type=video&regionCode=US&q=Do+Not+Disturb+Drake&part=id&safeSearch=none&key=AIzaSyBT3LRj9GtT9rWG4ByaZJozedSgJ3J4Ilw'
+            'https://content-youtube.googleapis.com/youtube/v3/search?type=video&regionCode=US&q=Do+Not+Disturb+Drake&part=id&safeSearch=none&key=youtube_api_key'
           ),
           {
             type: Adapter.YouTube,
