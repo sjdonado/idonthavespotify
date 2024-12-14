@@ -72,7 +72,7 @@ export const search = async ({
 
   const searchParser = getSearchParser(link, searchId);
 
-  const metadataFetchers = {
+  const metadataFetchersMap = {
     [Parser.Spotify]: getSpotifyMetadata,
     [Parser.YouTube]: getYouTubeMetadata,
     [Parser.AppleMusic]: getAppleMusicMetadata,
@@ -81,7 +81,7 @@ export const search = async ({
     [Parser.Tidal]: getTidalMetadata,
   };
 
-  const queryExtractors = {
+  const queryExtractorsMap = {
     [Parser.Spotify]: getSpotifyQueryFromMetadata,
     [Parser.YouTube]: getYouTubeQueryFromMetadata,
     [Parser.AppleMusic]: getAppleMusicQueryFromMetadata,
@@ -90,7 +90,7 @@ export const search = async ({
     [Parser.Tidal]: getTidalQueryFromMetadata,
   };
 
-  const linkGetters = {
+  const linkGettersMap = {
     [Adapter.Spotify]: getSpotifyLink,
     [Adapter.YouTube]: getYouTubeLink,
     [Adapter.AppleMusic]: getAppleMusicLink,
@@ -99,15 +99,15 @@ export const search = async ({
     [Adapter.Tidal]: getTidalLink,
   };
 
-  const fetchMetadata = metadataFetchers[searchParser.type];
-  const extractQuery = queryExtractors[searchParser.type];
+  const metadataFetcher = metadataFetchersMap[searchParser.type];
+  const queryExtractor = queryExtractorsMap[searchParser.type];
 
-  if (!fetchMetadata || !extractQuery) {
+  if (!metadataFetcher || !queryExtractor) {
     throw new InternalServerError('Parser not implemented yet');
   }
 
-  let metadata = await fetchMetadata(searchParser.id, searchParser.source);
-  const query = extractQuery(metadata);
+  let metadata = await metadataFetcher(searchParser.id, searchParser.source);
+  const query = queryExtractor(metadata);
   const parserType = searchParser.type as StreamingServiceType;
 
   logger.info(
@@ -187,10 +187,10 @@ export const search = async ({
   await Promise.all(
     remainingAdapters
       .map(adapter => {
-        const getLink = linkGetters[adapter];
-        if (!getLink) return null;
+        const linkGetter = linkGettersMap[adapter];
+        if (!linkGetter) return null;
 
-        return getLink(query, metadata).then(link => {
+        return linkGetter(query, metadata).then(link => {
           if (link) {
             links.push({ type: adapter, url: link.url, isVerified: true });
             existingAdapters.add(adapter);

@@ -36,7 +36,7 @@ const [
 ]);
 
 describe('Searches cache', () => {
-  let mock: AxiosMockAdapter;
+  let axiosMock: AxiosMockAdapter;
   const getUniversalMetadataFromTidalMock = spyOn(
     tidalUniversalLinkParser,
     'getUniversalMetadataFromTidal'
@@ -45,7 +45,7 @@ describe('Searches cache', () => {
   beforeAll(async () => {
     cacheStore.reset();
 
-    mock = new AxiosMockAdapter(axios);
+    axiosMock = new AxiosMockAdapter(axios);
 
     const query = 'Do Not Disturb Drake';
 
@@ -57,27 +57,27 @@ describe('Searches cache', () => {
 
     const request = jsonRequest(API_SEARCH_ENDPOINT, { link: cachedSpotifyLink });
 
-    mock.onGet(cachedSpotifyLink).reply(200, spotifySongHeadResponseMock);
+    axiosMock.onGet(cachedSpotifyLink).reply(200, spotifySongHeadResponseMock);
 
-    mock.onGet(tidalSearchLink).reply(200, tidalSongResponseMock);
-    mock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
-    mock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
-    mock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
-    mock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
+    axiosMock.onGet(tidalSearchLink).reply(200, tidalSongResponseMock);
+    axiosMock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
+    axiosMock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
+    axiosMock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
+    axiosMock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
 
     getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
-    mock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
-    mock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
-    mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
+    axiosMock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
+    axiosMock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
+    axiosMock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
     // fill cache
     await app.handle(request);
 
-    expect(mock.history.get).toHaveLength(6);
+    expect(axiosMock.history.get).toHaveLength(6);
   });
 
   afterAll(() => {
-    mock.reset();
+    axiosMock.reset();
   });
 
   it('should return 200 from cache', async () => {

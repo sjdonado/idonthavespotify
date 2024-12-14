@@ -1,5 +1,3 @@
-import { CheerioAPI } from 'cheerio';
-
 import { Adapter } from '~/config/enum';
 import {
   cacheTidalUniversalLinkResponse,
@@ -20,37 +18,25 @@ export const getUniversalMetadataFromTidal = async (
     return cached;
   }
 
-  const extractLink = (
-    doc: CheerioAPI,
-    selector: string,
-    type: Adapter
-  ): SearchResultLink | null => {
-    const url = doc(selector).attr('href');
-    return url
-      ? {
-          type,
-          url,
-          isVerified,
-        }
-      : null;
-  };
-
   try {
     const html = await fetchMetadata(link);
     const doc = getCheerioDoc(html);
 
+    const extractLink = (selector: string, type: Adapter): SearchResultLink | null => {
+      const url = doc(selector).attr('href');
+      return url
+        ? {
+            type,
+            url,
+            isVerified,
+          }
+        : null;
+    };
+
     const adapterLinks: Record<Adapter, SearchResultLink | null> = {
-      [Adapter.Spotify]: extractLink(doc, 'a[href*="spotify.com"]', Adapter.Spotify),
-      [Adapter.YouTube]: extractLink(
-        doc,
-        'a[href*="music.youtube.com"]',
-        Adapter.YouTube
-      ),
-      [Adapter.AppleMusic]: extractLink(
-        doc,
-        'a[href*="music.apple.com"]',
-        Adapter.AppleMusic
-      ),
+      [Adapter.Spotify]: extractLink('a[href*="spotify.com"]', Adapter.Spotify),
+      [Adapter.YouTube]: extractLink('a[href*="music.youtube.com"]', Adapter.YouTube),
+      [Adapter.AppleMusic]: extractLink('a[href*="music.apple.com"]', Adapter.AppleMusic),
       [Adapter.Deezer]: null,
       [Adapter.SoundCloud]: null,
       [Adapter.Tidal]: null,

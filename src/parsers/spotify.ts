@@ -5,8 +5,9 @@ import {
   SPOTIFY_LINK_MOBILE_REGEX,
 } from '~/config/constants';
 import { MetadataType, Parser } from '~/config/enum';
+import { ENV } from '~/config/env';
 import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
-import { defaultHeaders, fetchMetadata } from '~/services/metadata';
+import { fetchMetadata } from '~/services/metadata';
 import { SearchMetadata } from '~/services/search';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
@@ -30,6 +31,10 @@ const SPOTIFY_METADATA_TO_METADATA_TYPE = {
   [SpotifyMetadataType.Show]: MetadataType.Show,
 };
 
+const spotifyClientHeaders = {
+  'User-Agent': `${ENV.adapters.spotify.clientVersion} (Macintosh; Apple Silicon)`,
+};
+
 export const getSpotifyMetadata = async (id: string, link: string) => {
   const cached = await getCachedSearchMetadata(id, Parser.Spotify);
   if (cached) {
@@ -38,7 +43,7 @@ export const getSpotifyMetadata = async (id: string, link: string) => {
   }
 
   try {
-    let html = await fetchMetadata(link);
+    let html = await fetchMetadata(link, spotifyClientHeaders);
 
     if (SPOTIFY_LINK_MOBILE_REGEX.test(link)) {
       link = html.match(SPOTIFY_LINK_DESKTOP_REGEX)?.[0] ?? '';
@@ -53,7 +58,7 @@ export const getSpotifyMetadata = async (id: string, link: string) => {
       logger.info(`[${getSpotifyMetadata.name}] parse metadata (desktop): ${link}`);
 
       html = await HttpClient.get<string>(link, {
-        headers: defaultHeaders,
+        headers: spotifyClientHeaders,
         retries: 2,
       });
     }
