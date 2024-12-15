@@ -1,45 +1,47 @@
-import { beforeAll, beforeEach, describe, expect, it, mock, jest } from 'bun:test';
-
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import { beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test';
 
+import { ENV } from '~/config/env';
 import { app } from '~/index';
-import { getLinkWithPuppeteer } from '~/utils/scraper';
+import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
 
-import { JSONRequest } from '../../utils/request';
+import deezerShowResponseMock from '../../fixtures/deezer/showResponseMock.json';
+import { jsonRequest } from '../../utils/request';
 import {
   API_SEARCH_ENDPOINT,
   getAppleMusicSearchLink,
   getDeezerSearchLink,
-  getYouTubeSearchLink,
   urlShortenerLink,
   urlShortenerResponseMock,
 } from '../../utils/shared';
-
-import deezerShowResponseMock from '../../fixtures/deezer/showResponseMock.json';
 
 const [spotifyShowHeadResponseMock, appleMusicShowResponseMock] = await Promise.all([
   Bun.file('tests/fixtures/spotify/showHeadResponseMock.html').text(),
   Bun.file('tests/fixtures/apple-music/showResponseMock.html').text(),
 ]);
 
-mock.module('~/utils/scraper', () => ({
-  getLinkWithPuppeteer: jest.fn(),
-}));
-
 describe('GET /search - Podcast Show', () => {
   let mock: AxiosMockAdapter;
-  const getLinkWithPuppeteerMock = getLinkWithPuppeteer as jest.Mock;
+  const getUniversalMetadataFromTidalMock = spyOn(
+    tidalUniversalLinkParser,
+    'getUniversalMetadataFromTidal'
+  );
 
   beforeAll(() => {
     mock = new AxiosMockAdapter(axios);
   });
 
   beforeEach(() => {
-    getLinkWithPuppeteerMock.mockReset();
+    getUniversalMetadataFromTidalMock.mockReset();
     mock.reset();
     cacheStore.reset();
+
+    getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
+    mock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
+    mock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
+    mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
   });
 
   it('should return 200', async () => {
@@ -47,23 +49,19 @@ describe('GET /search - Podcast Show', () => {
     const query = 'Waveform: The MKBHD Podcast';
 
     const appleMusicSearchLink = getAppleMusicSearchLink(query);
-    const youtubeSearchLink = getYouTubeSearchLink(query, 'channel');
     const deezerSearchLink = getDeezerSearchLink(query, 'podcast');
 
-    const request = JSONRequest(API_SEARCH_ENDPOINT, { link });
+    const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
 
     mock.onGet(link).reply(200, spotifyShowHeadResponseMock);
     mock.onGet(appleMusicSearchLink).reply(200, appleMusicShowResponseMock);
     mock.onGet(deezerSearchLink).reply(200, deezerShowResponseMock);
     mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
 
-    const mockedYoutubeLink =
-      'https://music.youtube.com/watch?v=v4FYdo-oZQk&list=PL70yIS6vx_Y2xaKD3w2qb6Eu06jNBdNJb';
-    getLinkWithPuppeteerMock.mockResolvedValueOnce(mockedYoutubeLink);
+    const response = await app.handle(request);
+    const data = await response.json();
 
-    const response = await app.handle(request).then(res => res.json());
-
-    expect(response).toEqual({
+    expect(data).toEqual({
       id: 'b3Blbi5zcG90aWZ5LmNvbS9zaG93LzZvODFRdVcyMnM1bTJuZmNYV2p1Y2M%3D',
       type: 'show',
       title: 'Waveform: The MKBHD Podcast',
@@ -74,28 +72,13 @@ describe('GET /search - Podcast Show', () => {
       universalLink: urlShortenerResponseMock.data.refer,
       links: [
         {
-          type: 'youTube',
-          url: mockedYoutubeLink,
-          isVerified: true,
-        },
-        {
           type: 'deezer',
           url: 'https://www.deezer.com/show/1437252',
           isVerified: true,
-        },
-        {
-          type: 'tidal',
-          url: 'https://listen.tidal.com/search?q=Waveform%3A+The+MKBHD+Podcast',
         },
       ],
     });
 
     expect(mock.history.get).toHaveLength(2);
-    expect(getLinkWithPuppeteerMock).toHaveBeenCalledTimes(1);
-    // expect(getLinkWithPuppeteerMock).toHaveBeenCalledWith(
-    //   expect.stringContaining(youtubeSearchLink),
-    //   'ytmusic-card-shelf-renderer a',
-    //   expect.any(Array)
-    // );
   });
 });

@@ -1,4 +1,5 @@
 import { t } from 'elysia';
+
 import { ALLOWED_LINKS_REGEX } from '~/config/constants';
 import { Adapter } from '~/config/enum';
 

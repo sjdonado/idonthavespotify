@@ -44,10 +44,7 @@ const SPOTIFY_SEARCH_TYPES = {
 
 export async function getSpotifyLink(query: string, metadata: SearchMetadata) {
   const searchType = SPOTIFY_SEARCH_TYPES[metadata.type];
-
-  if (!searchType) {
-    return null;
-  }
+  if (!searchType) return null;
 
   const params = new URLSearchParams({
     q: query,
@@ -72,7 +69,6 @@ export async function getSpotifyLink(query: string, metadata: SearchMetadata) {
     });
 
     const [[, data]] = Object.entries(response);
-
     if (data.total === 0) {
       throw new Error(`No results found: ${JSON.stringify(response)}`);
     }

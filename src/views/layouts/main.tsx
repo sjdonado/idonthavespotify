@@ -13,6 +13,8 @@ export default function MainLayout({
   image?: string;
   children: JSX.Element;
 }) {
+  const isProduction = process.env.NODE_ENV === 'production';
+
   return (
     <html>
       <head>
@@ -59,18 +61,20 @@ export default function MainLayout({
           href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
         />
         <link href="https://fonts.cdnfonts.com/css/poppins" rel="stylesheet" />
-        <script src="https://unpkg.com/htmx.org@2.0.3"></script>
+        <script src="https://unpkg.com/htmx.org@1.9.12"></script>
 
         <link href="/assets/index.min.css" rel="stylesheet" />
       </head>
 
       <body class="h-screen bg-black font-light text-white">{children}</body>
 
-      <script
-        defer
-        src="https://umami.sjdonado.com/script.js"
-        data-website-id="da89a7a2-dd17-4c7f-b7ff-de28a7046a0e"
-      />
+      {isProduction && (
+        <script
+          defer
+          src="https://umami.sjdonado.com/script.js"
+          data-website-id="da89a7a2-dd17-4c7f-b7ff-de28a7046a0e"
+        />
+      )}
 
       <script src="assets/app.js" />
     </html>

@@ -1,0 +1,52 @@
+{
+  "kind": "youtube#searchListResponse",
+  "etag": "qu4QsNHSA2QNBFZzyxH6_ON-Ik0",
+  "nextPageToken": "CAUQAA",
+  "regionCode": "US",
+  "pageInfo": {
+    "totalResults": 5953,
+    "resultsPerPage": 5
+  },
+  "items": [
+    {
+      "kind": "youtube#searchResult",
+      "etag": "0nPLJ-Kpocsq20OK-F52TChpnuw",
+      "id": {
+        "kind": "youtube#video",
+        "videoId": "0atwuUWhKWs"
+      }
+    },
+    {
+      "kind": "youtube#searchResult",
+      "etag": "6g6DYBoKkZdO9KwDfEE9OD7GgLU",
+      "id": {
+        "kind": "youtube#video",
+        "videoId": "X8gvuyi7oz0"
+      }
+    },
+    {
+      "kind": "youtube#searchResult",
+      "etag": "Ro41Y_KOKAux7WpELANngknEaF4",
+      "id": {
+        "kind": "youtube#video",
+        "videoId": "N-_X42WGhqo"
+      }
+    },
+    {
+      "kind": "youtube#searchResult",
+      "etag": "A1ggAPJRYwvn6-vE4ywE9eruT4U",
+      "id": {
+        "kind": "youtube#video",
+        "videoId": "ygt0hV_9kGc"
+      }
+    },
+    {
+      "kind": "youtube#searchResult",
+      "etag": "PURLtOumPxySg9ZoMjlUnD6JLzk",
+      "id": {
+        "kind": "youtube#video",
+        "videoId": "7tZ6F9aPxCU"
+      }
+    }
+  ]
+}

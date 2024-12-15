@@ -30,10 +30,7 @@ const DEEZER_SEARCH_TYPES = {
 
 export async function getDeezerLink(query: string, metadata: SearchMetadata) {
   const searchType = DEEZER_SEARCH_TYPES[metadata.type];
-
-  if (!searchType) {
-    return null;
-  }
+  if (!searchType) return null;
 
   const params = new URLSearchParams({
     q: query,

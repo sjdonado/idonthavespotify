@@ -27,12 +27,13 @@ interface TidalSearchResponse {
   }>;
   included: Array<{
     attributes: {
-      title: string;
+      title?: string;
+      name?: string;
     };
   }>;
 }
 
-const TIDAL_SEARCH_TYPES = {
+export const TIDAL_SEARCH_TYPES = {
   [MetadataType.Song]: 'tracks',
   [MetadataType.Album]: 'albums',
   [MetadataType.Playlist]: 'playlists',
@@ -43,10 +44,7 @@ const TIDAL_SEARCH_TYPES = {
 
 export async function getTidalLink(query: string, metadata: SearchMetadata) {
   const searchType = TIDAL_SEARCH_TYPES[metadata.type];
-
-  if (!searchType) {
-    return null;
-  }
+  if (!searchType) return null;
 
   const params = new URLSearchParams({
     countryCode: 'US',
@@ -58,6 +56,7 @@ export async function getTidalLink(query: string, metadata: SearchMetadata) {
   );
   url.search = params.toString();
 
+  // console.log('tidal', url.toString(), await getOrUpdateTidalAccessToken());
   const cache = await getCachedSearchResultLink(url);
   if (cache) {
     logger.info(`[Tidal] (${url}) cache hit`);
@@ -72,7 +71,6 @@ export async function getTidalLink(query: string, metadata: SearchMetadata) {
     });
 
     const { data, included } = response;
-
     if (!data || data.length === 0) {
       throw new Error(`No results found: ${JSON.stringify(response)}`);
     }
@@ -81,7 +79,7 @@ export async function getTidalLink(query: string, metadata: SearchMetadata) {
     let highestScore = 0;
 
     for (const item of included) {
-      const title = item.attributes.title;
+      const title = item.attributes.title ?? item.attributes.name ?? '';
       const score = compareTwoStrings(title.toLowerCase(), query.toLowerCase());
 
       if (score > highestScore) {

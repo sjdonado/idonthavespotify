@@ -17,8 +17,9 @@ export const ENV = {
       clientSecret: Bun.env.TIDAL_CLIENT_SECRET!,
     },
     youTube: {
-      musicUrl: Bun.env.YOUTUBE_MUSIC_URL!,
-      cookies: Bun.env.YOUTUBE_COOKIES!,
+      apiUrl: Bun.env.YOUTUBE_API_URL!,
+      apiKey: Bun.env.YOUTUBE_API_KEY!,
+      musicBaseUrl: Bun.env.YOUTUBE_MUSIC_BASE_URL!,
     },
     deezer: {
       apiUrl: Bun.env.DEEZER_API_URL!,
@@ -42,6 +43,6 @@ export const ENV = {
   },
   cache: {
     databasePath: Bun.env.DATABASE_PATH ?? ':memory:',
-    expTime: 60 * 60 * 24 * 7, // 1 week in seconds
+    expTime: 60 * 60 * 24 * 7 * 4, // 4 weeks in seconds
   },
 };

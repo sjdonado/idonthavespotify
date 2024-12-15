@@ -1,10 +1,9 @@
-import { beforeAll, afterEach, describe, expect, it } from 'bun:test';
-
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import { afterEach, beforeAll, describe, expect, it } from 'bun:test';
 
-import { MetadataType, Adapter } from '~/config/enum';
 import { getSoundCloudLink } from '~/adapters/sound-cloud';
+import { Adapter, MetadataType } from '~/config/enum';
 import { SearchMetadata } from '~/services/search';
 
 import { getSoundCloudSearchLink } from '../utils/shared';

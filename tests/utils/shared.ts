@@ -1,3 +1,6 @@
+import { TIDAL_SEARCH_TYPES } from '~/adapters/tidal';
+import { YOUTUBE_SEARCH_TYPES } from '~/adapters/youtube';
+import { MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
 
 export const API_ENDPOINT = 'http://localhost/api';
@@ -32,11 +35,6 @@ export const cachedResponse = {
       isVerified: true,
     },
     {
-      type: 'youTube',
-      url: 'https://music.youtube.com/watch?v=zhY_0DoQCQs',
-      isVerified: true,
-    },
-    {
       type: 'deezer',
       url: 'https://www.deezer.com/track/144572248',
       isVerified: true,
@@ -48,17 +46,30 @@ export const cachedResponse = {
     },
     {
       type: 'tidal',
-      url: 'https://listen.tidal.com/search?q=Do+Not+Disturb+Drake',
+      url: 'https://tidal.com/browse/track/71717750',
+      isVerified: true,
+    },
+    {
+      type: 'youTube',
+      url: 'https://music.youtube.com/watch?v=vVd4T5NxLgI',
+      isVerified: true,
     },
   ],
 };
 
-export const getYouTubeSearchLink = (query: string, type: string) => {
+export const getYouTubeSearchLink = (query: string, type: MetadataType) => {
+  const searchType = YOUTUBE_SEARCH_TYPES[type]!;
+
   const params = new URLSearchParams({
-    q: `${query} ${type}`,
+    type: searchType,
+    regionCode: 'US',
+    q: query,
+    part: 'id',
+    safeSearch: 'none',
+    key: ENV.adapters.youTube.apiKey,
   });
 
-  const url = new URL(ENV.adapters.youTube.musicUrl);
+  const url = new URL(ENV.adapters.youTube.apiUrl);
   url.search = params.toString();
 
   return url.toString();
@@ -76,7 +87,7 @@ export const getAppleMusicSearchLink = (query: string) => {
 export const getDeezerSearchLink = (query: string, type: string) => {
   const params = new URLSearchParams({
     q: query,
-    limit: '1',
+    limit: '4',
   });
 
   const url = new URL(`${ENV.adapters.deezer.apiUrl}/${type}`);
@@ -91,6 +102,22 @@ export const getSoundCloudSearchLink = (query: string) => {
   });
 
   const url = new URL(`${ENV.adapters.soundCloud.baseUrl}/search`);
+  url.search = params.toString();
+
+  return url.toString();
+};
+
+export const getTidalSearchLink = (query: string, type: MetadataType) => {
+  const searchType = TIDAL_SEARCH_TYPES[type]!;
+
+  const params = new URLSearchParams({
+    countryCode: 'US',
+    include: searchType,
+  });
+
+  const url = new URL(
+    `${ENV.adapters.tidal.apiUrl}/${encodeURIComponent(query)}/relationships/${searchType}`
+  );
   url.search = params.toString();
 
   return url.toString();
