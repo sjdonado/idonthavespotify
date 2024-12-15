@@ -1,14 +1,12 @@
-import { ENV } from '~/config/env';
-import { MetadataType, Adapter } from '~/config/enum';
 import { RESPONSE_COMPARE_MIN_SCORE } from '~/config/constants';
-
+import { Adapter, MetadataType } from '~/config/enum';
+import { ENV } from '~/config/env';
+import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
+import { SearchMetadata, SearchResultLink } from '~/services/search';
+import { getResultWithBestScore } from '~/utils/compare';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { getCheerioDoc } from '~/utils/scraper';
-import { getResultWithBestScore } from '~/utils/compare';
-
-import { SearchMetadata, SearchResultLink } from '~/services/search';
-import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
 
 export const APPLE_MUSIC_LINK_SELECTOR = 'a[href^="https://music.apple.com/"]';
 
@@ -23,12 +21,9 @@ const APPLE_MUSIC_SEARCH_TYPES = {
 
 export async function getAppleMusicLink(query: string, metadata: SearchMetadata) {
   const searchType = APPLE_MUSIC_SEARCH_TYPES[metadata.type];
+  if (!searchType) return null;
 
-  if (!searchType) {
-    return;
-  }
-
-  // apple music does not support x-www-form-urlencoded encoding
+  // x-www-form-urlencoded encoding required for browser url
   const params = `term=${encodeURIComponent(query)}`;
 
   const url = new URL(`${ENV.adapters.appleMusic.apiUrl}/search?${params}`);
@@ -60,5 +55,6 @@ export async function getAppleMusicLink(query: string, metadata: SearchMetadata)
     return searchResultLink;
   } catch (err) {
     logger.error(`[Apple Music] (${url}) ${err} `);
+    return null;
   }
 }

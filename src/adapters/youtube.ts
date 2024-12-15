@@ -1,29 +1,63 @@
+import { Adapter, MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
-import { MetadataType, Adapter } from '~/config/enum';
-
+import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
+import { SearchMetadata, SearchResultLink } from '~/services/search';
+import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 
-import { SearchMetadata, SearchResultLink } from '~/services/search';
-import { getLinkWithPuppeteer } from '~/utils/scraper';
-import HttpClient from '~/utils/http-client';
+interface YoutubeSearchResponse {
+  kind: string;
+  etag: string;
+  nextPageToken?: string;
+  regionCode: string;
+  pageInfo: {
+    totalResults: number;
+    resultsPerPage: number;
+  };
+  items: Array<{
+    kind: string;
+    etag: string;
+    id: {
+      kind: string;
+      videoId?: string;
+      playlistId?: string;
+      channelId?: string;
+    };
+  }>;
+}
 
-import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
-
-const YOUTUBE_SEARCH_TYPES = {
-  [MetadataType.Song]: 'song',
-  [MetadataType.Album]: 'album',
-  [MetadataType.Playlist]: '',
+export const YOUTUBE_SEARCH_TYPES = {
+  [MetadataType.Song]: 'video',
+  [MetadataType.Album]: 'playlist',
+  [MetadataType.Playlist]: 'playlist',
   [MetadataType.Artist]: 'channel',
-  [MetadataType.Podcast]: '',
-  [MetadataType.Show]: '',
+  [MetadataType.Podcast]: 'video',
+  [MetadataType.Show]: undefined,
 };
 
+const YOUTUBE_SEARCH_LINK_TYPE = (item: YoutubeSearchResponse['items'][number]) => ({
+  [MetadataType.Song]: `watch?v=${item.id.videoId}`,
+  [MetadataType.Album]: `playlist?list=${item.id.playlistId}`,
+  [MetadataType.Playlist]: `playlist?list=${item.id.playlistId}`,
+  [MetadataType.Artist]: `channel/${item.id.channelId}`,
+  [MetadataType.Podcast]: `podcast/${item.id.videoId}`,
+  [MetadataType.Show]: undefined,
+});
+
 export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
+  const searchType = YOUTUBE_SEARCH_TYPES[metadata.type];
+  if (!searchType) return null;
+
   const params = new URLSearchParams({
-    q: `${query} ${YOUTUBE_SEARCH_TYPES[metadata.type]}`,
+    type: searchType,
+    regionCode: 'US',
+    q: query,
+    part: 'id',
+    safeSearch: 'none',
+    key: ENV.adapters.youTube.apiKey,
   });
 
-  const url = new URL(ENV.adapters.youTube.musicUrl);
+  const url = new URL(ENV.adapters.youTube.apiUrl);
   url.search = params.toString();
 
   const cache = await getCachedSearchResultLink(url);
@@ -33,36 +67,19 @@ export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
   }
 
   try {
-    const youtubeCookie = {
-      domain: '.youtube.com',
-      path: '/',
-      expires: Date.now() + 365 * 24 * 60 * 60 * 1000,
-      secure: true,
-    };
+    const response = await HttpClient.get<YoutubeSearchResponse>(url.toString());
 
-    const cookies = ENV.adapters.youTube.cookies.split(';').map(cookie => {
-      const [name, value] = cookie.split('=');
-      return {
-        ...youtubeCookie,
-        name,
-        value,
-      };
-    });
-
-    const link = await getLinkWithPuppeteer(
-      url.toString(),
-      'ytmusic-card-shelf-renderer a',
-      cookies
-    );
-
-    if (!link) {
-      return;
+    const { items } = response;
+    if (!items || !items[0]) {
+      throw new Error(`No results found: ${JSON.stringify(response)}`);
     }
+
+    const link = `${ENV.adapters.youTube.musicBaseUrl}/${YOUTUBE_SEARCH_LINK_TYPE(items[0])[metadata.type]}`;
 
     const searchResultLink = {
       type: Adapter.YouTube,
       url: link,
-      isVerified: true,
+      isVerified: false,
     } as SearchResultLink;
 
     await cacheSearchResultLink(url, searchResultLink);
@@ -70,17 +87,6 @@ export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
     return searchResultLink;
   } catch (error) {
     logger.error(`[YouTube] (${url}) ${error}`);
+    return null;
   }
-}
-
-export async function fetchYoutubeMetadata(youtubeLink: string) {
-  logger.info(`[${fetchYoutubeMetadata.name}] parse metadata (desktop): ${youtubeLink}`);
-
-  const html = await HttpClient.get<string>(youtubeLink, {
-    headers: {
-      Cookie: ENV.adapters.youTube.cookies,
-    },
-  });
-
-  return html;
 }

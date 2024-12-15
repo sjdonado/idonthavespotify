@@ -1,18 +1,16 @@
-import { ENV } from '~/config/env';
-import { MetadataType, Adapter } from '~/config/enum';
 import { RESPONSE_COMPARE_MIN_SCORE } from '~/config/constants';
-
+import { Adapter, MetadataType } from '~/config/enum';
+import { ENV } from '~/config/env';
+import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
+import { SearchMetadata, SearchResultLink } from '~/services/search';
+import { getResultWithBestScore } from '~/utils/compare';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { getCheerioDoc } from '~/utils/scraper';
-import { getResultWithBestScore } from '~/utils/compare';
-
-import { SearchMetadata, SearchResultLink } from '~/services/search';
-import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
 
 export async function getSoundCloudLink(query: string, metadata: SearchMetadata) {
   if (metadata.type === MetadataType.Show) {
-    return;
+    return null;
   }
 
   const params = new URLSearchParams({
@@ -40,14 +38,10 @@ export async function getSoundCloudLink(query: string, metadata: SearchMetadata)
 
     const { href, score } = getResultWithBestScore(noscriptDoc, listElements, query);
 
-    if (score <= RESPONSE_COMPARE_MIN_SCORE) {
-      return;
-    }
-
     const searchResultLink = {
       type: Adapter.SoundCloud,
       url: `${ENV.adapters.soundCloud.baseUrl}${href}`,
-      isVerified: true,
+      isVerified: score > RESPONSE_COMPARE_MIN_SCORE,
     } as SearchResultLink;
 
     await cacheSearchResultLink(url, searchResultLink);
@@ -55,5 +49,6 @@ export async function getSoundCloudLink(query: string, metadata: SearchMetadata)
     return searchResultLink;
   } catch (err) {
     logger.error(`[SoundCloud] (${url}) ${err}`);
+    return null;
   }
 }

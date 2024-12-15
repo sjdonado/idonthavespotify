@@ -1,11 +1,9 @@
 import { MetadataType, Parser } from '~/config/enum';
-
-import { logger } from '~/utils/logger';
-import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
-
-import { SearchMetadata } from '~/services/search';
 import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
 import { fetchMetadata } from '~/services/metadata';
+import { SearchMetadata } from '~/services/search';
+import { logger } from '~/utils/logger';
+import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
 
 enum SoundCloudMetadataType {
   Song = 'music.song',
@@ -27,7 +25,7 @@ export const getSoundCloudMetadata = async (id: string, link: string) => {
   }
 
   try {
-    const html = await fetchMetadata(link, {});
+    const html = await fetchMetadata(link);
 
     const doc = getCheerioDoc(html);
 

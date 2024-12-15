@@ -7,20 +7,20 @@ Copy a link from your favorite streaming service, paste it into the search bar, 
 Adapters represent the streaming services supported by the Web App and the Raycast Extension. Each adapter allows the app to convert links from one platform to others. The table below shows which features are available for each one:
 
 | Adapter          | Inverted Search | Official API           | Verified Links |
-| ---------------- | --------------- | ----------------------- | -------------- |
+| ---------------- | --------------- | ---------------------- | -------------- |
 | Spotify          | Yes             | Yes                    | Yes            |
+| Tidal            | Yes             | Yes                    | Yes            |
 | YouTube Music    | Yes             | No                     | Yes            |
 | Apple Music      | Yes             | No                     | Yes            |
 | Deezer           | Yes             | Yes                    | Yes            |
 | SoundCloud       | Yes             | No                     | Yes            |
-| Tidal            | No              | No (coming soon)       | No             |
 
 ## Web App
 
 ![Uptime Badge](https://uptime.sjdonado.com/api/badge/2/uptime/24?labelPrefix=Web%20Page%20&labelSuffix=h) ![Uptime Badge](https://uptime.sjdonado.com/api/badge/2/ping/24?labelPrefix=Web%20Page%20)
 
 <div align="center">
-  <img width=1200 src="https://firebasestorage.googleapis.com/v0/b/rule-of-thumb-1c13c.appspot.com/o/idonthavespotify.webp?alt=media"/>
+  <img width="1200" alt="image" src="https://github.com/user-attachments/assets/ae6250f5-d1ed-41f2-ae21-8a2b2599a450" />
 </div>
 
 ## Raycast Extension

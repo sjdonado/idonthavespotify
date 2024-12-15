@@ -6,13 +6,15 @@ services:
     volumes:
       - ./sqlite:/usr/src/app/sqlite
     ports:
-      - 3001:3000
+      - 3000:3000
     depends_on:
       - bit
   bit:
     image: sjdonado/bit
     environment:
       APP_URL: http://localhost:4001
+      ADMIN_NAME: 'Admin'
+      ADMIN_API_KEY: 'secure_12345'
     volumes:
       - sqlite_data:/app/sqlite
     ports:

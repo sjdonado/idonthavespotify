@@ -1,13 +1,12 @@
-import { ENV } from '~/config/env';
-import { MetadataType, Adapter } from '~/config/enum';
-import { ADAPTERS_QUERY_LIMIT } from '~/config/constants';
+import { compareTwoStrings } from 'string-similarity';
 
+import { ADAPTERS_QUERY_LIMIT, RESPONSE_COMPARE_MIN_SCORE } from '~/config/constants';
+import { Adapter, MetadataType } from '~/config/enum';
+import { ENV } from '~/config/env';
+import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
+import { SearchMetadata, SearchResultLink } from '~/services/search';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
-import { responseMatchesQuery } from '~/utils/compare';
-
-import { SearchMetadata, SearchResultLink } from '~/services/search';
-import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
 
 interface DeezerSearchResponse {
   total: number;
@@ -31,10 +30,7 @@ const DEEZER_SEARCH_TYPES = {
 
 export async function getDeezerLink(query: string, metadata: SearchMetadata) {
   const searchType = DEEZER_SEARCH_TYPES[metadata.type];
-
-  if (!searchType) {
-    return;
-  }
+  if (!searchType) return null;
 
   const params = new URLSearchParams({
     q: query,
@@ -57,18 +53,32 @@ export async function getDeezerLink(query: string, metadata: SearchMetadata) {
       throw new Error(`No results found: ${JSON.stringify(response)}`);
     }
 
-    const [{ title, name, link }] = response.data;
+    let bestMatch: SearchResultLink | null = null;
+    let highestScore = 0;
 
-    const searchResultLink = {
-      type: Adapter.Deezer,
-      url: link,
-      isVerified: responseMatchesQuery(title ?? name ?? '', query),
-    } as SearchResultLink;
+    for (const item of response.data) {
+      const title = item.title || item.name || '';
+      const score = compareTwoStrings(title.toLowerCase(), query.toLowerCase());
 
-    await cacheSearchResultLink(url, searchResultLink);
+      if (score > highestScore) {
+        highestScore = score;
+        bestMatch = {
+          type: Adapter.Deezer,
+          url: item.link,
+          isVerified: score > RESPONSE_COMPARE_MIN_SCORE,
+        };
+      }
+    }
 
-    return searchResultLink;
+    if (!bestMatch) {
+      throw new Error('No valid matches found.');
+    }
+
+    await cacheSearchResultLink(url, bestMatch);
+
+    return bestMatch;
   } catch (error) {
     logger.error(`[Deezer] (${url}) ${error}`);
+    return null;
   }
 }

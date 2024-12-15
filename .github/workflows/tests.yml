@@ -4,24 +4,28 @@ on:
   pull_request:
     branches: [master]
 
-env:
-  SPOTIFY_AUTH_URL: https://accounts.spotify.com/api/token
-  SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
-  SPOTIFY_CLIENT_SECRET: ${{ secrets.YOUTUBE_COOKIES }}
-  SPOTIFY_CLIENT_VERSION: ${{ secrets.SPOTIFY_CLIENT_VERSION }}
-  SPOTIFY_API_URL: https://api.spotify.com/v1/search
-  YOUTUBE_MUSIC_URL: https://music.youtube.com/search
-  YOUTUBE_COOKIES: ${{ secrets.YOUTUBE_COOKIES }}
-  DEEZER_API_URL: https://api.deezer.com/search
-  APPLE_MUSIC_API_URL: https://music.apple.com/ca
-  SOUNDCLOUD_BASE_URL: https://soundcloud.com
-  TIDAL_BASE_URL: https://listen.tidal.com
-
 jobs:
   tests:
     runs-on: ubuntu-latest
+    services:
+      bit:
+        image: sjdonado/bit
+        env:
+          APP_URL: http://localhost:4001
+          ADMIN_NAME: 'Admin'
+          ADMIN_API_KEY: 'secure_12345'
+        ports:
+          - 4000:4000
     steps:
       - uses: actions/checkout@v4
+      - name: Load environment variables
+        run: |
+          while read -r line; do
+            # skip empty and comment lines
+            if [ -n "$line" ] && [ "${line:0:1}" != "#" ]; then
+              echo "$line" >> $GITHUB_ENV
+            fi
+          done < .env.test
       - uses: oven-sh/setup-bun@v1
       - name: Install dependencies
         run: bun install

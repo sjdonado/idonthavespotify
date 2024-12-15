@@ -1,11 +1,9 @@
 import { MetadataType, Parser } from '~/config/enum';
-
-import { logger } from '~/utils/logger';
-import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
-
-import { SearchMetadata } from '~/services/search';
 import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
 import { fetchMetadata } from '~/services/metadata';
+import { SearchMetadata } from '~/services/search';
+import { logger } from '~/utils/logger';
+import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
 
 enum YouTubeMetadataType {
   Song = 'video.other',
@@ -32,7 +30,8 @@ export const getYouTubeMetadata = async (id: string, link: string) => {
   }
 
   try {
-    const html = await fetchMetadata(link, {});
+    const rawLink = link.replace('music.youtube', 'www.youtube');
+    const html = await fetchMetadata(rawLink);
 
     const doc = getCheerioDoc(html);
 

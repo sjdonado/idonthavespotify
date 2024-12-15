@@ -1,20 +1,20 @@
-import { ParseError } from 'elysia';
+import { InternalServerError } from 'elysia';
 
 import {
   APPLE_MUSIC_LINK_REGEX,
   DEEZER_LINK_REGEX,
   SOUNDCLOUD_LINK_REGEX,
   SPOTIFY_LINK_REGEX,
+  TIDAL_LINK_REGEX,
   YOUTUBE_LINK_REGEX,
 } from '~/config/constants';
 import { Parser } from '~/config/enum';
-
 import { getSourceFromId } from '~/utils/encoding';
 import { logger } from '~/utils/logger';
 
 export type SearchParser = {
   id: string;
-  type: string;
+  type: Parser;
   source: string;
 };
 
@@ -31,7 +31,7 @@ export const getSearchParser = (link?: string, searchId?: string) => {
   }
 
   if (!source) {
-    throw new ParseError('Source not found');
+    throw new InternalServerError('Source not found');
   }
 
   let id, type;
@@ -70,8 +70,14 @@ export const getSearchParser = (link?: string, searchId?: string) => {
     type = Parser.SoundCloud;
   }
 
+  const tidalId = source.match(TIDAL_LINK_REGEX)?.[2];
+  if (tidalId) {
+    id = tidalId;
+    type = Parser.Tidal;
+  }
+
   if (!id || !type) {
-    throw new ParseError('Service id could not be extracted from source.');
+    throw new InternalServerError('Service id could not be extracted from source.');
   }
 
   const searchParser = {

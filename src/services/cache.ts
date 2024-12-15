@@ -1,10 +1,15 @@
 import { caching } from 'cache-manager';
 import bunSqliteStore from 'cache-manager-bun-sqlite3';
 
+import type { Adapter, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
-import type { Parser } from '~/config/enum';
 
 import { SearchMetadata, SearchResultLink } from './search';
+
+export type AccessToken = {
+  accessToken: string;
+  expiresAt: number;
+};
 
 export const cacheStore = await caching(bunSqliteStore, {
   name: 'cache',
@@ -39,11 +44,33 @@ export const getCachedSearchMetadata = async (id: string, parser: Parser) => {
   return data;
 };
 
-export const cacheSpotifyAccessToken = async (accessToken: string, expTime: number) => {
-  await cacheStore.set('spotify:accessToken', accessToken, expTime);
+export const cacheSpotifyAccessToken = async (token: AccessToken, expTime: number) => {
+  await cacheStore.set('spotify:accessToken', token, expTime);
 };
-export const getCachedSpotifyAccessToken = async (): Promise<string | undefined> => {
-  return cacheStore.get('spotify:accessToken');
+
+export const getCachedSpotifyAccessToken = async (): Promise<AccessToken | undefined> => {
+  return await cacheStore.get<AccessToken>('spotify:accessToken');
+};
+
+export const cacheTidalAccessToken = async (token: AccessToken, expTime: number) => {
+  await cacheStore.set('tidal:accessToken', token, expTime);
+};
+
+export const getCachedTidalAccessToken = async (): Promise<AccessToken | undefined> => {
+  return await cacheStore.get<AccessToken>('tidal:accessToken');
+};
+
+export const cacheTidalUniversalLinkResponse = async (
+  link: string,
+  response: Record<Adapter, SearchResultLink | null>
+) => {
+  await cacheStore.set(`tidal:universalLink:${link}`, response);
+};
+
+export const getCachedTidalUniversalLinkResponse = async (
+  link: string
+): Promise<Record<Adapter, SearchResultLink | null> | undefined> => {
+  return cacheStore.get(`tidal:universalLink:${link}`);
 };
 
 export const cacheShortenLink = async (link: string, refer: string) => {
