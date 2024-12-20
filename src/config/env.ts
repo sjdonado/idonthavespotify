@@ -31,7 +31,7 @@ export const ENV = {
       baseUrl: Bun.env.SOUNDCLOUD_BASE_URL!,
     },
   },
-  utils: {
+  services: {
     urlShortener: {
       apiUrl: Bun.env.URL_SHORTENER_API_URL!,
       apiKey: Bun.env.URL_SHORTENER_API_KEY!,
@@ -40,6 +40,7 @@ export const ENV = {
   app: {
     url: Bun.env.APP_URL!,
     version: version,
+    apiKeyBeta: Bun.env.IDHS_API_KEY_BETA!,
   },
   cache: {
     databasePath: Bun.env.DATABASE_PATH ?? ':memory:',

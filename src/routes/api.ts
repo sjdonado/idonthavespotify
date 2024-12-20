@@ -3,7 +3,7 @@ import { Elysia } from 'elysia';
 import { Adapter } from '~/config/enum';
 import { search } from '~/services/search';
 import { logger } from '~/utils/logger';
-import { apiVersionValidator, searchPayloadValidator } from '~/validations/search';
+import { apiV2Validator, legacyApiV1Validator } from '~/validations/search';
 
 export const apiRouter = new Elysia().group('/api', app =>
   app
@@ -14,6 +14,16 @@ export const apiRouter = new Elysia().group('/api', app =>
         message: error.message,
       };
     })
+    .get(
+      '/search',
+      async ({ query: { link, adapters } }) => {
+        const searchResult = await search({ link, adapters: adapters as Adapter[] });
+        return searchResult;
+      },
+      {
+        query: apiV2Validator.query,
+      }
+    )
     .post(
       '/search',
       async ({ body: { link, adapters } }) => {
@@ -21,8 +31,8 @@ export const apiRouter = new Elysia().group('/api', app =>
         return searchResult;
       },
       {
-        body: searchPayloadValidator,
-        query: apiVersionValidator,
+        query: legacyApiV1Validator.query,
+        body: legacyApiV1Validator.body,
       }
     )
 );

@@ -6,7 +6,7 @@ import { ENV } from '~/config/env';
 export const API_ENDPOINT = 'http://localhost/api';
 export const API_SEARCH_ENDPOINT = `${API_ENDPOINT}/search?v=1`;
 
-export const urlShortenerLink = ENV.utils.urlShortener.apiUrl;
+export const urlShortenerLink = ENV.services.urlShortener.apiUrl;
 export const urlShortenerResponseMock = {
   data: {
     id: '6ce3f2d6-d73c-4c7f-b622-3b30e34d70dd',

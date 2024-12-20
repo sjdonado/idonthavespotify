@@ -23,14 +23,14 @@ export async function shortenLink(link: string) {
 
   try {
     const response = await HttpClient.post<ApiResponse>(
-      ENV.utils.urlShortener.apiUrl,
+      ENV.services.urlShortener.apiUrl,
       {
         url: link,
       },
       {
         headers: {
           'Content-Type': 'application/json',
-          'X-Api-Key': ENV.utils.urlShortener.apiKey,
+          'X-Api-Key': ENV.services.urlShortener.apiKey,
         },
       }
     );

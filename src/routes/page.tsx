@@ -3,7 +3,7 @@ import { Elysia, InternalServerError } from 'elysia';
 
 import { search } from '~/services/search';
 import { logger } from '~/utils/logger';
-import { searchPayloadValidator, searchQueryValidator } from '~/validations/search';
+import { legacyApiV1Validator, webValidator } from '~/validations/search';
 import ErrorMessage from '~/views/components/error-message';
 import SearchCard from '~/views/components/search-card';
 import MainLayout from '~/views/layouts/main';
@@ -61,7 +61,7 @@ export const pageRouter = new Elysia()
       }
     },
     {
-      query: searchQueryValidator,
+      query: webValidator.query,
     }
   )
   .post(
@@ -71,6 +71,6 @@ export const pageRouter = new Elysia()
       return <SearchCard searchResult={searchResult} />;
     },
     {
-      body: searchPayloadValidator,
+      body: legacyApiV1Validator.body,
     }
   );
