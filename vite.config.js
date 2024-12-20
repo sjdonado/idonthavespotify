@@ -1,7 +1,6 @@
 import path from 'path';
-
-import { defineConfig } from 'vite';
 import copy from 'rollup-plugin-copy';
+import { defineConfig } from 'vite';
 
 export default defineConfig({
   plugins: [

@@ -14,18 +14,8 @@ export const apiRouter = new Elysia().group('/api', app =>
         message: error.message,
       };
     })
-    .get(
-      '/search',
-      async ({ query: { link, adapters } }) => {
-        const searchResult = await search({ link, adapters: adapters as Adapter[] });
-        return searchResult;
-      },
-      {
-        query: apiV2Validator.query,
-      }
-    )
     .post(
-      '/search',
+      '/search', // TODO: remove after new Raycast version is released
       async ({ body: { link, adapters } }) => {
         const searchResult = await search({ link, adapters: adapters as Adapter[] });
         return searchResult;
@@ -33,6 +23,20 @@ export const apiRouter = new Elysia().group('/api', app =>
       {
         query: legacyApiV1Validator.query,
         body: legacyApiV1Validator.body,
+      }
+    )
+    .get(
+      '/search',
+      async ({ query }) => {
+        const searchResult = await search({
+          link: query.link,
+          adapters: query._adapters as Adapter[],
+        });
+        return searchResult;
+      },
+      {
+        query: apiV2Validator.query,
+        transform: apiV2Validator.transform,
       }
     )
 );

@@ -1,4 +1,4 @@
-import { t } from 'elysia';
+import { InternalServerError, t, ValidationError } from 'elysia';
 
 import { ALLOWED_LINKS_REGEX } from '~/config/constants';
 import { Adapter } from '~/config/enum';
@@ -43,14 +43,16 @@ export const apiV2Validator = {
       error: 'Invalid link, please try with Spotify or Youtube links.',
     }),
     adapters: t.Optional(
+      t.String({
+        error: 'Invalid adapters array, please provide a valid value.',
+      })
+    ),
+    _adapters: t.Optional(
       t.Array(
         t.String({
           validate: (value: string) => allowedAdapters.includes(value as Adapter),
           error: 'Invalid adapter, please use one of the allowed adapters.',
-        }),
-        {
-          error: 'Invalid adapters array, please provide an array of adapter types.',
-        }
+        })
       )
     ),
     key: t.String({
@@ -62,4 +64,11 @@ export const apiV2Validator = {
       error: 'Unsupported API version',
     }),
   }),
+  transform: ({ query }: { query: { adapters?: string; _adapters?: string[] } }) => {
+    if (query.adapters) {
+      if (typeof query.adapters === 'string') {
+        query._adapters = query.adapters.split(',').map(adapter => adapter.trim());
+      }
+    }
+  },
 };

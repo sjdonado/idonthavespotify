@@ -61,6 +61,8 @@ export const search = async ({
   searchId?: string;
   adapters?: Adapter[];
 }) => {
+  const searchParser = getSearchParser(link, searchId);
+
   const searchAdapters = adapters ?? [
     Adapter.Spotify,
     Adapter.YouTube,
@@ -70,7 +72,7 @@ export const search = async ({
     Adapter.Tidal,
   ];
 
-  const searchParser = getSearchParser(link, searchId);
+  logger.info(`[search] searchAdapters: ${searchAdapters}`);
 
   const metadataFetchersMap = {
     [Parser.Spotify]: getSpotifyMetadata,
@@ -146,7 +148,7 @@ export const search = async ({
   const existingAdapters = new Set(links.map(link => link.type));
 
   let tidalLink: SearchResultLink | null = linkSearchResult;
-  if (parserType !== Adapter.Tidal) {
+  if (searchAdapters.includes(Adapter.Tidal) && parserType !== Adapter.Tidal) {
     tidalLink = await getTidalLink(query, metadata);
     existingAdapters.add(Adapter.Tidal);
   }
@@ -171,6 +173,7 @@ export const search = async ({
     if (fromTidalULink) {
       for (const adapterKey in fromTidalULink) {
         const adapter = adapterKey as Adapter;
+        // Only add the adapter if it's requested and not the parser type
         if (parserType !== adapter && fromTidalULink[adapter]) {
           links.push(fromTidalULink[adapter]);
           existingAdapters.add(adapter);
@@ -213,16 +216,6 @@ export const search = async ({
   ]);
 
   metadata = updatedMetadata;
-  links.sort((a, b) => {
-    // Prioritize verified links
-    if (a.isVerified && !b.isVerified) return -1;
-    if (!a.isVerified && b.isVerified) return 1;
-
-    return a.type.localeCompare(b.type);
-  });
-
-  logger.info(`[${search.name}] (results) ${links.map(link => link?.url)}`);
-
   const searchResult: SearchResult = {
     id,
     type: metadata.type,
@@ -232,8 +225,18 @@ export const search = async ({
     audio: metadata.audio,
     source: searchParser.source,
     universalLink: shortLink,
-    links,
+    links: links
+      .filter(link => searchAdapters.includes(link.type))
+      .sort((a, b) => {
+        // Prioritize verified links
+        if (a.isVerified && !b.isVerified) return -1;
+        if (!a.isVerified && b.isVerified) return 1;
+
+        return a.type.localeCompare(b.type);
+      }),
   };
+
+  logger.info(`[${search.name}] (results) ${searchResult.links.map(link => link?.url)}`);
 
   return searchResult;
 };
