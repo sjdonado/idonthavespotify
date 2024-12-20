@@ -31,6 +31,7 @@ export const apiRouter = new Elysia().group('/api', app =>
         const searchResult = await search({
           link: query.link,
           adapters: query._adapters as Adapter[],
+          headless: query.headless,
         });
         return searchResult;
       },

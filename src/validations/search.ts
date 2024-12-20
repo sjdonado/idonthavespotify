@@ -39,6 +39,14 @@ export const legacyApiV1Validator = {
 
 export const apiV2Validator = {
   query: t.Object({
+    key: t.String({
+      validate: (value: string) => value === ENV.app.apiKeyBeta,
+      error: 'Invalid API key. Request one from the administrator.',
+    }),
+    v: t.String({
+      pattern: '2',
+      error: 'Unsupported API version',
+    }),
     link: t.RegExp(new RegExp(ALLOWED_LINKS_REGEX), {
       error: 'Invalid link, please try with Spotify or Youtube links.',
     }),
@@ -55,14 +63,7 @@ export const apiV2Validator = {
         })
       )
     ),
-    key: t.String({
-      validate: (value: string) => value === ENV.app.apiKeyBeta,
-      error: 'Invalid API key. Request one from the administrator.',
-    }),
-    v: t.String({
-      pattern: '2',
-      error: 'Unsupported API version',
-    }),
+    headless: t.Optional(t.Boolean()),
   }),
   transform: ({ query }: { query: { adapters?: string; _adapters?: string[] } }) => {
     if (query.adapters) {

@@ -56,10 +56,12 @@ export const search = async ({
   link,
   searchId,
   adapters,
+  headless,
 }: {
   link?: string;
   searchId?: string;
   adapters?: Adapter[];
+  headless?: boolean;
 }) => {
   const searchParser = getSearchParser(link, searchId);
 
@@ -72,7 +74,7 @@ export const search = async ({
     Adapter.Tidal,
   ];
 
-  logger.info(`[search] searchAdapters: ${searchAdapters}`);
+  logger.info(`[search] (searchAdapters) ${searchAdapters}`);
 
   const metadataFetchersMap = {
     [Parser.Spotify]: getSpotifyMetadata,
@@ -108,7 +110,8 @@ export const search = async ({
     throw new InternalServerError('Parser not implemented yet');
   }
 
-  let metadata = await metadataFetcher(searchParser.id, searchParser.source);
+  // Even if headless, we need initial metadata and query for link extraction
+  const metadata = await metadataFetcher(searchParser.id, searchParser.source);
   const query = queryExtractor(metadata);
   const parserType = searchParser.type as StreamingServiceType;
 
@@ -129,7 +132,12 @@ export const search = async ({
     searchAdapters.length === 1 &&
     searchParser.type === (searchAdapters[0] as StreamingServiceType)
   ) {
-    logger.info(`[${search.name}] early return - adapter is equal to parser type`);
+    logger.info(`[${search.name}] (early return) adapter is equal to parser type`);
+
+    // If headless, return just the link as a string, else return the full object
+    if (headless) {
+      return link;
+    }
 
     return {
       id,
@@ -145,12 +153,14 @@ export const search = async ({
   }
 
   const links: SearchResultLink[] = [];
-  const existingAdapters = new Set(links.map(link => link.type));
+  const existingAdapters = new Set<Adapter>();
 
   let tidalLink: SearchResultLink | null = linkSearchResult;
   if (searchAdapters.includes(Adapter.Tidal) && parserType !== Adapter.Tidal) {
     tidalLink = await getTidalLink(query, metadata);
-    existingAdapters.add(Adapter.Tidal);
+    if (tidalLink) {
+      existingAdapters.add(Adapter.Tidal);
+    }
   }
 
   if (tidalLink) {
@@ -174,7 +184,11 @@ export const search = async ({
       for (const adapterKey in fromTidalULink) {
         const adapter = adapterKey as Adapter;
         // Only add the adapter if it's requested and not the parser type
-        if (parserType !== adapter && fromTidalULink[adapter]) {
+        if (
+          searchAdapters.includes(adapter) &&
+          parserType !== adapter &&
+          fromTidalULink[adapter]
+        ) {
           links.push(fromTidalULink[adapter]);
           existingAdapters.add(adapter);
         }
@@ -203,9 +217,23 @@ export const search = async ({
       .filter(Boolean)
   );
 
-  // Fetch metadata audio from spotify and universal link from bit
+  const parsedLinks = links
+    .filter(link => searchAdapters.includes(link.type))
+    .sort((a, b) => {
+      // Prioritize verified links
+      if (a.isVerified && !b.isVerified) return -1;
+      if (!a.isVerified && b.isVerified) return 1;
+      return a.type.localeCompare(b.type);
+    });
+
+  // If headless is true, skip updatedMetadata and universal link shortening
+  if (headless) {
+    return parsedLinks.map(link => link.url);
+  }
+
+  // Fetch updated metadata (for audio) from spotify if not parser type
   const spotifyLink = links.find(link => link.type === Adapter.Spotify);
-  const [updatedMetadata, shortLink] = await Promise.all([
+  const [parsedMetadata, shortLink] = await Promise.all([
     parserType !== Adapter.Spotify && spotifyLink
       ? (async () => {
           const spotifySearchParser = getSearchParser(spotifyLink.url);
@@ -215,25 +243,16 @@ export const search = async ({
     shortenLink(universalLink),
   ]);
 
-  metadata = updatedMetadata;
   const searchResult: SearchResult = {
     id,
-    type: metadata.type,
-    title: metadata.title,
-    description: metadata.description,
-    image: metadata.image,
-    audio: metadata.audio,
+    type: parsedMetadata.type,
+    title: parsedMetadata.title,
+    description: parsedMetadata.description,
+    image: parsedMetadata.image,
+    audio: parsedMetadata.audio,
     source: searchParser.source,
     universalLink: shortLink,
-    links: links
-      .filter(link => searchAdapters.includes(link.type))
-      .sort((a, b) => {
-        // Prioritize verified links
-        if (a.isVerified && !b.isVerified) return -1;
-        if (!a.isVerified && b.isVerified) return 1;
-
-        return a.type.localeCompare(b.type);
-      }),
+    links: parsedLinks,
   };
 
   logger.info(`[${search.name}] (results) ${searchResult.links.map(link => link?.url)}`);
