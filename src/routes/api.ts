@@ -11,13 +11,17 @@ export const apiRouter = new Elysia().group('/api', app =>
       logger.error(error);
       return {
         code,
-        message: error.message,
+        message: error.toString(),
       };
     })
     .post(
       '/search', // TODO: remove after new Raycast version is released
       async ({ body: { link, adapters } }) => {
-        const searchResult = await search({ link, adapters: adapters as Adapter[] });
+        const searchResult = await search({
+          link,
+          adapters: adapters as Adapter[],
+          headless: false,
+        });
         return searchResult;
       },
       {
@@ -31,7 +35,7 @@ export const apiRouter = new Elysia().group('/api', app =>
         const searchResult = await search({
           link: query.link,
           adapters: query._adapters as Adapter[],
-          headless: query.headless,
+          headless: Boolean(query.headless),
         });
         return searchResult;
       },

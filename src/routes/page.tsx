@@ -30,7 +30,9 @@ export const pageRouter = new Elysia()
     '/',
     async ({ query: { id }, redirect, set }) => {
       try {
-        const searchResult = id ? await search({ searchId: id }) : undefined;
+        const searchResult = id
+          ? await search({ searchId: id, headless: false })
+          : undefined;
 
         return (
           <MainLayout
@@ -67,7 +69,7 @@ export const pageRouter = new Elysia()
   .post(
     '/search',
     async ({ body: { link } }) => {
-      const searchResult = await search({ link });
+      const searchResult = await search({ link, headless: false });
       return <SearchCard searchResult={searchResult} />;
     },
     {

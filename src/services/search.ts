@@ -52,17 +52,30 @@ export type SearchResult = {
   links: SearchResultLink[];
 };
 
-export const search = async ({
+export type SearchProps =
+  | {
+      link?: string;
+      searchId?: string;
+      adapters?: Adapter[];
+      headless: true;
+    }
+  | {
+      link?: string;
+      searchId?: string;
+      adapters?: Adapter[];
+      headless: false;
+    };
+
+export type SearchReturn<T extends SearchProps> = T['headless'] extends true
+  ? string | string[]
+  : SearchResult;
+
+export const search = async <T extends SearchProps>({
   link,
   searchId,
   adapters,
   headless,
-}: {
-  link?: string;
-  searchId?: string;
-  adapters?: Adapter[];
-  headless?: boolean;
-}) => {
+}: T): Promise<SearchReturn<T>> => {
   const searchParser = getSearchParser(link, searchId);
 
   const searchAdapters = adapters ?? [
@@ -136,7 +149,7 @@ export const search = async ({
 
     // If headless, return just the link as a string, else return the full object
     if (headless) {
-      return link;
+      return link as SearchReturn<T>;
     }
 
     return {
@@ -149,7 +162,7 @@ export const search = async ({
       source: searchParser.source,
       universalLink,
       links: [linkSearchResult],
-    };
+    } as SearchReturn<T>;
   }
 
   const links: SearchResultLink[] = [];
@@ -228,7 +241,7 @@ export const search = async ({
 
   // If headless is true, skip updatedMetadata and universal link shortening
   if (headless) {
-    return parsedLinks.map(link => link.url);
+    return parsedLinks.map(link => link.url) as SearchReturn<T>;
   }
 
   // Fetch updated metadata (for audio) from spotify if not parser type
@@ -257,5 +270,5 @@ export const search = async ({
 
   logger.info(`[${search.name}] (results) ${searchResult.links.map(link => link?.url)}`);
 
-  return searchResult;
+  return searchResult as SearchReturn<T>;
 };
