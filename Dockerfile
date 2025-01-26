@@ -6,7 +6,7 @@ WORKDIR /usr/src/app
 
 RUN apk update && apk add --no-cache nodejs python3
 
-COPY package.json bun.lockb .
+COPY package.json bun.lock .
 RUN bun install --frozen-lockfile
 
 COPY src src

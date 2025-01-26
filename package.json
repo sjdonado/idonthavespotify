@@ -1,6 +1,6 @@
 {
   "name": "idonthavespotify",
-  "version": "1.6.0-beta",
+  "version": "1.6.1-beta",
   "scripts": {
     "dev": "concurrently \"bun run build:dev\" \"bun run --watch www/bin.ts\"",
     "build:dev": "vite build --mode=development --watch",
@@ -10,15 +10,15 @@
     "tscheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@elysiajs/html": "^1.1.1",
-    "@elysiajs/static": "^1.1.1",
+    "@elysiajs/html": "^1.2.0",
+    "@elysiajs/static": "^1.2.0",
     "@hotwired/stimulus": "^3.2.2",
-    "axios": "^1.6.8",
-    "axios-retry": "^4.4.1",
+    "axios": "^1.7.9",
+    "axios-retry": "^4.5.0",
     "cache-manager": "^5.7.3",
     "cache-manager-bun-sqlite3": "^0.2.0",
     "cheerio": "^1.0.0",
-    "elysia": "^1.1.26",
+    "elysia": "^1.2.10",
     "howler": "^2.2.4",
     "notyf": "^3.10.0",
     "pino": "^8.20.0",
@@ -45,7 +45,7 @@
     "stimulus-vite-helpers": "^3.1.0",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.5",
-    "vite": "^5.2.10"
+    "vite": "^6.0.11"
   },
   "module": "www/bin.js"
 }
