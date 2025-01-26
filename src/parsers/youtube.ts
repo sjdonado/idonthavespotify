@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 import { MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
@@ -34,6 +36,10 @@ const METADATA_TO_YOUTUBE_ENDPOINT = {
 };
 
 export const getYouTubeMetadata = async (id: string, link: string) => {
+  if (link.includes('youtu.be/')) {
+    link = await resolveShortYouTubeLink(link);
+  }
+
   const cached = await getCachedSearchMetadata(id, Parser.YouTube);
   if (cached) {
     logger.info(`[YouTube] (${id}) metadata cache hit`);
@@ -90,7 +96,7 @@ export const getYouTubeMetadata = async (id: string, link: string) => {
 };
 
 export const getYouTubeQueryFromMetadata = (metadata: SearchMetadata) => {
-  let query = metadata.title;
+  let query = metadata.title.replace(/\s*\([^)]*\)/g, '').trim();
 
   if (metadata.type === MetadataType.Song) {
     const matches = metadata.description?.match(/(?:·|&)\s*([^·&℗]+)/g);
@@ -135,4 +141,19 @@ function parseYouTubeLink(link: string) {
       resourceId: parts[1]?.split('/')[0],
     };
   }
+}
+
+async function resolveShortYouTubeLink(shortLink: string): Promise<string> {
+  const response = await axios.request({
+    method: 'GET',
+    url: shortLink,
+    maxRedirects: 1,
+  });
+
+  const path =
+    response.request.path ||
+    response.request._currentUrl ||
+    response.request._headers?.path;
+
+  return `https://youtube.com${path}` || shortLink;
 }
