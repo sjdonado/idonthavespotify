@@ -8,7 +8,7 @@ export default class extends Controller {
   static targets = ['form', 'link'];
 
   initialize() {
-    document.addEventListener('htmx:afterOnLoad', () => {
+    document.addEventListener('htmx:afterSwap', () => {
       const searchParams = new URLSearchParams(window.location.search);
       const searchId = this.element
         .querySelector(`[data-controller="search-card"]`)
@@ -24,7 +24,7 @@ export default class extends Controller {
       }
     });
 
-    document.addEventListener('htmx:timeout', function () {
+    document.addEventListener('htmx:error', function () {
       toast().error('Something went wrong, please try again later.');
     });
   }
