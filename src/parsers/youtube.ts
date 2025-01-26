@@ -1,27 +1,38 @@
 import { MetadataType, Parser } from '~/config/enum';
+import { ENV } from '~/config/env';
 import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
-import { fetchMetadata } from '~/services/metadata';
 import { SearchMetadata } from '~/services/search';
+import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
-import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
 
-enum YouTubeMetadataType {
-  Song = 'video.other',
-  Album = 'album',
-  Playlist = 'playlist',
-  Artist = 'channel',
-  Podcast = 'song',
-  Show = 'website',
+interface YoutubeDataResponse {
+  kind: string;
+  etag: string;
+  items: Array<{
+    kind: string;
+    etag: string;
+    id: string;
+    snippet: {
+      title: string;
+      description: string;
+      thumbnails: {
+        url: string;
+        width: string;
+        height: string;
+      };
+    };
+  }>;
 }
 
-const YOUTUBE_METADATA_TO_METADATA_TYPE = {
-  [YouTubeMetadataType.Song]: MetadataType.Song,
-  [YouTubeMetadataType.Album]: MetadataType.Album,
-  [YouTubeMetadataType.Playlist]: MetadataType.Playlist,
-  [YouTubeMetadataType.Artist]: MetadataType.Artist,
-  [YouTubeMetadataType.Podcast]: MetadataType.Podcast,
-  [YouTubeMetadataType.Show]: MetadataType.Show,
+const METADATA_TO_YOUTUBE_ENDPOINT = {
+  [MetadataType.Song]: 'videos',
+  [MetadataType.Album]: 'playlists',
+  [MetadataType.Playlist]: 'playlists',
+  [MetadataType.Artist]: 'channels',
+  [MetadataType.Podcast]: 'videos',
+  [MetadataType.Show]: 'playlists',
 };
+
 export const getYouTubeMetadata = async (id: string, link: string) => {
   const cached = await getCachedSearchMetadata(id, Parser.YouTube);
   if (cached) {
@@ -30,32 +41,45 @@ export const getYouTubeMetadata = async (id: string, link: string) => {
   }
 
   try {
-    const rawLink = link.replace('music.youtube', 'www.youtube');
-    const html = await fetchMetadata(rawLink);
+    const parsed = parseYouTubeLink(link);
+    if (!parsed) throw new Error('No resource ID found in the provided YouTube link');
 
-    const doc = getCheerioDoc(html);
+    const { searchType, resourceId } = parsed;
 
-    const title = metaTagContent(doc, 'og:title', 'property');
-    const description = metaTagContent(doc, 'og:description', 'property') ?? '';
-    const image = metaTagContent(doc, 'og:image', 'property');
-    const type = metaTagContent(doc, 'og:type', 'property');
+    const params = new URLSearchParams({
+      id: resourceId,
+      part: 'snippet',
+      safeSearch: 'none',
+      key: ENV.adapters.youTube.apiKey,
+    });
 
-    if (!title || !type || !image) {
-      throw new Error('YouTube metadata not found');
+    const url = new URL(
+      `${ENV.adapters.youTube.apiUrl}/${METADATA_TO_YOUTUBE_ENDPOINT[searchType]}`
+    );
+    url.search = params.toString();
+
+    const response = await HttpClient.get<YoutubeDataResponse>(url.toString());
+    const item = response?.items?.[0];
+    if (!item) {
+      throw new Error(
+        `No items returned from YouTube API for ${searchType} ${resourceId}`
+      );
     }
 
-    const parsedTitle = title
-      ?.replace(/-?\s*on\sApple\sMusic/i, '')
-      .replace(/-?\s*YouTube\sMusic/i, '')
-      .trim();
+    const { snippet } = item;
+    if (!snippet) {
+      throw new Error(`No snippet found on item for ${searchType} ${resourceId}`);
+    }
 
-    const metadata = {
-      id,
-      title: parsedTitle,
+    const { title, description, thumbnails } = snippet;
+    const image = thumbnails?.url;
+
+    const metadata: SearchMetadata = {
+      title,
       description,
-      type: YOUTUBE_METADATA_TO_METADATA_TYPE[type as YouTubeMetadataType],
+      type: searchType,
       image,
-    } as SearchMetadata;
+    };
 
     await cacheSearchMetadata(id, Parser.YouTube, metadata);
 
@@ -86,3 +110,29 @@ export const getYouTubeQueryFromMetadata = (metadata: SearchMetadata) => {
 
   return query;
 };
+
+function parseYouTubeLink(link: string) {
+  const url = new URL(link);
+
+  if (url.searchParams.has('list')) {
+    return {
+      searchType: MetadataType.Playlist,
+      resourceId: url.searchParams.get('list')!,
+    };
+  }
+
+  if (url.searchParams.has('v')) {
+    return {
+      searchType: MetadataType.Song,
+      resourceId: url.searchParams.get('v')!,
+    };
+  }
+
+  if (url.pathname.includes('/channel/')) {
+    const parts = url.pathname.split('/channel/');
+    return {
+      searchType: MetadataType.Artist,
+      resourceId: parts[1]?.split('/')[0],
+    };
+  }
+}
