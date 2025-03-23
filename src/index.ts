@@ -2,6 +2,8 @@ import { file, serve } from 'bun';
 import Nano, { h, Helmet } from 'nano-jsx';
 
 import { Adapter } from './config/enum';
+import { apiRouteSchema } from './schemas/api.schema';
+import { indexRouteSchema, searchRouteSchema } from './schemas/web.schema';
 import { search } from './services/search';
 import { logger } from './utils/logger';
 import ErrorMessage from './views/components/error-message';
@@ -30,94 +32,151 @@ export const server = serve({
     },
     '/': {
       async GET(req) {
-        const url = new URL(req.url);
-        const id = url.searchParams.get('id');
-
-        let title, description, image, content;
-
         try {
-          const searchResult = id
-            ? await search({ searchId: id, headless: false })
-            : undefined;
+          const url = new URL(req.url);
+          const queryParams = Object.fromEntries(url.searchParams);
 
-          title = searchResult?.title;
-          description = searchResult?.description;
-          image = searchResult?.image;
+          const result = indexRouteSchema.safeParse({
+            query: queryParams,
+          });
 
-          // Create content with search result if available
-          let homeChildren = null;
-          if (searchResult) {
-            homeChildren = h(SearchCard, { searchResult });
+          if (!result.success) {
+            return Response.json(
+              {
+                error: 'Validation error',
+                details: result.error.format(),
+              },
+              { status: 400 }
+            );
           }
 
-          content = h(Home, { source: searchResult?.source }, homeChildren);
-        } catch (error) {
-          logger.error(`[indexRoute]: ${error}`);
+          const { id } = result.data.query;
 
-          const errorMsg = h(ErrorMessage, {
-            message: 'Something went wrong, please try again later.',
+          const searchResult = id
+            ? await search({ searchId: id, headless: false })
+            : null;
+
+          const content = h(
+            Home,
+            { source: searchResult?.source },
+            searchResult ? h(SearchCard, { searchResult }) : null
+          );
+
+          const app = Nano.renderSSR(
+            h(MainLayout, {
+              title: searchResult?.title,
+              description: searchResult?.description,
+              image: searchResult?.image,
+              isProduction,
+              children: content,
+            })
+          );
+
+          const { body, head, footer, attributes } = Helmet.SSR(app);
+          const html = `
+            <!DOCTYPE html>
+            <html ${attributes.html.toString()}>
+              <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                ${head.join('\n')}
+              </head>
+              <body ${attributes.body.toString()}>
+                ${body}
+                ${footer.join('\n')}
+              </body>
+            </html>`;
+
+          return new Response(html, {
+            headers: { 'Content-Type': 'text/html' },
           });
-          content = h(Home, {}, errorMsg);
+        } catch (error) {
+          logger.error('[/]', error);
+          const html = Nano.renderSSR(
+            h(ErrorMessage, { message: 'Something went wrong, please try again later.' })
+          );
+          return new Response(html, {
+            headers: { 'Content-Type': 'text/html' },
+            status: 500,
+          });
         }
-
-        const app = Nano.renderSSR(
-          h(MainLayout, {
-            title,
-            description,
-            image,
-            isProduction,
-            children: content,
-          })
-        );
-
-        const { body, head, footer, attributes } = Helmet.SSR(app);
-
-        const html = `
-          <!DOCTYPE html>
-          <html ${attributes.html.toString()}>
-            <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              ${head.join('\n')}
-            </head>
-            <body ${attributes.body.toString()}>
-              ${body}
-              ${footer.join('\n')}
-            </body>
-          </html>
-        `;
-
-        return new Response(html, {
-          headers: { 'Content-Type': 'text/html' },
-        });
       },
     },
     '/search': {
       async POST(req) {
-        const formData = await req.formData();
+        try {
+          const formData = await new Response(req.body).formData();
 
-        const link = formData.get('link');
+          const result = searchRouteSchema.safeParse({
+            body: Object.fromEntries(formData),
+          });
 
-        const searchResult = await search({ link, headless: false });
+          if (!result.success) {
+            return Response.json(
+              {
+                error: 'Validation error',
+                details: result.error.format(),
+              },
+              { status: 400 }
+            );
+          }
 
-        const html = Nano.renderSSR(h(SearchCard, { searchResult }));
+          const { link } = result.data.body;
 
-        return new Response(html, {
-          headers: { 'Content-Type': 'text/html' },
-        });
+          const searchResult = await search({ link, headless: false });
+
+          const html = Nano.renderSSR(h(SearchCard, { searchResult }));
+
+          return new Response(html, {
+            headers: { 'Content-Type': 'text/html' },
+          });
+        } catch (error) {
+          logger.error('[/search]', error);
+          const html = Nano.renderSSR(
+            h(ErrorMessage, { message: 'Something went wrong, please try again later.' })
+          );
+          return new Response(html, {
+            headers: { 'Content-Type': 'text/html' },
+            status: 500,
+          });
+        }
       },
     },
     '/api/search': {
       async POST(req) {
-        const { link, adapters } = await req.json();
+        try {
+          const url = new URL(req.url);
+          const queryParams = Object.fromEntries(url.searchParams);
+          const body = await req.json();
 
-        const searchResult = await search({
-          link,
-          adapters: adapters as Adapter[],
-          headless: false,
-        });
+          const result = apiRouteSchema.safeParse({
+            query: queryParams,
+            body: body,
+          });
 
-        return Response.json(searchResult);
+          if (!result.success) {
+            return Response.json(
+              {
+                error: 'Validation error',
+                details: result.error.format(),
+              },
+              { status: 400 }
+            );
+          }
+
+          const { link, adapters } = result.data.body;
+
+          const searchResult = await search({
+            link,
+            adapters: adapters as Adapter[],
+            headless: false,
+          });
+
+          return Response.json(searchResult);
+        } catch (error) {
+          logger.error('[/api/search]', error);
+          return Response.json({ error: 'Internal server error' }, { status: 500 });
+        }
       },
     },
   },

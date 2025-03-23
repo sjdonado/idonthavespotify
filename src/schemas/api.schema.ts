@@ -5,7 +5,7 @@ import { Adapter } from '~/config/enum';
 
 const allowedAdapters = Object.values(Adapter);
 
-export const apiRouteSchema = {
+export const apiRouteSchema = z.object({
   query: z.object({
     v: z.string().regex(/^1$/, { message: 'Unsupported API version' }),
   }),
@@ -24,4 +24,4 @@ export const apiRouteSchema = {
         message: 'Invalid adapters array, please provide an array of adapter types.',
       }),
   }),
-};
+});
