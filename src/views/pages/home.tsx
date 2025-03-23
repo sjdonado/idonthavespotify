@@ -1,4 +1,4 @@
-import { h } from 'nano-jsx';
+import Nano, { Fragment } from 'nano-jsx';
 
 import Footer from '../components/footer';
 import LoadingIndicator from '../components/loading-indicator';
@@ -8,7 +8,7 @@ export default function Home({
   children,
 }: {
   source?: string;
-  children?: JSX.Element;
+  children?: typeof Fragment;
 }) {
   return (
     <div class="flex h-svh flex-col gap-2 p-2">

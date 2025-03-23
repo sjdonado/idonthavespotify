@@ -10,8 +10,8 @@
     "moduleDetection": "force",
     "jsx": "react",
     "jsxImportSource": "nano-jsx/esm",
-    "jsxFactory": "h",
-    "jsxFragmentFactory": "Fragment",
+    "jsxFactory": "Nano.h",
+    "jsxFragmentFactory": "Nano.Fragment",
     "allowJs": true,
     "moduleResolution": "node",
     "paths": {
@@ -27,7 +27,6 @@
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
     // Some stricter flags
-    "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noPropertyAccessFromIndexSignature": true
   }

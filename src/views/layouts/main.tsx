@@ -1,4 +1,4 @@
-import { Fragment, h, Helmet } from 'nano-jsx';
+import Nano, { Fragment, Helmet } from 'nano-jsx';
 
 interface MainLayoutProps {
   title?: string;

@@ -1,4 +1,4 @@
-import { h } from 'nano-jsx';
+import Nano from 'nano-jsx';
 
 import { ENV } from '~/config/env';
 

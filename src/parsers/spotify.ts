@@ -1,5 +1,3 @@
-import { InternalServerError } from 'elysia';
-
 import {
   SPOTIFY_LINK_DESKTOP_REGEX,
   SPOTIFY_LINK_MOBILE_REGEX,
@@ -8,7 +6,7 @@ import { MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
 import { fetchMetadata } from '~/services/metadata';
-import { SearchMetadata } from '~/services/search';
+import { type SearchMetadata } from '~/services/search';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
@@ -91,7 +89,7 @@ export const getSpotifyMetadata = async (id: string, link: string) => {
 
     return metadata;
   } catch (err) {
-    throw new InternalServerError(`[${getSpotifyMetadata.name}] (${link}) ${err}`);
+    throw new Error(`[${getSpotifyMetadata.name}] (${link}) ${err}`);
   }
 };
 

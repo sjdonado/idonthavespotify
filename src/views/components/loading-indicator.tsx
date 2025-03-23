@@ -1,4 +1,4 @@
-import { h } from 'nano-jsx';
+import Nano from 'nano-jsx';
 
 export default function LoadingIndicator() {
   return (

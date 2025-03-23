@@ -1,5 +1,5 @@
 import { file, serve } from 'bun';
-import Nano, { h, Helmet } from 'nano-jsx';
+import { h, Helmet, renderSSR } from 'nano-jsx';
 
 import { Adapter } from './config/enum';
 import { apiRouteSchema } from './schemas/api.schema';
@@ -24,8 +24,8 @@ export const server = serve({
           const filePath = `public/assets/${path}`;
 
           return new Response(file(filePath));
-        } catch (error) {
-          console.error(`Error serving static file: ${error}`);
+        } catch (err) {
+          logger.error(`[route /assets/*]: ${err}`);
           return new Response('Server error', { status: 500 });
         }
       },
@@ -62,7 +62,7 @@ export const server = serve({
             searchResult ? h(SearchCard, { searchResult }) : null
           );
 
-          const app = Nano.renderSSR(
+          const app = renderSSR(
             h(MainLayout, {
               title: searchResult?.title,
               description: searchResult?.description,
@@ -88,9 +88,9 @@ export const server = serve({
           return new Response(html, {
             headers: { 'Content-Type': 'text/html' },
           });
-        } catch (error) {
-          logger.error('[/]', error);
-          const html = Nano.renderSSR(
+        } catch (err) {
+          logger.error(`[route /]: ${err}`);
+          const html = renderSSR(
             h(ErrorMessage, { message: 'Something went wrong, please try again later.' })
           );
           return new Response(html, {
@@ -122,15 +122,20 @@ export const server = serve({
           const { link } = result.data.body;
 
           const searchResult = await search({ link, headless: false });
-          const html = Nano.renderSSR(h(SearchCard, { searchResult }));
+          const html = renderSSR(h(SearchCard, { searchResult }));
 
           return new Response(html, {
             headers: { 'Content-Type': 'text/html' },
           });
-        } catch (error) {
-          logger.error('[/search]', error);
-          const html = Nano.renderSSR(
-            h(ErrorMessage, { message: 'Something went wrong, please try again later.' })
+        } catch (err) {
+          logger.error(`[route /search]: ${err}`);
+          const html = renderSSR(
+            h(ErrorMessage, {
+              message:
+                err instanceof Error
+                  ? err.message
+                  : 'Something went wrong, please try again later.',
+            })
           );
           return new Response(html, {
             headers: { 'Content-Type': 'text/html' },
@@ -170,8 +175,8 @@ export const server = serve({
           });
 
           return Response.json(searchResult);
-        } catch (error) {
-          logger.error('[/api/search]', error);
+        } catch (err) {
+          logger.error(`[route /api/search]: ${err}`);
           return Response.json({ error: 'Internal server error' }, { status: 500 });
         }
       },

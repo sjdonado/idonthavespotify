@@ -23,14 +23,6 @@ Adapters represent the streaming services supported by the Web App and the Rayca
   <img width="1200" alt="image" src="https://github.com/user-attachments/assets/ae6250f5-d1ed-41f2-ae21-8a2b2599a450" />
 </div>
 
-# Apple Shortcuts (beta)
-- [IDHS Open In Spotify](https://www.icloud.com/shortcuts/2757d4e10fad4cc182225953c8fdf80e)
-- [IDHS Open In Tidal](https://www.icloud.com/shortcuts/63716e2abdcd4cc28fb67abf72e994f9)
-- [IDHS Open In Youtube Music](https://www.icloud.com/shortcuts/de21be4d0878440f85bbf10bd6ee049a)
-- [IDHS Open In Apple Music](https://www.icloud.com/shortcuts/23edcdae7dab452a9adc926435eafbdc)
-- [IDHS Open In Deezer](https://www.icloud.com/shortcuts/f760b0cc6b6b494a88d31c31009966f3)
-- [IDHS Open In SoundCloud](https://www.icloud.com/shortcuts/972d8ac3b30b4184a6cd63abb8c5cd9b)
-
 ## Raycast Extension
 
 ![Uptime Badge](https://uptime.sjdonado.com/api/badge/3/uptime/24?labelPrefix=API%20&labelSuffix=h) ![Uptime Badge](https://uptime.sjdonado.com/api/badge/3/ping/24?labelPrefix=API%20)

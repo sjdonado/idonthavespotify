@@ -1,4 +1,4 @@
-import { h } from 'nano-jsx';
+import Nano from 'nano-jsx';
 
 import { Adapter } from '~/config/enum';
 import { type SearchResult } from '~/services/search';
