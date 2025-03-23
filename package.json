@@ -2,7 +2,7 @@
   "name": "idonthavespotify",
   "version": "1.6.1-beta",
   "scripts": {
-    "dev": "concurrently \"bun run build:dev\" \"bun run --watch www/bin.ts\"",
+    "dev": "concurrently \"bun run build:dev\" \"bun run --watch src/index.ts\"",
     "build:dev": "vite build --mode=development --watch",
     "build": "vite build",
     "test": "NODE_ENV=test bun test",
@@ -10,27 +10,26 @@
     "tscheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@elysiajs/html": "^1.2.0",
-    "@elysiajs/static": "^1.2.0",
     "@hotwired/stimulus": "^3.2.2",
     "axios": "^1.7.9",
     "axios-retry": "^4.5.0",
     "cache-manager": "^5.7.3",
     "cache-manager-bun-sqlite3": "^0.2.0",
     "cheerio": "^1.0.0",
-    "elysia": "^1.2.10",
     "howler": "^2.2.4",
+    "nano-jsx": "^0.1.0",
     "notyf": "^3.10.0",
     "pino": "^8.20.0",
     "pino-pretty": "^11.0.0",
-    "string-similarity": "^4.0.4"
+    "string-similarity": "^4.0.4",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@types/bun": "^1.2.5",
     "@types/string-similarity": "^4.0.2",
     "@typescript-eslint/eslint-plugin": "^7.7.1",
     "autoprefixer": "^10.4.19",
     "axios-mock-adapter": "^1.22.0",
-    "bun-types": "latest",
     "concurrently": "^8.2.2",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",

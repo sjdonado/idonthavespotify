@@ -23,4 +23,4 @@ COPY public public
 
 ENV NODE_ENV production
 
-CMD ["bun", "www/bin.ts"]
+CMD ["bun", "src/index.ts"]

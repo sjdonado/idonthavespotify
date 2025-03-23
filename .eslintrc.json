@@ -23,7 +23,8 @@
     "@typescript-eslint/no-unused-vars": [
       "error",
       {
-        "varsIgnorePattern": "^Html$"
+        "varsIgnorePattern": "^(h|Fragment)$",
+        "argsIgnorePattern": "^_"
       }
     ],
     "simple-import-sort/imports": "error",
