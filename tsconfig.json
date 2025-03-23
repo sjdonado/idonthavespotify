@@ -1,12 +1,15 @@
 {
   "compilerOptions": {
     "lib": [
-      "ESNext"
+      "dom",
+      "dom.iterable",
+      "esnext"
     ],
     "target": "ESNext",
     "module": "ESNext",
     "moduleDetection": "force",
     "jsx": "react",
+    "jsxImportSource": "nano-jsx/esm",
     "jsxFactory": "h",
     "jsxFragmentFactory": "Fragment",
     "allowJs": true,

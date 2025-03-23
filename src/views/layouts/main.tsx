@@ -1,11 +1,11 @@
-import { h, Helmet } from 'nano-jsx';
+import { Fragment, h, Helmet } from 'nano-jsx';
 
 interface MainLayoutProps {
   title?: string;
   description?: string;
   image?: string;
   isProduction: boolean;
-  children: JSX.Element;
+  children: typeof Fragment;
 }
 
 const MainLayout = ({

@@ -1,12 +1,10 @@
-import { InternalServerError } from 'elysia';
-
 import { getAppleMusicLink } from '~/adapters/apple-music';
 import { getDeezerLink } from '~/adapters/deezer';
 import { getSoundCloudLink } from '~/adapters/sound-cloud';
 import { getSpotifyLink } from '~/adapters/spotify';
 import { getTidalLink } from '~/adapters/tidal';
 import { getYouTubeLink } from '~/adapters/youtube';
-import { Adapter, MetadataType, Parser, StreamingServiceType } from '~/config/enum';
+import { Adapter, MetadataType, Parser, type StreamingServiceType } from '~/config/enum';
 import { ENV } from '~/config/env';
 import {
   getAppleMusicMetadata,
@@ -120,7 +118,7 @@ export const search = async <T extends SearchProps>({
   const queryExtractor = queryExtractorsMap[searchParser.type];
 
   if (!metadataFetcher || !queryExtractor) {
-    throw new InternalServerError('Parser not implemented yet');
+    throw new Error('Parser not implemented yet');
   }
 
   // Even if headless, we need initial metadata and query for link extraction

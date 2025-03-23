@@ -77,8 +77,6 @@ export const server = serve({
             <!DOCTYPE html>
             <html ${attributes.html.toString()}>
               <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 ${head.join('\n')}
               </head>
               <body ${attributes.body.toString()}>
@@ -105,7 +103,7 @@ export const server = serve({
     '/search': {
       async POST(req) {
         try {
-          const formData = await new Response(req.body).formData();
+          const formData = await req.formData();
 
           const result = searchRouteSchema.safeParse({
             body: Object.fromEntries(formData),
@@ -124,7 +122,6 @@ export const server = serve({
           const { link } = result.data.body;
 
           const searchResult = await search({ link, headless: false });
-
           const html = Nano.renderSSR(h(SearchCard, { searchResult }));
 
           return new Response(html, {
