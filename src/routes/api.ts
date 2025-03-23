@@ -15,7 +15,7 @@ export const apiRouter = new Elysia().group('/api', app =>
       };
     })
     .post(
-      '/search', // TODO: remove after new Raycast version is released
+      '/search',
       async ({ body: { link, adapters } }) => {
         const searchResult = await search({
           link,

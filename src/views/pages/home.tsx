@@ -1,7 +1,7 @@
-import { Html } from '@elysiajs/html';
+import { h } from 'nano-jsx';
 
-import LoadingIndicator from '../components/loading-indicator';
 import Footer from '../components/footer';
+import LoadingIndicator from '../components/loading-indicator';
 
 export default function Home({
   source,
