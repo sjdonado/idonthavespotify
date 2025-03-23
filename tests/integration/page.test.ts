@@ -1,19 +1,8 @@
-import axios from 'axios';
-import AxiosMockAdapter from 'axios-mock-adapter';
-import {
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  mock,
-  spyOn,
-} from 'bun:test';
+import { beforeAll, beforeEach, describe, expect, it, mock, spyOn } from 'bun:test';
 
 import { Adapter, MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
-import { app } from '~/index';
+import { server } from '~/index';
 import * as linkParser from '~/parsers/link';
 import {
   cacheSearchMetadata,
@@ -30,15 +19,8 @@ import { urlShortenerResponseMock } from '../utils/shared';
 const INDEX_ENDPOINT = 'http://localhost';
 
 describe('Page router', () => {
-  let axiosMock: AxiosMockAdapter;
-
   beforeAll(() => {
-    axiosMock = new AxiosMockAdapter(axios);
     mock.restore();
-  });
-
-  afterEach(() => {
-    axiosMock.reset();
   });
 
   beforeEach(async () => {
@@ -62,9 +44,11 @@ describe('Page router', () => {
   describe('GET /', () => {
     it('should return landing page', async () => {
       const request = new Request(`${INDEX_ENDPOINT}`);
-      const response = await app.handle(request).then(res => res.text());
+      const response = await server.fetch(request);
 
-      const doc = getCheerioDoc(response);
+      const html = await response.text();
+
+      const doc = getCheerioDoc(html);
 
       expect(doc('h1').text()).toEqual("I Don't Have Spotify");
       expect(doc('p').text()).toContain(
@@ -141,7 +125,7 @@ describe('Page router', () => {
       ]);
 
       const request = formDataRequest(endpoint, { link: spotifyLink });
-      const response = await app.handle(request);
+      const response = await server.fetch(request);
       const data = await response.text();
 
       const doc = getCheerioDoc(data);
@@ -227,7 +211,7 @@ describe('Page router', () => {
       ]);
 
       const request = formDataRequest(endpoint, { link: spotifyLink });
-      const response = await app.handle(request);
+      const response = await server.fetch(request);
       const data = await response.text();
 
       const doc = getCheerioDoc(data);
@@ -264,7 +248,7 @@ describe('Page router', () => {
 
     it('should return search card when searchLinks are empty', async () => {
       const request = formDataRequest(endpoint, { link: spotifyLink });
-      const response = await app.handle(request);
+      const response = await server.fetch(request);
       const data = await response.text();
 
       const doc = getCheerioDoc(data);
@@ -284,7 +268,7 @@ describe('Page router', () => {
         link: 'https://open.spotify.com/invalid',
       });
 
-      const response = await app.handle(request);
+      const response = await server.fetch(request);
 
       const data = await response.text();
       const doc = getCheerioDoc(data);
@@ -302,7 +286,7 @@ describe('Page router', () => {
       });
 
       const request = formDataRequest(endpoint, { link: spotifyLink });
-      const response = await app.handle(request);
+      const response = await server.fetch(request);
       const data = await response.text();
 
       const doc = getCheerioDoc(data);
