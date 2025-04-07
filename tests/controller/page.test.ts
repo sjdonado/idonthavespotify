@@ -3,7 +3,6 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, spyOn } from 'bu
 
 import { Adapter, MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
-import { createApp } from '~/index';
 import * as linkParser from '~/parsers/link';
 import {
   cacheSearchMetadata,
@@ -14,18 +13,17 @@ import {
 } from '~/services/cache';
 import { getCheerioDoc } from '~/utils/scraper';
 
-import { formDataFromObject, nodeFetch } from '../utils/request';
+import { createTestApp, formDataFromObject, nodeFetch } from '../utils/request';
 import { urlShortenerResponseMock } from '../utils/shared';
 
 describe('Page router', () => {
   let app: Server;
 
-  beforeAll(async () => {
-    app = createApp();
+  beforeAll(() => {
+    app = createTestApp();
   });
 
   afterAll(() => {
-    app.stop(true);
     cacheStore.reset();
   });
 

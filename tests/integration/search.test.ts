@@ -14,11 +14,10 @@ import {
 } from 'bun:test';
 
 import { ENV } from '~/config/env';
-import { createApp } from '~/index';
 import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
 
-import { nodeFetch } from '../utils/request';
+import { createTestApp, nodeFetch } from '../utils/request';
 import {
   apiSearchEndpoint,
   urlShortenerLink,
@@ -35,7 +34,7 @@ describe('GET /search', () => {
   >;
 
   beforeAll(() => {
-    app = createApp();
+    app = createTestApp();
     searchEndpointUrl = apiSearchEndpoint(app.url);
 
     axiosMock = new AxiosMockAdapter(axios);
@@ -46,8 +45,6 @@ describe('GET /search', () => {
   });
 
   afterAll(() => {
-    app.stop(true);
-
     cacheStore.reset();
     axiosMock.reset();
     getUniversalMetadataFromTidalMock.mockReset();
