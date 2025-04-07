@@ -170,9 +170,8 @@ export const createApp = (port: string = '0') =>
               hostname: req.headers.get('host')?.split(':')[0] ?? '127.0.0.1',
               language: req.headers.get('accept-language') ?? '',
               referrer: req.headers.get('referer') ?? '',
-              title: '/api/search',
+              title: 'Raycast search',
               url: url.pathname,
-              name: 'raycast',
             });
 
             return Response.json(searchResult);
