@@ -26,6 +26,7 @@ describe('Page router', () => {
 
   afterAll(() => {
     app.stop(true);
+    cacheStore.reset();
   });
 
   beforeEach(async () => {

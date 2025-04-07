@@ -78,10 +78,12 @@ export const getSearchParser = (link?: string, searchId?: string) => {
     throw new Error('Service id could not be extracted from source.');
   }
 
+  const parsedSource = new URL(source);
+
   const searchParser = {
     id,
     type,
-    source,
+    source: [parsedSource.origin, parsedSource.pathname].join(''),
   } as SearchParser;
 
   return searchParser;

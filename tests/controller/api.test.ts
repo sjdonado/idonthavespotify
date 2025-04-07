@@ -44,6 +44,7 @@ describe('Api router', () => {
   beforeAll(() => {
     app = createApp();
     searchEndpointUrl = apiSearchEndpoint(app.url);
+
     axiosMock = new AxiosMockAdapter(axios);
     getUniversalMetadataFromTidalaxiosMock = spyOn(
       tidalUniversalLinkParser,
@@ -53,8 +54,9 @@ describe('Api router', () => {
 
   afterAll(() => {
     app.stop(true);
-    // axiosMock.reset();
-    // getUniversalMetadataFromTidalaxiosMock.mockReset();
+
+    axiosMock.reset();
+    getUniversalMetadataFromTidalaxiosMock.mockReset();
   });
 
   beforeEach(() => {
