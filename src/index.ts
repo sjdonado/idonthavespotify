@@ -37,13 +37,13 @@ export const createApp = (port: string = '0') =>
         async GET(req) {
           try {
             const url = new URL(req.url);
-            const queryParams = Object.fromEntries(url.searchParams);
+            const query = Object.fromEntries(url.searchParams);
 
             const result = indexRouteSchema.safeParse({
-              query: queryParams,
+              query,
             });
-            if (!result.success) throw validationError(result.error);
 
+            if (!result.success) throw validationError(result.error);
             const { id } = result.data.query;
 
             const searchResult = id
@@ -56,7 +56,7 @@ export const createApp = (port: string = '0') =>
               searchResult ? h(SearchCard, { searchResult }) : null
             );
 
-            const app = renderSSR(
+            const html = renderSSR(
               h(MainLayout, {
                 title: searchResult?.title,
                 description: searchResult?.description,
@@ -66,22 +66,24 @@ export const createApp = (port: string = '0') =>
               })
             );
 
-            const { body, head, footer, attributes } = Helmet.SSR(app);
-            const html = `
-            <!DOCTYPE html>
-            <html ${attributes.html.toString()}>
-              <head>
-                ${head.join('\n')}
-              </head>
-              <body ${attributes.body.toString()}>
-                ${body}
-                ${footer.join('\n')}
-              </body>
-            </html>`;
+            const { body, head, footer, attributes } = Helmet.SSR(html);
 
-            return new Response(html, {
-              headers: { 'Content-Type': 'text/html' },
-            });
+            return new Response(
+              `<!DOCTYPE html>
+                <html ${attributes.html.toString()}>
+                  <head>
+                    ${head.join('\n')}
+                  </head>
+                  <body ${attributes.body.toString()}>
+                    ${body}
+                    ${footer.join('\n')}
+                  </body>
+                </html>
+              `,
+              {
+                headers: { 'Content-Type': 'text/html' },
+              }
+            );
           } catch (err) {
             if (err instanceof Response) return err;
 
@@ -102,11 +104,13 @@ export const createApp = (port: string = '0') =>
       '/search': {
         async POST(req) {
           try {
-            const result = searchRouteSchema.safeParse({
-              body: req.body ? Object.fromEntries(await req.formData()) : null,
-            });
-            if (!result.success) throw validationError(result.error);
+            const body = req.body ? Object.fromEntries(await req.formData()) : null;
 
+            const result = searchRouteSchema.safeParse({
+              body,
+            });
+
+            if (!result.success) throw validationError(result.error);
             const { link } = result.data.body;
 
             const searchResult = await search({ link, headless: false });
@@ -145,13 +149,14 @@ export const createApp = (port: string = '0') =>
           try {
             const url = new URL(req.url);
             const queryParams = Object.fromEntries(url.searchParams);
+            const body = req.body ? await req.json() : null;
 
             const result = apiRouteSchema.safeParse({
               query: queryParams,
-              body: req.body ? await req.json() : null,
+              body,
             });
-            if (!result.success) throw validationError(result.error);
 
+            if (!result.success) throw validationError(result.error);
             const { link, adapters } = result.data.body;
 
             const searchResult = await search({
