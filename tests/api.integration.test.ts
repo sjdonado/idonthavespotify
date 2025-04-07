@@ -116,8 +116,7 @@ describe('Api router', () => {
     });
 
     it('should return 200 when adapter returns error', async () => {
-      const link =
-        'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc?si=different_version';
+      const link = 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc';
       const query = 'Like a Rolling Stone Bob Dylan';
 
       axiosMock.onGet(getTidalSearchLink(query, MetadataType.Song)).reply(500);

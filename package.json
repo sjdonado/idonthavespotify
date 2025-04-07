@@ -20,7 +20,6 @@
     "cheerio": "^1.0.0",
     "howler": "^2.2.4",
     "nano-jsx": "^0.1.0",
-    "node-fetch-cache": "^5.0.2",
     "notyf": "^3.10.0",
     "pino": "^8.20.0",
     "pino-pretty": "^11.0.0",
