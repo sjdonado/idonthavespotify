@@ -6,6 +6,7 @@
     "build:dev": "vite build --mode=development --watch",
     "build": "vite build",
     "test": "NODE_ENV=test bun test",
+    "test:ci": "NODE_ENV=test bun test integration",
     "lint": "eslint --fix",
     "tscheck": "tsc --noEmit"
   },

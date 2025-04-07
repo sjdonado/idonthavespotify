@@ -17,12 +17,12 @@ import { ENV } from '~/config/env';
 import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
 
-import { createTestApp, nodeFetch } from '../utils/request';
+import { createTestApp, nodeFetch } from './utils/request';
 import {
   apiSearchEndpoint,
   urlShortenerLink,
   urlShortenerResponseMock,
-} from '../utils/shared';
+} from './utils/shared';
 
 describe('GET /search', () => {
   let app: Server;
@@ -369,13 +369,7 @@ describe('GET /search', () => {
           'https://podz-content.spotifycdn.com/audio/clips/6omeNtNZD86P8h4edCGXRl/clip_176359_236359.mp3',
         source: 'https://open.spotify.com/episode/2uvOfpJRRliCWpbiCXKf4Q',
         universalLink: 'http://localhost:4000/2saYhYg',
-        links: [
-          {
-            isVerified: true,
-            type: 'soundCloud',
-            url: 'https://soundcloud.com/rem-official/its-the-end-of-the-world-as-4',
-          },
-        ],
+        links: [],
       });
     });
   });
@@ -406,7 +400,13 @@ describe('GET /search', () => {
           'https://podz-content.spotifycdn.com/audio/clips/0Dijh26Vc2UoFrsXfkACQ8/clip_2900584_2965529.mp3',
         source: 'https://open.spotify.com/episode/43TCrgmP23qkLcAXZQN8qT',
         universalLink: urlShortenerResponseMock.data.refer,
-        links: [],
+        links: [
+          {
+            isVerified: true,
+            type: 'soundCloud',
+            url: 'https://soundcloud.com/rem-official/its-the-end-of-the-world-as-4',
+          },
+        ],
       });
     });
   });

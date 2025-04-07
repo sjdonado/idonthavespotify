@@ -18,7 +18,7 @@ import { ENV } from '~/config/env';
 import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
 
-import { createTestApp, nodeFetch } from '../utils/request';
+import { createTestApp, nodeFetch } from './utils/request';
 import {
   apiSearchEndpoint,
   cachedSpotifyLink,
@@ -29,7 +29,7 @@ import {
   getYouTubeSearchLink,
   urlShortenerLink,
   urlShortenerResponseMock,
-} from '../utils/shared';
+} from './utils/shared';
 
 describe('Api router', () => {
   let app: Server;

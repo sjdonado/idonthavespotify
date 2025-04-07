@@ -13,8 +13,8 @@ import {
 } from '~/services/cache';
 import { getCheerioDoc } from '~/utils/scraper';
 
-import { createTestApp, formDataFromObject, nodeFetch } from '../utils/request';
-import { urlShortenerResponseMock } from '../utils/shared';
+import { createTestApp, formDataFromObject, nodeFetch } from './utils/request';
+import { urlShortenerResponseMock } from './utils/shared';
 
 describe('Page router', () => {
   let app: Server;
