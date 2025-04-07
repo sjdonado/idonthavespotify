@@ -30,7 +30,7 @@ export const cachedResponse = {
   links: [
     {
       type: 'appleMusic',
-      url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
+      url: 'https://geo.music.apple.com/de/album/do-not-disturb/1440890708?i=1440892237&app=music&ls=1',
       isVerified: true,
     },
     {

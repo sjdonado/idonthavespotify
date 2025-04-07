@@ -14,20 +14,18 @@
     "jsxFragmentFactory": "Nano.Fragment",
     "allowJs": true,
     "moduleResolution": "node",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedParameters": true,
+    "noPropertyAccessFromIndexSignature": true,
     "paths": {
       "~/*": [
         "./src/*"
       ]
-    },
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "noEmit": true,
-    // Best practices
-    "strict": true,
-    "skipLibCheck": true,
-    "noFallthroughCasesInSwitch": true,
-    // Some stricter flags
-    "noUnusedParameters": true,
-    "noPropertyAccessFromIndexSignature": true
+    }
   }
 }

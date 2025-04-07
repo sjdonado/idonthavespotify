@@ -1,8 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Server } from 'bun';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test';
 
 import { Adapter, MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
-import { server } from '~/index';
+import { createApp } from '~/index';
 import * as linkParser from '~/parsers/link';
 import {
   cacheSearchMetadata,
@@ -13,12 +14,20 @@ import {
 } from '~/services/cache';
 import { getCheerioDoc } from '~/utils/scraper';
 
-import { formDataRequest } from '../utils/request';
+import { formDataFromObject, nodeFetch } from '../utils/request';
 import { urlShortenerResponseMock } from '../utils/shared';
 
-const INDEX_ENDPOINT = 'http://localhost';
-
 describe('Page router', () => {
+  let app: Server;
+
+  beforeAll(async () => {
+    app = createApp();
+  });
+
+  afterAll(() => {
+    app.stop(true);
+  });
+
   beforeEach(async () => {
     cacheStore.reset();
 
@@ -39,8 +48,7 @@ describe('Page router', () => {
 
   describe('GET /', () => {
     it('should return landing page', async () => {
-      const request = new Request(`${INDEX_ENDPOINT}`);
-      const response = await server.fetch(request);
+      const response = await nodeFetch(app.url.toString());
 
       const html = await response.text();
 
@@ -61,8 +69,8 @@ describe('Page router', () => {
   });
 
   describe('POST /search', () => {
-    const endpoint = `${INDEX_ENDPOINT}/search`;
-    const spotifyLink = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
+    const endpoint = `${app.url}/search`;
+    const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
 
     it('should return search card with a valid link', async () => {
       await Promise.all([
@@ -88,7 +96,7 @@ describe('Page router', () => {
           new URL('https://music.apple.com/ca/search?term=Do%20Not%20Disturb%20Drake'),
           {
             type: Adapter.AppleMusic,
-            url: 'https://music.apple.com/ca/album/do-not-disturb/1440890708?i=1440892237',
+            url: 'https://geo.music.apple.com/de/album/do-not-disturb/1440890708?i=1440892237&app=music&ls=1',
             isVerified: true,
           }
         ),
@@ -120,8 +128,10 @@ describe('Page router', () => {
         ),
       ]);
 
-      const request = formDataRequest(endpoint, { link: spotifyLink });
-      const response = await server.fetch(request);
+      const response = await nodeFetch(endpoint, {
+        method: 'POST',
+        body: formDataFromObject({ link }),
+      });
       const data = await response.text();
 
       const doc = getCheerioDoc(data);
@@ -136,7 +146,7 @@ describe('Page router', () => {
       expect(searchLinks).toHaveLength(5);
       expect(searchLinks[0].attribs['aria-label']).toContain('Listen on Apple Music');
       expect(searchLinks[0].attribs['href']).toBe(
-        'https://music.apple.com/ca/album/do-not-disturb/1440890708?i=1440892237'
+        'https://geo.music.apple.com/de/album/do-not-disturb/1440890708?i=1440892237&app=music&ls=1'
       );
       expect(searchLinks[1].attribs['aria-label']).toContain('Listen on Deezer');
       expect(searchLinks[1].attribs['href']).toBe(
@@ -206,8 +216,10 @@ describe('Page router', () => {
         ),
       ]);
 
-      const request = formDataRequest(endpoint, { link: spotifyLink });
-      const response = await server.fetch(request);
+      const response = await nodeFetch(endpoint, {
+        method: 'POST',
+        body: formDataFromObject({ link }),
+      });
       const data = await response.text();
 
       const doc = getCheerioDoc(data);
@@ -243,8 +255,10 @@ describe('Page router', () => {
     });
 
     it('should return search card when searchLinks are empty', async () => {
-      const request = formDataRequest(endpoint, { link: spotifyLink });
-      const response = await server.fetch(request);
+      const response = await nodeFetch(endpoint, {
+        method: 'POST',
+        body: formDataFromObject({ link }),
+      });
       const data = await response.text();
 
       const doc = getCheerioDoc(data);
@@ -260,13 +274,14 @@ describe('Page router', () => {
     });
 
     it('should return error message when sent an invalid link', async () => {
-      const request = formDataRequest(endpoint, {
-        link: 'https://open.spotify.com/invalid',
+      const response = await nodeFetch(endpoint, {
+        method: 'POST',
+        body: formDataFromObject({
+          link: 'https://open.spotify.com/invalid',
+        }),
       });
-
-      const response = await server.fetch(request);
-
       const data = await response.text();
+
       const doc = getCheerioDoc(data);
       const errorMessage = doc('p').text();
       expect(errorMessage).toContain(
@@ -274,15 +289,19 @@ describe('Page router', () => {
       );
     });
 
-    it('should return error message when internal server error', async () => {
-      const getSearchParserMock = vi.spyOn(linkParser, 'getSearchParser');
+    it('should return error message when internal app error', async () => {
+      const getSearchParserMock = spyOn(linkParser, 'getSearchParser');
 
       getSearchParserMock.mockImplementationOnce(() => {
-        throw new Error('Injected Error');
+        throw new Error();
       });
 
-      const request = formDataRequest(endpoint, { link: spotifyLink });
-      const response = await server.fetch(request);
+      const response = await nodeFetch(`${endpoint}?test=1`, {
+        method: 'POST',
+        body: formDataFromObject({
+          link,
+        }),
+      });
       const data = await response.text();
 
       const doc = getCheerioDoc(data);

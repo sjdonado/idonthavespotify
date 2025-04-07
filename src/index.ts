@@ -6,6 +6,7 @@ import { apiRouteSchema } from './schemas/api.schema';
 import { indexRouteSchema, searchRouteSchema } from './schemas/web.schema';
 import { search } from './services/search';
 import { logger } from './utils/logger';
+import { validationError } from './utils/zod';
 import ErrorMessage from './views/components/error-message';
 import SearchCard from './views/components/search-card';
 import MainLayout from './views/layouts/main';
@@ -13,7 +14,7 @@ import Home from './views/pages/home';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
-export const createServer = (port: string = '0') =>
+export const createApp = (port: string = '0') =>
   serve({
     port,
     routes: {
@@ -41,15 +42,7 @@ export const createServer = (port: string = '0') =>
             const result = indexRouteSchema.safeParse({
               query: queryParams,
             });
-
-            if (!result.success) {
-              return Response.json(
-                {
-                  error: result.error.issues[0]?.message || 'Validation error',
-                },
-                { status: 400 }
-              );
-            }
+            if (!result.success) throw validationError(result.error);
 
             const { id } = result.data.query;
 
@@ -90,13 +83,15 @@ export const createServer = (port: string = '0') =>
               headers: { 'Content-Type': 'text/html' },
             });
           } catch (err) {
-            console.error(err);
-            logger.error(`[route /]: ${err}`);
+            if (err instanceof Response) return err;
+
             const html = renderSSR(
               h(ErrorMessage, {
                 message: 'Something went wrong, please try again later.',
               })
             );
+
+            logger.error(`[route /]: ${err}`);
             return new Response(html, {
               headers: { 'Content-Type': 'text/html' },
               status: 500,
@@ -107,20 +102,10 @@ export const createServer = (port: string = '0') =>
       '/search': {
         async POST(req) {
           try {
-            const formData = await req.formData();
-
             const result = searchRouteSchema.safeParse({
-              body: Object.fromEntries(formData),
+              body: req.body ? Object.fromEntries(await req.formData()) : null,
             });
-
-            if (!result.success) {
-              return Response.json(
-                {
-                  error: result.error.issues[0]?.message || 'Validation error',
-                },
-                { status: 400 }
-              );
-            }
+            if (!result.success) throw validationError(result.error);
 
             const { link } = result.data.body;
 
@@ -131,19 +116,26 @@ export const createServer = (port: string = '0') =>
               headers: { 'Content-Type': 'text/html' },
             });
           } catch (err) {
-            console.error(err);
+            let message = 'Something went wrong, please try again later.';
+            let statusCode = 500;
+
+            if (err instanceof Response) {
+              const { error } = await err.json();
+              message = error;
+              statusCode = err.status;
+            }
+            if (err instanceof Error) {
+              if (err.message) {
+                message = err.message;
+              }
+            }
+
+            const html = renderSSR(h(ErrorMessage, { message }));
+
             logger.error(`[route /search]: ${err}`);
-            const html = renderSSR(
-              h(ErrorMessage, {
-                message:
-                  err instanceof Error
-                    ? err.message
-                    : 'Something went wrong, please try again later.',
-              })
-            );
             return new Response(html, {
               headers: { 'Content-Type': 'text/html' },
-              status: 500,
+              status: statusCode,
             });
           }
         },
@@ -158,16 +150,7 @@ export const createServer = (port: string = '0') =>
               query: queryParams,
               body: req.body ? await req.json() : null,
             });
-
-            if (!result.success) {
-              const error = Object.values(result.error.flatten().fieldErrors)[0][0];
-              return Response.json(
-                {
-                  error,
-                },
-                { status: 400 }
-              );
-            }
+            if (!result.success) throw validationError(result.error);
 
             const { link, adapters } = result.data.body;
 
@@ -179,6 +162,8 @@ export const createServer = (port: string = '0') =>
 
             return Response.json(searchResult);
           } catch (err) {
+            if (err instanceof Response) return err;
+
             const { message } = err as Error;
             logger.error(`[route /api/search]: ${err}`);
             return Response.json({ error: message }, { status: 500 });
@@ -191,6 +176,6 @@ export const createServer = (port: string = '0') =>
   });
 
 const port = Bun.env['PORT'] ?? '3000';
-const server = createServer(port);
+const app = createApp(port);
 
-logger.info(`Listening on ${server.url}`);
+logger.info(`Listening on ${app.url}`);

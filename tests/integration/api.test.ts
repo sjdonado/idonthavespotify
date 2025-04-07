@@ -12,14 +12,14 @@ import {
   type Mock,
   spyOn,
 } from 'bun:test';
-import NodeFetchCache, { FileSystemCache } from 'node-fetch-cache';
 
 import { Adapter, MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
-import { createServer } from '~/index';
+import { createApp } from '~/index';
 import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
 
+import { nodeFetch } from '../utils/request';
 import {
   apiSearchEndpoint,
   cachedSpotifyLink,
@@ -32,14 +32,8 @@ import {
   urlShortenerResponseMock,
 } from '../utils/shared';
 
-const fetch = NodeFetchCache.create({
-  cache: new FileSystemCache({
-    ttl: 604800000, // 7 days
-  }),
-});
-
 describe('Api router', () => {
-  let server: Server;
+  let app: Server;
   let searchEndpointUrl: string;
 
   let axiosMock: InstanceType<typeof AxiosMockAdapter>;
@@ -48,8 +42,8 @@ describe('Api router', () => {
   >;
 
   beforeAll(() => {
-    server = createServer();
-    searchEndpointUrl = apiSearchEndpoint(server.url);
+    app = createApp();
+    searchEndpointUrl = apiSearchEndpoint(app.url);
     axiosMock = new AxiosMockAdapter(axios);
     getUniversalMetadataFromTidalaxiosMock = spyOn(
       tidalUniversalLinkParser,
@@ -58,7 +52,7 @@ describe('Api router', () => {
   });
 
   afterAll(() => {
-    server.stop(true);
+    app.stop(true);
     // axiosMock.reset();
     // getUniversalMetadataFromTidalaxiosMock.mockReset();
   });
@@ -83,7 +77,7 @@ describe('Api router', () => {
     it('should return 200', async () => {
       axiosMock.onGet().passThrough();
 
-      const response = await fetch(searchEndpointUrl, {
+      const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -134,7 +128,7 @@ describe('Api router', () => {
       axiosMock.onGet(getSoundCloudSearchLink(query)).reply(500);
       axiosMock.onGet().passThrough();
 
-      const response = await fetch(searchEndpointUrl, {
+      const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -160,7 +154,7 @@ describe('Api router', () => {
     it('should return 200 when adapter adapter matches the parser type', async () => {
       axiosMock.onGet().passThrough();
 
-      const response = await fetch(searchEndpointUrl, {
+      const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -194,7 +188,7 @@ describe('Api router', () => {
       const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
       axiosMock.onGet(cachedSpotifyLink).reply(200, '<html></html>');
 
-      const response = await fetch(searchEndpointUrl, {
+      const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -211,7 +205,7 @@ describe('Api router', () => {
     });
 
     it('should return bad request - invalid link', async () => {
-      const response = await fetch(searchEndpointUrl, {
+      const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -227,7 +221,7 @@ describe('Api router', () => {
     });
 
     it('should return bad request - invalid searchId', async () => {
-      const response = await fetch(searchEndpointUrl, {
+      const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -243,7 +237,7 @@ describe('Api router', () => {
     });
 
     it('should return bad request - unknown body param', async () => {
-      const response = await fetch(searchEndpointUrl, {
+      const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -259,7 +253,7 @@ describe('Api router', () => {
     });
 
     it('should return bad request - unsupported API version', async () => {
-      const response = await fetch(`${server.url}api/search?v=2`, {
+      const response = await nodeFetch(`${app.url}api/search?v=2`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -274,7 +268,7 @@ describe('Api router', () => {
     });
 
     it('should return bad request - missing API version query param', async () => {
-      const response = await fetch(`${server.url}api/search`, {
+      const response = await nodeFetch(`${app.url}api/search`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
