@@ -6,7 +6,7 @@ export const SPOTIFY_LINK_DESKTOP_REGEX =
   /(https:\/\/open\.spotify\.com\/(track|album|playlist|artist|episode|show)\/(\w+))/;
 
 export const YOUTUBE_LINK_REGEX =
-  /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be|music\.youtube\.com)\/(?:watch\?v=|embed\/|v\/|shorts\/|playlist\?list=|channel\/)?([\w-]{11,})(?:\S+)?(?:&si=\S+)?/;
+  /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be|music\.youtube\.com)\/(?:watch\?v=|embed\/|v\/|shorts\/|playlist\?list=|channel\/)?([^&\s]{11,})/;
 
 export const APPLE_MUSIC_LINK_REGEX =
   /^https:\/\/music\.apple\.com\/(?:[a-z]{2}\/)?(?:album|playlist|station|artist|music-video|video-playlist|show)\/([\w-]+)(?:\/([\w-]+))?(?:\?i=(\d+))?(?:\?.*)?/;
