@@ -4,7 +4,7 @@ import bunSqliteStore from 'cache-manager-bun-sqlite3';
 import type { Adapter, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 
-import { SearchMetadata, SearchResultLink } from './search';
+import { type SearchMetadata, type SearchResultLink } from './search';
 
 export type AccessToken = {
   accessToken: string;

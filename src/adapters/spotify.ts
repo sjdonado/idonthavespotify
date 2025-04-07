@@ -7,7 +7,7 @@ import {
   getCachedSearchResultLink,
   getCachedSpotifyAccessToken,
 } from '~/services/cache';
-import { SearchMetadata, SearchResultLink } from '~/services/search';
+import type { SearchMetadata, SearchResultLink } from '~/services/search';
 import { getOrUpdateAccessToken } from '~/utils/access-token';
 import { responseMatchesQuery } from '~/utils/compare';
 import HttpClient from '~/utils/http-client';

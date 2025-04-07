@@ -7,7 +7,7 @@ export const stream = pretty({
 
 export const logger = pino(
   {
-    level: process.env.LOG_LEVEL ?? 'debug',
+    level: Bun.env['LOG_LEVEL'] ?? 'debug',
   },
   stream
 );
