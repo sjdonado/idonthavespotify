@@ -1,22 +1,23 @@
-export const jsonRequest = (endpoint: string, body: object) => {
-  return new Request(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
-};
+import type { Server } from 'bun';
 
-export const formDataRequest = (endpoint: string, body: object) => {
+import { createApp } from '~/index';
+
+export const nodeFetch = fetch;
+
+let _testApp: Server;
+export function createTestApp() {
+  if (_testApp) return _testApp;
+
+  _testApp = createApp();
+  return _testApp;
+}
+
+export const formDataFromObject = (body: object) => {
   const formData = new FormData();
 
   Object.entries(body).forEach(([key, value]) => {
     formData.append(key, value);
   });
 
-  return new Request(endpoint, {
-    method: 'POST',
-    body: formData,
-  });
+  return formData;
 };

@@ -1,7 +1,7 @@
-import { Html } from '@elysiajs/html';
+import Nano from 'nano-jsx';
 
 import { Adapter } from '~/config/enum';
-import { SearchResult } from '~/services/search';
+import { type SearchResult } from '~/services/search';
 
 const SEARCH_LINK_DICT = {
   [Adapter.Spotify]: {

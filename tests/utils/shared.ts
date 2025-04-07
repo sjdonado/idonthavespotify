@@ -3,10 +3,9 @@ import { YOUTUBE_SEARCH_TYPES } from '~/adapters/youtube';
 import { MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
 
-export const API_ENDPOINT = 'http://localhost/api';
-export const API_SEARCH_ENDPOINT = `${API_ENDPOINT}/search?v=1`;
+export const apiSearchEndpoint = (baseUrl: URL) => `${baseUrl}api/search?v=1`;
 
-export const urlShortenerLink = ENV.utils.urlShortener.apiUrl;
+export const urlShortenerLink = ENV.services.urlShortener.apiUrl;
 export const urlShortenerResponseMock = {
   data: {
     id: '6ce3f2d6-d73c-4c7f-b622-3b30e34d70dd',
@@ -31,7 +30,7 @@ export const cachedResponse = {
   links: [
     {
       type: 'appleMusic',
-      url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
+      url: 'https://geo.music.apple.com/de/album/do-not-disturb/1440890708?i=1440892237&app=music&ls=1',
       isVerified: true,
     },
     {

@@ -1,4 +1,4 @@
-import { Html } from '@elysiajs/html';
+import Nano from 'nano-jsx';
 
 import { ENV } from '~/config/env';
 

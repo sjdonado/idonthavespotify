@@ -1,12 +1,10 @@
-import { InternalServerError } from 'elysia';
-
 import { getAppleMusicLink } from '~/adapters/apple-music';
 import { getDeezerLink } from '~/adapters/deezer';
 import { getSoundCloudLink } from '~/adapters/sound-cloud';
 import { getSpotifyLink } from '~/adapters/spotify';
 import { getTidalLink } from '~/adapters/tidal';
 import { getYouTubeLink } from '~/adapters/youtube';
-import { Adapter, MetadataType, Parser, StreamingServiceType } from '~/config/enum';
+import { Adapter, MetadataType, Parser, type StreamingServiceType } from '~/config/enum';
 import { ENV } from '~/config/env';
 import {
   getAppleMusicMetadata,
@@ -52,15 +50,32 @@ export type SearchResult = {
   links: SearchResultLink[];
 };
 
-export const search = async ({
+export type SearchProps =
+  | {
+      link?: string;
+      searchId?: string;
+      adapters?: Adapter[];
+      headless: true;
+    }
+  | {
+      link?: string;
+      searchId?: string;
+      adapters?: Adapter[];
+      headless: false;
+    };
+
+export type SearchReturn<T extends SearchProps> = T['headless'] extends true
+  ? string | string[]
+  : SearchResult;
+
+export const search = async <T extends SearchProps>({
   link,
   searchId,
   adapters,
-}: {
-  link?: string;
-  searchId?: string;
-  adapters?: Adapter[];
-}) => {
+  headless,
+}: T): Promise<SearchReturn<T>> => {
+  const searchParser = getSearchParser(link, searchId);
+
   const searchAdapters = adapters ?? [
     Adapter.Spotify,
     Adapter.YouTube,
@@ -70,7 +85,7 @@ export const search = async ({
     Adapter.Tidal,
   ];
 
-  const searchParser = getSearchParser(link, searchId);
+  logger.info(`[search] (searchAdapters) ${searchAdapters}`);
 
   const metadataFetchersMap = {
     [Parser.Spotify]: getSpotifyMetadata,
@@ -103,10 +118,11 @@ export const search = async ({
   const queryExtractor = queryExtractorsMap[searchParser.type];
 
   if (!metadataFetcher || !queryExtractor) {
-    throw new InternalServerError('Parser not implemented yet');
+    throw new Error('Parser not implemented yet');
   }
 
-  let metadata = await metadataFetcher(searchParser.id, searchParser.source);
+  // Even if headless, we need initial metadata and query for link extraction
+  const metadata = await metadataFetcher(searchParser.id, searchParser.source);
   const query = queryExtractor(metadata);
   const parserType = searchParser.type as StreamingServiceType;
 
@@ -127,7 +143,12 @@ export const search = async ({
     searchAdapters.length === 1 &&
     searchParser.type === (searchAdapters[0] as StreamingServiceType)
   ) {
-    logger.info(`[${search.name}] early return - adapter is equal to parser type`);
+    logger.info(`[${search.name}] (early return) adapter is equal to parser type`);
+
+    // If headless, return just the link as a string, else return the full object
+    if (headless) {
+      return link as SearchReturn<T>;
+    }
 
     return {
       id,
@@ -139,16 +160,18 @@ export const search = async ({
       source: searchParser.source,
       universalLink,
       links: [linkSearchResult],
-    };
+    } as SearchReturn<T>;
   }
 
   const links: SearchResultLink[] = [];
-  const existingAdapters = new Set(links.map(link => link.type));
+  const existingAdapters = new Set<Adapter>();
 
   let tidalLink: SearchResultLink | null = linkSearchResult;
-  if (parserType !== Adapter.Tidal) {
+  if (searchAdapters.includes(Adapter.Tidal) && parserType !== Adapter.Tidal) {
     tidalLink = await getTidalLink(query, metadata);
-    existingAdapters.add(Adapter.Tidal);
+    if (tidalLink) {
+      existingAdapters.add(Adapter.Tidal);
+    }
   }
 
   if (tidalLink) {
@@ -171,7 +194,12 @@ export const search = async ({
     if (fromTidalULink) {
       for (const adapterKey in fromTidalULink) {
         const adapter = adapterKey as Adapter;
-        if (parserType !== adapter && fromTidalULink[adapter]) {
+        // Only add the adapter if it's requested and not the parser type
+        if (
+          searchAdapters.includes(adapter) &&
+          parserType !== adapter &&
+          fromTidalULink[adapter]
+        ) {
           links.push(fromTidalULink[adapter]);
           existingAdapters.add(adapter);
         }
@@ -200,9 +228,23 @@ export const search = async ({
       .filter(Boolean)
   );
 
-  // Fetch metadata audio from spotify and universal link from bit
+  const parsedLinks = links
+    .filter(link => searchAdapters.includes(link.type))
+    .sort((a, b) => {
+      // Prioritize verified links
+      if (a.isVerified && !b.isVerified) return -1;
+      if (!a.isVerified && b.isVerified) return 1;
+      return a.type.localeCompare(b.type);
+    });
+
+  // If headless is true, skip updatedMetadata and universal link shortening
+  if (headless) {
+    return parsedLinks.map(link => link.url) as SearchReturn<T>;
+  }
+
+  // Fetch updated metadata (for audio) from spotify if not parser type
   const spotifyLink = links.find(link => link.type === Adapter.Spotify);
-  const [updatedMetadata, shortLink] = await Promise.all([
+  const [parsedMetadata, shortLink] = await Promise.all([
     parserType !== Adapter.Spotify && spotifyLink
       ? (async () => {
           const spotifySearchParser = getSearchParser(spotifyLink.url);
@@ -212,28 +254,19 @@ export const search = async ({
     shortenLink(universalLink),
   ]);
 
-  metadata = updatedMetadata;
-  links.sort((a, b) => {
-    // Prioritize verified links
-    if (a.isVerified && !b.isVerified) return -1;
-    if (!a.isVerified && b.isVerified) return 1;
-
-    return a.type.localeCompare(b.type);
-  });
-
-  logger.info(`[${search.name}] (results) ${links.map(link => link?.url)}`);
-
   const searchResult: SearchResult = {
     id,
-    type: metadata.type,
-    title: metadata.title,
-    description: metadata.description,
-    image: metadata.image,
-    audio: metadata.audio,
+    type: parsedMetadata.type,
+    title: parsedMetadata.title,
+    description: parsedMetadata.description,
+    image: parsedMetadata.image,
+    audio: parsedMetadata.audio,
     source: searchParser.source,
     universalLink: shortLink,
-    links,
+    links: parsedLinks,
   };
 
-  return searchResult;
+  logger.info(`[${search.name}] (results) ${searchResult.links.map(link => link?.url)}`);
+
+  return searchResult as SearchReturn<T>;
 };

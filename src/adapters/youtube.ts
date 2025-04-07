@@ -57,7 +57,7 @@ export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
     key: ENV.adapters.youTube.apiKey,
   });
 
-  const url = new URL(ENV.adapters.youTube.apiUrl);
+  const url = new URL(`${ENV.adapters.youTube.apiUrl}/search`);
   url.search = params.toString();
 
   const cache = await getCachedSearchResultLink(url);

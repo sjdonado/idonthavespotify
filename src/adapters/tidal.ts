@@ -9,7 +9,7 @@ import {
   getCachedSearchResultLink,
   getCachedTidalAccessToken,
 } from '~/services/cache';
-import { SearchMetadata, SearchResultLink } from '~/services/search';
+import { type SearchMetadata, type SearchResultLink } from '~/services/search';
 import { getOrUpdateAccessToken } from '~/utils/access-token';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
@@ -56,7 +56,6 @@ export async function getTidalLink(query: string, metadata: SearchMetadata) {
   );
   url.search = params.toString();
 
-  // console.log('tidal', url.toString(), await getOrUpdateTidalAccessToken());
   const cache = await getCachedSearchResultLink(url);
   if (cache) {
     logger.info(`[Tidal] (${url}) cache hit`);
