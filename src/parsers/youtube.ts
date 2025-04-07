@@ -3,7 +3,7 @@ import axios from 'axios';
 import { MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
-import { SearchMetadata } from '~/services/search';
+import type { SearchMetadata } from '~/services/search';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 

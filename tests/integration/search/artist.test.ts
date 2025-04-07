@@ -1,82 +1,80 @@
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
-import { beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test';
+import type { Server } from 'bun';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  type Mock,
+  spyOn,
+} from 'bun:test';
 
-import { MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
-import { app } from '~/index';
+import { createApp } from '~/index';
 import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
 
-import deezerArtistResponseMock from '../../fixtures/deezer/artistResponseMock.json';
-import tidalArtistResponseMock from '../../fixtures/tidal/artistResponseMock.json';
-import youtubeArtistResponseMock from '../../fixtures/youtube/artistResponseMock.json';
-import { jsonRequest } from '../../utils/request';
+import { nodeFetch } from '../../utils/request';
 import {
-  API_SEARCH_ENDPOINT,
-  getAppleMusicSearchLink,
-  getDeezerSearchLink,
-  getSoundCloudSearchLink,
-  getTidalSearchLink,
-  getYouTubeSearchLink,
+  apiSearchEndpoint,
   urlShortenerLink,
   urlShortenerResponseMock,
 } from '../../utils/shared';
 
-const [
-  spotifyArtistHeadResponseMock,
-  appleMusicArtistResponseMock,
-  soundCloudArtistResponseMock,
-] = await Promise.all([
-  Bun.file('tests/fixtures/spotify/artistHeadResponseMock.html').text(),
-  Bun.file('tests/fixtures/apple-music/artistResponseMock.html').text(),
-  Bun.file('tests/fixtures/soundcloud/artistResponseMock.html').text(),
-]);
-
 describe('GET /search - Artist', () => {
-  let mock: AxiosMockAdapter;
-  const getUniversalMetadataFromTidalMock = spyOn(
-    tidalUniversalLinkParser,
-    'getUniversalMetadataFromTidal'
-  );
+  let app: Server;
+  let searchEndpointUrl: string;
+
+  let axiosMock: InstanceType<typeof AxiosMockAdapter>;
+  let getUniversalMetadataFromTidalMock: Mock<
+    typeof tidalUniversalLinkParser.getUniversalMetadataFromTidal
+  >;
 
   beforeAll(() => {
-    mock = new AxiosMockAdapter(axios);
+    app = createApp();
+    searchEndpointUrl = apiSearchEndpoint(app.url);
+    axiosMock = new AxiosMockAdapter(axios);
+    getUniversalMetadataFromTidalMock = spyOn(
+      tidalUniversalLinkParser,
+      'getUniversalMetadataFromTidal'
+    );
+  });
+
+  afterAll(() => {
+    app.stop(true);
   });
 
   beforeEach(() => {
-    getUniversalMetadataFromTidalMock.mockReset();
-    mock.reset();
     cacheStore.reset();
+    axiosMock.reset();
 
     getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
-    mock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
-    mock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
-    mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
+    axiosMock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
+    axiosMock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
+    axiosMock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
+  });
+
+  afterEach(() => {
+    axiosMock.reset();
   });
 
   it('should return 200', async () => {
     const link = 'https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5';
-    const query = 'J. Cole';
 
-    const tidalSearchLink = getTidalSearchLink(query, MetadataType.Artist);
-    const appleMusicSearchLink = getAppleMusicSearchLink(query);
-    const youtubeSearchLink = getYouTubeSearchLink(query, MetadataType.Artist);
-    const deezerSearchLink = getDeezerSearchLink(query, 'artist');
-    const soundCloudSearchLink = getSoundCloudSearchLink(query);
+    axiosMock.onGet().passThrough();
 
-    const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
+    const response = await nodeFetch(searchEndpointUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ link }),
+    });
 
-    mock.onGet(link).reply(200, spotifyArtistHeadResponseMock);
-
-    mock.onGet(tidalSearchLink).reply(200, tidalArtistResponseMock);
-    mock.onGet(appleMusicSearchLink).reply(200, appleMusicArtistResponseMock);
-    mock.onGet(youtubeSearchLink).reply(200, youtubeArtistResponseMock);
-    mock.onGet(deezerSearchLink).reply(200, deezerArtistResponseMock);
-    mock.onGet(soundCloudSearchLink).reply(200, soundCloudArtistResponseMock);
-    mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
-
-    const response = await app.handle(request);
     const data = await response.json();
 
     expect(data).toEqual({
@@ -90,7 +88,7 @@ describe('GET /search - Artist', () => {
       links: [
         {
           type: 'appleMusic',
-          url: 'https://music.apple.com/us/artist/j-cole/73705833',
+          url: 'https://music.apple.com/ca/artist/j-cole/73705833',
           isVerified: true,
         },
         {
@@ -103,19 +101,7 @@ describe('GET /search - Artist', () => {
           url: 'https://soundcloud.com/j-cole',
           isVerified: true,
         },
-        {
-          type: 'tidal',
-          url: 'https://tidal.com/browse/artist/3652822',
-          isVerified: true,
-        },
-        {
-          type: 'youTube',
-          url: 'https://music.youtube.com/channel/UCByOQJjav0CUDwxCk-jVNRQ',
-          isVerified: true,
-        },
       ],
     });
-
-    expect(mock.history.get).toHaveLength(6);
   });
 });

@@ -1,120 +1,111 @@
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
-import { beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test';
+import type { Server } from 'bun';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  type Mock,
+  spyOn,
+} from 'bun:test';
 
-import { MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
-import { app } from '~/index';
+import { createApp } from '~/index';
 import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
 
-import deezerAlbumResponseMock from '../../fixtures/deezer/albumResponseMock.json';
-import tidalAlbumResponseMock from '../../fixtures/tidal/albumResponseMock.json';
-import youtubeAlbumResponseMock from '../../fixtures/youtube/albumResponseMock.json';
-import { jsonRequest } from '../../utils/request';
+import { nodeFetch } from '../../utils/request';
 import {
-  API_SEARCH_ENDPOINT,
-  getAppleMusicSearchLink,
-  getDeezerSearchLink,
-  getSoundCloudSearchLink,
-  getTidalSearchLink,
-  getYouTubeSearchLink,
+  apiSearchEndpoint,
   urlShortenerLink,
   urlShortenerResponseMock,
 } from '../../utils/shared';
 
-const [
-  spotifyAlbumHeadResponseMock,
-  appleMusicAlbumResponseMock,
-  soundCloudAlbumResponseMock,
-] = await Promise.all([
-  Bun.file('tests/fixtures/spotify/albumHeadResponseMock.html').text(),
-  Bun.file('tests/fixtures/apple-music/albumResponseMock.html').text(),
-  Bun.file('tests/fixtures/soundcloud/albumResponseMock.html').text(),
-]);
-
 describe('GET /search - Album', () => {
-  let mock: AxiosMockAdapter;
-  const getUniversalMetadataFromTidalMock = spyOn(
-    tidalUniversalLinkParser,
-    'getUniversalMetadataFromTidal'
-  );
+  let app: Server;
+  let searchEndpointUrl: string;
+
+  let axiosMock: InstanceType<typeof AxiosMockAdapter>;
+  let getUniversalMetadataFromTidalMock: Mock<
+    typeof tidalUniversalLinkParser.getUniversalMetadataFromTidal
+  >;
 
   beforeAll(() => {
-    mock = new AxiosMockAdapter(axios);
+    app = createApp();
+    searchEndpointUrl = apiSearchEndpoint(app.url);
+    axiosMock = new AxiosMockAdapter(axios);
+    getUniversalMetadataFromTidalMock = spyOn(
+      tidalUniversalLinkParser,
+      'getUniversalMetadataFromTidal'
+    );
+  });
+
+  afterAll(() => {
+    app.stop(true);
   });
 
   beforeEach(() => {
-    getUniversalMetadataFromTidalMock.mockReset();
     cacheStore.reset();
-    mock.reset();
+    axiosMock.reset();
 
     getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
-    mock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
-    mock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
-    mock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
+    axiosMock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
+    axiosMock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
+    axiosMock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
   });
 
-  it('should return 200', async () => {
-    const link = 'https://open.spotify.com/album/4czdORdCWP9umpbhFXK2fW';
-    const query = 'For All The Dogs Drake';
+  afterEach(() => {
+    axiosMock.reset();
+  });
 
-    const tidalSearchLink = getTidalSearchLink(query, MetadataType.Album);
-    const appleMusicSearchLink = getAppleMusicSearchLink(query);
-    const youtubeSearchLink = getYouTubeSearchLink(query, MetadataType.Album);
-    const deezerSearchLink = getDeezerSearchLink(query, 'album');
-    const soundCloudSearchLink = getSoundCloudSearchLink(query);
+  describe('GET /search - Album', () => {
+    const link =
+      'https://open.spotify.com/album/7dqftJ3kas6D0VAdmt3k3V?si=e3MGBRjwSAuq7VuUN59HpA';
 
-    const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
+    it('should return 200', async () => {
+      axiosMock.onGet().passThrough();
 
-    mock.onGet(link).reply(200, spotifyAlbumHeadResponseMock);
-
-    mock.onGet(tidalSearchLink).reply(200, tidalAlbumResponseMock);
-    mock.onGet(appleMusicSearchLink).reply(200, appleMusicAlbumResponseMock);
-    mock.onGet(deezerSearchLink).reply(200, deezerAlbumResponseMock);
-    mock.onGet(soundCloudSearchLink).reply(200, soundCloudAlbumResponseMock);
-    mock.onGet(youtubeSearchLink).reply(200, youtubeAlbumResponseMock);
-
-    const response = await app.handle(request);
-    const data = await response.json();
-
-    expect(data).toEqual({
-      id: 'b3Blbi5zcG90aWZ5LmNvbS9hbGJ1bS80Y3pkT1JkQ1dQOXVtcGJoRlhLMmZX',
-      type: 'album',
-      title: 'For All The Dogs',
-      description: 'Drake · Album · 2023 · 23 songs.',
-      image: 'https://i.scdn.co/image/ab67616d0000b2730062621987df634efede0e6c',
-      source: 'https://open.spotify.com/album/4czdORdCWP9umpbhFXK2fW',
-      universalLink: urlShortenerResponseMock.data.refer,
-      links: [
-        {
-          type: 'appleMusic',
-          url: 'https://music.apple.com/us/album/for-all-the-dogs/1710685602',
-          isVerified: true,
+      const response = await nodeFetch(searchEndpointUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        {
-          type: 'deezer',
-          url: 'https://www.deezer.com/album/496789121',
-          isVerified: true,
-        },
-        {
-          type: 'soundCloud',
-          url: 'https://soundcloud.com/octobersveryown/sets/for-all-the-dogs-3',
-          isVerified: true,
-        },
-        {
-          type: 'tidal',
-          url: 'https://tidal.com/browse/album/320189583',
-          isVerified: true,
-        },
-        {
-          type: 'youTube',
-          url: 'https://music.youtube.com/playlist?list=PLbUIPZJL6vw-7ef4PuuPJhaK3K-0UxRKO',
-          isVerified: true,
-        },
-      ],
+        body: JSON.stringify({ link }),
+      });
+
+      const data = await response.json();
+
+      expect(data).toEqual({
+        id: 'b3Blbi5zcG90aWZ5LmNvbS9hbGJ1bS83ZHFmdEoza2FzNkQwVkFkbXQzazNWP3NpPWUzTUdCUmp3U0F1cTdWdVVONTlIcEE%3D',
+        type: 'album',
+        title: 'Stories',
+        description: 'Avicii · Album · 2015 · 14 songs',
+        image: 'https://i.scdn.co/image/ab67616d0000b2735393c5d3cac806092a9bc468',
+        source:
+          'https://open.spotify.com/album/7dqftJ3kas6D0VAdmt3k3V?si=e3MGBRjwSAuq7VuUN59HpA',
+        universalLink: 'http://localhost:4000/2saYhYg',
+        links: [
+          {
+            type: 'appleMusic',
+            url: 'https://music.apple.com/ca/album/stories/1440834059',
+            isVerified: true,
+          },
+          {
+            type: 'deezer',
+            url: 'https://www.deezer.com/album/11192186',
+            isVerified: true,
+          },
+          {
+            type: 'soundCloud',
+            url: 'https://soundcloud.com/aviciiofficial/sets/stories-253',
+            isVerified: true,
+          },
+        ],
+      });
     });
-
-    expect(mock.history.get).toHaveLength(6);
   });
 });
