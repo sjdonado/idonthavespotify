@@ -1,5 +1,4 @@
 import axios, { AxiosError } from 'axios';
-import { setupCache } from 'axios-cache-interceptor';
 import axiosRetry from 'axios-retry';
 
 import { DEFAULT_TIMEOUT } from '~/config/constants';
@@ -45,10 +44,6 @@ axiosRetry(axios, {
   },
 });
 
-const api = setupCache(axios, {
-  ttl: 15 * 60 * 1000, // 15 mins
-});
-
 export default class HttpClient {
   static defaultHeaders = {
     'Accept-Encoding': 'gzip',
@@ -76,7 +71,7 @@ export default class HttpClient {
     };
 
     try {
-      const { status, data } = await api({
+      const { status, data } = await axios.request({
         url,
         method,
         data: options?.payload,

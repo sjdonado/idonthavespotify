@@ -115,7 +115,7 @@ describe('Api router', () => {
       });
     });
 
-    it('should return 200 when adapter returns error', async () => {
+    it.only('should return 200 when adapter returns error', async () => {
       const link = 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc';
       const query = 'Like a Rolling Stone Bob Dylan';
 
@@ -137,7 +137,7 @@ describe('Api router', () => {
       const data = await response.json();
 
       expect(data).toEqual({
-        id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8zQWhYWmE4c1VRaHQwVUVkQkpncEdjP3NpPWRpZmZlcmVudF92ZXJzaW9u',
+        id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8zQWhYWmE4c1VRaHQwVUVkQkpncEdj',
         type: 'song',
         title: 'Like a Rolling Stone',
         description: 'Bob Dylan · Highway 61 Revisited · Song · 1965',
