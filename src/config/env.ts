@@ -34,7 +34,9 @@ export const ENV = {
   services: {
     urlShortener: {
       apiUrl: Bun.env.URL_SHORTENER_API_URL!,
-      apiKey: Bun.env.URL_SHORTENER_API_KEY!,
+    },
+    umami: {
+      apiUrl: Bun.env.UMAMI_API_URL!,
     },
   },
   app: {
