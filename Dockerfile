@@ -10,7 +10,6 @@ COPY package.json bun.lock .
 RUN bun install --frozen-lockfile
 
 COPY src src
-COPY www www
 
 COPY tsconfig.json .
 COPY tailwind.config.js .
