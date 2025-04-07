@@ -5,7 +5,7 @@ import { Adapter } from './config/enum';
 import { apiRouteSchema } from './schemas/api.schema';
 import { indexRouteSchema, searchRouteSchema } from './schemas/web.schema';
 import { search } from './services/search';
-import umami, { trackUmamiEvent } from './services/umami';
+import umami from './services/umami';
 import { logger } from './utils/logger';
 import { validationError } from './utils/zod';
 import ErrorMessage from './views/components/error-message';
