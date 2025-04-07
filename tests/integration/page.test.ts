@@ -1,4 +1,4 @@
-import { beforeAll, beforeEach, describe, expect, it, mock, spyOn } from 'bun:test';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Adapter, MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
@@ -19,10 +19,6 @@ import { urlShortenerResponseMock } from '../utils/shared';
 const INDEX_ENDPOINT = 'http://localhost';
 
 describe('Page router', () => {
-  beforeAll(() => {
-    mock.restore();
-  });
-
   beforeEach(async () => {
     cacheStore.reset();
 
@@ -279,7 +275,7 @@ describe('Page router', () => {
     });
 
     it('should return error message when internal server error', async () => {
-      const getSearchParserMock = spyOn(linkParser, 'getSearchParser');
+      const getSearchParserMock = vi.spyOn(linkParser, 'getSearchParser');
 
       getSearchParserMock.mockImplementationOnce(() => {
         throw new Error('Injected Error');

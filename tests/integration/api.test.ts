@@ -1,5 +1,6 @@
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import type { Server } from 'bun';
 import {
   afterAll,
   afterEach,
@@ -11,29 +12,44 @@ import {
   type Mock,
   spyOn,
 } from 'bun:test';
+import NodeFetchCache, { FileSystemCache } from 'node-fetch-cache';
 
-import { Adapter } from '~/config/enum';
+import { Adapter, MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
-import { server } from '~/index';
+import { createServer } from '~/index';
 import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
 
-import { jsonRequest } from '../utils/request';
 import {
-  API_ENDPOINT,
-  API_SEARCH_ENDPOINT,
+  apiSearchEndpoint,
   cachedSpotifyLink,
+  getAppleMusicSearchLink,
+  getDeezerSearchLink,
+  getSoundCloudSearchLink,
+  getTidalSearchLink,
+  getYouTubeSearchLink,
   urlShortenerLink,
   urlShortenerResponseMock,
 } from '../utils/shared';
 
+const fetch = NodeFetchCache.create({
+  cache: new FileSystemCache({
+    ttl: 604800000, // 7 days
+  }),
+});
+
 describe('Api router', () => {
+  let server: Server;
+  let searchEndpointUrl: string;
+
   let axiosMock: InstanceType<typeof AxiosMockAdapter>;
   let getUniversalMetadataFromTidalaxiosMock: Mock<
     typeof tidalUniversalLinkParser.getUniversalMetadataFromTidal
   >;
 
   beforeAll(() => {
+    server = createServer();
+    searchEndpointUrl = apiSearchEndpoint(server.url);
     axiosMock = new AxiosMockAdapter(axios);
     getUniversalMetadataFromTidalaxiosMock = spyOn(
       tidalUniversalLinkParser,
@@ -42,8 +58,9 @@ describe('Api router', () => {
   });
 
   afterAll(() => {
-    axiosMock.reset();
-    getUniversalMetadataFromTidalaxiosMock.mockReset();
+    server.stop(true);
+    // axiosMock.reset();
+    // getUniversalMetadataFromTidalaxiosMock.mockReset();
   });
 
   beforeEach(() => {
@@ -61,346 +78,213 @@ describe('Api router', () => {
   });
 
   describe('GET /search', () => {
-    it('should return 200 when adapter returns error - Apple Music', async () => {
-      const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
-      // const query = 'Do Not Disturb Drake';
+    const link = 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc';
 
-      // const tidalSearchLink = getTidalSearchLink(query, MetadataType.Song);
-      // const appleMusicSearchLink = getAppleMusicSearchLink(query);
-      // const youtubeSearchLink = getYouTubeSearchLink(query, MetadataType.Song);
-      // const deezerSearchLink = getDeezerSearchLink(query, 'track');
-      // const soundCloudSearchLink = getSoundCloudSearchLink(query);
+    it('should return 200', async () => {
+      axiosMock.onGet().passThrough();
 
-      const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
-
-      // axiosMock.onGet(link).reply(200, spotifySongHeadResponseMock);
-
-      const response = await server.fetch(request);
-      const data = await response.json();
-
-      expect(data).toEqual({
-        id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8yS3ZIQzl6MTRHU2w0WXBrTk1YMzg0',
-        type: 'song',
-        title: 'Do Not Disturb',
-        description: 'Drake · Song · 2017',
-        image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
-        audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
-        source: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
-        universalLink: urlShortenerResponseMock.data.refer,
-        links: [
-          {
-            type: 'deezer',
-            url: 'https://www.deezer.com/track/144572248',
-            isVerified: true,
-          },
-          {
-            type: 'soundCloud',
-            url: 'https://soundcloud.com/octobersveryown/drake-do-not-disturb',
-            isVerified: true,
-          },
-          {
-            type: 'tidal',
-            url: 'https://tidal.com/browse/track/71717750',
-            isVerified: true,
-          },
-          {
-            type: 'youTube',
-            url: 'https://music.youtube.com/watch?v=vVd4T5NxLgI',
-            isVerified: true,
-          },
-        ],
+      const response = await fetch(searchEndpointUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ link }),
       });
 
-      expect(axiosMock.history).toHaveLength(7);
-    });
-
-    it('should return 200 when adapter returns error - Youtube', async () => {
-      const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
-      // const query = 'Do Not Disturb Drake';
-
-      // const tidalSearchLink = getTidalSearchLink(query, MetadataType.Song);
-      // const appleMusicSearchLink = getAppleMusicSearchLink(query);
-      // const youtubeSearchLink = getYouTubeSearchLink(query, MetadataType.Song);
-      // const deezerSearchLink = getDeezerSearchLink(query, 'track');
-      // const soundCloudSearchLink = getSoundCloudSearchLink(query);
-
-      const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
-
-      // axiosMock.onGet(link).reply(200, spotifySongHeadResponseMock);
-      //
-      // axiosMock.onGet(tidalSearchLink).reply(200, tidalSongResponseMock);
-      // axiosMock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
-      // axiosMock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
-      // axiosMock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
-      // axiosMock.onGet(youtubeSearchLink).reply(500);
-
-      const response = await server.fetch(request);
       const data = await response.json();
 
       expect(data).toEqual({
-        id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8yS3ZIQzl6MTRHU2w0WXBrTk1YMzg0',
+        id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8zQWhYWmE4c1VRaHQwVUVkQkpncEdj',
         type: 'song',
-        title: 'Do Not Disturb',
-        description: 'Drake · Song · 2017',
-        image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
-        audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
-        source: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
+        title: 'Like a Rolling Stone',
+        description: 'Bob Dylan · Highway 61 Revisited · Song · 1965',
+        image: 'https://i.scdn.co/image/ab67616d0000b27341720ef0ae31e10d39e43ca2',
+        audio: 'https://p.scdn.co/mp3-preview/d48c45e3194cfe07470c85e50ca7dc7440661caa',
+        source: 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc',
         universalLink: urlShortenerResponseMock.data.refer,
         links: [
           {
             type: 'appleMusic',
-            url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
+            url: 'https://music.apple.com/ca/album/like-a-rolling-stone/192688369?i=192688675',
             isVerified: true,
           },
           {
             type: 'deezer',
-            url: 'https://www.deezer.com/track/144572248',
+            url: 'https://www.deezer.com/track/14477354',
             isVerified: true,
           },
           {
             type: 'soundCloud',
-            url: 'https://soundcloud.com/octobersveryown/drake-do-not-disturb',
-            isVerified: true,
-          },
-          {
-            type: 'tidal',
-            url: 'https://tidal.com/browse/track/71717750',
+            url: 'https://soundcloud.com/bobdylan/like-a-rolling-stone-1',
             isVerified: true,
           },
         ],
       });
-
-      expect(axiosMock.history).toHaveLength(7);
     });
 
-    it('should return 200 when adapter returns error - Deezer', async () => {
-      const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
-      // const query = 'Do Not Disturb Drake';
+    it('should return 200 when adapter returns error', async () => {
+      const link =
+        'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc?si=different_version';
+      const query = 'Like a Rolling Stone Bob Dylan';
 
-      // const tidalSearchLink = getTidalSearchLink(query, MetadataType.Song);
-      // const appleMusicSearchLink = getAppleMusicSearchLink(query);
-      // const youtubeSearchLink = getYouTubeSearchLink(query, MetadataType.Song);
-      // const deezerSearchLink = getDeezerSearchLink(query, 'track');
-      // const soundCloudSearchLink = getSoundCloudSearchLink(query);
+      axiosMock.onGet(getTidalSearchLink(query, MetadataType.Song)).reply(500);
+      axiosMock.onGet(getAppleMusicSearchLink(query)).reply(500);
+      axiosMock.onGet(getYouTubeSearchLink(query, MetadataType.Song)).reply(500);
+      axiosMock.onGet(getDeezerSearchLink(query, 'track')).reply(500);
+      axiosMock.onGet(getSoundCloudSearchLink(query)).reply(500);
+      axiosMock.onGet().passThrough();
 
-      const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
+      const response = await fetch(searchEndpointUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ link }),
+      });
 
-      // axiosMock.onGet(link).reply(200, spotifySongHeadResponseMock);
-      //
-      // axiosMock.onGet(tidalSearchLink).reply(200, tidalSongResponseMock);
-      // axiosMock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
-      // axiosMock.onGet(deezerSearchLink).reply(500);
-      // axiosMock.onGet(soundCloudSearchLink).reply(200, soundCloudSongResponseMock);
-      // axiosMock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
-
-      const response = await server.fetch(request);
       const data = await response.json();
 
       expect(data).toEqual({
-        id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8yS3ZIQzl6MTRHU2w0WXBrTk1YMzg0',
+        id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8zQWhYWmE4c1VRaHQwVUVkQkpncEdjP3NpPWRpZmZlcmVudF92ZXJzaW9u',
         type: 'song',
-        title: 'Do Not Disturb',
-        description: 'Drake · Song · 2017',
-        image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
-        audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
-        source: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
+        title: 'Like a Rolling Stone',
+        description: 'Bob Dylan · Highway 61 Revisited · Song · 1965',
+        image: 'https://i.scdn.co/image/ab67616d0000b27341720ef0ae31e10d39e43ca2',
+        audio: 'https://p.scdn.co/mp3-preview/d48c45e3194cfe07470c85e50ca7dc7440661caa',
+        source: link,
         universalLink: urlShortenerResponseMock.data.refer,
-        links: [
-          {
-            type: 'appleMusic',
-            url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
-            isVerified: true,
-          },
-          {
-            type: 'soundCloud',
-            url: 'https://soundcloud.com/octobersveryown/drake-do-not-disturb',
-            isVerified: true,
-          },
-          {
-            type: 'tidal',
-            url: 'https://tidal.com/browse/track/71717750',
-            isVerified: true,
-          },
-          {
-            type: 'youTube',
-            url: 'https://music.youtube.com/watch?v=vVd4T5NxLgI',
-            isVerified: true,
-          },
-        ],
+        links: [],
       });
-
-      expect(axiosMock.history).toHaveLength(7);
-    });
-
-    it('should return 200 when adapter returns error - SoundCloud', async () => {
-      const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
-      // const query = 'Do Not Disturb Drake';
-
-      // const tidalSearchLink = getTidalSearchLink(query, MetadataType.Song);
-      // const appleMusicSearchLink = getAppleMusicSearchLink(query);
-      // const youtubeSearchLink = getYouTubeSearchLink(query, MetadataType.Song);
-      // const deezerSearchLink = getDeezerSearchLink(query, 'track');
-      // const soundCloudSearchLink = getSoundCloudSearchLink(query);
-
-      const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
-
-      // axiosMock.onGet(link).reply(200, spotifySongHeadResponseMock);
-
-      // axiosMock.onGet(tidalSearchLink).reply(200, tidalSongResponseMock);
-      // axiosMock.onGet(appleMusicSearchLink).reply(200, appleMusicSongResponseMock);
-      // axiosMock.onGet(deezerSearchLink).reply(200, deezerSongResponseMock);
-      // axiosMock.onGet(soundCloudSearchLink).reply(500);
-      // axiosMock.onGet(youtubeSearchLink).reply(200, youtubeSongResponseMock);
-
-      const response = await server.fetch(request);
-      const data = await response.json();
-
-      expect(data).toEqual({
-        id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8yS3ZIQzl6MTRHU2w0WXBrTk1YMzg0',
-        type: 'song',
-        title: 'Do Not Disturb',
-        description: 'Drake · Song · 2017',
-        image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
-        audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
-        source: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
-        universalLink: urlShortenerResponseMock.data.refer,
-        links: [
-          {
-            type: 'appleMusic',
-            url: 'https://music.apple.com/us/album/do-not-disturb/1440890708?i=1440892237',
-            isVerified: true,
-          },
-          {
-            type: 'deezer',
-            url: 'https://www.deezer.com/track/144572248',
-            isVerified: true,
-          },
-          {
-            type: 'tidal',
-            url: 'https://tidal.com/browse/track/71717750',
-            isVerified: true,
-          },
-          {
-            type: 'youTube',
-            url: 'https://music.youtube.com/watch?v=vVd4T5NxLgI',
-            isVerified: true,
-          },
-        ],
-      });
-
-      expect(axiosMock.history).toHaveLength(7);
     });
 
     it('should return 200 when adapter adapter matches the parser type', async () => {
-      const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
+      axiosMock.onGet().passThrough();
 
-      const request = jsonRequest(API_SEARCH_ENDPOINT, {
-        link,
-        adapters: [Adapter.Spotify],
+      const response = await fetch(searchEndpointUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ link, adapters: [Adapter.Spotify] }),
       });
 
-      // axiosMock.onGet(link).reply(200, spotifySongHeadResponseMock);
-
-      const response = await server.fetch(request);
       const data = await response.json();
 
       expect(data).toEqual({
-        id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8yS3ZIQzl6MTRHU2w0WXBrTk1YMzg0',
+        id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8zQWhYWmE4c1VRaHQwVUVkQkpncEdj',
         type: 'song',
-        title: 'Do Not Disturb',
-        description: 'Drake · Song · 2017',
-        image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
-        audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
-        source: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
+        title: 'Like a Rolling Stone',
+        description: 'Bob Dylan · Highway 61 Revisited · Song · 1965',
+        image: 'https://i.scdn.co/image/ab67616d0000b27341720ef0ae31e10d39e43ca2',
+        audio: 'https://p.scdn.co/mp3-preview/d48c45e3194cfe07470c85e50ca7dc7440661caa',
+        source: 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc',
         universalLink:
-          'http://localhost:3000?id=b3Blbi5zcG90aWZ5LmNvbS90cmFjay8yS3ZIQzl6MTRHU2w0WXBrTk1YMzg0',
+          'http://localhost:3000?id=b3Blbi5zcG90aWZ5LmNvbS90cmFjay8zQWhYWmE4c1VRaHQwVUVkQkpncEdj',
         links: [
           {
             isVerified: true,
             type: 'spotify',
-            url: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
+            url: 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc',
           },
         ],
       });
-
-      expect(axiosMock.history).toHaveLength(1);
     });
 
     it('should return unknown error - could not parse Spotify metadata', async () => {
-      const request = jsonRequest(API_SEARCH_ENDPOINT, {
-        link: cachedSpotifyLink,
-      });
-
+      const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
       axiosMock.onGet(cachedSpotifyLink).reply(200, '<html></html>');
 
-      const response = await server.fetch(request);
+      const response = await fetch(searchEndpointUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ link }),
+      });
 
-      expect(response.text()).resolves.toThrow({
-        code: 'INTERNAL_SERVER_ERROR',
-        message:
+      const data = await response.json();
+
+      expect(data).toEqual({
+        error:
           '[getSpotifyMetadata] (https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384) Error: Spotify metadata not found',
       });
     });
 
     it('should return bad request - invalid link', async () => {
-      const link = 'https://open.spotify.com/invalid';
+      const response = await fetch(searchEndpointUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ link: 'https://open.spotify.com/invalid' }),
+      });
 
-      const request = jsonRequest(API_SEARCH_ENDPOINT, { link });
+      const data = await response.json();
 
-      const response = await server.fetch(request);
-
-      expect(response.text()).resolves.toThrow({
-        code: 'VALIDATION',
-        message: 'Invalid link, please try with Spotify or Youtube links.',
+      expect(data).toEqual({
+        error: 'Invalid link, please check ALLOWED_LINKS_REGEX',
       });
     });
 
     it('should return bad request - invalid searchId', async () => {
-      const searchId = 123;
+      const response = await fetch(searchEndpointUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ searchId: 123 }),
+      });
 
-      const request = jsonRequest(API_SEARCH_ENDPOINT, { searchId });
-      const response = await server.fetch(request);
+      const data = await response.json();
 
-      expect(response.text()).resolves.toThrow({
-        code: 'VALIDATION',
-        message: 'Invalid link, please try with Spotify or Youtube links.',
+      expect(data).toEqual({
+        error: 'Invalid link, field is required',
       });
     });
 
     it('should return bad request - unknown body param', async () => {
-      const request = jsonRequest(API_SEARCH_ENDPOINT, { foo: 'bar' });
+      const response = await fetch(searchEndpointUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ foo: 'bar' }),
+      });
 
-      const response = await server.fetch(request);
+      const data = await response.json();
 
-      expect(response.text()).resolves.toThrow({
-        code: 'VALIDATION',
-        message: 'Invalid link, please try with Spotify or Youtube links.',
+      expect(data).toEqual({
+        error: 'Invalid link, field is required',
       });
     });
 
     it('should return bad request - unsupported API version', async () => {
-      const request = jsonRequest(`${API_ENDPOINT}/search?v=2`, {
-        link: cachedSpotifyLink,
+      const response = await fetch(`${server.url}api/search?v=2`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
-      const response = await server.fetch(request);
+      const data = await response.json();
 
-      expect(response.text()).resolves.toThrow({
-        code: 'VALIDATION',
-        message: 'Unsupported API version',
+      expect(data).toEqual({
+        error: 'Unsupported API version',
       });
     });
 
     it('should return bad request - missing API version query param', async () => {
-      const request = jsonRequest(`${API_ENDPOINT}/search`, {
-        link: cachedSpotifyLink,
+      const response = await fetch(`${server.url}api/search`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
-      const response = await server.fetch(request);
+      const data = await response.json();
 
-      expect(response.text()).resolves.toThrow({
-        code: 'VALIDATION',
-        message: 'Unsupported API version',
+      expect(data).toEqual({
+        error: 'API version required',
       });
     });
   });

@@ -3,8 +3,7 @@ import { YOUTUBE_SEARCH_TYPES } from '~/adapters/youtube';
 import { MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
 
-export const API_ENDPOINT = 'http://localhost/api';
-export const API_SEARCH_ENDPOINT = `${API_ENDPOINT}/search?v=1`;
+export const apiSearchEndpoint = (baseUrl: URL) => `${baseUrl}api/search?v=1`;
 
 export const urlShortenerLink = ENV.services.urlShortener.apiUrl;
 export const urlShortenerResponseMock = {
