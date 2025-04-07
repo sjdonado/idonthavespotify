@@ -12,6 +12,7 @@
   "dependencies": {
     "@hotwired/stimulus": "^3.2.2",
     "axios": "^1.7.9",
+    "axios-cache-interceptor": "^1.7.0",
     "axios-retry": "^4.5.0",
     "cache-manager": "^5.7.3",
     "cache-manager-bun-sqlite3": "^0.2.0",

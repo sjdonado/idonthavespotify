@@ -2,7 +2,7 @@ import NodeFetchCache, { FileSystemCache } from 'node-fetch-cache';
 
 export const nodeFetch = NodeFetchCache.create({
   cache: new FileSystemCache({
-    ttl: 604800000, // 7 days
+    ttl: 15 * 60 * 1000, // 15 mins
   }),
 });
 
