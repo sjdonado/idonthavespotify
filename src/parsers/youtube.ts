@@ -35,7 +35,9 @@ const METADATA_TO_YOUTUBE_ENDPOINT = {
   [MetadataType.Show]: 'playlists',
 };
 
-export const getYouTubeMetadata = async (id: string, link: string) => {
+export const getYouTubeMetadata = async (id: string, source: string) => {
+  let link = `${source}?v=${id}`;
+
   if (link.includes('youtu.be/')) {
     link = await resolveShortYouTubeLink(link);
   }
