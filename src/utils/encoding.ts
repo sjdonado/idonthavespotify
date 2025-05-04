@@ -19,6 +19,16 @@ export const generateId = (source: string) => {
 };
 
 export const getSourceFromId = (id: string) => {
+  id = id.replace(/%(?:3D|2[BF])/g, char => {
+    switch (char) {
+      case '%2B':
+        return '-'
+      case '%2F':
+        return '_'
+      default:
+        return ''
+    }
+  });
   const decoded = Buffer.from(id, 'base64url').toString('utf8');
 
   return `https://${decoded}`;
