@@ -9,7 +9,7 @@ import {
   getCachedSearchResultLink,
   getCachedTidalAccessToken,
 } from '~/services/cache';
-import { type SearchMetadata, type SearchResultLink } from '~/services/search';
+import type { SearchMetadata, SearchResultLink } from '~/services/search';
 import { getOrUpdateAccessToken } from '~/utils/access-token';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';

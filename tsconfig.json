@@ -9,7 +9,6 @@
     "module": "ESNext",
     "moduleDetection": "force",
     "jsx": "react",
-    "jsxImportSource": "nano-jsx/esm",
     "jsxFactory": "Nano.h",
     "jsxFragmentFactory": "Nano.Fragment",
     "allowJs": true,

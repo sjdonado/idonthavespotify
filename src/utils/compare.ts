@@ -1,4 +1,5 @@
-import type { AnyNode, Cheerio, CheerioAPI } from 'cheerio';
+import type { Cheerio, CheerioAPI } from 'cheerio';
+import type { Node as CheerioNode } from 'domhandler';
 import { compareTwoStrings } from 'string-similarity';
 
 import { RESPONSE_COMPARE_MIN_SCORE } from '~/config/constants';
@@ -12,7 +13,7 @@ export function responseMatchesQuery(response: string, query: string) {
 
 export function getResultWithBestScore(
   doc: CheerioAPI,
-  listElements: Cheerio<AnyNode>,
+  listElements: Cheerio<CheerioNode>,
   query: string
 ) {
   const parsedQuery = query.toLowerCase().trim();

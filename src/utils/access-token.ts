@@ -1,4 +1,4 @@
-import { AccessToken } from '~/services/cache';
+import type { AccessToken } from '~/services/cache';
 
 export async function getOrUpdateAccessToken(
   getCachedAccessToken: () => Promise<AccessToken | undefined>,
