@@ -15,11 +15,21 @@ export const generateId = (source: string) => {
     idString += `?${firstParam[0]}=${firstParam[1]}`;
   }
 
-  return encodeURIComponent(Buffer.from(idString).toString('base64'));
+  return Buffer.from(idString).toString('base64url');
 };
 
 export const getSourceFromId = (id: string) => {
-  const decoded = Buffer.from(decodeURIComponent(id), 'base64').toString('utf8');
+  id = id.replace(/%(?:3D|2[BF])/g, char => {
+    switch (char) {
+      case '%2B':
+        return '-'
+      case '%2F':
+        return '_'
+      default:
+        return ''
+    }
+  });
+  const decoded = Buffer.from(id, 'base64url').toString('utf8');
 
   return `https://${decoded}`;
 };
