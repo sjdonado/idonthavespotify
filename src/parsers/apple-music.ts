@@ -31,23 +31,43 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
 
     const doc = getCheerioDoc(html);
 
-    const title = metaTagContent(doc, 'og:title', 'property');
+    const songUrl = metaTagContent(doc, 'music:song', 'property');
     const description = metaTagContent(doc, 'og:description', 'property');
     const image = metaTagContent(doc, 'og:image', 'property');
     const type = metaTagContent(doc, 'og:type', 'property');
 
-    if (!title || !type || !image) {
+    if (!songUrl || !type || !image) {
       throw new Error('AppleMusic metadata not found');
     }
 
-    const parsedTitle = title?.replace(/on\sApple\sMusic/i, '').trim();
+    let title = '';
+    if (songUrl) {
+      const songMatch = songUrl.match(/\/song\/([^\/]+)/);
+      if (songMatch && songMatch[1]) {
+        const songName = formatName(songMatch[1]);
+
+        const artists: string[] = [];
+        doc('meta[property="music:musician"]').each((_, element) => {
+          const artistUrl = doc(element).attr('content');
+          if (artistUrl) {
+            const artistMatch = artistUrl.match(/\/artist\/([^\/]+)/);
+            if (artistMatch && artistMatch[1]) {
+              artists.push(formatName(artistMatch[1]));
+            }
+          }
+        });
+
+        title = [songName, ...artists].join(' ');
+      }
+    }
+
     const parsedDescription = description
       ?.replace(/(Listen to\s|on\sApple\sMusic)/gi, '')
       .trim();
 
     const metadata = {
       id,
-      title: parsedTitle,
+      title,
       description: parsedDescription,
       type: APPLE_MUSIC_METADATA_TO_METADATA_TYPE[type as AppleMusicMetadataType],
       image,
@@ -64,13 +84,16 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
 export const getAppleMusicQueryFromMetadata = (metadata: SearchMetadata) => {
   let query = metadata.title;
 
-  if (metadata.type === MetadataType.Album) {
-    query = metadata.description;
-  }
-
   if (metadata.type === MetadataType.Playlist) {
     query = `${query} playlist`;
   }
 
   return query;
 };
+
+function formatName(name: string): string {
+  return name
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
