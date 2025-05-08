@@ -2,7 +2,7 @@ import { RESPONSE_COMPARE_MIN_SCORE } from '~/config/constants';
 import { Adapter, MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
-import { SearchMetadata, SearchResultLink } from '~/services/search';
+import type { SearchMetadata, SearchResultLink } from '~/services/search';
 import { getResultWithBestScore } from '~/utils/compare';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';

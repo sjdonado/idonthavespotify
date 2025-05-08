@@ -4,7 +4,7 @@ import {
   getCachedTidalUniversalLinkResponse,
 } from '~/services/cache';
 import { fetchMetadata } from '~/services/metadata';
-import { SearchResultLink } from '~/services/search';
+import type { SearchResultLink } from '~/services/search';
 import { logger } from '~/utils/logger';
 import { getCheerioDoc } from '~/utils/scraper';
 

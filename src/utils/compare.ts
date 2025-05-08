@@ -1,4 +1,5 @@
-import type { AnyNode, Cheerio, CheerioAPI } from 'cheerio';
+import type { Cheerio, CheerioAPI } from 'cheerio';
+import type { AnyNode } from 'domhandler';
 import { compareTwoStrings } from 'string-similarity';
 
 import { RESPONSE_COMPARE_MIN_SCORE } from '~/config/constants';

@@ -1,8 +1,11 @@
-name: Deploy to sjdonado.com
-
+name: Deploy
 on:
   push:
     branches: [master]
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
 
 jobs:
   deploy:
