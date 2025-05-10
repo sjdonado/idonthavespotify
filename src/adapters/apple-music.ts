@@ -8,8 +8,6 @@ import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { getCheerioDoc } from '~/utils/scraper';
 
-export const APPLE_MUSIC_LINK_SELECTOR = 'a[href^="https://music.apple.com/"]';
-
 const APPLE_MUSIC_SEARCH_TYPES = {
   [MetadataType.Song]: 'Songs',
   [MetadataType.Album]: 'Albums',
@@ -44,9 +42,16 @@ export async function getAppleMusicLink(query: string, metadata: SearchMetadata)
 
     const { href, score } = getResultWithBestScore(doc, listElements, query);
 
+    // Convert music.apple.com links to geo.music.apple.com links for better results
+    const geoUrl = href.replace('music.apple.com', 'geo.music.apple.com');
+
+    if (href !== geoUrl) {
+      logger.info(`[Apple Music] transformed to geo link: ${geoUrl}`);
+    }
+
     const searchResultLink = {
       type: Adapter.AppleMusic,
-      url: href,
+      url: geoUrl,
       isVerified: score > RESPONSE_COMPARE_MIN_SCORE,
     } as SearchResultLink;
 

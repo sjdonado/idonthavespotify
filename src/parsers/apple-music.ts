@@ -26,8 +26,17 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
     return cached;
   }
 
+  let actualLink = link;
+  let html = '';
   try {
-    const html = await fetchMetadata(link);
+    if (link.includes('music.apple.com')) {
+      actualLink = link.replace('music.apple.com', 'geo.music.apple.com');
+      logger.info(
+        `[${getAppleMusicMetadata.name}] transformed to geo link: ${actualLink}`
+      );
+    }
+
+    html = await fetchMetadata(actualLink);
 
     const doc = getCheerioDoc(html);
 
@@ -77,7 +86,7 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
 
     return metadata;
   } catch (err) {
-    throw new Error(`[${getAppleMusicMetadata.name}] (${link}) ${err}`);
+    throw new Error(`[${getAppleMusicMetadata.name}] (${actualLink || link}) ${err}`);
   }
 };
 
