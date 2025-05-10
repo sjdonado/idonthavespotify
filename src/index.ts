@@ -137,7 +137,7 @@ export const createApp = (port: string = '0') =>
 
             const html = renderSSR(h(ErrorMessage, { message }));
 
-            logger.error(`[route /search]: ${err}`);
+            logger.error(`[route /search]: ${message}`);
             return new Response(html, {
               headers: { 'Content-Type': 'text/html' },
               status: statusCode,
