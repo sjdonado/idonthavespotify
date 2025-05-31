@@ -73,7 +73,7 @@ const MainLayout = ({
         {isProduction && (
           <script
             defer
-            src="https://umami.sjdonado.com/script.js"
+            src="https://umami.donado.co/script.js"
             data-website-id="da89a7a2-dd17-4c7f-b7ff-de28a7046a0e"
           ></script>
         )}
