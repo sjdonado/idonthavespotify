@@ -78,12 +78,11 @@ export const getSearchParser = (link?: string, searchId?: string) => {
     throw new Error('Service id could not be extracted from source.');
   }
 
-  const parsedSource = new URL(source);
-
   const searchParser = {
     id,
     type,
-    source: [parsedSource.origin, parsedSource.pathname].join(''),
+    // For Apple Music, preserve query parameters (especially the 'i' parameter for songs)
+    source,
   } as SearchParser;
 
   return searchParser;

@@ -26,16 +26,10 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
     return cached;
   }
 
-  let actualLink = link;
+  const actualLink = link.replace('geo.music.apple.com', 'music.apple.com');
   let html = '';
-  try {
-    if (link.includes('music.apple.com')) {
-      actualLink = link.replace('music.apple.com', 'geo.music.apple.com');
-      logger.info(
-        `[${getAppleMusicMetadata.name}] transformed to geo link: ${actualLink}`
-      );
-    }
 
+  try {
     html = await fetchMetadata(actualLink);
 
     const doc = getCheerioDoc(html);
@@ -43,9 +37,8 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
     const songUrl = metaTagContent(doc, 'music:song', 'property');
     const description = metaTagContent(doc, 'og:description', 'property');
     const image = metaTagContent(doc, 'og:image', 'property');
-    const type = metaTagContent(doc, 'og:type', 'property');
 
-    if (!songUrl || !type || !image) {
+    if (!songUrl || !image) {
       throw new Error('AppleMusic metadata not found');
     }
 
@@ -70,6 +63,17 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
       }
     }
 
+    let type = AppleMusicMetadataType.Album;
+    if (actualLink.includes('i=')) {
+      type = AppleMusicMetadataType.Song;
+    }
+    if (actualLink.includes('playlist')) {
+      type = AppleMusicMetadataType.Playlist;
+    }
+    if (actualLink.includes('artist')) {
+      type = AppleMusicMetadataType.Artist;
+    }
+
     const parsedDescription = description
       ?.replace(/(Listen to\s|on\sApple\sMusic)/gi, '')
       .trim();
@@ -78,7 +82,7 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
       id,
       title,
       description: parsedDescription,
-      type: APPLE_MUSIC_METADATA_TO_METADATA_TYPE[type as AppleMusicMetadataType],
+      type: APPLE_MUSIC_METADATA_TO_METADATA_TYPE[type],
       image,
     } as SearchMetadata;
 
