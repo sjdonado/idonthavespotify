@@ -83,7 +83,7 @@ export const getYouTubeMetadata = async (id: string, source: string) => {
     const image = thumbnails?.url;
 
     const metadata: SearchMetadata = {
-      title,
+      title: title.replace(/[^a-zA-Z ]/g, ' ').replace('  ', ' '),
       description,
       type: searchType,
       image,
@@ -122,10 +122,10 @@ export const getYouTubeQueryFromMetadata = (metadata: SearchMetadata) => {
 function parseYouTubeLink(link: string) {
   const url = new URL(link);
 
-  if (url.searchParams.has('list') || url.searchParams.has('playlist')) {
+  if (url.pathname.includes('list')) {
     return {
-      searchType: MetadataType.Playlist,
-      resourceId: url.searchParams.get('list')!,
+      searchType: MetadataType.Album,
+      resourceId: (url.searchParams.get('list') || url.searchParams.get('v'))!,
     };
   }
 
