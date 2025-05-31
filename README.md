@@ -17,15 +17,11 @@ Adapters represent the streaming services supported by the Web App and the Rayca
 
 ## Web App
 
-![Uptime Badge](https://uptime.sjdonado.com/api/badge/2/uptime/24?labelPrefix=Web%20Page%20&labelSuffix=h) ![Uptime Badge](https://uptime.sjdonado.com/api/badge/2/ping/24?labelPrefix=Web%20Page%20)
-
 <div align="center">
   <img width="1200" alt="image" src="https://github.com/user-attachments/assets/ae6250f5-d1ed-41f2-ae21-8a2b2599a450" />
 </div>
 
 ## Raycast Extension
-
-![Uptime Badge](https://uptime.sjdonado.com/api/badge/3/uptime/24?labelPrefix=API%20&labelSuffix=h) ![Uptime Badge](https://uptime.sjdonado.com/api/badge/3/ping/24?labelPrefix=API%20)
 
 <a title="Install idonthavespotify Raycast Extension" href="https://www.raycast.com/sjdonado/idonthavespotify"><img src="https://www.raycast.com/sjdonado/idonthavespotify/install_button@2x.png?v=1.1" height="64" style="height: 64px;" alt=""></a>
 

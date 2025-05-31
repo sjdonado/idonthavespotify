@@ -122,7 +122,7 @@ export const getYouTubeQueryFromMetadata = (metadata: SearchMetadata) => {
 function parseYouTubeLink(link: string) {
   const url = new URL(link);
 
-  if (url.searchParams.has('list')) {
+  if (url.searchParams.has('list') || url.searchParams.has('playlist')) {
     return {
       searchType: MetadataType.Playlist,
       resourceId: url.searchParams.get('list')!,
