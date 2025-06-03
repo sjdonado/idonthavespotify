@@ -1,7 +1,5 @@
 import { Controller } from '@hotwired/stimulus';
 
-import { SPOTIFY_LINK_REGEX, YOUTUBE_LINK_REGEX } from '~/config/constants';
-
 import { toast } from './helpers';
 
 export default class extends Controller {
@@ -27,34 +25,5 @@ export default class extends Controller {
     document.addEventListener('htmx:error', function () {
       toast().error('Something went wrong, please try again later.');
     });
-  }
-
-  /**
-   * Submits the form using a link obtained from the clipboard if it matches
-   * specific patterns and no search ID is present in the URL.
-   *
-   * @returns {Promise<void>}
-   */
-  async submitFromClipboard() {
-    if ('clipboard' in navigator) {
-      const searchParams = new URLSearchParams(window.location.search);
-
-      try {
-        const clipboardText = await navigator.clipboard.readText();
-        if (
-          clipboardText.match(
-            new RegExp(`${SPOTIFY_LINK_REGEX.source}|${YOUTUBE_LINK_REGEX.source}`)
-          ) &&
-          !searchParams.get('id')
-        ) {
-          this.linkTarget.value = link;
-          this.formTarget.submit();
-        }
-      } catch (error) {
-        toast().error('Clipboard access error');
-      }
-    } else {
-      toast().error('Feature not supported in your browser');
-    }
   }
 }

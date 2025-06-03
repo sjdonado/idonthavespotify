@@ -1,8 +1,4 @@
-import '../css/index.css';
+// Import the Bun-compatible Stimulus loader
+import { application } from './loader.js';
 
-import { Application } from '@hotwired/stimulus';
-import { registerControllers } from 'stimulus-vite-helpers';
-
-const application = Application.start();
-const controllers = import.meta.glob('./**/*_controller.js', { eager: true });
-registerControllers(application, controllers);
+// Application is already started and controllers are registered in loader.js

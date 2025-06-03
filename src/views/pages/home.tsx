@@ -54,14 +54,6 @@ export default function Home({
               <span class="sr-only">Search</span>
             </button>
           </form>
-          {/* <button */}
-          {/*   data-action="search#submitFromClipboard" */}
-          {/*   type="button" */}
-          {/*   class="flex items-center justify-center gap-2 rounded-lg bg-zinc-700 px-3 py-1 text-sm font-semibold sm:hidden" */}
-          {/* > */}
-          {/*   <i class="ti ti-search" /> */}
-          {/*   Search from Clipboard */}
-          {/* </button> */}
           <div id="search-results">{children}</div>
         </div>
       </main>
