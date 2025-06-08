@@ -95,6 +95,8 @@ export const createApp = (port: string = '0') =>
             );
 
             logger.error(`[route /]: ${err}`);
+            logger.error(err);
+
             return new Response(html, {
               headers: { 'Content-Type': 'text/html' },
               status: 500,
@@ -138,6 +140,8 @@ export const createApp = (port: string = '0') =>
             const html = renderSSR(h(ErrorMessage, { message }));
 
             logger.error(`[route /search]: ${message}`);
+            logger.error(err);
+
             return new Response(html, {
               headers: { 'Content-Type': 'text/html' },
               status: statusCode,
@@ -180,6 +184,8 @@ export const createApp = (port: string = '0') =>
 
             const { message } = err as Error;
             logger.error(`[route /api/search]: ${err}`);
+            logger.error(err);
+
             return Response.json({ error: message }, { status: 500 });
           }
         },
