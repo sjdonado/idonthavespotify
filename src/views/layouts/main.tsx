@@ -75,6 +75,7 @@ const MainLayout = ({
             defer
             src="https://umami.donado.co/script.js"
             data-website-id="da89a7a2-dd17-4c7f-b7ff-de28a7046a0e"
+            data-auto-track="false"
           ></script>
         )}
         <script src="assets/index.js" />

@@ -5,6 +5,13 @@ import { toast } from './helpers';
 export default class extends Controller {
   static targets = ['form', 'link'];
 
+  connect() {
+    if (window.umami && !window.umamiTracked) {
+      window.umami.track();
+      window.umamiTracked = true;
+    }
+  }
+
   initialize() {
     document.addEventListener('htmx:afterSwap', () => {
       const searchParams = new URLSearchParams(window.location.search);
