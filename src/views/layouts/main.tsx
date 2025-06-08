@@ -20,7 +20,7 @@ const MainLayout = ({
       <Helmet>
         <html lang="en" />
         <meta charset="utf-8" />
-        <title>I don't have spotify</title>
+        <title>I Don't Have Spotify</title>
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
