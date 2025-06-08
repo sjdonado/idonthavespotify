@@ -245,4 +245,3 @@ if (import.meta.main) {
 }
 
 export { buildAssets, buildCSS, buildJS };
-
