@@ -1,6 +1,3 @@
-import { caching } from 'cache-manager';
-import bunSqliteStore from 'cache-manager-bun-sqlite3';
-
 import type { Adapter, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 
@@ -11,72 +8,157 @@ export type AccessToken = {
   expiresAt: number;
 };
 
-export const cacheStore = await caching(bunSqliteStore, {
-  name: 'cache',
-  path: ENV.cache.databasePath,
-  ttl: ENV.cache.expTime,
-});
+interface CacheEntry<T> {
+  value: T;
+  expiresAt: number;
+}
 
+class InMemoryCache {
+  private cache = new Map<string, CacheEntry<unknown>>();
+  private defaultTTL: number;
+
+  constructor(defaultTTL: number) {
+    this.defaultTTL = defaultTTL;
+
+    // Clean up expired entries every 5 minutes
+    setInterval(() => this.cleanup(), 5 * 60 * 1000);
+  }
+
+  private cleanup(): void {
+    const now = Date.now();
+    for (const [key, entry] of this.cache.entries()) {
+      if (entry.expiresAt <= now) {
+        this.cache.delete(key);
+      }
+    }
+  }
+
+  set<T>(key: string, value: T, ttl?: number): void {
+    const expiresAt = Date.now() + (ttl || this.defaultTTL) * 1000;
+    this.cache.set(key, { value, expiresAt });
+  }
+
+  get<T>(key: string): T | undefined {
+    const entry = this.cache.get(key) as CacheEntry<T> | undefined;
+    if (!entry) {
+      return undefined;
+    }
+
+    if (entry.expiresAt <= Date.now()) {
+      this.cache.delete(key);
+      return undefined;
+    }
+
+    return entry.value;
+  }
+
+  del(key: string): void {
+    this.cache.delete(key);
+  }
+
+  reset(): void {
+    this.cache.clear();
+  }
+
+  size(): number {
+    return this.cache.size;
+  }
+}
+
+const cache = new InMemoryCache(ENV.cache.expTime);
+export const cacheStore = {
+  async get<T>(key: string): Promise<T | undefined> {
+    return cache.get<T>(key);
+  },
+
+  async set<T>(key: string, value: T, ttl?: number): Promise<void> {
+    cache.set(key, value, ttl);
+  },
+
+  async del(key: string): Promise<void> {
+    cache.del(key);
+  },
+
+  reset(): void {
+    cache.reset();
+  },
+};
+
+// Search result link caching
 export const cacheSearchResultLink = async (
   url: URL,
   searchResultLink: SearchResultLink
-) => {
-  await cacheStore.set(`search:${url.toString()}`, searchResultLink);
+): Promise<void> => {
+  cache.set(`search:${url.toString()}`, searchResultLink);
 };
 
-export const getCachedSearchResultLink = async (url: URL) => {
-  const data = (await cacheStore.get(`search:${url.toString()}`)) as SearchResultLink;
-
-  return data;
+export const getCachedSearchResultLink = async (
+  url: URL
+): Promise<SearchResultLink | null> => {
+  const data = cache.get<SearchResultLink>(`search:${url.toString()}`);
+  return data || null;
 };
 
+// Search metadata caching
 export const cacheSearchMetadata = async (
   id: string,
   parser: Parser,
   searchMetadata: SearchMetadata
-) => {
-  await cacheStore.set(`metadata:${parser}:${id}`, searchMetadata);
+): Promise<void> => {
+  cache.set(`metadata:${parser}:${id}`, searchMetadata);
 };
 
-export const getCachedSearchMetadata = async (id: string, parser: Parser) => {
-  const data = (await cacheStore.get(`metadata:${parser}:${id}`)) as SearchMetadata;
-
-  return data;
+export const getCachedSearchMetadata = async (
+  id: string,
+  parser: Parser
+): Promise<SearchMetadata | null> => {
+  const data = cache.get<SearchMetadata>(`metadata:${parser}:${id}`);
+  return data || null;
 };
 
-export const cacheSpotifyAccessToken = async (token: AccessToken, expTime: number) => {
-  await cacheStore.set('spotify:accessToken', token, expTime);
+// Spotify access token caching
+export const cacheSpotifyAccessToken = async (
+  token: AccessToken,
+  expTime: number
+): Promise<void> => {
+  cache.set('spotify:accessToken', token, expTime);
 };
 
 export const getCachedSpotifyAccessToken = async (): Promise<AccessToken | undefined> => {
-  return await cacheStore.get<AccessToken>('spotify:accessToken');
+  return cache.get<AccessToken>('spotify:accessToken');
 };
 
-export const cacheTidalAccessToken = async (token: AccessToken, expTime: number) => {
-  await cacheStore.set('tidal:accessToken', token, expTime);
+// Tidal access token caching
+export const cacheTidalAccessToken = async (
+  token: AccessToken,
+  expTime: number
+): Promise<void> => {
+  cache.set('tidal:accessToken', token, expTime);
 };
 
 export const getCachedTidalAccessToken = async (): Promise<AccessToken | undefined> => {
-  return await cacheStore.get<AccessToken>('tidal:accessToken');
+  return cache.get<AccessToken>('tidal:accessToken');
 };
 
+// Tidal universal link response caching
 export const cacheTidalUniversalLinkResponse = async (
   link: string,
   response: Record<Adapter, SearchResultLink | null>
-) => {
-  await cacheStore.set(`tidal:universalLink:${link}`, response);
+): Promise<void> => {
+  cache.set(`tidal:universalLink:${link}`, response);
 };
 
 export const getCachedTidalUniversalLinkResponse = async (
   link: string
 ): Promise<Record<Adapter, SearchResultLink | null> | undefined> => {
-  return cacheStore.get(`tidal:universalLink:${link}`);
+  return cache.get(`tidal:universalLink:${link}`);
 };
 
-export const cacheShortenLink = async (link: string, refer: string) => {
-  await cacheStore.set(`url-shortener:${link}`, refer);
+// URL shortener caching
+export const cacheShortenLink = async (link: string, refer: string): Promise<void> => {
+  cache.set(`url-shortener:${link}`, refer);
 };
 
 export const getCachedShortenLink = async (link: string): Promise<string | undefined> => {
-  return cacheStore.get(`url-shortener:${link}`);
+  return cache.get(`url-shortener:${link}`);
 };

@@ -3,8 +3,6 @@ services:
     build: .
     env_file:
       - .env
-    volumes:
-      - ./sqlite:/usr/src/app/sqlite
     ports:
       - 3000:3000
     depends_on:
