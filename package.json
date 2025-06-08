@@ -2,12 +2,11 @@
   "name": "idonthavespotify",
   "version": "1.6.3",
   "scripts": {
-    "dev": "bun run dev-server.ts",
-    "dev:simple": "concurrently \"bun run watch:assets\" \"bun run watch:server\"",
+    "dev": "concurrently \"bun run watch:assets\" \"bun run watch:server\"",
     "watch:assets": "bun run build.config.ts --watch",
     "watch:server": "bun run --watch src/index.ts",
     "watch:js": "bun build ./src/views/controllers/index.js --outdir ./public/assets --watch",
-    "watch:css": "bunx tailwindcss -i ./src/views/css/index.css -o ./public/assets/index.min.css --watch --postcss",
+    "watch:css": "bunx @tailwindcss/cli -i ./src/views/css/index.css -o ./public/assets/index.min.css --watch",
     "build:dev": "bun run build.config.ts --watch",
     "build": "bun run build.config.ts --minify",
     "test": "NODE_ENV=test bun test",
@@ -36,7 +35,6 @@
     "@types/howler": "^2.2.12",
     "@types/string-similarity": "^4.0.2",
     "@typescript-eslint/eslint-plugin": "^7.7.1",
-    "autoprefixer": "^10.4.19",
     "axios-mock-adapter": "^1.22.0",
     "concurrently": "^8.2.2",
     "domhandler": "^5.0.3",
@@ -46,10 +44,11 @@
     "eslint-plugin-jsx": "^0.1.0",
     "eslint-plugin-prettier": "^5.1.3",
     "eslint-plugin-simple-import-sort": "^12.1.1",
-    "eslint-plugin-tailwindcss": "^3.15.1",
     "postcss": "^8.4.38",
     "prettier": "^3.2.5",
-    "tailwindcss": "^3.4.3",
+    "@tailwindcss/cli": "^4.0.0",
+    "@tailwindcss/postcss": "^4.0.0",
+    "tailwindcss": "^4.0.0",
     "typescript": "^5.4.5"
   }
 }

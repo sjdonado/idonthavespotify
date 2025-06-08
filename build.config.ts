@@ -20,28 +20,23 @@ async function ensureDir(dir: string) {
 async function buildCSS(options: BuildOptions = {}) {
   const inputCSS = './src/views/css/index.css';
   const outputCSS = './public/assets/index.min.css';
-  
+
   try {
-    const tailwindCmd = [
-      'bunx', 'tailwindcss',
-      '-i', inputCSS,
-      '-o', outputCSS,
-      '--postcss'
-    ];
-    
+    const tailwindCmd = ['bunx', '@tailwindcss/cli', '-i', inputCSS, '-o', outputCSS];
+
     if (options.minify || isProduction) {
       tailwindCmd.push('--minify');
     }
-    
+
     if (options.watch) {
       tailwindCmd.push('--watch');
     }
-    
+
     const proc = Bun.spawn(tailwindCmd, {
       stdout: 'pipe',
       stderr: 'pipe',
     });
-    
+
     if (!options.watch) {
       const result = await proc.exited;
       if (result === 0) {
@@ -55,7 +50,7 @@ async function buildCSS(options: BuildOptions = {}) {
       console.log('👀 Watching CSS files...');
       return proc;
     }
-    
+
     return proc;
   } catch (error) {
     console.error('❌ CSS build error:', error);
@@ -65,7 +60,7 @@ async function buildCSS(options: BuildOptions = {}) {
 
 async function buildJS(options: BuildOptions = {}) {
   await ensureDir('public/assets');
-  
+
   try {
     const result = await build({
       entrypoints: ['./src/views/controllers/index.js'],
@@ -104,21 +99,18 @@ async function buildJS(options: BuildOptions = {}) {
 
 async function buildAssets(options: BuildOptions = {}) {
   console.log('🔨 Building assets...');
-  
+
   if (options.watch) {
     console.log('👀 Starting watch mode...');
-    
+
     // Build JS once, then start CSS watch (CSS watch runs continuously)
     await buildJS(options);
     await buildCSS(options); // This starts the CSS watcher
-    
+
     console.log('✅ Watch mode started - CSS and JS will rebuild on changes');
   } else {
     // Build both in parallel for production
-    await Promise.all([
-      buildJS(options),
-      buildCSS(options)
-    ]);
+    await Promise.all([buildJS(options), buildCSS(options)]);
     console.log('📦 All assets built successfully');
   }
 }
@@ -131,7 +123,7 @@ const minifyMode = args.includes('--minify');
 if (import.meta.main) {
   await buildAssets({
     watch: watchMode,
-    minify: minifyMode
+    minify: minifyMode,
   });
 }
 

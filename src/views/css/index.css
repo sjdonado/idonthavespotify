@@ -1,8 +1,6 @@
 @import 'notyf/notyf.min.css';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 html {
   font-family: 'Poppins', sans-serif;
@@ -16,6 +14,10 @@ html {
 
 .animate-loading-bar {
   animation: loading 2s linear infinite;
+}
+
+button {
+  @apply cursor-pointer;
 }
 
 @keyframes loading {
