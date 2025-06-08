@@ -29,7 +29,7 @@ export default function RateLimitError({
   };
 
   return (
-    <div class="flex flex-col items-center justify-center min-h-[400px] p-8 text-center">
+    <div class="flex flex-col items-center justify-center min-h-[400px] p-4 text-center">
       <div class="max-w-md mx-auto flex flex-col gap-4">
         <h2 class="text-2xl mb-4">Rate Limit Exceeded</h2>
 
@@ -53,12 +53,12 @@ export default function RateLimitError({
           </div>
         )}
 
-        <div class="text-left bg-gray-50 rounded-lg p-4">
-          <h3 class="font-semibold text-gray-900 mb-2">Tips:</h3>
-          <ul class="text-sm text-gray-600 space-y-1">
-            <li>• Wait for the cooldown period to reset</li>
-            <li>• Avoid making too many requests quickly</li>
-            <li>• Refresh the page after the wait time</li>
+        <div class="text-left bg-zinc-700 text-zinc-300 rounded-lg p-4">
+          <h3 class="font-semibold mb-2">Tips:</h3>
+          <ul class="text-sm space-y-1 list-disc list-outside">
+            <li>Wait for the cooldown period to reset</li>
+            <li>Avoid making too many requests quickly</li>
+            <li>Refresh the page after the wait time</li>
           </ul>
         </div>
       </div>

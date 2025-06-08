@@ -266,9 +266,6 @@ export class RateLimiter {
     return entry.count <= this.maxRequests;
   }
 
-  /**
-   * Get current request count for an IP
-   */
   getRequestCount(ip: string): number {
     const entry = this.store.get(ip);
     if (!entry) return 0;
@@ -315,27 +312,18 @@ export class RateLimiter {
     expiredIPs.forEach(ip => this.store.delete(ip));
 
     if (expiredIPs.length > 0) {
-      console.log(`Rate limiter cleaned up ${expiredIPs.length} expired entries`);
+      logger.info(`Rate limiter cleaned up ${expiredIPs.length} expired entries`);
     }
   }
 
-  /**
-   * Get current store size (for monitoring)
-   */
   getStoreSize(): number {
     return this.store.size;
   }
 
-  /**
-   * Clear all entries
-   */
   clear(): void {
     this.store.clear();
   }
 
-  /**
-   * Destroy the rate limiter and clear cleanup interval
-   */
   destroy(): void {
     if (this.cleanupInterval) {
       clearInterval(this.cleanupInterval);
@@ -344,7 +332,6 @@ export class RateLimiter {
   }
 }
 
-// Helper function to extract IP from request
 export function getClientIP(req: Request): string {
   // Check common headers for real IP (in case of proxies/load balancers)
   const headers = req.headers;
@@ -366,6 +353,5 @@ export function getClientIP(req: Request): string {
   }
 
   // Fallback to a default IP if we can't determine it
-  // In a real deployment behind a proxy, this should be configured properly
   return '127.0.0.1';
 }
