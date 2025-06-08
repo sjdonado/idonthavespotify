@@ -1,7 +1,8 @@
 dist
 /node_modules
-*.min.js*
-*.min.css*
+
+/public/assets/*.js*
+/public/assets/*.css*
 
 .DS_Store
 Thumbs.db

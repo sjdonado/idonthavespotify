@@ -1,2 +1,15 @@
 [test]
 coverage = false
+
+[install]
+cache = false
+registry = "https://registry.npmjs.org"
+
+[build]
+target = "browser"
+format = "esm"
+minify = false
+sourcemap = "external"
+
+[serve.static]
+plugins = []

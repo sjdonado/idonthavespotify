@@ -6,8 +6,7 @@
   },
   "extends": [
     "plugin:@typescript-eslint/recommended",
-    "plugin:prettier/recommended",
-    "plugin:tailwindcss/recommended"
+    "plugin:prettier/recommended"
   ],
   "overrides": [],
   "parserOptions": {
