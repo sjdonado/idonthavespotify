@@ -42,8 +42,7 @@ export default class extends Controller {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: 'idonthavespotify',
-          text: `I Don't Have Spotify Unversal Link`,
+          title: `I Don't Have Spotify`,
           url: universalLink,
         });
         return;
