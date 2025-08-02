@@ -1,0 +1,242 @@
+# I Don't Have Spotify - API Documentation for AI Agents
+
+## Overview
+
+I Don't Have Spotify is a service that converts music streaming links between different platforms. It accepts a link from one streaming service (Spotify, Apple Music, YouTube Music, Tidal, Deezer, SoundCloud) and returns equivalent links for all other supported platforms.
+
+**Important Limitation**: Playlists are out of scope. Only individual tracks, albums, artists, and podcasts are supported.
+
+## Base URL
+
+Production: https://idonthavespotify.donado.co
+Local Development: http://localhost:3000
+
+## Authentication
+
+No authentication required. The API uses rate limiting instead.
+
+## Rate Limits
+
+- API endpoints: Limited per IP address
+- Web endpoints: Separate rate limiting for web interface
+- Check current rate limit status: GET /api/status
+
+## API Endpoints
+
+### POST /api/search
+
+Convert a streaming service link to equivalent links on other platforms.
+
+**Required Query Parameters:**
+- `v`: API version (must be "1")
+
+**Request Body:**
+```json
+{
+  "link": "https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh",
+  "adapters": ["spotify", "appleMusic", "youTube", "deezer", "soundCloud", "tidal"]
+}
+```
+
+**Request Body Parameters:**
+- `link` (required): Valid streaming service URL
+- `adapters` (optional): Array of streaming services to include in response. If omitted, returns all supported services.
+
+**Valid Adapters:**
+- `spotify`: Spotify
+- `appleMusic`: Apple Music
+- `youTube`: YouTube Music
+- `deezer`: Deezer
+- `soundCloud`: SoundCloud
+- `tidal`: Tidal
+
+**Supported URL Patterns:**
+
+**Spotify:**
+- https://open.spotify.com/track/[id]
+- https://open.spotify.com/album/[id]
+- https://open.spotify.com/artist/[id]
+- https://open.spotify.com/episode/[id]
+- https://open.spotify.com/show/[id]
+- https://spotify.link/[id]
+
+**Apple Music:**
+- https://music.apple.com/[country]/album/[name]/[id]
+- https://music.apple.com/[country]/song/[name]/[id]
+- https://music.apple.com/[country]/artist/[name]/[id]
+
+**YouTube Music:**
+- https://music.youtube.com/watch?v=[id]
+- https://youtube.com/watch?v=[id]
+- https://youtu.be/[id]
+
+**Tidal:**
+- https://tidal.com/browse/track/[id]
+- https://tidal.com/browse/album/[id]
+- https://tidal.com/browse/artist/[id]
+
+**Deezer:**
+- https://www.deezer.com/track/[id]
+- https://www.deezer.com/album/[id]
+- https://www.deezer.com/artist/[id]
+
+**SoundCloud:**
+- https://soundcloud.com/[user]/[track]
+
+**Response Format:**
+```json
+{
+  "id": "base64_encoded_id",
+  "type": "song|album|artist|podcast|show",
+  "title": "Track/Album/Artist Name",
+  "description": "Artist Name · Album Name",
+  "image": "https://image-url.com/cover.jpg",
+  "audio": "https://audio-preview-url.com/preview.mp3",
+  "source": "https://original-link.com",
+  "universalLink": "https://idonthavespotify.donado.co?id=encoded_id",
+  "links": [
+    {
+      "type": "spotify",
+      "url": "https://open.spotify.com/track/id",
+      "isVerified": true
+    },
+    {
+      "type": "appleMusic",
+      "url": "https://music.apple.com/album/name/id",
+      "isVerified": true
+    }
+  ]
+}
+```
+
+**Response Fields:**
+- `id`: Unique identifier for this search result
+- `type`: Content type (song, album, artist, podcast, show)
+- `title`: Primary title of the content
+- `description`: Additional descriptive text
+- `image`: Cover art/thumbnail URL
+- `audio`: Preview audio URL (when available, primarily from Spotify)
+- `source`: Original input URL
+- `universalLink`: Shortened link that redirects to the web interface
+- `links`: Array of equivalent links on other platforms
+- `links[].type`: Streaming service identifier
+- `links[].url`: Direct link to content on that platform
+- `links[].isVerified`: Whether the link has been verified as working
+
+### GET /api/status
+
+Check API rate limit status and system health.
+
+**Response:**
+```json
+{
+  "ip": "127.0.0.1",
+  "rateLimits": {
+    "web": {
+      "allowed": 100,
+      "remaining": 95,
+      "resetIn": 3600
+    },
+    "api": {
+      "allowed": 50,
+      "remaining": 48,
+      "resetIn": 3600
+    }
+  },
+  "storeSize": {
+    "web": 5,
+    "api": 2
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
+## Error Responses
+
+**400 Bad Request:**
+```json
+{
+  "error": "Invalid link, field is required"
+}
+```
+
+**400 Bad Request (Invalid API Version):**
+```json
+{
+  "error": "Unsupported API version"
+}
+```
+
+**429 Too Many Requests:**
+```json
+{
+  "error": "Rate limit exceeded. Please try again later."
+}
+```
+
+**500 Internal Server Error:**
+```json
+{
+  "error": "Something went wrong, please try again later."
+}
+```
+
+## Content Types
+
+The API supports these content types:
+
+- **song**: Individual tracks/songs
+- **album**: Music albums or EPs
+- **artist**: Artist pages/profiles
+- **podcast**: Individual podcast episodes
+- **show**: Podcast series/shows
+
+**Note**: Playlists are not currently supported.
+
+## Example Usage
+
+### Convert a Spotify track to all platforms:
+
+```bash
+curl -X POST "https://idonthavespotify.donado.co/api/search?v=1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "link": "https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh"
+  }'
+```
+
+### Convert to specific platforms only:
+
+```bash
+curl -X POST "https://idonthavespotify.donado.co/api/search?v=1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "link": "https://music.apple.com/us/album/bohemian-rhapsody/1440650428?i=1440650450",
+    "adapters": ["spotify", "youTube", "tidal"]
+  }'
+```
+
+### Check rate limit status:
+
+```bash
+curl "https://idonthavespotify.donado.co/api/status"
+```
+
+## Integration Tips for AI Agents
+
+1. **Always include the API version**: The `v=1` query parameter is required
+2. **Handle rate limits gracefully**: Check the 429 status code and respect retry timing
+3. **Validate URLs first**: Ensure the input URL matches one of the supported patterns
+4. **Remember playlist limitation**: Don't attempt to convert playlist URLs
+5. **Use specific adapters when possible**: Include only the platforms you need to reduce response size
+6. **Check isVerified field**: Prioritize verified links in your responses
+7. **Handle missing audio**: Not all content has preview audio available
+8. **Universal links**: Use the `universalLink` field for shareable links that work across platforms
+
+## Web Interface
+
+The service also provides a web interface at the base URL where users can paste links directly. The web interface supports the same link types and returns an HTML response with the converted links.
+
+## Source Code
+
+The project is open source and available at: https://github.com/sjdonado/idonthavespotify

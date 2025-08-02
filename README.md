@@ -2,6 +2,8 @@
 
 Copy a link from your favorite streaming service, paste it into the search bar, and voilà! Links to the track on all other supported platforms are displayed. If the original source is Spotify you'll even get a quick audio preview to ensure it's the right track.
 
+**Note:** Currently, playlists are out of scope. Only individual tracks, albums, artists, and podcasts are supported.
+
 ## Supported Streaming Services (Adapters)
 
 Adapters represent the streaming services supported by the Web App and the Raycast Extension. Each adapter allows the app to convert links from one platform to others. The table below shows which features are available for each one:
