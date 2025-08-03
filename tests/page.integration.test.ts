@@ -62,8 +62,8 @@ describe('Page router', () => {
 
       expect(footerText).toContain('@sjdonado');
       expect(footerText).toContain('Status');
-      expect(footerText).toContain('Source Code');
-      expect(footerText).toContain('Raycast Extension');
+      expect(footerText).toContain('Source');
+      expect(footerText).toContain('Spooky Planning');
     });
   });
 

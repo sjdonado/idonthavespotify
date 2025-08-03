@@ -1,5 +1,4 @@
 import jseslint from '@eslint/js';
-import reactPlugin from 'eslint-plugin-react';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
@@ -10,8 +9,26 @@ export default [
   { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
   jseslint.configs.recommended,
   ...tseslint.configs.recommended,
-  reactPlugin.configs.flat.recommended,
-  reactPlugin.configs.flat['jsx-runtime'],
+  {
+    files: ['**/*.{jsx,tsx}'],
+    languageOptions: {
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+    },
+    rules: {
+      // Allow JSX without imports since nano-jsx uses automatic JSX runtime
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^(Nano|h)$',
+        },
+      ],
+    },
+  },
   {
     plugins: {
       'simple-import-sort': simpleImportSort,
