@@ -124,7 +124,19 @@ describe('Api router', () => {
       axiosMock.onGet(getYouTubeSearchLink(query, MetadataType.Song)).reply(500);
       axiosMock.onGet(getDeezerSearchLink(query, 'track')).reply(500);
       axiosMock.onGet(getSoundCloudSearchLink(query)).reply(500);
-      axiosMock.onGet().passThrough();
+      // Mock Spotify metadata API
+      axiosMock.onGet('https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc').reply(
+        200,
+        `
+        <meta property="og:title" content="Like a Rolling Stone" />
+        <meta property="og:description" content="Bob Dylan · Highway 61 Revisited · Song · 1965" />
+        <meta property="og:image" content="https://i.scdn.co/image/ab67616d0000b27341720ef0ae31e10d39e43ca2" />
+        <meta property="og:type" content="music.song" />
+        <meta property="og:audio" content="https://p.scdn.co/mp3-preview/d48c45e3194cfe07470c85e50ca7dc7440661caa" />
+      `
+      );
+
+      axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
@@ -144,7 +156,7 @@ describe('Api router', () => {
         image: 'https://i.scdn.co/image/ab67616d0000b27341720ef0ae31e10d39e43ca2',
         audio: 'https://p.scdn.co/mp3-preview/d48c45e3194cfe07470c85e50ca7dc7440661caa',
         source: link,
-        universalLink: urlShortenerResponseMock.data.refer,
+        universalLink: 'http://localhost:4000/2saYhYg',
         links: [],
       });
     });
