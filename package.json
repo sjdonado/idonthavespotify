@@ -11,7 +11,8 @@
     "build": "bun run build.config.ts --minify",
     "test": "NODE_ENV=test bun test",
     "test:ci": "NODE_ENV=test bun test integration",
-    "lint": "eslint --fix",
+    "lint": "eslint ./app/**/*.{ts,tsx}",
+    "lint:fix": "eslint ./app/**/*.{ts,tsx} --fix",
     "tscheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -29,24 +30,29 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@eslint/js": "^9.32.0",
     "@tailwindcss/cli": "^4.0.0",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/bun": "^1.2.5",
     "@types/howler": "^2.2.12",
     "@types/string-similarity": "^4.0.2",
-    "@typescript-eslint/eslint-plugin": "^7.7.1",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0",
     "axios-mock-adapter": "^1.22.0",
     "concurrently": "^8.2.2",
     "domhandler": "^5.0.3",
-    "eslint": "^8.57.0",
+    "eslint": "^9.32.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jsx": "^0.1.0",
     "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-simple-import-sort": "^12.1.1",
+    "globals": "^16.3.0",
     "postcss": "^8.4.38",
     "prettier": "^3.2.5",
     "tailwindcss": "^4.0.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.38.0"
   }
 }
