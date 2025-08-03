@@ -1,5 +1,6 @@
 import { file, serve } from 'bun';
 import { h, Helmet, renderSSR } from 'nano-jsx';
+import { resolve, normalize, sep } from 'path';
 
 import { Adapter } from './config/enum';
 import {
@@ -33,21 +34,6 @@ export const createApp = (port: string = '0') =>
   serve({
     port,
     routes: {
-      '/assets/*': {
-        GET: async req => {
-          try {
-            const url = new URL(req.url);
-            const path = url.pathname.replace(/^\/assets\//, '');
-            const filePath = `public/assets/${path}`;
-
-            return new Response(file(filePath));
-          } catch (err) {
-            console.error(err);
-            logger.error(`[route /assets/*]: ${err}`);
-            return new Response('Server error', { status: 500 });
-          }
-        },
-      },
       '/': {
         GET: withRateLimitHTML(
           async function (req) {
@@ -271,6 +257,51 @@ export const createApp = (port: string = '0') =>
             message: 'Status endpoint rate limited',
           }
         ),
+      },
+      '/*': {
+        GET: async req => {
+          try {
+            const url = new URL(req.url);
+
+            // Sanitize pathname to prevent directory traversal attacks
+            let pathname = url.pathname.split('?')[0].split('#')[0];
+
+            try {
+              pathname = decodeURIComponent(pathname);
+            } catch {
+              return new Response('Bad Request', { status: 400 });
+            }
+
+            // Check for dangerous characters
+            if (pathname.includes('\0') || !pathname.startsWith('/')) {
+              return new Response('Bad Request', { status: 400 });
+            }
+
+            const publicDir = resolve(process.cwd(), 'public');
+            const requestedPath = resolve(publicDir, pathname.slice(1));
+
+            // Ensure the resolved path is within the public directory
+            if (
+              !requestedPath.startsWith(publicDir + sep) &&
+              requestedPath !== publicDir
+            ) {
+              return new Response('Bad Request', { status: 400 });
+            }
+
+            const filePath = requestedPath;
+
+            const fileExists = await Bun.file(filePath).exists();
+            if (!fileExists) {
+              return new Response('Not found', { status: 404 });
+            }
+
+            return new Response(file(filePath));
+          } catch (err) {
+            console.error(err);
+            logger.error(`[route /*]: ${err}`);
+            return new Response('Not found', { status: 404 });
+          }
+        },
       },
     },
 
