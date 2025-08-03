@@ -1,6 +1,9 @@
 import { compareTwoStrings } from 'string-similarity';
 
-import { RESPONSE_COMPARE_MIN_SCORE } from '~/config/constants';
+import {
+  RESPONSE_COMPARE_MIN_SCORE,
+  RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
+} from '~/config/constants';
 import { Adapter, MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
 import {
@@ -86,7 +89,8 @@ export async function getTidalLink(query: string, metadata: SearchMetadata) {
         bestMatch = {
           type: Adapter.Tidal,
           url: `${ENV.adapters.tidal.baseUrl}/${searchType.slice(0, -1)}/${data[0].id}`,
-          isVerified: score > RESPONSE_COMPARE_MIN_SCORE,
+          isVerified: score >= RESPONSE_COMPARE_MIN_SCORE,
+          notAvailable: score < RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
         };
       }
     }
@@ -94,6 +98,10 @@ export async function getTidalLink(query: string, metadata: SearchMetadata) {
     if (!bestMatch) {
       throw new Error('No valid matches found.');
     }
+
+    logger.info(
+      `[Tidal] Best match score: ${highestScore.toFixed(3)} (verified: ${bestMatch.isVerified ? 'yes' : 'no'}, available: ${!bestMatch.notAvailable ? 'yes' : 'no'})`
+    );
 
     await cacheSearchResultLink(url, bestMatch);
 

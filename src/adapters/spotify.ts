@@ -1,4 +1,10 @@
-import { ADAPTERS_QUERY_LIMIT } from '~/config/constants';
+import { compareTwoStrings } from 'string-similarity';
+
+import {
+  ADAPTERS_QUERY_LIMIT,
+  RESPONSE_COMPARE_MIN_SCORE,
+  RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
+} from '~/config/constants';
 import { Adapter, MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
 import {
@@ -74,11 +80,18 @@ export async function getSpotifyLink(query: string, metadata: SearchMetadata) {
     }
 
     const { name, external_urls } = data.items[0];
+    const similarity = compareTwoStrings(name?.toLowerCase() ?? '', query.toLowerCase());
+
+    logger.info(`[Spotify] Found result: "${name}" -> ${external_urls.spotify}`);
+    logger.info(
+      `[Spotify] Similarity score: ${similarity.toFixed(3)} (verified: ${similarity >= RESPONSE_COMPARE_MIN_SCORE ? 'yes' : 'no'}, available: ${similarity >= RESPONSE_COMPARE_MIN_INCLUSION_SCORE ? 'yes' : 'no'})`
+    );
 
     const searchResultLink = {
       type: Adapter.Spotify,
       url: external_urls.spotify,
-      isVerified: responseMatchesQuery(name ?? '', query),
+      isVerified: similarity >= RESPONSE_COMPARE_MIN_SCORE,
+      notAvailable: similarity < RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
     } as SearchResultLink;
 
     await cacheSearchResultLink(url, searchResultLink);

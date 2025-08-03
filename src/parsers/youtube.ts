@@ -82,8 +82,17 @@ export const getYouTubeMetadata = async (id: string, source: string) => {
     const { title, description, thumbnails } = snippet;
     const image = thumbnails?.url;
 
+    const processedTitle = title
+      .replace(/[^\w\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    logger.info(
+      `[YouTube] Original title: "${title}". Processed title: "${processedTitle}"`
+    );
+
     const metadata: SearchMetadata = {
-      title: title.replace(/[^a-zA-Z ]/g, ' ').replace('  ', ' '),
+      title: processedTitle,
       description,
       type: searchType,
       image,
@@ -98,7 +107,10 @@ export const getYouTubeMetadata = async (id: string, source: string) => {
 };
 
 export const getYouTubeQueryFromMetadata = (metadata: SearchMetadata) => {
-  let query = metadata.title.replace(/\s*\([^)]*\)/g, '').trim();
+  let query = metadata.title
+    .replace(/\s*\([^)]*\)/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 
   if (metadata.type === MetadataType.Song) {
     const matches = metadata.description?.match(/(?:·|&)\s*([^·&℗]+)/g);
@@ -116,6 +128,7 @@ export const getYouTubeQueryFromMetadata = (metadata: SearchMetadata) => {
     query = `${query} playlist`;
   }
 
+  logger.info(`[YouTube] Final search query: "${query}"`);
   return query;
 };
 

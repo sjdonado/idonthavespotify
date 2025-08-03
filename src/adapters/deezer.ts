@@ -1,6 +1,10 @@
 import { compareTwoStrings } from 'string-similarity';
 
-import { ADAPTERS_QUERY_LIMIT, RESPONSE_COMPARE_MIN_SCORE } from '~/config/constants';
+import {
+  ADAPTERS_QUERY_LIMIT,
+  RESPONSE_COMPARE_MIN_SCORE,
+  RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
+} from '~/config/constants';
 import { Adapter, MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
@@ -65,7 +69,8 @@ export async function getDeezerLink(query: string, metadata: SearchMetadata) {
         bestMatch = {
           type: Adapter.Deezer,
           url: item.link,
-          isVerified: score > RESPONSE_COMPARE_MIN_SCORE,
+          isVerified: score >= RESPONSE_COMPARE_MIN_SCORE,
+          notAvailable: score < RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
         };
       }
     }
@@ -73,6 +78,10 @@ export async function getDeezerLink(query: string, metadata: SearchMetadata) {
     if (!bestMatch) {
       throw new Error('No valid matches found.');
     }
+
+    logger.info(
+      `[Deezer] Best match score: ${highestScore.toFixed(3)} (verified: ${bestMatch.isVerified ? 'yes' : 'no'}, available: ${!bestMatch.notAvailable ? 'yes' : 'no'})`
+    );
 
     await cacheSearchResultLink(url, bestMatch);
 

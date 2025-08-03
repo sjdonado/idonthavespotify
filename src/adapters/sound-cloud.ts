@@ -1,4 +1,7 @@
-import { RESPONSE_COMPARE_MIN_SCORE } from '~/config/constants';
+import {
+  RESPONSE_COMPARE_MIN_SCORE,
+  RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
+} from '~/config/constants';
 import { Adapter, MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
@@ -41,8 +44,13 @@ export async function getSoundCloudLink(query: string, metadata: SearchMetadata)
     const searchResultLink = {
       type: Adapter.SoundCloud,
       url: `${ENV.adapters.soundCloud.baseUrl}${href}`,
-      isVerified: score > RESPONSE_COMPARE_MIN_SCORE,
+      isVerified: score >= RESPONSE_COMPARE_MIN_SCORE,
+      notAvailable: score < RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
     } as SearchResultLink;
+
+    logger.info(
+      `[SoundCloud] Result score: ${score.toFixed(3)} (verified: ${searchResultLink.isVerified ? 'yes' : 'no'}, available: ${!searchResultLink.notAvailable ? 'yes' : 'no'})`
+    );
 
     await cacheSearchResultLink(url, searchResultLink);
 

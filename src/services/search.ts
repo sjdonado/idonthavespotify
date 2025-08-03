@@ -36,6 +36,7 @@ export type SearchResultLink = {
   type: Adapter;
   url: string;
   isVerified?: boolean;
+  notAvailable?: boolean;
 };
 
 export type SearchResult = {
@@ -220,8 +221,20 @@ export const search = async <T extends SearchProps>({
 
         return linkGetter(query, metadata).then(link => {
           if (link) {
-            links.push({ type: adapter, url: link.url, isVerified: true });
+            logger.info(
+              `[${search.name}] Found ${adapter} link: ${link.url}, isVerified: ${link.isVerified}, notAvailable: ${link.notAvailable || false}`
+            );
+            links.push({
+              type: adapter,
+              url: link.url,
+              isVerified: link.isVerified,
+              notAvailable: link.notAvailable,
+            });
             existingAdapters.add(adapter);
+          } else {
+            logger.info(
+              `[${search.name}] No ${adapter} link found for query: "${query}"`
+            );
           }
         });
       })
@@ -244,13 +257,43 @@ export const search = async <T extends SearchProps>({
 
   // Fetch updated metadata (for audio) from spotify if not parser type
   const spotifyLink = links.find(link => link.type === Adapter.Spotify);
+  logger.info(
+    `[${search.name}] Spotify link found: ${spotifyLink ? `${spotifyLink.url} (verified: ${spotifyLink.isVerified}, notAvailable: ${spotifyLink.notAvailable || false})` : 'none'}`
+  );
+
   const [parsedMetadata, shortLink] = await Promise.all([
-    parserType !== Adapter.Spotify && spotifyLink
+    parserType !== Adapter.Spotify &&
+    spotifyLink &&
+    spotifyLink.isVerified &&
+    !spotifyLink.notAvailable
       ? (async () => {
+          logger.info(
+            `[${search.name}] Fetching Spotify metadata for verified available link: ${spotifyLink.url}`
+          );
           const spotifySearchParser = getSearchParser(spotifyLink.url);
-          return getSpotifyMetadata(spotifySearchParser.id, spotifyLink.url);
+          const spotifyMetadata = await getSpotifyMetadata(
+            spotifySearchParser.id,
+            spotifyLink.url
+          );
+          logger.info(
+            `[${search.name}] Spotify metadata - Title: "${spotifyMetadata.title}", Audio: ${spotifyMetadata.audio ? 'available' : 'none'}`
+          );
+          return spotifyMetadata;
         })()
-      : metadata,
+      : (async () => {
+          if (parserType !== Adapter.Spotify && spotifyLink) {
+            if (spotifyLink.notAvailable) {
+              logger.info(
+                `[${search.name}] Skipping not available Spotify link for metadata: ${spotifyLink.url}`
+              );
+            } else if (!spotifyLink.isVerified) {
+              logger.info(
+                `[${search.name}] Skipping unverified Spotify link for metadata: ${spotifyLink.url}`
+              );
+            }
+          }
+          return metadata;
+        })(),
     shortenLink(universalLink),
   ]);
 
