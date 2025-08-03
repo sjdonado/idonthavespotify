@@ -40,11 +40,13 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
       class="relative m-4 flex max-w-3xl flex-wrap items-start justify-center gap-4 rounded-lg shadow-lg md:p-4"
     >
       <div class="flex w-full items-center justify-start gap-4">
-        <img
-          class="w-24 max-w-24 rounded-lg md:w-28"
-          src={props.searchResult.image}
-          alt={props.searchResult.title}
-        />
+        {props.searchResult.image && (
+          <img
+            class="w-24 max-w-24 rounded-lg md:w-28"
+            src={props.searchResult.image}
+            alt={props.searchResult.title}
+          />
+        )}
         <div class="flex flex-col gap-1">
           <h3 class="hyphens-auto text-lg font-normal md:text-start md:text-2xl">
             {props.searchResult.title}
@@ -81,19 +83,19 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
       </div>
       <div class="mt-2 flex min-h-12 flex-1 flex-col items-start p-2">
         {props.searchResult.links.length === 0 && (
-          <p class="w-full text-center text-sm md:text-start">
-            Not available on other platforms
+          <p class="w-full text-center text-sm md:text-start text-zinc-400">
+            Not available on other platforms.
           </p>
         )}
         {props.searchResult.links.length > 0 && (
           <ul class="w-full">
-            {props.searchResult.links.map(({ type, url, isVerified }) => {
+            {props.searchResult.links.map(({ type, url, isVerified, notAvailable }) => {
               const searchResult = SEARCH_LINK_DICT[type];
               return (
                 <li
                   data-controller="search-link"
                   data-search-link-url-value={url}
-                  class="flex items-center justify-between gap-1 rounded-lg p-2 hover:bg-zinc-700"
+                  class={`flex items-center justify-between gap-1 rounded-lg p-2 ${notAvailable ? 'pointer-events-none text-zinc-400' : 'hover:bg-zinc-700'}`}
                 >
                   <a
                     href={url}
@@ -115,9 +117,15 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
                       </span>
                     )}
                   </a>
-                  <button type="button" data-action="search-link#share">
-                    <i class="ti ti-copy px-2" />
-                  </button>
+                  {notAvailable ? (
+                    <span class="ml-1 rounded-md p-1 text-xs" aria-label="Not available">
+                      Not available
+                    </span>
+                  ) : (
+                    <button type="button" data-action="search-link#share">
+                      <i class="ti ti-copy px-2" />
+                    </button>
+                  )}
                 </li>
               );
             })}
