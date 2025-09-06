@@ -164,10 +164,10 @@ export const search = async <T extends SearchProps>({
     } as SearchReturn<T>;
   }
 
-  const links: SearchResultLink[] = [];
+  const links: SearchResultLink[] = [linkSearchResult];
   const existingAdapters = new Set<Adapter>();
 
-  let tidalLink: SearchResultLink | null = linkSearchResult;
+  let tidalLink: SearchResultLink | null = null;
   if (searchAdapters.includes(Adapter.Tidal) && parserType !== Adapter.Tidal) {
     tidalLink = await getTidalLink(query, metadata);
     if (tidalLink) {

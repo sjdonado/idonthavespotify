@@ -111,6 +111,11 @@ describe('Api router', () => {
             url: 'https://soundcloud.com/bobdylan/like-a-rolling-stone-1',
             isVerified: true,
           },
+          {
+            type: 'spotify',
+            url: 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc',
+            isVerified: true,
+          },
         ],
       });
     });
@@ -157,7 +162,13 @@ describe('Api router', () => {
         audio: 'https://p.scdn.co/mp3-preview/d48c45e3194cfe07470c85e50ca7dc7440661caa',
         source: link,
         universalLink: 'http://localhost:4000/2saYhYg',
-        links: [],
+        links: [
+          {
+            isVerified: true,
+            type: 'spotify',
+            url: 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc',
+          },
+        ],
       });
     });
 

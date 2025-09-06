@@ -138,6 +138,11 @@ describe('GET /search', () => {
             isVerified: true,
             notAvailable: false,
           },
+          {
+            type: 'spotify',
+            url: 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc',
+            isVerified: true,
+          },
         ],
       });
 
@@ -145,8 +150,7 @@ describe('GET /search', () => {
     });
 
     it('should return 200 - Mobile link', async () => {
-      const mobileSpotifyLink =
-        'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc?si=c3hmDTxcTNWuUy0c92WaUw';
+      const mobileSpotifyLink = 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc';
 
       // Mock Spotify metadata API
       axiosMock.onGet(/open\.spotify\.com\/track\/3AhXZa8sUQht0UEdBJgpGc/).reply(
@@ -197,14 +201,13 @@ describe('GET /search', () => {
       const data = await response.json();
 
       expect(data).toEqual({
-        id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8zQWhYWmE4c1VRaHQwVUVkQkpncEdjP3NpPWMzaG1EVHhjVE5XdVV5MGM5MldhVXc',
+        id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8zQWhYWmE4c1VRaHQwVUVkQkpncEdj',
         type: 'song',
         title: 'Like a Rolling Stone',
         description: 'Bob Dylan · Highway 61 Revisited · Song · 1965',
         image: 'https://i.scdn.co/image/ab67616d0000b27341720ef0ae31e10d39e43ca2',
         audio: 'https://p.scdn.co/mp3-preview/d48c45e3194cfe07470c85e50ca7dc7440661caa',
-        source:
-          'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc?si=c3hmDTxcTNWuUy0c92WaUw',
+        source: 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc',
         universalLink: 'http://localhost:4000/2saYhYg',
         links: [
           {
@@ -218,6 +221,11 @@ describe('GET /search', () => {
             url: 'https://www.deezer.com/track/14477354',
             isVerified: true,
             notAvailable: false,
+          },
+          {
+            type: 'spotify',
+            url: 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc',
+            isVerified: true,
           },
         ],
       });
@@ -300,6 +308,11 @@ describe('GET /search', () => {
             isVerified: true,
             notAvailable: false,
           },
+          {
+            type: 'spotify',
+            url: 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc?si=NbEEVPZvTVuov_nA3ylJJQ&utm_source=copy-link&utm_medium=copy-link&context=spotify%3Aalbum%3A4czdORdCWP9umpbhFXK2aW&_branch_match_id=1238568162599463760&_branch_referrer=H2sIAAAAAAAAA8soKSkottLXLy7IL8lMq9TLyczL1q%2Fy8nHxLLXwM3RJAgDKC3LnIAAAAA%3D%3D',
+            isVerified: true,
+          },
         ],
       });
 
@@ -308,8 +321,7 @@ describe('GET /search', () => {
   });
 
   describe('GET /search - Album', () => {
-    const link =
-      'https://open.spotify.com/album/7dqftJ3kas6D0VAdmt3k3V?si=e3MGBRjwSAuq7VuUN59HpA';
+    const link = 'https://open.spotify.com/album/7dqftJ3kas6D0VAdmt3k3V';
 
     it('should return 200', async () => {
       // Mock Spotify metadata API
@@ -360,15 +372,19 @@ describe('GET /search', () => {
       const data = await response.json();
 
       expect(data).toEqual({
-        id: 'b3Blbi5zcG90aWZ5LmNvbS9hbGJ1bS83ZHFmdEoza2FzNkQwVkFkbXQzazNWP3NpPWUzTUdCUmp3U0F1cTdWdVVONTlIcEE',
+        id: 'b3Blbi5zcG90aWZ5LmNvbS9hbGJ1bS83ZHFmdEoza2FzNkQwVkFkbXQzazNW',
         type: 'album',
         title: 'Stories',
         description: 'Avicii · Album · 2015 · 14 songs',
         image: 'https://i.scdn.co/image/ab67616d0000b2735393c5d3cac806092a9bc468',
-        source:
-          'https://open.spotify.com/album/7dqftJ3kas6D0VAdmt3k3V?si=e3MGBRjwSAuq7VuUN59HpA',
+        source: 'https://open.spotify.com/album/7dqftJ3kas6D0VAdmt3k3V',
         universalLink: 'http://localhost:4000/2saYhYg',
         links: [
+          {
+            type: 'spotify',
+            url: 'https://open.spotify.com/album/7dqftJ3kas6D0VAdmt3k3V',
+            isVerified: true,
+          },
           {
             type: 'appleMusic',
             url: 'https://geo.music.apple.com/ca/album/stories/1440834059',
@@ -453,6 +469,11 @@ describe('GET /search', () => {
             type: 'deezer',
             url: 'https://www.deezer.com/artist/339209',
           },
+          {
+            isVerified: true,
+            type: 'spotify',
+            url: 'https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5',
+          },
         ],
       });
     });
@@ -525,6 +546,11 @@ describe('GET /search', () => {
             url: 'https://www.deezer.com/playlist/10737811462',
           },
           {
+            isVerified: true,
+            type: 'spotify',
+            url: 'https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ',
+          },
+          {
             isVerified: false,
             notAvailable: false,
             type: 'appleMusic',
@@ -537,8 +563,7 @@ describe('GET /search', () => {
 
   describe('GET /search - Podcast Show', () => {
     it('should return 200', async () => {
-      const link =
-        'https://open.spotify.com/episode/2uvOfpJRRliCWpbiCXKf4Q?si=-eioJkIhREuPjvD16kyEAQ';
+      const link = 'https://open.spotify.com/episode/2uvOfpJRRliCWpbiCXKf4Q';
 
       // Mock Spotify metadata API
       axiosMock.onGet(/open\.spotify\.com\/episode\/2uvOfpJRRliCWpbiCXKf4Q/).reply(
@@ -570,17 +595,22 @@ describe('GET /search', () => {
       const data = await response.json();
 
       expect(data).toEqual({
-        id: 'b3Blbi5zcG90aWZ5LmNvbS9lcGlzb2RlLzJ1dk9mcEpSUmxpQ1dwYmlDWEtmNFE_c2k9LWVpb0prSWhSRXVQanZEMTZreUVBUQ',
+        id: 'b3Blbi5zcG90aWZ5LmNvbS9lcGlzb2RlLzJ1dk9mcEpSUmxpQ1dwYmlDWEtmNFE',
         type: 'podcast',
         title: '¿Dónde estabas el 6 de noviembre del año 1985?',
         description: 'Tercera Vuelta · Episode',
         image: 'https://i.scdn.co/image/ab6765630000ba8a85c9dd1468476ba33d95f0e9',
         audio:
           'https://podz-content.spotifycdn.com/audio/clips/6omeNtNZD86P8h4edCGXRl/clip_176359_236359.mp3',
-        source:
-          'https://open.spotify.com/episode/2uvOfpJRRliCWpbiCXKf4Q?si=-eioJkIhREuPjvD16kyEAQ',
+        source: 'https://open.spotify.com/episode/2uvOfpJRRliCWpbiCXKf4Q',
         universalLink: 'http://localhost:4000/2saYhYg',
-        links: [],
+        links: [
+          {
+            isVerified: true,
+            type: 'spotify',
+            url: 'https://open.spotify.com/episode/2uvOfpJRRliCWpbiCXKf4Q',
+          },
+        ],
       });
     });
   });
@@ -631,7 +661,13 @@ describe('GET /search', () => {
           'https://podz-content.spotifycdn.com/audio/clips/0Dijh26Vc2UoFrsXfkACQ8/clip_2900584_2965529.mp3',
         source: 'https://open.spotify.com/episode/43TCrgmP23qkLcAXZQN8qT',
         universalLink: 'http://localhost:4000/2saYhYg',
-        links: [],
+        links: [
+          {
+            isVerified: true,
+            type: 'spotify',
+            url: 'https://open.spotify.com/episode/43TCrgmP23qkLcAXZQN8qT',
+          },
+        ],
       });
     });
   });
