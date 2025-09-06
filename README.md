@@ -1,21 +1,38 @@
-> Effortlessly convert Spotify links to your preferred streaming service
+> IDHS (I Don't Have Spotify)
 
 Copy a link from your favorite streaming service, paste it into the search bar, and voilà! Links to the track on all other supported platforms are displayed. If the original source is Spotify you'll even get a quick audio preview to ensure it's the right track.
 
 **Note:** Currently, playlists are out of scope. Only individual tracks, albums, artists, and podcasts are supported.
 
-## Supported Streaming Services (Adapters)
+## Supported Streaming Services
 
 Adapters represent the streaming services supported by the Web App and the Raycast Extension. Each adapter allows the app to convert links from one platform to others. The table below shows which features are available for each one:
 
 | Adapter          | Inverted Search | Official API           | Verified Links |
 | ---------------- | --------------- | ---------------------- | -------------- |
 | Spotify          | Yes             | Yes                    | Yes            |
-| Tidal            | Yes             | Yes                    | Yes            |
+| Tidal            | Yes but unstable| Yes                    | Yes            |
 | YouTube Music    | Yes             | No                     | Yes            |
 | Apple Music      | Yes             | No                     | Yes            |
 | Deezer           | Yes             | Yes                    | Yes            |
 | SoundCloud       | Yes             | No                     | Yes            |
+
+## Disclaimer: Search-based results
+
+IDHS extracts whatever metadata it can from the link you paste, then uses that information to build a fresh query for public search engines or official APIs (e.g. Apple Music, YouTube, SoundCloud). It picks the result that looks most relevant, but it can't guarantee the returned link is the exact track you want or even a song at all.
+
+Suggestions for a better query building workflow are welcome. The main constraint is keeping requests fast, so no brute-force retries for now.
+
+## Architecture overview: Parsers and Adapters
+
+- Parsers (`src/parsers`) identify the incoming link's platform and extract normalized metadata (title, description, type, image, and optional audio) as well as a consistent search query. For example, a Spotify link is parsed to gather Open Graph metadata and produce a query string that represents the track/album/artist/show/episode. This query is later used to search other platforms.
+
+- Adapters (`src/adapters`) turn that normalized query into outbound links for each destination platform (Spotify, YouTube Music, Apple Music, Deezer, SoundCloud, Tidal). Each adapter is responsible for:
+  - Performing a platform-specific search (API or HTML-based) using the normalized query
+  - Returning a result with `type`, `url`, and flags like `isVerified` and `notAvailable`
+  - Preferring "verified" links when the platform provides a reliable match signal
+
+This separation keeps the system modular: parsers focus on understanding the source, while adapters focus on finding the best possible destination links.
 
 ## Web App
 

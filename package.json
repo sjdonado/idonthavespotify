@@ -1,6 +1,6 @@
 {
   "name": "idonthavespotify",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "type": "module",
   "scripts": {
     "dev": "concurrently \"bun run watch:assets\" \"bun run watch:server\"",
