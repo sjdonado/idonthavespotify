@@ -82,6 +82,7 @@ Convert a streaming service link to equivalent links on other platforms.
 
 **SoundCloud:**
 - https://soundcloud.com/[user]/[track]
+- https://on.soundcloud.com/[id]
 
 **Response Format:**
 ```json
