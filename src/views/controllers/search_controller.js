@@ -2,13 +2,25 @@ import { Controller } from '@hotwired/stimulus';
 
 import { toast } from './helpers';
 
+/**
+ * @global
+ * @typedef {Object} WindowWithUmami
+ * @property {Object} [umami] – optional umami tracker
+ * @property {Function} [umami.track] – track method
+ * @property {boolean} [umamiTracked] – flag to prevent duplicate tracking
+ */
+
+/** @type {WindowWithUmami} */
+const win = window;
+
 export default class extends Controller {
+  /** @type {string[]} */
   static targets = ['form', 'link'];
 
   connect() {
-    if (window.umami && !window.umamiTracked) {
-      window.umami.track();
-      window.umamiTracked = true;
+    if (win.umami && !win.umamiTracked) {
+      win.umami.track();
+      win.umamiTracked = true;
     }
   }
 
