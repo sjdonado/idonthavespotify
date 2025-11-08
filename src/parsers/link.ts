@@ -62,7 +62,7 @@ export const getSearchParser = (link?: string, searchId?: string) => {
   }
 
   const soundCloudMatch = source.match(SOUNDCLOUD_LINK_REGEX);
-  const soundCloudId = soundCloudMatch ? soundCloudMatch[3] || soundCloudMatch[2] : null;
+  const soundCloudId = soundCloudMatch ? soundCloudMatch[3] || soundCloudMatch[2] || soundCloudMatch[4] : null;
   if (soundCloudId) {
     id = soundCloudId;
     type = Parser.SoundCloud;

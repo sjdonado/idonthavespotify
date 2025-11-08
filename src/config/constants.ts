@@ -15,7 +15,7 @@ export const DEEZER_LINK_REGEX =
   /^https:\/\/www\.deezer\.com\/(?:[a-z]{2}\/)?(?:track|album|playlist|artist|episode|show)\/(\d+)/;
 
 export const SOUNDCLOUD_LINK_REGEX =
-  /^https:\/\/soundcloud\.com\/([\w-]+)\/([\w-]+)(?:\/sets\/([\w-]+))?(?:[\?#].*)?/;
+  /^(?:https:\/\/soundcloud\.com\/([\w-]+)\/([\w-]+)(?:\/sets\/([\w-]+))?(?:[\?#].*)?|https:\/\/on\.soundcloud\.com\/([\w-]{8,}))$/;
 
 export const TIDAL_LINK_REGEX =
   /^https:\/\/tidal\.com\/browse\/(track|artist|album|mix|video)\/([\w-]+)(?:\/[\w-]+)?(?:[\?#].*)?$/;
