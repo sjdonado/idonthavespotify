@@ -9,7 +9,6 @@ import {
   cacheSearchResultLink,
   cacheShortenLink,
   cacheStore,
-  cacheTidalUniversalLinkResponse,
 } from '~/services/cache';
 import { getCheerioDoc } from '~/utils/scraper';
 
@@ -55,7 +54,7 @@ describe('Page router', () => {
 
       expect(doc('h1').text()).toEqual("I Don't Have Spotify");
       expect(doc('p').text()).toContain(
-        'Paste a link from Spotify, YouTube Music, Apple Music, Deezer or SoundCloud to start.'
+        'Paste a link from Spotify, YouTube Music, Apple Music, Deezer, SoundCloud or Tidal to start.'
       );
 
       const footerText = doc('footer').text();
@@ -73,14 +72,6 @@ describe('Page router', () => {
     it('should return search card with a valid link', async () => {
       const endpoint = `${app.url}/search`;
       await Promise.all([
-        cacheTidalUniversalLinkResponse('https://tidal.com/browse/track/71717750/u', {
-          spotify: null,
-          youTube: null,
-          appleMusic: null,
-          deezer: null,
-          soundCloud: null,
-          tidal: null,
-        }),
         cacheSearchResultLink(
           new URL(
             'https://content-youtube.googleapis.com/youtube/v3/search?type=video&regionCode=US&q=Do+Not+Disturb+Drake&part=id&safeSearch=none&key=youtube_api_key'
@@ -182,26 +173,6 @@ describe('Page router', () => {
             isVerified: true,
           }
         ),
-        cacheTidalUniversalLinkResponse('https://tidal.com/browse/track/71717750/u', {
-          spotify: {
-            type: Adapter.Spotify,
-            url: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
-            isVerified: true,
-          },
-          youTube: {
-            type: Adapter.YouTube,
-            url: 'https://music.youtube.com/watch?v=zhY_0DoQCQs',
-            isVerified: true,
-          },
-          appleMusic: {
-            type: Adapter.AppleMusic,
-            url: 'https://geo.music.apple.com/de/album/do-not-disturb/1440890708?i=1440892237&app=music&ls=1',
-            isVerified: true,
-          },
-          deezer: null,
-          soundCloud: null,
-          tidal: null,
-        }),
         cacheSearchResultLink(
           new URL('https://api.deezer.com/search/track?q=Do+Not+Disturb+Drake&limit=4'),
           {
@@ -286,7 +257,7 @@ describe('Page router', () => {
       const doc = getCheerioDoc(data);
       const errorMessage = doc('p').text();
       expect(errorMessage).toContain(
-        'Invalid link, please try with Spotify or Youtube links.'
+        'Invalid link, please try with Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal, or Google Music Share links.'
       );
     });
 

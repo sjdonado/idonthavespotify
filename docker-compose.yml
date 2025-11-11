@@ -13,10 +13,5 @@ services:
       APP_URL: http://localhost:4001
       ADMIN_NAME: 'Admin'
       ADMIN_API_KEY: 'secure_12345'
-    volumes:
-      - sqlite_data:/app/sqlite
     ports:
       - 4000:4000
-
-volumes:
-  sqlite_data:
