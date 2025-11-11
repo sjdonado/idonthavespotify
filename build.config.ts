@@ -1,6 +1,5 @@
 import { build } from 'bun';
-import { existsSync } from 'fs';
-import { mkdir, watch } from 'fs/promises';
+import { mkdir } from 'fs/promises';
 
 interface BuildOptions {
   watch?: boolean;
@@ -11,41 +10,50 @@ const isProduction = process.env.NODE_ENV === 'production';
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 async function ensureDir(dir: string) {
-  try {
-    await mkdir(dir, { recursive: true });
-  } catch (error) {
-    // Directory might already exist
-  }
+  await mkdir(dir, { recursive: true }).catch(() => 'Directory already exists');
 }
 
 async function buildCSS(options: BuildOptions = {}) {
-  const inputCSS = './src/views/css/index.css';
-  const outputCSS = './public/assets/index.min.css';
-
   await ensureDir('./public/assets');
 
-  const tailwindCmd = ['bunx', '@tailwindcss/cli', '-i', inputCSS, '-o', outputCSS];
+  const tailwindCmd = [
+    'bunx',
+    '@tailwindcss/cli',
+    '-i',
+    './src/views/css/index.css',
+    '-o',
+    './public/assets/index.min.css',
+  ];
 
   if (options.minify || isProduction) {
     tailwindCmd.push('--minify');
   }
 
+  if (options.watch) {
+    tailwindCmd.push('--watch');
+  }
+
   try {
     const proc = Bun.spawn(tailwindCmd, {
-      stdout: 'pipe',
-      stderr: 'pipe',
+      stdout: 'inherit',
+      stderr: 'inherit',
     });
 
-    const result = await proc.exited;
-    if (result === 0) {
-      console.log('✅ CSS build completed');
+    if (!options.watch) {
+      const result = await proc.exited;
+      if (result === 0) {
+        console.log('✅ CSS build completed');
+      } else {
+        console.error('CSS build failed');
+        throw new Error('CSS build failed');
+      }
     } else {
-      const stderr = await new Response(proc.stderr).text();
-      console.error('❌ CSS build failed:', stderr);
-      throw new Error('CSS build failed');
+      console.log('👀 Tailwind CSS watcher started');
+      // Keep process alive in watch mode
+      return proc;
     }
   } catch (error) {
-    console.error('❌ CSS build error:', error);
+    console.error('CSS build error:', error);
     throw error;
   }
 }
@@ -77,110 +85,41 @@ async function buildJS(options: BuildOptions = {}) {
       console.log('✅ JavaScript build completed');
       return result;
     } else {
-      console.error('❌ JavaScript build failed');
+      console.error('JavaScript build failed');
       if (result.logs && result.logs.length > 0) {
         result.logs.forEach(log => console.error(log));
       }
       throw new Error('JavaScript build failed');
     }
   } catch (error) {
-    console.error('❌ JavaScript build error:', error);
+    console.error('JavaScript build error:', error);
     throw error;
   }
 }
 
-async function watchFiles(options: BuildOptions) {
-  console.log('👀 Starting file watchers...');
+async function watchJS(options: BuildOptions) {
+  console.log('👀 Starting JS watcher...');
 
-  let isBuilding = false;
-  const debounceTime = 100;
-  let buildTimeout: Timer | null = null;
+  const jsWatchCmd = ['bun', 'build', './src/views/controllers/index.js', '--outdir', './public/assets', '--watch'];
 
-  const debouncedBuild = async (type: 'js' | 'css' | 'both') => {
-    if (buildTimeout) {
-      clearTimeout(buildTimeout);
-    }
-
-    buildTimeout = setTimeout(async () => {
-      if (isBuilding) return;
-      isBuilding = true;
-
-      try {
-        console.log(`🔄 Rebuilding ${type}...`);
-
-        if (type === 'js' || type === 'both') {
-          await buildJS(options);
-        }
-        if (type === 'css' || type === 'both') {
-          await buildCSS(options);
-        }
-
-        console.log(`✅ ${type.toUpperCase()} rebuild completed`);
-      } catch (error) {
-        console.error(`❌ ${type.toUpperCase()} rebuild failed:`, error);
-      } finally {
-        isBuilding = false;
-      }
-    }, debounceTime);
-  };
-
-  // Watch JavaScript files
-  const jsWatchPaths = ['./src/views/controllers', './src/views/components'];
-
-  for (const watchPath of jsWatchPaths) {
-    if (existsSync(watchPath)) {
-      try {
-        const watcher = watch(watchPath, { recursive: true });
-        console.log(`👀 Watching JS files in ${watchPath}`);
-
-        (async () => {
-          for await (const _event of watcher) {
-            if (_event.filename?.endsWith('.js') || _event.filename?.endsWith('.ts')) {
-              debouncedBuild('js');
-            }
-          }
-        })().catch(console.error);
-      } catch (error) {
-        console.warn(`Could not watch ${watchPath}:`, error);
-      }
-    }
+  if (options.minify || isProduction) {
+    jsWatchCmd.push('--minify');
   }
 
-  // Watch CSS files
-  const cssWatchPaths = ['./src/views/css', './src/views/components'];
-
-  for (const watchPath of cssWatchPaths) {
-    if (existsSync(watchPath)) {
-      try {
-        const watcher = watch(watchPath, { recursive: true });
-        console.log(`👀 Watching CSS files in ${watchPath}`);
-
-        (async () => {
-          for await (const _event of watcher) {
-            if (_event.filename?.endsWith('.css') || _event.filename?.endsWith('.scss')) {
-              debouncedBuild('css');
-            }
-          }
-        })().catch(console.error);
-      } catch (error) {
-        console.warn(`Could not watch ${watchPath}:`, error);
-      }
-    }
+  if (isDevelopment) {
+    jsWatchCmd.push('--sourcemap=external');
   }
 
-  // Also watch the main CSS file
-  if (existsSync('./src/views/css/index.css')) {
-    try {
-      const cssWatcher = watch('./src/views/css/index.css');
-      (async () => {
-        for await (const _event of cssWatcher) {
-          debouncedBuild('css');
-        }
-      })().catch(console.error);
-    } catch (error) {
-      console.warn('Could not watch main CSS file:', error);
-    }
-  }
+  jsWatchCmd.push('--target=browser');
+  jsWatchCmd.push('--format=esm');
+
+  const proc = Bun.spawn(jsWatchCmd, {
+    stdout: 'inherit',
+    stderr: 'inherit',
+  });
+
+  console.log('👀 JavaScript watcher started');
+  return proc;
 }
 
 async function buildAssets(options: BuildOptions = {}) {
@@ -191,27 +130,24 @@ async function buildAssets(options: BuildOptions = {}) {
 
     // Initial build
     try {
-      await Promise.all([buildJS(options), buildCSS(options)]);
-      console.log('✅ Initial build completed');
+      await buildJS(options);
+      console.log('✅ Initial JS build completed');
     } catch (error) {
-      console.error('❌ Initial build failed:', error);
+      console.error('Initial build failed:', error);
       process.exit(1);
     }
 
-    // Start watchers
-    await watchFiles(options);
-    console.log('✅ Watch mode started - files will rebuild on changes');
+    // Start watchers (both return processes that stay alive)
+    const cssProc = await buildCSS(options);
+    const jsProc = await watchJS(options);
 
-    // Keep the process alive
-    const keepAlive = () => {
-      return new Promise<never>(() => {
-        // This promise never resolves, keeping the process alive
-      });
-    };
+    console.log('✅ Watch mode started - files will rebuild on changes');
 
     // Handle cleanup
     const cleanup = () => {
-      console.log('\n🛑 Stopping build watcher...');
+      console.log('\n🛑 Stopping build watchers...');
+      cssProc?.kill();
+      jsProc?.kill();
       process.exit(0);
     };
 
@@ -219,14 +155,16 @@ async function buildAssets(options: BuildOptions = {}) {
     process.on('SIGTERM', cleanup);
 
     // Keep process alive
-    await keepAlive();
+    await new Promise<never>(() => {
+      // This promise never resolves, keeping the process alive
+    });
   } else {
     // Build both in parallel for production
     try {
       await Promise.all([buildJS(options), buildCSS(options)]);
       console.log('📦 All assets built successfully');
     } catch (error) {
-      console.error('❌ Build failed:', error);
+      console.error('Build failed:', error);
       process.exit(1);
     }
   }
