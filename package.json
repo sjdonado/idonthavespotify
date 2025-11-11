@@ -20,6 +20,7 @@
     "axios-retry": "^4.5.0",
     "cheerio": "^1.0.0",
     "howler": "^2.2.4",
+    "html-entities": "^2.6.0",
     "nano-jsx": "^0.2.0",
     "notyf": "^3.10.0",
     "pino": "^10.1.0",
