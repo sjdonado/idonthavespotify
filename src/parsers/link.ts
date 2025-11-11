@@ -1,6 +1,7 @@
 import {
   APPLE_MUSIC_LINK_REGEX,
   DEEZER_LINK_REGEX,
+  GOOGLE_LINK_REGEX,
   SOUNDCLOUD_LINK_REGEX,
   SPOTIFY_LINK_REGEX,
   TIDAL_LINK_REGEX,
@@ -72,6 +73,14 @@ export const getSearchParser = (link?: string, searchId?: string) => {
   if (tidalId) {
     id = tidalId;
     type = Parser.Tidal;
+  }
+
+  const googleMatch = source.match(GOOGLE_LINK_REGEX);
+  if (googleMatch) {
+    // For gasearch URLs, capture group [1] is undefined, so use the full path
+    // For share.google URLs, capture group [1] contains the share ID
+    id = googleMatch[1] || source;
+    type = Parser.Google;
   }
 
   if (!id || !type) {
