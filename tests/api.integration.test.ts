@@ -97,17 +97,20 @@ describe('Api router', () => {
         universalLink: urlShortenerResponseMock.data.refer,
         links: [
           {
-            type: 'appleMusic',
-            url: 'https://music.apple.com/ca/album/like-a-rolling-stone/192688369?i=192688675',
             isVerified: true,
+            notAvailable: false,
+            type: "appleMusic",
+            url: "https://geo.music.apple.com/ca/album/like-a-rolling-stone/192688369?i=192688675",
           },
           {
             type: 'deezer',
+            notAvailable: false,
             url: 'https://www.deezer.com/track/14477354',
             isVerified: true,
           },
           {
             type: 'soundCloud',
+            notAvailable: false,
             url: 'https://soundcloud.com/bobdylan/like-a-rolling-stone-1',
             isVerified: true,
           },
@@ -120,7 +123,7 @@ describe('Api router', () => {
       });
     });
 
-    it.only('should return 200 when adapter returns error', async () => {
+    it('should return 200 when adapter returns error', async () => {
       const link = 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc';
       const query = 'Like a Rolling Stone Bob Dylan';
 
