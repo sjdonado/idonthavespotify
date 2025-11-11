@@ -1,8 +1,8 @@
 import { compareTwoStrings } from 'string-similarity';
 
 import {
-  RESPONSE_COMPARE_MIN_SCORE,
   RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
+  RESPONSE_COMPARE_MIN_SCORE,
 } from '~/config/constants';
 import { Adapter, MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
