@@ -68,10 +68,10 @@ describe('Page router', () => {
   });
 
   describe('POST /search', () => {
-    const endpoint = `${app.url}/search`;
     const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
 
     it('should return search card with a valid link', async () => {
+      const endpoint = `${app.url}/search`;
       await Promise.all([
         cacheTidalUniversalLinkResponse('https://tidal.com/browse/track/71717750/u', {
           spotify: null,
@@ -170,6 +170,7 @@ describe('Page router', () => {
     });
 
     it('should return search card with a valid link - From Universal link', async () => {
+      const endpoint = `${app.url}/search`;
       await Promise.all([
         cacheSearchResultLink(
           new URL(
@@ -253,6 +254,7 @@ describe('Page router', () => {
     });
 
     it('should return search card when searchLinks are empty', async () => {
+      const endpoint = `${app.url}/search`;
       const response = await nodeFetch(endpoint, {
         method: 'POST',
         body: formDataFromObject({ link }),
@@ -272,6 +274,7 @@ describe('Page router', () => {
     });
 
     it('should return error message when sent an invalid link', async () => {
+      const endpoint = `${app.url}/search`;
       const response = await nodeFetch(endpoint, {
         method: 'POST',
         body: formDataFromObject({
@@ -288,6 +291,7 @@ describe('Page router', () => {
     });
 
     it('should return error message when internal app error', async () => {
+      const endpoint = `${app.url}/search`;
       const getSearchParserMock = spyOn(linkParser, 'getSearchParser');
 
       getSearchParserMock.mockImplementationOnce(() => {

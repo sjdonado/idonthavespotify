@@ -1,5 +1,6 @@
 import { Notyf } from 'notyf';
 
+/** @type {Notyf | undefined} */
 let _toast;
 
 /**

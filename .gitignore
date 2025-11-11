@@ -6,9 +6,11 @@ dist
 
 .DS_Store
 Thumbs.db
+*.log
 
 .env
 todo.md
 
 /sqlite
 .cache
+

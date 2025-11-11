@@ -3,9 +3,31 @@ import { Howl } from 'howler';
 
 import { copyToClipboard } from './helpers';
 
+/**
+ * @typedef {Object} ControllerValues
+ * @property {String} id
+ * @property {String} universalLink
+ * @property {String} audio
+ */
+
+/**
+ * @typedef {Object} ControllerTargets
+ * @property {HTMLElement} icon
+ * @property {HTMLElement} audioProgress
+ */
+
 export default class extends Controller {
+  /** @type {ControllerValues} */
   static values = { id: String, universalLink: String, audio: String };
+
+  /** @type {string[]} */
   static targets = ['icon', 'audioProgress'];
+
+  /** @type {Howl | undefined} */
+  soundPlayer;
+
+  /** @type {number | undefined} */
+  audioProgressInterval;
 
   async connect() {
     this.soundPlayer = new Howl({

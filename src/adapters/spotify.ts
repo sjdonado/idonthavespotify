@@ -2,8 +2,8 @@ import { compareTwoStrings } from 'string-similarity';
 
 import {
   ADAPTERS_QUERY_LIMIT,
-  RESPONSE_COMPARE_MIN_SCORE,
   RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
+  RESPONSE_COMPARE_MIN_SCORE,
 } from '~/config/constants';
 import { Adapter, MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
@@ -15,7 +15,6 @@ import {
 } from '~/services/cache';
 import type { SearchMetadata, SearchResultLink } from '~/services/search';
 import { getOrUpdateAccessToken } from '~/utils/access-token';
-import { responseMatchesQuery } from '~/utils/compare';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 
