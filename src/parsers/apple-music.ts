@@ -35,32 +35,25 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
     const doc = getCheerioDoc(html);
 
     const songUrl = metaTagContent(doc, 'music:song', 'property');
-    const description = metaTagContent(doc, 'og:description', 'property');
+    const ogTitle = metaTagContent(doc, 'og:title', 'property');
     const image = metaTagContent(doc, 'og:image', 'property');
 
-    if (!songUrl || !image) {
-      throw new Error('AppleMusic metadata not found');
-    }
-
-    let title = '';
-    if (songUrl) {
-      const songMatch = songUrl.match(/\/song\/([^\/]+)/);
-      if (songMatch && songMatch[1]) {
-        const songName = formatName(songMatch[1]);
-
-        const artists: string[] = [];
-        doc('meta[property="music:musician"]').each((_, element) => {
-          const artistUrl = doc(element).attr('content');
-          if (artistUrl) {
-            const artistMatch = artistUrl.match(/\/artist\/([^\/]+)/);
-            if (artistMatch && artistMatch[1]) {
-              artists.push(formatName(artistMatch[1]));
-            }
-          }
-        });
-
-        title = [songName, ...artists].join(' ');
+    // Extract audio URL from script tags
+    let audioUrl: string | undefined;
+    const audioUrlRegex = /https:\/\/audio-ssl\.itunes\.apple\.com[^\s"']+\.m4a/;
+    doc('script').each((_, element) => {
+      const scriptContent = doc(element).html();
+      if (scriptContent) {
+        const match = scriptContent.match(audioUrlRegex);
+        if (match) {
+          audioUrl = match[0];
+          return false; // Break the loop
+        }
       }
+    });
+
+    if (!songUrl || !image || !ogTitle) {
+      throw new Error('AppleMusic metadata not found');
     }
 
     let type = AppleMusicMetadataType.Album;
@@ -74,16 +67,33 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
       type = AppleMusicMetadataType.Artist;
     }
 
-    const parsedDescription = description
-      ?.replace(/(Listen to\s|on\sApple\sMusic)/gi, '')
-      .trim();
+    // First, remove "Apple Music" and the preceding word (on/bei/en/sur/etc.)
+    const withoutSuffix = ogTitle.replace(/\s+(?:on|bei|en|sur|su|no|op|på|w)\s+Apple\s+Music$/i, '');
+
+    // Then match the last occurrence of the separator word (by/von/de/etc.)
+    // Using greedy match to capture from the LAST separator (handles titles with "de", "di", etc.)
+    const titleRegex = /^(.+)\s+(?:by|von|de|par|di|door|av|af|przez)\s+(.+)$/i;
+    const match = withoutSuffix.match(titleRegex);
+
+    let title: string;
+    let description: string;
+
+    if (match) {
+      title = match[1].trim();
+      description = `${match[1].trim()} ${match[2].trim()}`;
+    } else {
+      // Fallback: use the cleaned string as both title and description
+      title = withoutSuffix.trim();
+      description = title;
+    }
 
     const metadata = {
       id,
       title,
-      description: parsedDescription,
+      description,
       type: APPLE_MUSIC_METADATA_TO_METADATA_TYPE[type],
       image,
+      audio: audioUrl,
     } as SearchMetadata;
 
     await cacheSearchMetadata(id, Parser.AppleMusic, metadata);
