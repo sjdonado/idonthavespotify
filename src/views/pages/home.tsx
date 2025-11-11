@@ -42,7 +42,7 @@ export default function Home({
               data-search-target="link"
               type="text"
               name="link"
-              class="flex-1 rounded-lg bg-zinc-700 p-2.5 font-normal text-white placeholder:text-zinc-400"
+              class="flex-1 rounded-lg bg-zinc-700 p-2.5 text-base font-normal text-white placeholder:text-zinc-400"
               placeholder="https://open.spotify.com/track/7A8MwSsu9efJXP6xvZfRN3?si=d4f1e2eb324c43df"
               value={source}
             />
