@@ -11,7 +11,7 @@ Adapters represent the streaming services supported by the Web App and the Rayca
 | Adapter          | Inverted Search | Official API           | Verified Links |
 | ---------------- | --------------- | ---------------------- | -------------- |
 | Spotify          | Yes             | Yes                    | Yes            |
-| Tidal            | Yes but unstable| Yes                    | Yes            |
+| Tidal            | Yes             | Yes                    | Yes            |
 | YouTube Music    | Yes             | No                     | Yes            |
 | Apple Music      | Yes             | No                     | Yes            |
 | Deezer           | Yes             | Yes                    | Yes            |
@@ -40,12 +40,24 @@ This separation keeps the system modular: parsers focus on understanding the sou
   <img width="1200" alt="image" src="https://github.com/user-attachments/assets/ae6250f5-d1ed-41f2-ae21-8a2b2599a450" />
 </div>
 
-## Raycast Extension
+## Extensions
+
+### Raycast
 
 <a title="Install idonthavespotify Raycast Extension" href="https://www.raycast.com/sjdonado/idonthavespotify"><img src="https://www.raycast.com/sjdonado/idonthavespotify/install_button@2x.png?v=1.1" height="64" style="height: 64px;" alt=""></a>
 
+Source code: https://github.com/raycast/extensions/tree/main/extensions/idonthavespotify
 
-## Local Setup (Web App)
+### Martillo
+
+Martillo is an open source Raycast alternative (https://github.com/sjdonado/martillo). To install run:
+
+```sh
+cd ~/.martillo
+./scripts/store-cli.sh add https://github.com/sjdonado/idonthavespotify/tree/master/extra/martillo
+```
+
+## Local Setup
 
 The list of environment variables is available in `.env.test`. To complete the values for the following variables:
 
@@ -64,9 +76,6 @@ docker compose up -d
 bun install
 bun dev
 ```
-
-## Local Setup (Raycast)
-Follow the guidelines https://developers.raycast.com/basics/create-your-first-extension and look for the folder: https://github.com/raycast/extensions/tree/8533f11972392b6d22f69f073fdb2af6d8ffee10/extensions/idonthavespotify
 
 ## More info
 
