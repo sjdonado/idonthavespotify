@@ -5,7 +5,7 @@
 local toast = require 'lib.toast'
 local events = require 'lib.events'
 local icons = require 'lib.icons'
-local pickerManager = require 'lib.picker'
+local chooserManager = require 'lib.chooser'
 
 -- API Configuration
 local API_BASE = 'https://idonthavespotify.sjdonado.com'
@@ -60,7 +60,7 @@ return {
         loading = true
       end
 
-      actionsLauncher:openChildPicker {
+      actionsLauncher:openChildChooser {
         placeholder = hasValidLink and 'Converting music link...' or "I Don't Have Spotify",
         parentAction = 'idonthavespotify',
         initialQuery = queryLink or '',
@@ -103,82 +103,75 @@ return {
         local url = string.format('%s/api/search?v=%s', API_BASE, API_VERSION)
         local payload = hs.json.encode { link = link }
 
-        hs.http.asyncPost(
-          url,
-          payload,
-          { ['Content-Type'] = 'application/json' },
-          function(status, body, headers)
-            loading = false
+        hs.http.asyncPost(url, payload, { ['Content-Type'] = 'application/json' }, function(status, body, headers)
+          loading = false
 
-            if status == 200 then
-              local success, data = pcall(function()
-                return hs.json.decode(body)
-              end)
+          if status == 200 then
+            local success, data = pcall(function()
+              return hs.json.decode(body)
+            end)
 
-              if success and data and data.links then
-                -- Store song info
-                songInfo = {
-                  title = data.title,
-                  type = data.type,
-                  description = data.description,
-                  image = data.image,
-                }
+            if success and data and data.links then
+              -- Store song info
+              songInfo = {
+                title = data.title,
+                type = data.type,
+                description = data.description,
+                image = data.image,
+              }
 
-                -- Clear previous results
-                results = {}
+              -- Clear previous results
+              results = {}
 
-                -- Add universal link as first option if available
-                if data.universalLink then
+              -- Add universal link as first option if available
+              if data.universalLink then
+                table.insert(results, {
+                  text = 'Universal Link (Share All)',
+                  subText = data.universalLink,
+                  url = data.universalLink,
+                  platformType = 'universal',
+                })
+              end
+
+              -- Process platform-specific links
+              for _, linkData in ipairs(data.links) do
+                if not linkData.notAvailable then
+                  local platformName = PLATFORM_NAMES[linkData.type] or linkData.type
+                  local verified = linkData.isVerified and ' ✓' or ''
+
                   table.insert(results, {
-                    text = 'Universal Link (Share All)',
-                    subText = data.universalLink,
-                    url = data.universalLink,
-                    platformType = 'universal',
+                    text = string.format('%s%s', platformName, verified),
+                    subText = linkData.url,
+                    url = linkData.url,
+                    platformType = linkData.type,
                   })
                 end
-
-                -- Process platform-specific links
-                for _, linkData in ipairs(data.links) do
-                  if not linkData.notAvailable then
-                    local platformName = PLATFORM_NAMES[linkData.type] or linkData.type
-                    local verified = linkData.isVerified and ' ✓' or ''
-
-                    table.insert(results, {
-                      text = string.format('%s%s', platformName, verified),
-                      subText = linkData.url,
-                      url = linkData.url,
-                      platformType = linkData.type,
-                    })
-                  end
-                end
-
-                lastQuery = {
-                  link = link,
-                  results = results,
-                  songInfo = songInfo,
-                }
-
-                actionsLauncher:refresh()
-              else
-                logger.e('Failed to parse API response: ' .. tostring(body))
-                toast.error 'Failed to parse API response'
               end
-            elseif status == 429 then
-              local errorData = hs.json.decode(body) or {}
-              local retryAfter = errorData.retryAfter or 60
-              logger.w(string.format('Rate limited. Retry after %d seconds', retryAfter))
-              toast.error(string.format('Rate limited. Retry after %d seconds', retryAfter))
-            else
-              local errorData = hs.json.decode(body) or {}
-              local errorMsg = errorData.error or 'Unknown error'
-              logger.e(string.format('API error %d: %s', status, errorMsg))
-              toast.error(string.format('API error: %s', errorMsg))
-            end
-          end
-        )
-      end
 
-      return 'OPEN_CHILD_PICKER'
+              lastQuery = {
+                link = link,
+                results = results,
+                songInfo = songInfo,
+              }
+
+              actionsLauncher:refresh()
+            else
+              logger.e('Failed to parse API response: ' .. tostring(body))
+              toast.error 'Failed to parse API response'
+            end
+          elseif status == 429 then
+            local errorData = hs.json.decode(body) or {}
+            local retryAfter = errorData.retryAfter or 60
+            logger.w(string.format('Rate limited. Retry after %d seconds', retryAfter))
+            toast.error(string.format('Rate limited. Retry after %d seconds', retryAfter))
+          else
+            local errorData = hs.json.decode(body) or {}
+            local errorMsg = errorData.error or 'Unknown error'
+            logger.e(string.format('API error %d: %s', status, errorMsg))
+            toast.error(string.format('API error: %s', errorMsg))
+          end
+        end)
+      end
     end,
   },
 }

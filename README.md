@@ -50,7 +50,11 @@ Source code: https://github.com/raycast/extensions/tree/main/extensions/idonthav
 
 ### Martillo
 
-Martillo is an open source Raycast alternative (https://github.com/sjdonado/martillo). To install run:
+Martillo is an open source Raycast alternative (https://github.com/sjdonado/martillo).
+
+<img width="887" height="720" alt="image" src="https://github.com/user-attachments/assets/27434115-f4a3-4bc9-bbc9-a6824fbe0593" />
+
+#### To install run:
 
 ```sh
 cd ~/.martillo
