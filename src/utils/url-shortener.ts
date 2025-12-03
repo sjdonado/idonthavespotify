@@ -13,6 +13,10 @@ interface ApiResponse {
 }
 
 export async function shortenLink(link: string) {
+  if (!ENV.services.urlShortener.apiUrl) {
+    return link;
+  }
+
   const cache = await getCachedShortenLink(link);
   if (cache) {
     logger.info(`[url-shortener] (${link}) cache hit`);
