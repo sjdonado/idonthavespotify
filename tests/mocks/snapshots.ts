@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'fs';
-import path from 'path';
+import * as path from 'node:path';
 
 export type SnapshotTarget = {
   url: string;
@@ -32,7 +32,7 @@ export const headSnapshotTargets = {
     url: 'https://open.spotify.com/episode/43TCrgmP23qkLcAXZQN8qT',
     file: 'tests/mocks/head/spotify-episode-43TCrgmP23qkLcAXZQN8qT.html',
   },
-} satisfies Record<string, SnapshotTarget>;
+} as const satisfies Record<string, SnapshotTarget>;
 
 export const searchSnapshotTargets = {
   soundCloudRollingStone: {
@@ -100,12 +100,12 @@ export const searchSnapshotTargets = {
     file: 'tests/mocks/search/youtube-empty.json',
     staticBody: JSON.stringify({ items: [] }),
   },
-} satisfies Record<string, SnapshotTarget>;
+} as const satisfies Record<string, SnapshotTarget>;
 
 export const allSnapshotTargets = {
   ...headSnapshotTargets,
   ...searchSnapshotTargets,
-} satisfies Record<string, SnapshotTarget>;
+} as const satisfies Record<string, SnapshotTarget>;
 
 export const loadSnapshotsFromDisk = <T extends Record<string, SnapshotTarget>>(
   targets: T

@@ -9,8 +9,8 @@
     "build": "bun run build.config.ts --minify",
     "build:prod": "bun build src/index.ts --compile --outfile ./dist/idonthavespotify",
     "test": "NODE_ENV=test bun test",
-    "test:ci": "NODE_ENV=test bun test integration",
     "test:mocks:fetch": "bun run scripts/fetch-snapshots.ts",
+    "test:ci": "bun run test:mocks:fetch && NODE_ENV=test bun test",
     "lint": "eslint ./src",
     "typecheck": "tsc --noEmit"
   },

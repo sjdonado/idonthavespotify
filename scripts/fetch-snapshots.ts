@@ -1,5 +1,6 @@
+import * as path from 'node:path';
+
 import { mkdir, writeFile } from 'fs/promises';
-import path from 'path';
 
 import { allSnapshotTargets } from '../tests/mocks/snapshots';
 
