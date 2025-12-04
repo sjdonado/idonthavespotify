@@ -18,6 +18,7 @@ import { ENV } from '~/config/env';
 import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
 
+import { headSnapshots, searchSnapshots } from './mocks/snapshots';
 import { createTestApp, nodeFetch } from './utils/request';
 import {
   apiSearchEndpoint,
@@ -52,6 +53,7 @@ describe('Api router', () => {
   });
 
   afterAll(() => {
+    app.stop();
     axiosMock.reset();
     getUniversalMetadataFromTidalaxiosMock.mockReset();
   });
@@ -74,7 +76,30 @@ describe('Api router', () => {
     const link = 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc';
 
     it('should return 200', async () => {
-      axiosMock.onGet().passThrough();
+      const query = 'Like a Rolling Stone Bob Dylan';
+
+      axiosMock.onGet(getTidalSearchLink(query, MetadataType.Song)).reply(404);
+      axiosMock.onGet(getYouTubeSearchLink(query, MetadataType.Song)).reply(404);
+      axiosMock.onGet(getAppleMusicSearchLink(query)).reply(
+        200,
+        `
+        <div aria-label="Songs"><a href="https://music.apple.com/ca/album/like-a-rolling-stone/192688369?i=192688675">Like a Rolling Stone</a></div>
+      `
+      );
+      axiosMock.onGet(getDeezerSearchLink(query, 'track')).reply(200, {
+        data: [
+          {
+            title: 'Like a Rolling Stone',
+            link: 'https://www.deezer.com/track/14477354',
+          },
+        ],
+      });
+      axiosMock
+        .onGet(getSoundCloudSearchLink(query))
+        .reply(200, searchSnapshots.soundCloudRollingStone);
+      axiosMock
+        .onGet('https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc')
+        .reply(200, headSnapshots.spotifyTrackRollingStone);
 
       const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
@@ -91,33 +116,33 @@ describe('Api router', () => {
         type: 'song',
         title: 'Like a Rolling Stone',
         description: 'Bob Dylan · Highway 61 Revisited · Song · 1965',
-        image: 'https://i.scdn.co/image/ab67616d0000b27341720ef0ae31e10d39e43ca2',
-        audio: 'https://p.scdn.co/mp3-preview/d48c45e3194cfe07470c85e50ca7dc7440661caa',
+        image: 'https://i.scdn.co/image/ab67616d0000b2730cb0884829c5503b2e242541',
+        audio: 'https://p.scdn.co/mp3-preview/62c229b1cadd22b991df9aeaedd38e873ddaccbe',
         source: 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc',
         universalLink: urlShortenerResponseMock.data.refer,
         links: [
           {
             isVerified: true,
             notAvailable: false,
-            type: "appleMusic",
-            url: "https://geo.music.apple.com/ca/album/like-a-rolling-stone/192688369?i=192688675",
+            type: 'appleMusic',
+            url: 'https://geo.music.apple.com/ca/album/like-a-rolling-stone/192688369?i=192688675',
           },
           {
+            isVerified: true,
+            notAvailable: false,
             type: 'deezer',
-            notAvailable: false,
             url: 'https://www.deezer.com/track/14477354',
-            isVerified: true,
           },
           {
-            type: 'soundCloud',
+            isVerified: true,
             notAvailable: false,
+            type: 'soundCloud',
             url: 'https://soundcloud.com/bobdylan/like-a-rolling-stone-1',
-            isVerified: true,
           },
           {
+            isVerified: true,
             type: 'spotify',
             url: 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc',
-            isVerified: true,
           },
         ],
       });
@@ -133,16 +158,9 @@ describe('Api router', () => {
       axiosMock.onGet(getDeezerSearchLink(query, 'track')).reply(500);
       axiosMock.onGet(getSoundCloudSearchLink(query)).reply(500);
       // Mock Spotify metadata API
-      axiosMock.onGet('https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc').reply(
-        200,
-        `
-        <meta property="og:title" content="Like a Rolling Stone" />
-        <meta property="og:description" content="Bob Dylan · Highway 61 Revisited · Song · 1965" />
-        <meta property="og:image" content="https://i.scdn.co/image/ab67616d0000b27341720ef0ae31e10d39e43ca2" />
-        <meta property="og:type" content="music.song" />
-        <meta property="og:audio" content="https://p.scdn.co/mp3-preview/d48c45e3194cfe07470c85e50ca7dc7440661caa" />
-      `
-      );
+      axiosMock
+        .onGet('https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc')
+        .reply(200, headSnapshots.spotifyTrackRollingStone);
 
       axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
@@ -161,10 +179,10 @@ describe('Api router', () => {
         type: 'song',
         title: 'Like a Rolling Stone',
         description: 'Bob Dylan · Highway 61 Revisited · Song · 1965',
-        image: 'https://i.scdn.co/image/ab67616d0000b27341720ef0ae31e10d39e43ca2',
-        audio: 'https://p.scdn.co/mp3-preview/d48c45e3194cfe07470c85e50ca7dc7440661caa',
+        image: 'https://i.scdn.co/image/ab67616d0000b2730cb0884829c5503b2e242541',
+        audio: 'https://p.scdn.co/mp3-preview/62c229b1cadd22b991df9aeaedd38e873ddaccbe',
         source: link,
-        universalLink: 'http://localhost:4000/2saYhYg',
+        universalLink: urlShortenerResponseMock.data.refer,
         links: [
           {
             isVerified: true,
@@ -176,7 +194,9 @@ describe('Api router', () => {
     });
 
     it('should return 200 when adapter adapter matches the parser type', async () => {
-      axiosMock.onGet().passThrough();
+      axiosMock
+        .onGet('https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc')
+        .reply(200, headSnapshots.spotifyTrackRollingStone);
 
       const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
@@ -193,11 +213,10 @@ describe('Api router', () => {
         type: 'song',
         title: 'Like a Rolling Stone',
         description: 'Bob Dylan · Highway 61 Revisited · Song · 1965',
-        image: 'https://i.scdn.co/image/ab67616d0000b27341720ef0ae31e10d39e43ca2',
-        audio: 'https://p.scdn.co/mp3-preview/d48c45e3194cfe07470c85e50ca7dc7440661caa',
+        image: 'https://i.scdn.co/image/ab67616d0000b2730cb0884829c5503b2e242541',
+        audio: 'https://p.scdn.co/mp3-preview/62c229b1cadd22b991df9aeaedd38e873ddaccbe',
         source: 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc',
-        universalLink:
-          'http://localhost:3000?id=b3Blbi5zcG90aWZ5LmNvbS90cmFjay8zQWhYWmE4c1VRaHQwVUVkQkpncEdj',
+        universalLink: urlShortenerResponseMock.data.refer,
         links: [
           {
             isVerified: true,

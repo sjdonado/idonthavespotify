@@ -53,17 +53,17 @@ export type SearchResult = {
 
 export type SearchProps =
   | {
-    link?: string;
-    searchId?: string;
-    adapters?: Adapter[];
-    headless: true;
-  }
+      link?: string;
+      searchId?: string;
+      adapters?: Adapter[];
+      headless: true;
+    }
   | {
-    link?: string;
-    searchId?: string;
-    adapters?: Adapter[];
-    headless: false;
-  };
+      link?: string;
+      searchId?: string;
+      adapters?: Adapter[];
+      headless: false;
+    };
 
 export type SearchReturn<T extends SearchProps> = T['headless'] extends true
   ? string | string[]
@@ -142,10 +142,10 @@ export const search = async <T extends SearchProps>({
   const linkSearchResult: SearchResultLink | null = isParserOnlyService
     ? null
     : {
-      type: parserType,
-      url: link as string,
-      isVerified: true,
-    };
+        type: parserType,
+        url: link as string,
+        isVerified: true,
+      };
 
   // Early return if only one adapter matches the parser type
   // Skip this for parser-only services like Google
@@ -161,6 +161,8 @@ export const search = async <T extends SearchProps>({
       return link as SearchReturn<T>;
     }
 
+    const shortLink = await shortenLink(universalLink);
+
     return {
       id,
       type: metadata.type,
@@ -169,7 +171,7 @@ export const search = async <T extends SearchProps>({
       image: metadata.image,
       audio: metadata.audio,
       source: searchParser.source,
-      universalLink,
+      universalLink: shortLink,
       links: [linkSearchResult!],
     } as SearchReturn<T>;
   }
@@ -237,38 +239,38 @@ export const search = async <T extends SearchProps>({
   const [parsedMetadata, shortLink] = await Promise.all([
     needsSpotifyMetadata
       ? (async () => {
-        logger.info(
-          `[${search.name}] Fetching Spotify metadata for verified available link: ${spotifyLink.url}`
-        );
-        const spotifySearchParser = getSearchParser(spotifyLink.url);
-        const spotifyMetadata = await getSpotifyMetadata(
-          spotifySearchParser.id,
-          spotifyLink.url
-        );
-        logger.info(
-          `[${search.name}] Spotify metadata - Title: "${spotifyMetadata.title}", Audio: ${spotifyMetadata.audio ? 'available' : 'none'}, Image: ${spotifyMetadata.image ? 'available' : 'none'}`
-        );
-        // Merge metadata: use Spotify's audio and image if original metadata doesn't have them
-        return {
-          ...metadata,
-          audio: metadata.audio || spotifyMetadata.audio,
-          image: metadata.image || spotifyMetadata.image,
-        };
-      })()
+          logger.info(
+            `[${search.name}] Fetching Spotify metadata for verified available link: ${spotifyLink.url}`
+          );
+          const spotifySearchParser = getSearchParser(spotifyLink.url);
+          const spotifyMetadata = await getSpotifyMetadata(
+            spotifySearchParser.id,
+            spotifyLink.url
+          );
+          logger.info(
+            `[${search.name}] Spotify metadata - Title: "${spotifyMetadata.title}", Audio: ${spotifyMetadata.audio ? 'available' : 'none'}, Image: ${spotifyMetadata.image ? 'available' : 'none'}`
+          );
+          // Merge metadata: use Spotify's audio and image if original metadata doesn't have them
+          return {
+            ...metadata,
+            audio: metadata.audio || spotifyMetadata.audio,
+            image: metadata.image || spotifyMetadata.image,
+          };
+        })()
       : (async () => {
-        if (parserType !== Adapter.Spotify && spotifyLink) {
-          if (spotifyLink.notAvailable) {
-            logger.info(
-              `[${search.name}] Skipping not available Spotify link for metadata: ${spotifyLink.url}`
-            );
-          } else if (!spotifyLink.isVerified) {
-            logger.info(
-              `[${search.name}] Skipping unverified Spotify link for metadata: ${spotifyLink.url}`
-            );
+          if (parserType !== Adapter.Spotify && spotifyLink) {
+            if (spotifyLink.notAvailable) {
+              logger.info(
+                `[${search.name}] Skipping not available Spotify link for metadata: ${spotifyLink.url}`
+              );
+            } else if (!spotifyLink.isVerified) {
+              logger.info(
+                `[${search.name}] Skipping unverified Spotify link for metadata: ${spotifyLink.url}`
+              );
+            }
           }
-        }
-        return metadata;
-      })(),
+          return metadata;
+        })(),
     shortenLink(universalLink),
   ]);
 

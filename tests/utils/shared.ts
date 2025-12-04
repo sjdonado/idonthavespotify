@@ -5,6 +5,8 @@ import { ENV } from '~/config/env';
 
 export const apiSearchEndpoint = (baseUrl: URL) => `${baseUrl}api/search?v=1`;
 
+export const pageSearchEndpoint = (baseUrl: URL) => `${baseUrl}search`;
+
 export const urlShortenerLink = ENV.services.urlShortener.apiUrl;
 export const urlShortenerResponseMock = {
   data: {
@@ -26,7 +28,7 @@ export const cachedResponse = {
   image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
   audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
   source: 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384',
-  universalLink: 'http://localhost:4000/2saYhYg',
+  universalLink: urlShortenerResponseMock.data.refer,
   links: [
     {
       type: 'appleMusic',

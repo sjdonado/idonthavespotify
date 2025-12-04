@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test';
+
 import { APPLE_MUSIC_LINK_REGEX } from '~/config/constants';
 
 describe('Apple Music Link Regex', () => {

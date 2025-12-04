@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
-import { getSearchParser } from '~/parsers/link';
+
 import { Parser } from '~/config/enum';
+import { getSearchParser } from '~/parsers/link';
 
 describe('Apple Music Link Parser', () => {
   test('Should preserve query parameters in source', () => {

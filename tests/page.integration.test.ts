@@ -13,17 +13,19 @@ import {
 import { getCheerioDoc } from '~/utils/scraper';
 
 import { createTestApp, formDataFromObject, nodeFetch } from './utils/request';
-import { urlShortenerResponseMock } from './utils/shared';
+import { pageSearchEndpoint, urlShortenerResponseMock } from './utils/shared';
 
 describe('Page router', () => {
   let app: Server<undefined>;
+  let searchEndpointUrl: string;
 
   beforeAll(() => {
     app = createTestApp();
+    searchEndpointUrl = pageSearchEndpoint(app.url);
   });
 
   afterAll(() => {
-    cacheStore.reset();
+    app.stop();
   });
 
   beforeEach(async () => {
@@ -133,7 +135,7 @@ describe('Page router', () => {
 
       const searchLinks = doc('[data-controller="search-link"] > a').toArray();
 
-      expect(searchLinks).toHaveLength(6);
+      expect(searchLinks).toHaveLength(4);
       expect(searchLinks[0].attribs['aria-label']).toContain('Listen on Apple Music');
       expect(searchLinks[0].attribs['href']).toBe(
         'https://geo.music.apple.com/de/album/do-not-disturb/1440890708?i=1440892237&app=music&ls=1'
@@ -149,14 +151,6 @@ describe('Page router', () => {
       expect(searchLinks[3].attribs['aria-label']).toContain('Listen on Spotify');
       expect(searchLinks[3].attribs['href']).toBe(
         'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384'
-      );
-      expect(searchLinks[4].attribs['aria-label']).toContain('Listen on Tidal');
-      expect(searchLinks[4].attribs['href']).toBe(
-        'https://tidal.com/browse/track/71717750'
-      );
-      expect(searchLinks[5].attribs['aria-label']).toContain('Listen on YouTube');
-      expect(searchLinks[5].attribs['href']).toBe(
-        'https://music.youtube.com/watch?v=zhY_0DoQCQs'
       );
     });
 

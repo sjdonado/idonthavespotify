@@ -17,9 +17,11 @@ import { ENV } from '~/config/env';
 import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
 
+import { headSnapshots, searchSnapshots } from './mocks/snapshots';
 import { createTestApp, nodeFetch } from './utils/request';
 import {
   apiSearchEndpoint,
+  getSoundCloudSearchLink,
   urlShortenerLink,
   urlShortenerResponseMock,
 } from './utils/shared';
@@ -45,6 +47,7 @@ describe('GET /search', () => {
   });
 
   afterAll(() => {
+    app.stop();
     cacheStore.reset();
     axiosMock.reset();
     getUniversalMetadataFromTidalMock.mockReset();
@@ -67,18 +70,12 @@ describe('GET /search', () => {
   describe('GET /search - Song', () => {
     it('should return 200', async () => {
       const link = 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc';
+      const query = 'Like a Rolling Stone Bob Dylan';
 
       // Mock Spotify metadata API
-      axiosMock.onGet('https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc').reply(
-        200,
-        `
-        <meta property="og:title" content="Like a Rolling Stone" />
-        <meta property="og:description" content="Bob Dylan · Highway 61 Revisited · Song · 1965" />
-        <meta property="og:image" content="https://i.scdn.co/image/ab67616d0000b27341720ef0ae31e10d39e43ca2" />
-        <meta property="og:type" content="music.song" />
-        <meta property="og:audio" content="https://p.scdn.co/mp3-preview/d48c45e3194cfe07470c85e50ca7dc7440661caa" />
-      `
-      );
+      axiosMock
+        .onGet('https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc')
+        .reply(200, headSnapshots.spotifyTrackRollingStone);
 
       // Mock adapter API calls
       axiosMock.onGet(/music\.apple\.com.*search/).reply(
@@ -97,14 +94,13 @@ describe('GET /search', () => {
         ],
       });
 
-      axiosMock.onGet(/soundcloud\.com.*search/).reply(
-        200,
-        `
-        <noscript><ul><li><h2><a href="/bobdylan/like-a-rolling-stone-1">Like a Rolling Stone</a></h2></li></ul></noscript>
-      `
-      );
+      const soundCloudSearchUrl = getSoundCloudSearchLink(query);
+      axiosMock
+        .onGet(soundCloudSearchUrl)
+        .reply(200, searchSnapshots.soundCloudRollingStone);
 
       axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
+      axiosMock.onGet(/youtube\.googleapis\.com/).reply(200, { items: [] });
 
       const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
@@ -121,27 +117,33 @@ describe('GET /search', () => {
         type: 'song',
         title: 'Like a Rolling Stone',
         description: 'Bob Dylan · Highway 61 Revisited · Song · 1965',
-        image: 'https://i.scdn.co/image/ab67616d0000b27341720ef0ae31e10d39e43ca2',
-        audio: 'https://p.scdn.co/mp3-preview/d48c45e3194cfe07470c85e50ca7dc7440661caa',
+        image: 'https://i.scdn.co/image/ab67616d0000b2730cb0884829c5503b2e242541',
+        audio: 'https://p.scdn.co/mp3-preview/62c229b1cadd22b991df9aeaedd38e873ddaccbe',
         source: 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc',
         universalLink: urlShortenerResponseMock.data.refer,
         links: [
           {
+            isVerified: true,
+            notAvailable: false,
             type: 'appleMusic',
             url: 'https://geo.music.apple.com/ca/album/like-a-rolling-stone/192688369?i=192688675',
-            isVerified: true,
-            notAvailable: false,
           },
           {
+            isVerified: true,
+            notAvailable: false,
             type: 'deezer',
             url: 'https://www.deezer.com/track/14477354',
-            isVerified: true,
-            notAvailable: false,
           },
           {
+            isVerified: true,
+            notAvailable: false,
+            type: 'soundCloud',
+            url: 'https://soundcloud.com/bobdylan/like-a-rolling-stone-1',
+          },
+          {
+            isVerified: true,
             type: 'spotify',
             url: 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc',
-            isVerified: true,
           },
         ],
       });
@@ -151,18 +153,12 @@ describe('GET /search', () => {
 
     it('should return 200 - Mobile link', async () => {
       const mobileSpotifyLink = 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc';
+      const query = 'Like a Rolling Stone Bob Dylan';
 
       // Mock Spotify metadata API
-      axiosMock.onGet(/open\.spotify\.com\/track\/3AhXZa8sUQht0UEdBJgpGc/).reply(
-        200,
-        `
-        <meta property="og:title" content="Like a Rolling Stone" />
-        <meta property="og:description" content="Bob Dylan · Highway 61 Revisited · Song · 1965" />
-        <meta property="og:image" content="https://i.scdn.co/image/ab67616d0000b27341720ef0ae31e10d39e43ca2" />
-        <meta property="og:type" content="music.song" />
-        <meta property="og:audio" content="https://p.scdn.co/mp3-preview/d48c45e3194cfe07470c85e50ca7dc7440661caa" />
-      `
-      );
+      axiosMock
+        .onGet(/open\.spotify\.com\/track\/3AhXZa8sUQht0UEdBJgpGc/)
+        .reply(200, headSnapshots.spotifyTrackRollingStone);
 
       // Mock adapter API calls
       axiosMock.onGet(/music\.apple\.com.*search/).reply(
@@ -181,12 +177,10 @@ describe('GET /search', () => {
         ],
       });
 
-      axiosMock.onGet(/soundcloud\.com.*search/).reply(
-        200,
-        `
-        <noscript><ul><li><h2><a href="/bobdylan/like-a-rolling-stone-1">Like a Rolling Stone</a></h2></li></ul></noscript>
-      `
-      );
+      const soundCloudSearchUrl = getSoundCloudSearchLink(query);
+      axiosMock
+        .onGet(soundCloudSearchUrl)
+        .reply(200, searchSnapshots.soundCloudRollingStone);
 
       axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
@@ -205,10 +199,10 @@ describe('GET /search', () => {
         type: 'song',
         title: 'Like a Rolling Stone',
         description: 'Bob Dylan · Highway 61 Revisited · Song · 1965',
-        image: 'https://i.scdn.co/image/ab67616d0000b27341720ef0ae31e10d39e43ca2',
-        audio: 'https://p.scdn.co/mp3-preview/d48c45e3194cfe07470c85e50ca7dc7440661caa',
+        image: 'https://i.scdn.co/image/ab67616d0000b2730cb0884829c5503b2e242541',
+        audio: 'https://p.scdn.co/mp3-preview/62c229b1cadd22b991df9aeaedd38e873ddaccbe',
         source: 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc',
-        universalLink: 'http://localhost:4000/2saYhYg',
+        universalLink: urlShortenerResponseMock.data.refer,
         links: [
           {
             type: 'appleMusic',
@@ -219,6 +213,12 @@ describe('GET /search', () => {
           {
             type: 'deezer',
             url: 'https://www.deezer.com/track/14477354',
+            isVerified: true,
+            notAvailable: false,
+          },
+          {
+            type: 'soundCloud',
+            url: 'https://soundcloud.com/bobdylan/like-a-rolling-stone-1',
             isVerified: true,
             notAvailable: false,
           },
@@ -236,18 +236,12 @@ describe('GET /search', () => {
     it('should return 200 - Extra query params', async () => {
       const link =
         'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc?si=NbEEVPZvTVuov_nA3ylJJQ&utm_source=copy-link&utm_medium=copy-link&context=spotify%3Aalbum%3A4czdORdCWP9umpbhFXK2aW&_branch_match_id=1238568162599463760&_branch_referrer=H2sIAAAAAAAAA8soKSkottLXLy7IL8lMq9TLyczL1q%2Fy8nHxLLXwM3RJAgDKC3LnIAAAAA%3D%3D';
+      const query = 'Like a Rolling Stone Bob Dylan';
 
       // Mock Spotify metadata API
-      axiosMock.onGet(/open\.spotify\.com\/track\/3AhXZa8sUQht0UEdBJgpGc/).reply(
-        200,
-        `
-        <meta property="og:title" content="Like a Rolling Stone" />
-        <meta property="og:description" content="Bob Dylan · Highway 61 Revisited · Song · 1965" />
-        <meta property="og:image" content="https://i.scdn.co/image/ab67616d0000b27341720ef0ae31e10d39e43ca2" />
-        <meta property="og:type" content="music.song" />
-        <meta property="og:audio" content="https://p.scdn.co/mp3-preview/d48c45e3194cfe07470c85e50ca7dc7440661caa" />
-      `
-      );
+      axiosMock
+        .onGet(/open\.spotify\.com\/track\/3AhXZa8sUQht0UEdBJgpGc/)
+        .reply(200, headSnapshots.spotifyTrackRollingStone);
 
       // Mock adapter API calls
       axiosMock.onGet(/music\.apple\.com.*search/).reply(
@@ -266,12 +260,10 @@ describe('GET /search', () => {
         ],
       });
 
-      axiosMock.onGet(/soundcloud\.com.*search/).reply(
-        200,
-        `
-        <noscript><ul><li><h2><a href="/bobdylan/like-a-rolling-stone-1">Like a Rolling Stone</a></h2></li></ul></noscript>
-      `
-      );
+      const soundCloudSearchUrl = getSoundCloudSearchLink(query);
+      axiosMock
+        .onGet(soundCloudSearchUrl)
+        .reply(200, searchSnapshots.soundCloudRollingStone);
 
       axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
@@ -290,11 +282,11 @@ describe('GET /search', () => {
         type: 'song',
         title: 'Like a Rolling Stone',
         description: 'Bob Dylan · Highway 61 Revisited · Song · 1965',
-        image: 'https://i.scdn.co/image/ab67616d0000b27341720ef0ae31e10d39e43ca2',
-        audio: 'https://p.scdn.co/mp3-preview/d48c45e3194cfe07470c85e50ca7dc7440661caa',
+        image: 'https://i.scdn.co/image/ab67616d0000b2730cb0884829c5503b2e242541',
+        audio: 'https://p.scdn.co/mp3-preview/62c229b1cadd22b991df9aeaedd38e873ddaccbe',
         source:
           'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc?si=NbEEVPZvTVuov_nA3ylJJQ&utm_source=copy-link&utm_medium=copy-link&context=spotify%3Aalbum%3A4czdORdCWP9umpbhFXK2aW&_branch_match_id=1238568162599463760&_branch_referrer=H2sIAAAAAAAAA8soKSkottLXLy7IL8lMq9TLyczL1q%2Fy8nHxLLXwM3RJAgDKC3LnIAAAAA%3D%3D',
-        universalLink: 'http://localhost:4000/2saYhYg',
+        universalLink: urlShortenerResponseMock.data.refer,
         links: [
           {
             type: 'appleMusic',
@@ -305,6 +297,12 @@ describe('GET /search', () => {
           {
             type: 'deezer',
             url: 'https://www.deezer.com/track/14477354',
+            isVerified: true,
+            notAvailable: false,
+          },
+          {
+            type: 'soundCloud',
+            url: 'https://soundcloud.com/bobdylan/like-a-rolling-stone-1',
             isVerified: true,
             notAvailable: false,
           },
@@ -325,15 +323,9 @@ describe('GET /search', () => {
 
     it('should return 200', async () => {
       // Mock Spotify metadata API
-      axiosMock.onGet(/open\.spotify\.com\/album\/7dqftJ3kas6D0VAdmt3k3V/).reply(
-        200,
-        `
-        <meta property="og:title" content="Stories" />
-        <meta property="og:description" content="Avicii · Album · 2015 · 14 songs" />
-        <meta property="og:image" content="https://i.scdn.co/image/ab67616d0000b2735393c5d3cac806092a9bc468" />
-        <meta property="og:type" content="music.album" />
-      `
-      );
+      axiosMock
+        .onGet(/open\.spotify\.com\/album\/7dqftJ3kas6D0VAdmt3k3V/)
+        .reply(200, headSnapshots.spotifyAlbumStories);
 
       // Mock adapter API calls
       axiosMock.onGet(/music\.apple\.com.*search/).reply(
@@ -352,12 +344,10 @@ describe('GET /search', () => {
         ],
       });
 
-      axiosMock.onGet(/soundcloud\.com.*search/).reply(
-        200,
-        `
-        <noscript><ul><li><h2><a href="/aviciiofficial/sets/stories-253">Stories</a></h2></li></ul></noscript>
-      `
-      );
+      const soundCloudSearchUrl = getSoundCloudSearchLink('Stories Avicii');
+      axiosMock
+        .onGet(soundCloudSearchUrl)
+        .reply(200, searchSnapshots.soundCloudStoriesAvicii);
 
       axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
@@ -374,11 +364,11 @@ describe('GET /search', () => {
       expect(data).toEqual({
         id: 'b3Blbi5zcG90aWZ5LmNvbS9hbGJ1bS83ZHFmdEoza2FzNkQwVkFkbXQzazNW',
         type: 'album',
-        title: 'Stories',
-        description: 'Avicii · Album · 2015 · 14 songs',
+        title: 'Stories - Album by Avicii | Spotify',
+        description: 'Avicii · album · 2015 · 14 songs',
         image: 'https://i.scdn.co/image/ab67616d0000b2735393c5d3cac806092a9bc468',
         source: 'https://open.spotify.com/album/7dqftJ3kas6D0VAdmt3k3V',
-        universalLink: 'http://localhost:4000/2saYhYg',
+        universalLink: urlShortenerResponseMock.data.refer,
         links: [
           {
             type: 'spotify',
@@ -397,6 +387,12 @@ describe('GET /search', () => {
             isVerified: false,
             notAvailable: false,
           },
+          {
+            type: 'soundCloud',
+            url: 'https://soundcloud.com/aviciiofficial/sets/stories-253',
+            isVerified: false,
+            notAvailable: false,
+          },
         ],
       });
     });
@@ -407,15 +403,9 @@ describe('GET /search', () => {
       const link = 'https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5';
 
       // Mock Spotify metadata API
-      axiosMock.onGet('https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5').reply(
-        200,
-        `
-        <meta property="og:title" content="J. Cole" />
-        <meta property="og:description" content="Artist · 36.2M monthly listeners." />
-        <meta property="og:image" content="https://i.scdn.co/image/ab6761610000e5eb4b053c29fd4b317ff825f0dc" />
-        <meta property="og:type" content="profile" />
-      `
-      );
+      axiosMock
+        .onGet('https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5')
+        .reply(200, headSnapshots.spotifyArtistJCole);
 
       // Mock adapter API calls
       axiosMock.onGet(/music\.apple\.com.*search/).reply(
@@ -429,12 +419,8 @@ describe('GET /search', () => {
         data: [{ name: 'J. Cole', link: 'https://www.deezer.com/artist/339209' }],
       });
 
-      axiosMock.onGet(/soundcloud\.com.*search/).reply(
-        200,
-        `
-        <noscript><ul><li><h2><a href="/j-cole">J. Cole</a></h2></li></ul></noscript>
-      `
-      );
+      const soundCloudSearchUrl = getSoundCloudSearchLink('J. Cole');
+      axiosMock.onGet(soundCloudSearchUrl).reply(200, searchSnapshots.soundCloudJCole);
 
       axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
@@ -452,10 +438,10 @@ describe('GET /search', () => {
         id: 'b3Blbi5zcG90aWZ5LmNvbS9hcnRpc3QvNmwzSHZRNXNhNm1YVHNNVEIxOXJPNQ',
         type: 'artist',
         title: 'J. Cole',
-        description: 'Artist · 36.2M monthly listeners.',
+        description: 'Artist · 32.9M monthly listeners.',
         image: 'https://i.scdn.co/image/ab6761610000e5eb4b053c29fd4b317ff825f0dc',
         source: 'https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5',
-        universalLink: 'http://localhost:4000/2saYhYg',
+        universalLink: urlShortenerResponseMock.data.refer,
         links: [
           {
             isVerified: true,
@@ -468,6 +454,12 @@ describe('GET /search', () => {
             notAvailable: false,
             type: 'deezer',
             url: 'https://www.deezer.com/artist/339209',
+          },
+          {
+            isVerified: true,
+            notAvailable: false,
+            type: 'soundCloud',
+            url: 'https://soundcloud.com/j-cole',
           },
           {
             isVerified: true,
@@ -484,15 +476,9 @@ describe('GET /search', () => {
       const link = 'https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ';
 
       // Mock Spotify metadata API
-      axiosMock.onGet('https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ').reply(
-        200,
-        `
-        <meta property="og:title" content="This Is Bad Bunny" />
-        <meta property="og:description" content="Playlist · Spotify · 129 items · 5.6M saves" />
-        <meta property="og:image" content="https://i.scdn.co/image/ab67706f00000002b5c87a0cb63c40dfe1ffd68e" />
-        <meta property="og:type" content="music.playlist" />
-      `
-      );
+      axiosMock
+        .onGet('https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ')
+        .reply(200, headSnapshots.spotifyPlaylistBadBunny);
 
       // Mock adapter API calls
       axiosMock.onGet(/music\.apple\.com.*search/).reply(
@@ -511,12 +497,10 @@ describe('GET /search', () => {
         ],
       });
 
-      axiosMock.onGet(/soundcloud\.com.*search/).reply(
-        200,
-        `
-        <noscript><ul><li><h2><a href="/domingos-odemar/sets/this-is-bad-bunny">This Is Bad Bunny</a></h2></li></ul></noscript>
-      `
-      );
+      const soundCloudSearchUrl = getSoundCloudSearchLink('This Is Bad Bunny');
+      axiosMock
+        .onGet(soundCloudSearchUrl)
+        .reply(200, searchSnapshots.soundCloudThisIsBadBunny);
 
       axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
@@ -534,10 +518,10 @@ describe('GET /search', () => {
         id: 'b3Blbi5zcG90aWZ5LmNvbS9wbGF5bGlzdC8zN2k5ZFFaRjFEWDJhcFd6eUVDd3la',
         type: 'playlist',
         title: 'This Is Bad Bunny',
-        description: 'Playlist · Spotify · 129 items · 5.6M saves',
-        image: 'https://i.scdn.co/image/ab67706f00000002b5c87a0cb63c40dfe1ffd68e',
+        description: 'Playlist · Spotify · 129 items · 5.8M saves',
+        image: 'https://i.scdn.co/image/ab67706f00000002a548bbf4cd54767b735f9701',
         source: 'https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ',
-        universalLink: 'http://localhost:4000/2saYhYg',
+        universalLink: urlShortenerResponseMock.data.refer,
         links: [
           {
             isVerified: true,
@@ -556,6 +540,12 @@ describe('GET /search', () => {
             type: 'appleMusic',
             url: 'https://geo.music.apple.com/ca/playlist/bad-bunny-essentials/pl.1c35ac10cfe848aaa19f68ebe62ea46e',
           },
+          {
+            isVerified: false,
+            notAvailable: false,
+            type: 'soundCloud',
+            url: 'https://soundcloud.com/dodo-boys-in-the-hood/bad-bunny-eoo-dodo-edit-perreo',
+          },
         ],
       });
     });
@@ -566,22 +556,19 @@ describe('GET /search', () => {
       const link = 'https://open.spotify.com/episode/2uvOfpJRRliCWpbiCXKf4Q';
 
       // Mock Spotify metadata API
-      axiosMock.onGet(/open\.spotify\.com\/episode\/2uvOfpJRRliCWpbiCXKf4Q/).reply(
-        200,
-        `
-        <meta property="og:title" content="¿Dónde estabas el 6 de noviembre del año 1985?" />
-        <meta property="og:description" content="Tercera Vuelta · Episode" />
-        <meta property="og:image" content="https://i.scdn.co/image/ab6765630000ba8a85c9dd1468476ba33d95f0e9" />
-        <meta property="og:audio" content="https://podz-content.spotifycdn.com/audio/clips/6omeNtNZD86P8h4edCGXRl/clip_176359_236359.mp3" />
-      `
-      );
+      axiosMock
+        .onGet(/open\.spotify\.com\/episode\/2uvOfpJRRliCWpbiCXKf4Q/)
+        .reply(200, headSnapshots.spotifyEpisodeTerceraVuelta);
 
       // Mock adapter API calls - podcasts usually don't have matches on other platforms
       axiosMock.onGet(/music\.apple\.com.*search/).reply(200, '<div></div>');
       axiosMock.onGet(/api\.deezer\.com.*search/).reply(200, { data: [] });
+      const soundCloudSearchUrl = getSoundCloudSearchLink(
+        '¿Dónde estabas el 6 de noviembre del año 1985?'
+      );
       axiosMock
-        .onGet(/soundcloud\.com.*search/)
-        .reply(200, '<noscript><ul></ul></noscript>');
+        .onGet(soundCloudSearchUrl)
+        .reply(200, searchSnapshots.soundCloudTerceraVuelta);
       axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
@@ -603,7 +590,7 @@ describe('GET /search', () => {
         audio:
           'https://podz-content.spotifycdn.com/audio/clips/6omeNtNZD86P8h4edCGXRl/clip_176359_236359.mp3',
         source: 'https://open.spotify.com/episode/2uvOfpJRRliCWpbiCXKf4Q',
-        universalLink: 'http://localhost:4000/2saYhYg',
+        universalLink: urlShortenerResponseMock.data.refer,
         links: [
           {
             isVerified: true,
@@ -620,25 +607,19 @@ describe('GET /search', () => {
       const link = 'https://open.spotify.com/episode/43TCrgmP23qkLcAXZQN8qT';
 
       // Mock Spotify metadata API
-      axiosMock.onGet('https://open.spotify.com/episode/43TCrgmP23qkLcAXZQN8qT').reply(
-        200,
-        `
-        <meta property="og:title" content="The End of Twitter as We Know It" />
-        <meta property="og:description" content="Waveform: The MKBHD Podcast · Episode" />
-        <meta property="og:image" content="https://i.scdn.co/image/ab6765630000ba8aa05ac56dbc44378f45ef693a" />
-        <meta property="og:audio" content="https://podz-content.spotifycdn.com/audio/clips/0Dijh26Vc2UoFrsXfkACQ8/clip_2900584_2965529.mp3" />
-      `
-      );
+      axiosMock
+        .onGet('https://open.spotify.com/episode/43TCrgmP23qkLcAXZQN8qT')
+        .reply(200, headSnapshots.spotifyEpisodeWaveform);
 
       // Mock adapter API calls
       axiosMock.onGet(/music\.apple\.com.*search/).reply(200, '<div></div>');
       axiosMock.onGet(/api\.deezer\.com.*search/).reply(200, { data: [] });
-      axiosMock.onGet(/soundcloud\.com.*search/).reply(
-        200,
-        `
-        <noscript><ul><li><h2><a href="/rem-official/its-the-end-of-the-world-as-4">It's the End of the World</a></h2></li></ul></noscript>
-      `
+      const soundCloudSearchUrl = getSoundCloudSearchLink(
+        'The End of Twitter as We Know It'
       );
+      axiosMock
+        .onGet(soundCloudSearchUrl)
+        .reply(200, searchSnapshots.soundCloudWaveformEndOfTwitter);
       axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
@@ -656,16 +637,22 @@ describe('GET /search', () => {
         type: 'podcast',
         title: 'The End of Twitter as We Know It',
         description: 'Waveform: The MKBHD Podcast · Episode',
-        image: 'https://i.scdn.co/image/ab6765630000ba8aa05ac56dbc44378f45ef693a',
+        image: 'https://i.scdn.co/image/ab6765630000ba8a7878c8215f202b56b20a007e',
         audio:
-          'https://podz-content.spotifycdn.com/audio/clips/0Dijh26Vc2UoFrsXfkACQ8/clip_2900584_2965529.mp3',
+          'https://podz-content.spotifycdn.com/audio/clips/3GYsio7wUsfky3DC7ut4uL/clip_140000_202520.mp3',
         source: 'https://open.spotify.com/episode/43TCrgmP23qkLcAXZQN8qT',
-        universalLink: 'http://localhost:4000/2saYhYg',
+        universalLink: urlShortenerResponseMock.data.refer,
         links: [
           {
             isVerified: true,
             type: 'spotify',
             url: 'https://open.spotify.com/episode/43TCrgmP23qkLcAXZQN8qT',
+          },
+          {
+            isVerified: false,
+            notAvailable: false,
+            type: 'soundCloud',
+            url: 'https://soundcloud.com/ipc-sound-room/its-the-end-of-the-world-as-we-know-it',
           },
         ],
       });

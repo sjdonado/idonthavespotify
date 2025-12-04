@@ -1,15 +1,9 @@
-import type { Server } from 'bun';
-
 import { createApp } from '~/index';
 
 export const nodeFetch = fetch;
 
-let _testApp: Server<undefined>;
 export function createTestApp() {
-  if (_testApp) return _testApp;
-
-  _testApp = createApp();
-  return _testApp;
+  return createApp();
 }
 
 export const formDataFromObject = (body: object) => {
