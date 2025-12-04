@@ -14,7 +14,7 @@ RUN bun run build:prod
 
 FROM alpine:3.20
 
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache ca-certificates libstdc++ libgcc
 WORKDIR /app
 
 COPY --from=builder /usr/src/app/public ./public
