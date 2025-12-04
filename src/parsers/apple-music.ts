@@ -68,7 +68,10 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
     }
 
     // First, remove "Apple Music" and the preceding word (on/bei/en/sur/etc.)
-    const withoutSuffix = ogTitle.replace(/\s+(?:on|bei|en|sur|su|no|op|på|w)\s+Apple\s+Music$/i, '');
+    const withoutSuffix = ogTitle.replace(
+      /\s+(?:on|bei|en|sur|su|no|op|på|w)\s+Apple\s+Music$/i,
+      ''
+    );
 
     // Then match the last occurrence of the separator word (by/von/de/etc.)
     // Using greedy match to capture from the LAST separator (handles titles with "de", "di", etc.)
@@ -113,10 +116,3 @@ export const getAppleMusicQueryFromMetadata = (metadata: SearchMetadata) => {
 
   return query;
 };
-
-function formatName(name: string): string {
-  return name
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}

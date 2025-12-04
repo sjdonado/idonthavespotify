@@ -1,6 +1,6 @@
 import { file, serve } from 'bun';
 import { h, Helmet, renderSSR } from 'nano-jsx';
-import { resolve, normalize, sep } from 'path';
+import { resolve, sep } from 'path';
 
 import { Adapter } from './config/enum';
 import {

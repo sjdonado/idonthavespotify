@@ -170,5 +170,5 @@ async function resolveShortYouTubeLink(shortLink: string): Promise<string> {
     response.request._currentUrl ||
     response.request._headers?.path;
 
-  return `https://youtube.com${path}` || shortLink;
+  return path ? `https://youtube.com${path}` : shortLink;
 }

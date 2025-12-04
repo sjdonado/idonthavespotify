@@ -10,8 +10,7 @@
     "build:prod": "bun build src/index.ts --compile --outfile ./dist/idonthavespotify",
     "test": "NODE_ENV=test bun test",
     "test:ci": "NODE_ENV=test bun test integration",
-    "lint": "eslint ./src/**/*.{ts,tsx}",
-    "lint:fix": "eslint ./src/**/*.{ts,tsx} --fix",
+    "lint": "eslint ./src",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
