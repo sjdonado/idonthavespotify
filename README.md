@@ -64,19 +64,23 @@ cd ~/.martillo
 ## Local Setup
 
 The list of environment variables is available in `.env.test`. To complete the values for the following variables:
-
 - `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET`, refer to [Spotify Web API Documentation](https://developer.spotify.com/documentation/web-api).
 - `TIDAL_CLIENT_ID` and `TIDAL_CLIENT_SECRET`, refer to [TIDAL Developer Portal](https://developer.tidal.com/).
 - `YOUTUBE_API_KEY`, refer to [Google Developers Console](https://console.developers.google.com/).
-- `URL_SHORTENER_API_KEY`, refer to [Bit](https://github.com/sjdonado/bit)
 
 Ensure that the values are correctly added to your `.env` file to configure the API keys properly.
 
-To get the app up:
+- To get the app up:
+```sh
+bun install
+bun dev
+```
 
+- To run with url-shortener:
+
+Set this ENV file `URL_SHORTENER_API_KEY`, with the value used in `docker-compose.yml`
 ```sh
 docker compose up -d
-
 bun install
 bun dev
 ```
