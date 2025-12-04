@@ -25,7 +25,7 @@ import {
 } from './utils/shared';
 
 describe('GET /search', () => {
-  let app: Server;
+  let app: Server<undefined>;
   let searchEndpointUrl: string;
 
   let axiosMock: InstanceType<typeof AxiosMockAdapter>;

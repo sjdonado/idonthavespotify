@@ -88,7 +88,7 @@ export function withRateLimit(
       return newResponse;
     } catch (error) {
       // Log the error and re-throw
-      logger.error(`Error in rate-limited handler for IP ${ip}:`, error);
+      logger.error(error, `Error in rate-limited handler for IP ${ip}:`);
       throw error;
     }
   };
@@ -171,7 +171,7 @@ export function withRateLimitHTML(
 
       return response;
     } catch (error) {
-      logger.error(`Error in rate-limited handler for IP ${ip}:`, error);
+      logger.error(error, `Error in rate-limited handler for IP ${ip}:`);
       throw error;
     }
   };

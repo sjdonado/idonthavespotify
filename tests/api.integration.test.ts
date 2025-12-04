@@ -32,7 +32,7 @@ import {
 } from './utils/shared';
 
 describe('Api router', () => {
-  let app: Server;
+  let app: Server<undefined>;
   let searchEndpointUrl: string;
 
   let axiosMock: InstanceType<typeof AxiosMockAdapter>;

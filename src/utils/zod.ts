@@ -2,11 +2,15 @@ import type { ZodError } from 'zod';
 
 export function validationError(error: ZodError) {
   const fieldErrors = error.flatten().fieldErrors;
-  const firstError = Object.values(fieldErrors)[0]?.[0] || 'Validation error';
+  const errorKeys = Object.keys(fieldErrors);
+  const firstError =
+    errorKeys.length > 0
+      ? fieldErrors[errorKeys[0] as keyof typeof fieldErrors]?.[0]
+      : undefined;
 
   throw Response.json(
     {
-      error: firstError,
+      error: firstError ?? 'Validation error',
     },
     { status: 400 }
   );

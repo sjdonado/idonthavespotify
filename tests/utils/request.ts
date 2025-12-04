@@ -4,7 +4,7 @@ import { createApp } from '~/index';
 
 export const nodeFetch = fetch;
 
-let _testApp: Server;
+let _testApp: Server<undefined>;
 export function createTestApp() {
   if (_testApp) return _testApp;
 

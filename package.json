@@ -11,7 +11,7 @@
     "test:ci": "NODE_ENV=test bun test integration",
     "lint": "eslint ./src/**/*.{ts,tsx}",
     "lint:fix": "eslint ./src/**/*.{ts,tsx} --fix",
-    "tscheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@hotwired/stimulus": "^3.2.2",

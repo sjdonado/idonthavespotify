@@ -16,7 +16,7 @@ import { createTestApp, formDataFromObject, nodeFetch } from './utils/request';
 import { urlShortenerResponseMock } from './utils/shared';
 
 describe('Page router', () => {
-  let app: Server;
+  let app: Server<undefined>;
 
   beforeAll(() => {
     app = createTestApp();
