@@ -97,7 +97,7 @@ export const getSpotifyQueryFromMetadata = (metadata: SearchMetadata) => {
   const parsedTitle = metadata.title
     // Remove suffixes/tags added to the title by Spotify
     .replace(
-      /(\s-\s(Album|Song)\sby\s(.+?))?\s\|\sSpotify$/g,
+      /(\s(?:–|-)\s.*?\s(?:by|von|de|par|di|door|av|af|przez)\s.+)?\s\|\sSpotify$/i,
       ''
     )
     // Remove emojis
