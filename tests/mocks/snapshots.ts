@@ -1,9 +1,10 @@
-import { readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import path from 'path';
 
 export type SnapshotTarget = {
   url: string;
   file: string;
+  staticBody?: string;
 };
 
 export const headSnapshotTargets = {
@@ -58,6 +59,47 @@ export const searchSnapshotTargets = {
     url: 'https://soundcloud.com/search?q=The%20End%20of%20Twitter%20as%20We%20Know%20It',
     file: 'tests/mocks/search/soundcloud-the-end-of-twitter-as-we-know-it.html',
   },
+  appleMusicRollingStone: {
+    url: 'https://music.apple.com/ca/search?term=Like%20a%20Rolling%20Stone%20Bob%20Dylan',
+    file: 'tests/mocks/search/applemusic-like-a-rolling-stone.html',
+  },
+  appleMusicStories: {
+    url: 'https://music.apple.com/ca/search?term=Stories%20Avicii',
+    file: 'tests/mocks/search/applemusic-stories-avicii.html',
+  },
+  appleMusicJCole: {
+    url: 'https://music.apple.com/ca/search?term=J%20Cole',
+    file: 'tests/mocks/search/applemusic-j-cole.html',
+  },
+  appleMusicBadBunnyPlaylist: {
+    url: 'https://music.apple.com/ca/search?term=This%20Is%20Bad%20Bunny',
+    file: 'tests/mocks/search/applemusic-bad-bunny-playlist.html',
+  },
+  deezerRollingStone: {
+    url: 'https://api.deezer.com/search/track?q=Like%20a%20Rolling%20Stone%20Bob%20Dylan&limit=4',
+    file: 'tests/mocks/search/deezer-like-a-rolling-stone.json',
+  },
+  deezerStories: {
+    url: 'https://api.deezer.com/search/album?q=Stories%20Avicii&limit=4',
+    file: 'tests/mocks/search/deezer-stories-avicii.json',
+  },
+  deezerJCole: {
+    url: 'https://api.deezer.com/search/artist?q=J%20Cole&limit=4',
+    file: 'tests/mocks/search/deezer-j-cole.json',
+  },
+  deezerBadBunnyPlaylist: {
+    url: 'https://api.deezer.com/search/playlist?q=This%20Is%20Bad%20Bunny&limit=4',
+    file: 'tests/mocks/search/deezer-bad-bunny-playlist.json',
+  },
+  youtubeMusicRollingStone: {
+    url: 'https://music.youtube.com/search?q=Like%20a%20Rolling%20Stone%20Bob%20Dylan',
+    file: 'tests/mocks/search/youtubemusic-like-a-rolling-stone.html',
+  },
+  youtubeDataEmpty: {
+    url: 'https://youtube.googleapis.com/mock',
+    file: 'tests/mocks/search/youtube-empty.json',
+    staticBody: JSON.stringify({ items: [] }),
+  },
 } satisfies Record<string, SnapshotTarget>;
 
 export const allSnapshotTargets = {
@@ -65,14 +107,21 @@ export const allSnapshotTargets = {
   ...searchSnapshotTargets,
 } satisfies Record<string, SnapshotTarget>;
 
-const loadSnapshots = <T extends Record<string, SnapshotTarget>>(targets: T) =>
+export const loadSnapshotsFromDisk = <T extends Record<string, SnapshotTarget>>(
+  targets: T
+) =>
   Object.fromEntries(
     Object.entries(targets).map(([key, target]) => {
       const snapshotPath = path.resolve(process.cwd(), target.file);
+      if (!existsSync(snapshotPath)) {
+        throw new Error(
+          `Snapshot missing: ${snapshotPath}. Run "bun run test:mocks:fetch".`
+        );
+      }
       const snapshot = readFileSync(snapshotPath, 'utf8');
       return [key, snapshot];
     })
   ) as { [K in keyof T]: string };
 
-export const headSnapshots = loadSnapshots(headSnapshotTargets);
-export const searchSnapshots = loadSnapshots(searchSnapshotTargets);
+export const loadHeadSnapshots = () => loadSnapshotsFromDisk(headSnapshotTargets);
+export const loadSearchSnapshots = () => loadSnapshotsFromDisk(searchSnapshotTargets);

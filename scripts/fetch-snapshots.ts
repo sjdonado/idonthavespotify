@@ -24,7 +24,7 @@ async function saveSnapshots() {
     const snapshotPath = path.resolve(process.cwd(), target.file);
     await mkdir(path.dirname(snapshotPath), { recursive: true });
 
-    const body = await fetchSnapshot(target.url);
+    const body = target.staticBody ?? (await fetchSnapshot(target.url));
     await writeFile(snapshotPath, body, 'utf8');
     console.log(`Saved snapshot for ${target.url} -> ${target.file}`);
   }

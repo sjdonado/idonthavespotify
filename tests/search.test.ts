@@ -17,7 +17,7 @@ import { ENV } from '~/config/env';
 import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
 
-import { headSnapshots, searchSnapshots } from './mocks/snapshots';
+import { loadHeadSnapshots, loadSearchSnapshots } from './mocks/snapshots';
 import { createTestApp, nodeFetch } from './utils/request';
 import {
   apiSearchEndpoint,
@@ -25,6 +25,9 @@ import {
   urlShortenerLink,
   urlShortenerResponseMock,
 } from './utils/shared';
+
+const headSnapshots = loadHeadSnapshots();
+const searchSnapshots = loadSearchSnapshots();
 
 describe('GET /search', () => {
   let app: Server<undefined>;
@@ -78,21 +81,13 @@ describe('GET /search', () => {
         .reply(200, headSnapshots.spotifyTrackRollingStone);
 
       // Mock adapter API calls
-      axiosMock.onGet(/music\.apple\.com.*search/).reply(
-        200,
-        `
-        <div aria-label="Songs"><a href="https://music.apple.com/ca/album/like-a-rolling-stone/192688369?i=192688675">Like a Rolling Stone</a></div>
-      `
-      );
+      axiosMock
+        .onGet(/music\.apple\.com.*search/)
+        .reply(200, searchSnapshots.appleMusicRollingStone);
 
-      axiosMock.onGet(/api\.deezer\.com.*search.*track/).reply(200, {
-        data: [
-          {
-            title: 'Like a Rolling Stone',
-            link: 'https://www.deezer.com/track/14477354',
-          },
-        ],
-      });
+      axiosMock
+        .onGet(/api\.deezer\.com.*search.*track/)
+        .reply(200, JSON.parse(searchSnapshots.deezerRollingStone));
 
       const soundCloudSearchUrl = getSoundCloudSearchLink(query);
       axiosMock
@@ -161,21 +156,13 @@ describe('GET /search', () => {
         .reply(200, headSnapshots.spotifyTrackRollingStone);
 
       // Mock adapter API calls
-      axiosMock.onGet(/music\.apple\.com.*search/).reply(
-        200,
-        `
-        <div aria-label="Songs"><a href="https://music.apple.com/ca/album/like-a-rolling-stone/192688369?i=192688675">Like a Rolling Stone</a></div>
-      `
-      );
+      axiosMock
+        .onGet(/music\.apple\.com.*search/)
+        .reply(200, searchSnapshots.appleMusicRollingStone);
 
-      axiosMock.onGet(/api\.deezer\.com.*search.*track/).reply(200, {
-        data: [
-          {
-            title: 'Like a Rolling Stone',
-            link: 'https://www.deezer.com/track/14477354',
-          },
-        ],
-      });
+      axiosMock
+        .onGet(/api\.deezer\.com.*search.*track/)
+        .reply(200, JSON.parse(searchSnapshots.deezerRollingStone));
 
       const soundCloudSearchUrl = getSoundCloudSearchLink(query);
       axiosMock
@@ -244,21 +231,13 @@ describe('GET /search', () => {
         .reply(200, headSnapshots.spotifyTrackRollingStone);
 
       // Mock adapter API calls
-      axiosMock.onGet(/music\.apple\.com.*search/).reply(
-        200,
-        `
-        <div aria-label="Songs"><a href="https://music.apple.com/ca/album/like-a-rolling-stone/192688369?i=192688675">Like a Rolling Stone</a></div>
-      `
-      );
+      axiosMock
+        .onGet(/music\.apple\.com.*search/)
+        .reply(200, searchSnapshots.appleMusicRollingStone);
 
-      axiosMock.onGet(/api\.deezer\.com.*search.*track/).reply(200, {
-        data: [
-          {
-            title: 'Like a Rolling Stone',
-            link: 'https://www.deezer.com/track/14477354',
-          },
-        ],
-      });
+      axiosMock
+        .onGet(/api\.deezer\.com.*search.*track/)
+        .reply(200, JSON.parse(searchSnapshots.deezerRollingStone));
 
       const soundCloudSearchUrl = getSoundCloudSearchLink(query);
       axiosMock
@@ -328,21 +307,13 @@ describe('GET /search', () => {
         .reply(200, headSnapshots.spotifyAlbumStories);
 
       // Mock adapter API calls
-      axiosMock.onGet(/music\.apple\.com.*search/).reply(
-        200,
-        `
-        <div aria-label="Albums"><a href="https://music.apple.com/ca/album/stories/1440834059">Stories</a></div>
-      `
-      );
+      axiosMock
+        .onGet(/music\.apple\.com.*search/)
+        .reply(200, searchSnapshots.appleMusicStories);
 
-      axiosMock.onGet(/api\.deezer\.com.*search.*album/).reply(200, {
-        data: [
-          {
-            title: 'Stories',
-            link: 'https://www.deezer.com/album/11192186',
-          },
-        ],
-      });
+      axiosMock
+        .onGet(/api\.deezer\.com.*search.*album/)
+        .reply(200, JSON.parse(searchSnapshots.deezerStories));
 
       const soundCloudSearchUrl = getSoundCloudSearchLink('Stories Avicii');
       axiosMock
@@ -383,7 +354,7 @@ describe('GET /search', () => {
           },
           {
             type: 'deezer',
-            url: 'https://www.deezer.com/album/11192186',
+            url: 'https://www.deezer.com/album/11191996',
             isVerified: false,
             notAvailable: false,
           },
@@ -408,16 +379,13 @@ describe('GET /search', () => {
         .reply(200, headSnapshots.spotifyArtistJCole);
 
       // Mock adapter API calls
-      axiosMock.onGet(/music\.apple\.com.*search/).reply(
-        200,
-        `
-        <div aria-label="Artists"><a href="https://music.apple.com/ca/artist/j-cole/73705833">J. Cole</a></div>
-      `
-      );
+      axiosMock
+        .onGet(/music\.apple\.com.*search/)
+        .reply(200, searchSnapshots.appleMusicJCole);
 
-      axiosMock.onGet(/api\.deezer\.com.*search.*artist/).reply(200, {
-        data: [{ name: 'J. Cole', link: 'https://www.deezer.com/artist/339209' }],
-      });
+      axiosMock
+        .onGet(/api\.deezer\.com.*search.*artist/)
+        .reply(200, JSON.parse(searchSnapshots.deezerJCole));
 
       const soundCloudSearchUrl = getSoundCloudSearchLink('J. Cole');
       axiosMock.onGet(soundCloudSearchUrl).reply(200, searchSnapshots.soundCloudJCole);
@@ -481,21 +449,13 @@ describe('GET /search', () => {
         .reply(200, headSnapshots.spotifyPlaylistBadBunny);
 
       // Mock adapter API calls
-      axiosMock.onGet(/music\.apple\.com.*search/).reply(
-        200,
-        `
-        <div aria-label="Playlists"><a href="https://music.apple.com/ca/playlist/bad-bunny-essentials/pl.1c35ac10cfe848aaa19f68ebe62ea46e">Bad Bunny Essentials</a></div>
-      `
-      );
+      axiosMock
+        .onGet(/music\.apple\.com.*search/)
+        .reply(200, searchSnapshots.appleMusicBadBunnyPlaylist);
 
-      axiosMock.onGet(/api\.deezer\.com.*search.*playlist/).reply(200, {
-        data: [
-          {
-            title: 'This Is Bad Bunny',
-            link: 'https://www.deezer.com/playlist/10737811462',
-          },
-        ],
-      });
+      axiosMock
+        .onGet(/api\.deezer\.com.*search.*playlist/)
+        .reply(200, JSON.parse(searchSnapshots.deezerBadBunnyPlaylist));
 
       const soundCloudSearchUrl = getSoundCloudSearchLink('This Is Bad Bunny');
       axiosMock
@@ -527,7 +487,7 @@ describe('GET /search', () => {
             isVerified: true,
             notAvailable: false,
             type: 'deezer',
-            url: 'https://www.deezer.com/playlist/10737811462',
+            url: 'https://www.deezer.com/playlist/13821871021',
           },
           {
             isVerified: true,

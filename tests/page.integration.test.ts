@@ -135,7 +135,7 @@ describe('Page router', () => {
 
       const searchLinks = doc('[data-controller="search-link"] > a').toArray();
 
-      expect(searchLinks).toHaveLength(4);
+      expect(searchLinks).toHaveLength(5);
       expect(searchLinks[0].attribs['aria-label']).toContain('Listen on Apple Music');
       expect(searchLinks[0].attribs['href']).toBe(
         'https://geo.music.apple.com/de/album/do-not-disturb/1440890708?i=1440892237&app=music&ls=1'
@@ -151,6 +151,10 @@ describe('Page router', () => {
       expect(searchLinks[3].attribs['aria-label']).toContain('Listen on Spotify');
       expect(searchLinks[3].attribs['href']).toBe(
         'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384'
+      );
+      expect(searchLinks[4].attribs['aria-label']).toContain('Listen on YouTube Music');
+      expect(searchLinks[4].attribs['href']).toBe(
+        'https://music.youtube.com/watch?v=zhY_0DoQCQs'
       );
     });
 

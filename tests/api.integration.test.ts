@@ -18,7 +18,7 @@ import { ENV } from '~/config/env';
 import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
 
-import { headSnapshots, searchSnapshots } from './mocks/snapshots';
+import { loadHeadSnapshots, loadSearchSnapshots } from './mocks/snapshots';
 import { createTestApp, nodeFetch } from './utils/request';
 import {
   apiSearchEndpoint,
@@ -31,6 +31,9 @@ import {
   urlShortenerLink,
   urlShortenerResponseMock,
 } from './utils/shared';
+
+const headSnapshots = loadHeadSnapshots();
+const searchSnapshots = loadSearchSnapshots();
 
 describe('Api router', () => {
   let app: Server<undefined>;
@@ -80,20 +83,12 @@ describe('Api router', () => {
 
       axiosMock.onGet(getTidalSearchLink(query, MetadataType.Song)).reply(404);
       axiosMock.onGet(getYouTubeSearchLink(query, MetadataType.Song)).reply(404);
-      axiosMock.onGet(getAppleMusicSearchLink(query)).reply(
-        200,
-        `
-        <div aria-label="Songs"><a href="https://music.apple.com/ca/album/like-a-rolling-stone/192688369?i=192688675">Like a Rolling Stone</a></div>
-      `
-      );
-      axiosMock.onGet(getDeezerSearchLink(query, 'track')).reply(200, {
-        data: [
-          {
-            title: 'Like a Rolling Stone',
-            link: 'https://www.deezer.com/track/14477354',
-          },
-        ],
-      });
+      axiosMock
+        .onGet(getAppleMusicSearchLink(query))
+        .reply(200, searchSnapshots.appleMusicRollingStone);
+      axiosMock
+        .onGet(getDeezerSearchLink(query, 'track'))
+        .reply(200, JSON.parse(searchSnapshots.deezerRollingStone));
       axiosMock
         .onGet(getSoundCloudSearchLink(query))
         .reply(200, searchSnapshots.soundCloudRollingStone);
