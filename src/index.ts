@@ -308,7 +308,9 @@ export const createApp = (port: string = '0') =>
     development: !isProduction,
   });
 
-const port = Bun.env['PORT'] ?? '3000';
-const app = createApp(port);
+if (import.meta.main) {
+  const port = Bun.env['PORT'] ?? '3000';
+  const app = createApp(port);
 
-logger.info(`Listening on ${app.url}`);
+  logger.info(`Listening on ${app.url}`);
+}

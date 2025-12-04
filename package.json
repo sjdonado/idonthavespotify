@@ -7,6 +7,7 @@
     "watch:assets": "bun run build.config.ts --watch",
     "watch:server": "bun run --watch src/index.ts",
     "build": "bun run build.config.ts --minify",
+    "build:prod": "bun build src/index.ts --compile --outfile ./dist/idonthavespotify",
     "test": "NODE_ENV=test bun test",
     "test:ci": "NODE_ENV=test bun test integration",
     "lint": "eslint ./src/**/*.{ts,tsx}",
