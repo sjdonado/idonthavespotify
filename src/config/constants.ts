@@ -9,7 +9,7 @@ export const YOUTUBE_LINK_REGEX =
   /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be|music\.youtube\.com)\/(?:watch\?v=|embed\/|v\/|shorts\/|playlist\?list=|channel\/)?([^&\s]{11,})/;
 
 export const APPLE_MUSIC_LINK_REGEX =
-  /^https:\/\/music\.apple\.com\/(?:[a-z]{2}\/)?(?:album|playlist|station|artist|music-video|video-playlist|show|song)\/([\w.-]+)(?:\/([\w.-]+))?(?:\?.*)?$/;
+  /^https:\/\/music\.apple\.com\/(?:[a-z]{2}(?:-[a-z]{2})?\/)?(?:album|playlist|station|artist|music-video|video-playlist|show|song)\/([^/?]+)(?:\/([^/?]+))?(?:\?.*)?$/;
 
 export const DEEZER_LINK_REGEX =
   /^https:\/\/www\.deezer\.com\/(?:[a-z]{2}\/)?(?:track|album|playlist|artist|episode|show)\/(\d+)/;

@@ -1,5 +1,6 @@
-import { existsSync, readFileSync } from 'fs';
 import * as path from 'node:path';
+
+import { existsSync, readFileSync } from 'fs';
 
 export type SnapshotTarget = {
   url: string;
