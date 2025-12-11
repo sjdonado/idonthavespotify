@@ -8,8 +8,16 @@ Base URL: `http://idonthavespotify.sjdonado.com`
 
 Convert music links across streaming platforms.
 
+**Authentication:**
+- If `API_AUTH_KEY` environment variable is configured, requests must include an `Authorization` header with a Bearer token
+- Header format: `Authorization: Bearer <your-api-key>`
+
 **Query Parameters:**
 - `v` (required): API version, must be `"1"`
+
+**Request Headers:**
+- `Authorization` (required if API_AUTH_KEY is set): `Bearer <your-api-key>`
+- `Content-Type`: `application/json`
 
 **Request Body:**
 ```json
@@ -47,10 +55,22 @@ Convert music links across streaming platforms.
 
 **Errors:**
 - `400`: Invalid link or missing parameters
+- `401`: Unauthorized - Invalid or missing API key
 - `429`: Rate limit exceeded (10 requests/minute)
 - `500`: Processing failed
 
 **Example:**
+```bash
+curl -X POST "http://idonthavespotify.sjdonado.com/api/search?v=1" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer your-api-key-here" \
+  -d '{
+    "link": "https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc",
+    "adapters": ["youTube", "appleMusic"]
+  }'
+```
+
+**Example without authentication (when API_AUTH_KEY is not configured):**
 ```bash
 curl -X POST "http://idonthavespotify.sjdonado.com/api/search?v=1" \
   -H "Content-Type: application/json" \

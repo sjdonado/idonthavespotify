@@ -1,0 +1,38 @@
+---
+alwaysApply: true
+---
+
+# 禁止生成文档规则说明
+
+## 规则名称：禁止生成文档
+
+MATCH **/*
+EXCEPT **/*.md
+EXCEPT **/*.txt
+EXCEPT docs/**
+EXCEPT README.md
+
+## 禁止生成或修改任何 Markdown 文档
+
+DO NOT create or modify:
+
+- *.md files
+- *.markdown files  
+- Documentation files
+- CHANGELOG, TODO, NOTES
+- Inline comments longer than 3 lines
+- JSDoc/TSDoc/Python docstrings unless explicitly requested
+
+## 允许的行为
+
+ALLOW:
+
+- Pure code changes
+- Refactoring
+- Bug fixes
+- Feature implementation
+- Short inline comments (≤2 lines)
+
+## 明确指令
+
+NEVER write documentation unless I type "please document" or "add docs"

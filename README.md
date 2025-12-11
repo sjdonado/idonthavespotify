@@ -67,6 +67,7 @@ The list of environment variables is available in `.env.test`. To complete the v
 - `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET`, refer to [Spotify Web API Documentation](https://developer.spotify.com/documentation/web-api).
 - `TIDAL_CLIENT_ID` and `TIDAL_CLIENT_SECRET`, refer to [TIDAL Developer Portal](https://developer.tidal.com/).
 - `YOUTUBE_API_KEY`, refer to [Google Developers Console](https://console.developers.google.com/).
+- `API_AUTH_KEY` (optional): If set, enables Bearer token authentication for `/api/search` endpoint. Leave empty to disable authentication.
 
 Ensure that the values are correctly added to your `.env` file to configure the API keys properly.
 

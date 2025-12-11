@@ -44,6 +44,7 @@ export const ENV = {
     url: Bun.env['APP_URL']!,
     version: version,
     apiKeyBeta: Bun.env['IDHS_API_KEY_BETA']!,
+    apiAuthKey: Bun.env['API_AUTH_KEY'],
   },
   cache: {
     databasePath: Bun.env['DATABASE_PATH'] ?? ':memory:',
