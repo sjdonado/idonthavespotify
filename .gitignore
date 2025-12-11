@@ -18,3 +18,5 @@ todo.md
 
 /tests/mocks/**/*.html
 /tests/mocks/**/*.json
+
+.yarn/
