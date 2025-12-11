@@ -35,10 +35,11 @@ export const getQobuzMetadata = async (id: string, link: string) => {
   }
 
   try {
-    const type = link.match(QOBUZ_LINK_REGEX)?.[3];
+    let type = link.match(QOBUZ_LINK_REGEX)?.[3];
     if (!type) {
       throw new Error('Qobuz link unable to be parsed correctly');
     }
+    if (type === 'interpreter'){ type = 'artist';}
 
     // `play.qobuz.com` pages require a login, so there's nothing to scrape...
     if (link.match(QOBUZ_LINK_REGEX)?.[1] === 'play') {
@@ -104,9 +105,12 @@ function cleanQobuzTrackMetadataForQuery(metadata: SearchMetadata) {
 }
 
 export const getQobuzQueryFromMetadata = (metadata: SearchMetadata) => {
-  const cleanFunction = metadataCleanersMap[metadata.type as keyof typeof metadataCleanersMap];
+  // TODO: Help! Typescript is confusing me.
+  // const cleanFunction = metadataCleanersMap[metadata.type];
 
-  const cleaned = cleanFunction(metadata);
+  const cleanFunction = metadata.type === 'album' ? cleanQobuzAlbumMetadataForQuery : (metadata.type === 'artist' ? cleanQobuzArtistMetadataForQuery : null);
+
+  const cleaned = typeof cleanFunction === 'function' ? cleanFunction(metadata) : metadata.title;
 
   return cleaned
     // Remove suffix added to the title
