@@ -6,6 +6,7 @@ export enum StreamingService {
   SoundCloud = 'soundCloud',
   Tidal = 'tidal',
   Google = 'google',
+  Qobuz = 'qobuz',
 }
 
 export enum Adapter {
@@ -15,6 +16,7 @@ export enum Adapter {
   Deezer = StreamingService.Deezer,
   SoundCloud = StreamingService.SoundCloud,
   Tidal = StreamingService.Tidal,
+  Qobuz = StreamingService.Qobuz,
 }
 
 export enum Parser {
@@ -25,6 +27,7 @@ export enum Parser {
   SoundCloud = StreamingService.SoundCloud,
   Tidal = StreamingService.Tidal,
   Google = StreamingService.Google,
+  Qobuz = StreamingService.Qobuz,
 }
 
 export type StreamingServiceType = Adapter & Parser;
