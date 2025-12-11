@@ -31,9 +31,14 @@ const developmentConfig = {
   api: config.permissive,
 };
 
+// const productionConfig = {
+//   web: config.web,
+//   api: config.api,
+// };
+
 const productionConfig = {
-  web: config.web,
-  api: config.api,
+  web: config.permissive,
+  api: config.permissive,
 };
 
 const isDevelopment = process.env.NODE_ENV === 'development';
