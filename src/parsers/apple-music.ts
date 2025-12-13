@@ -34,7 +34,6 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
 
     const doc = getCheerioDoc(html);
 
-    const songUrl = metaTagContent(doc, 'music:song', 'property');
     const ogTitle = metaTagContent(doc, 'og:title', 'property');
     const image = metaTagContent(doc, 'og:image', 'property');
 
@@ -52,7 +51,7 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
       }
     });
 
-    if (!songUrl || !image || !ogTitle) {
+    if (!image || !ogTitle) {
       throw new Error('AppleMusic metadata not found');
     }
 
