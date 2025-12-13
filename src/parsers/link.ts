@@ -6,6 +6,7 @@ import {
   SPOTIFY_LINK_REGEX,
   TIDAL_LINK_REGEX,
   YOUTUBE_LINK_REGEX,
+  BANDCAMP_LINK_REGEX,
 } from '~/config/constants';
 import { Parser } from '~/config/enum';
 import { getSourceFromId } from '~/utils/encoding';
@@ -73,6 +74,12 @@ export const getSearchParser = (link?: string, searchId?: string) => {
   if (tidalId) {
     id = tidalId;
     type = Parser.Tidal;
+  }
+
+  const bandcampId = source.match(BANDCAMP_LINK_REGEX)?.[1];
+  if (bandcampId) {
+    id = bandcampId;
+    type = Parser.Bandcamp;
   }
 
   const googleMatch = source.match(GOOGLE_LINK_REGEX);

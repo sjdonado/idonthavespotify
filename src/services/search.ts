@@ -4,6 +4,7 @@ import { getSoundCloudLink } from '~/adapters/sound-cloud';
 import { getSpotifyLink } from '~/adapters/spotify';
 import { getTidalLink } from '~/adapters/tidal';
 import { getYouTubeLink } from '~/adapters/youtube';
+import { getBandcampLink } from '~/adapters/bandcamp';
 import { Adapter, MetadataType, Parser, type StreamingServiceType } from '~/config/enum';
 import { ENV } from '~/config/env';
 import {
@@ -20,6 +21,7 @@ import {
 import { getSpotifyMetadata, getSpotifyQueryFromMetadata } from '~/parsers/spotify';
 import { getTidalMetadata, getTidalQueryFromMetadata } from '~/parsers/tidal';
 import { getYouTubeMetadata, getYouTubeQueryFromMetadata } from '~/parsers/youtube';
+import { getBandcampMetadata, getBandcampQueryFromMetadata } from '~/parsers/bandcamp';
 import { generateId } from '~/utils/encoding';
 import { logger } from '~/utils/logger';
 import { shortenLink } from '~/utils/url-shortener';
@@ -84,6 +86,7 @@ export const search = async <T extends SearchProps>({
     Adapter.Deezer,
     Adapter.SoundCloud,
     Adapter.Tidal,
+    Adapter.Bandcamp,
   ];
 
   logger.info(`[search] (searchAdapters) ${searchAdapters}`);
@@ -96,6 +99,7 @@ export const search = async <T extends SearchProps>({
     [Parser.SoundCloud]: getSoundCloudMetadata,
     [Parser.Tidal]: getTidalMetadata,
     [Parser.Google]: getGoogleMetadata,
+    [Parser.Bandcamp]: getBandcampMetadata,
   };
 
   const queryExtractorsMap = {
@@ -106,6 +110,7 @@ export const search = async <T extends SearchProps>({
     [Parser.SoundCloud]: getSoundCloudQueryFromMetadata,
     [Parser.Tidal]: getTidalQueryFromMetadata,
     [Parser.Google]: getGoogleQueryFromMetadata,
+    [Parser.Bandcamp]: getBandcampQueryFromMetadata,
   };
 
   const linkGettersMap = {
@@ -115,6 +120,7 @@ export const search = async <T extends SearchProps>({
     [Adapter.Deezer]: getDeezerLink,
     [Adapter.SoundCloud]: getSoundCloudLink,
     [Adapter.Tidal]: getTidalLink,
+    [Adapter.Bandcamp]: getBandcampLink,
   };
 
   const metadataFetcher = metadataFetchersMap[searchParser.type];

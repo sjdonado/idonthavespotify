@@ -28,6 +28,10 @@ const SEARCH_LINK_DICT = {
     icon: 'ti ti-brand-soundcloud',
     label: 'Listen on SoundCloud',
   },
+  [Adapter.Bandcamp]: {
+    icon: 'ti ti-brand-bandcamp',
+    label: 'Listen on Bandcamp',
+  },
 };
 
 export default function SearchCard(props: { searchResult: SearchResult }) {

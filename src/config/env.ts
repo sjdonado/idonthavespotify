@@ -30,6 +30,10 @@ export const ENV = {
     soundCloud: {
       baseUrl: Bun.env['SOUNDCLOUD_BASE_URL']!,
     },
+    bandcamp: {
+      apiUrl: Bun.env['BANDCAMP_API_URL']!,
+      baseUrl: Bun.env['BANDCAMP_BASE_URL']!,
+    },
   },
   services: {
     urlShortener: {

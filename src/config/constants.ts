@@ -23,7 +23,10 @@ export const TIDAL_LINK_REGEX =
 export const GOOGLE_LINK_REGEX =
   /^https:\/\/(?:www\.google\.com\/gasearch(?:[\?#].+)?|share\.google\/(.+))$/;
 
-export const ALLOWED_LINKS_REGEX = `${SPOTIFY_LINK_REGEX.source}|${YOUTUBE_LINK_REGEX.source}|${APPLE_MUSIC_LINK_REGEX.source}|${DEEZER_LINK_REGEX.source}|${SOUNDCLOUD_LINK_REGEX.source}|${TIDAL_LINK_REGEX.source}|${GOOGLE_LINK_REGEX.source}`;
+export const BANDCAMP_LINK_REGEX =
+  /^https:\/\/([^\.]+)\.bandcamp\.com\/(album|track)?\/?([^/?]+)?\/?$/;
+
+export const ALLOWED_LINKS_REGEX = `${SPOTIFY_LINK_REGEX.source}|${YOUTUBE_LINK_REGEX.source}|${APPLE_MUSIC_LINK_REGEX.source}|${DEEZER_LINK_REGEX.source}|${SOUNDCLOUD_LINK_REGEX.source}|${TIDAL_LINK_REGEX.source}|${GOOGLE_LINK_REGEX.source}|${BANDCAMP_LINK_REGEX.source}`;
 
 export const ADAPTERS_QUERY_LIMIT = 4;
 export const RESPONSE_COMPARE_MIN_SCORE = 0.7;
