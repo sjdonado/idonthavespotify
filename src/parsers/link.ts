@@ -5,6 +5,7 @@ import {
   SOUNDCLOUD_LINK_REGEX,
   SPOTIFY_LINK_REGEX,
   TIDAL_LINK_REGEX,
+  QOBUZ_LINK_REGEX,
   YOUTUBE_LINK_REGEX,
 } from '~/config/constants';
 import { Parser } from '~/config/enum';
@@ -73,6 +74,12 @@ export const getSearchParser = (link?: string, searchId?: string) => {
   if (tidalId) {
     id = tidalId;
     type = Parser.Tidal;
+  }
+
+  const qobuzId = source.match(QOBUZ_LINK_REGEX)?.[5];
+  if (qobuzId) {
+    id = qobuzId;
+    type = Parser.Qobuz;
   }
 
   const googleMatch = source.match(GOOGLE_LINK_REGEX);

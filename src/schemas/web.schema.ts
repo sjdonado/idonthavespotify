@@ -11,7 +11,7 @@ export const indexRouteSchema = z.object({
 export const searchRouteSchema = z.object({
   body: z.object({
     link: z.string().regex(new RegExp(ALLOWED_LINKS_REGEX), {
-      message: 'Invalid link, please try with Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal, or Google Music Share links.',
+      message: 'Invalid link, please try with Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal, Qobuz, or Google Music Share links.',
     }),
   }),
 });

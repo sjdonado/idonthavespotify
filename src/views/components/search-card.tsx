@@ -28,6 +28,10 @@ const SEARCH_LINK_DICT = {
     icon: 'ti ti-brand-soundcloud',
     label: 'Listen on SoundCloud',
   },
+  [Adapter.Qobuz]: {
+    icon: 'ti ti-brand-qobuz',
+    label: 'Listen on Qobuz',
+  },
 };
 
 export default function SearchCard(props: { searchResult: SearchResult }) {
