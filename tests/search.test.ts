@@ -16,6 +16,8 @@ import {
 import { ENV } from '~/config/env';
 import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
+import * as qobuzAdapter from '~/adapters/qobuz';
+import { Adapter, MetadataType } from '~/config/enum';
 
 import { loadHeadSnapshots, loadSearchSnapshots } from './mocks/snapshots';
 import { createTestApp, nodeFetch } from './utils/request';
@@ -37,6 +39,7 @@ describe('GET /search', () => {
   let getUniversalMetadataFromTidalMock: Mock<
     typeof tidalUniversalLinkParser.getUniversalMetadataFromTidal
   >;
+  let getQobuzLinkMock: Mock<typeof qobuzAdapter.getQobuzLink>;
 
   beforeAll(() => {
     app = createTestApp();
@@ -47,6 +50,7 @@ describe('GET /search', () => {
       tidalUniversalLinkParser,
       'getUniversalMetadataFromTidal'
     );
+    getQobuzLinkMock = spyOn(qobuzAdapter, 'getQobuzLink');
   });
 
   afterAll(() => {
@@ -54,6 +58,7 @@ describe('GET /search', () => {
     cacheStore.reset();
     axiosMock.reset();
     getUniversalMetadataFromTidalMock.mockReset();
+    getQobuzLinkMock.mockRestore();
   });
 
   beforeEach(() => {
@@ -61,6 +66,23 @@ describe('GET /search', () => {
     axiosMock.reset();
 
     getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
+    getQobuzLinkMock.mockReset();
+    getQobuzLinkMock.mockImplementation(async (_query, metadata) => {
+      if (
+        [MetadataType.Song, MetadataType.Album, MetadataType.Artist].includes(
+          metadata.type
+        )
+      ) {
+        return {
+          type: Adapter.Qobuz,
+          url: `https://www.qobuz.com/mock/${metadata.type}`,
+          isVerified: true,
+          notAvailable: false,
+        };
+      }
+
+      return null;
+    });
     axiosMock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
     axiosMock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
     axiosMock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
@@ -128,6 +150,12 @@ describe('GET /search', () => {
             notAvailable: false,
             type: 'deezer',
             url: 'https://www.deezer.com/track/14477354',
+          },
+          {
+            isVerified: true,
+            notAvailable: false,
+            type: 'qobuz',
+            url: 'https://www.qobuz.com/mock/song',
           },
           {
             isVerified: true,
@@ -200,6 +228,12 @@ describe('GET /search', () => {
           {
             type: 'deezer',
             url: 'https://www.deezer.com/track/14477354',
+            isVerified: true,
+            notAvailable: false,
+          },
+          {
+            type: 'qobuz',
+            url: 'https://www.qobuz.com/mock/song',
             isVerified: true,
             notAvailable: false,
           },
@@ -280,6 +314,12 @@ describe('GET /search', () => {
             notAvailable: false,
           },
           {
+            type: 'qobuz',
+            url: 'https://www.qobuz.com/mock/song',
+            isVerified: true,
+            notAvailable: false,
+          },
+          {
             type: 'soundCloud',
             url: 'https://soundcloud.com/bobdylan/like-a-rolling-stone-1',
             isVerified: true,
@@ -341,6 +381,12 @@ describe('GET /search', () => {
         source: 'https://open.spotify.com/album/7dqftJ3kas6D0VAdmt3k3V',
         universalLink: urlShortenerResponseMock.data.refer,
         links: [
+          {
+            type: 'qobuz',
+            url: 'https://www.qobuz.com/mock/album',
+            isVerified: true,
+            notAvailable: false,
+          },
           {
             type: 'spotify',
             url: 'https://open.spotify.com/album/7dqftJ3kas6D0VAdmt3k3V',
@@ -422,6 +468,12 @@ describe('GET /search', () => {
             notAvailable: false,
             type: 'deezer',
             url: 'https://www.deezer.com/artist/339209',
+          },
+          {
+            isVerified: true,
+            notAvailable: false,
+            type: 'qobuz',
+            url: 'https://www.qobuz.com/mock/artist',
           },
           {
             isVerified: true,

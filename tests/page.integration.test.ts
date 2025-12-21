@@ -56,7 +56,7 @@ describe('Page router', () => {
 
       expect(doc('h1').text()).toEqual("I Don't Have Spotify");
       expect(doc('p').text()).toContain(
-        'Paste a link from Spotify, YouTube Music, Apple Music, Deezer, SoundCloud or Tidal to start.'
+        'Paste a link from Spotify, YouTube Music, Apple Music, Deezer, SoundCloud, Qobuz or Tidal to start.'
       );
 
       const footerText = doc('footer').text();
@@ -255,7 +255,7 @@ describe('Page router', () => {
       const doc = getCheerioDoc(data);
       const errorMessage = doc('p').text();
       expect(errorMessage).toContain(
-        'Invalid link, please try with Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal, or Google Music Share links.'
+        'Invalid link, please try with Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal, Qobuz, or Google Music Share links.'
       );
     });
 

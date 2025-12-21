@@ -1,5 +1,5 @@
 @import 'notyf/notyf.min.css';
-@import "tailwindcss";
+@import 'tailwindcss';
 
 html {
   font-family: 'Poppins', sans-serif;
@@ -27,4 +27,13 @@ button {
   100% {
     left: 100%;
   }
+}
+
+.ti-brand-qobuz {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23fff' stroke-width='2' viewBox='0 0 24 24'%3E %3Ccircle cx='12' cy='12' r='10'/%3E %3Ccircle cx='12' cy='12' r='2' stroke-width='2.5'/%3E %3Cline x1='16.5' x2='19' y1='16.5' y2='19' stroke-linecap='round'/%3E %3Cline x1='19' x2='22' y1='19' y2='22'/%3E %3C/svg%3E");
+  height: 1em;
+  width: 1em;
+  display: inline-block;
+  margin-left: 0;
+  margin-right: 16px;
 }
