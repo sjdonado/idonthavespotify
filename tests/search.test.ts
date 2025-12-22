@@ -14,7 +14,6 @@ import {
 } from 'bun:test';
 
 import { ENV } from '~/config/env';
-import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
 import * as qobuzAdapter from '~/adapters/qobuz';
 import { Adapter, MetadataType } from '~/config/enum';
@@ -36,9 +35,6 @@ describe('GET /search', () => {
   let searchEndpointUrl: string;
 
   let axiosMock: InstanceType<typeof AxiosMockAdapter>;
-  let getUniversalMetadataFromTidalMock: Mock<
-    typeof tidalUniversalLinkParser.getUniversalMetadataFromTidal
-  >;
   let getQobuzLinkMock: Mock<typeof qobuzAdapter.getQobuzLink>;
 
   beforeAll(() => {
@@ -46,10 +42,6 @@ describe('GET /search', () => {
     searchEndpointUrl = apiSearchEndpoint(app.url);
 
     axiosMock = new AxiosMockAdapter(axios);
-    getUniversalMetadataFromTidalMock = spyOn(
-      tidalUniversalLinkParser,
-      'getUniversalMetadataFromTidal'
-    );
     getQobuzLinkMock = spyOn(qobuzAdapter, 'getQobuzLink');
   });
 
@@ -57,7 +49,6 @@ describe('GET /search', () => {
     app.stop();
     cacheStore.reset();
     axiosMock.reset();
-    getUniversalMetadataFromTidalMock.mockReset();
     getQobuzLinkMock.mockRestore();
   });
 
@@ -65,7 +56,6 @@ describe('GET /search', () => {
     cacheStore.reset();
     axiosMock.reset();
 
-    getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
     getQobuzLinkMock.mockReset();
     getQobuzLinkMock.mockImplementation(async (_query, metadata) => {
       if (
@@ -170,8 +160,6 @@ describe('GET /search', () => {
           },
         ],
       });
-
-      expect(getUniversalMetadataFromTidalMock).toHaveBeenCalledTimes(0);
     });
 
     it('should return 200 - Mobile link', async () => {
@@ -250,8 +238,6 @@ describe('GET /search', () => {
           },
         ],
       });
-
-      expect(getUniversalMetadataFromTidalMock).toHaveBeenCalledTimes(0);
     });
 
     it('should return 200 - Extra query params', async () => {
@@ -332,8 +318,6 @@ describe('GET /search', () => {
           },
         ],
       });
-
-      expect(getUniversalMetadataFromTidalMock).toHaveBeenCalledTimes(0);
     });
   });
 
