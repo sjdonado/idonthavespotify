@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 export const SPOTIFY_LINK_REGEX =
   /^https:\/\/(open\.spotify\.com\/(?:intl-[a-z]{2}\/)?(track|album|playlist|artist|episode|show)|spotify\.link)\/(\w{11,24})(?:[\?#].*)?$/;
 
@@ -25,6 +26,9 @@ export const GOOGLE_LINK_REGEX =
 
 export const QOBUZ_LINK_REGEX =
   /^https:\/\/(open|play|www)\.qobuz\.com\/(\w{2}-\w{2}\/)?(artist|album|interpreter)\/([\w-]+\/)?(\w+)$/;
+
+export const BANDCAMP_LINK_REGEX =
+  /^https:\/\/([^\.]+)\.bandcamp\.com\/(album|track)?\/?([^/?]+)?\/?$/;
 
 export const ALLOWED_LINKS_REGEX = `${SPOTIFY_LINK_REGEX.source}|${YOUTUBE_LINK_REGEX.source}|${APPLE_MUSIC_LINK_REGEX.source}|${DEEZER_LINK_REGEX.source}|${SOUNDCLOUD_LINK_REGEX.source}|${TIDAL_LINK_REGEX.source}|${QOBUZ_LINK_REGEX.source}|${GOOGLE_LINK_REGEX.source}`;
 

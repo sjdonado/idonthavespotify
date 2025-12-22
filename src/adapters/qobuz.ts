@@ -12,51 +12,44 @@ import type { SearchMetadata, SearchResultLink } from '~/services/search';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 
-interface QobuzSearchResponse {
-  [index: string]: Array<any>,
-  albums: Array<QobuzSearchResponseAlbum>,
-  artists: Array<QobuzSearchResponseArtist>,
-  tracks: Array<QobuzSearchResponseTrack>,
-  labels: [],
-}
+type QobuzAlbumItem = {
+  id: string;
+  title: string;
+  artist: string;
+  image: string;
+  url: string;
+  url_encoded: string;
+  is_hires: boolean;
+  is_dsd: boolean;
+  is_dxd: boolean;
+};
 
-type QobuzSearchResponseAlbum = {
-  [index: string]: {
-    id: string,
-    title: string,
-    artist: string,
-    image: string,
-    url: string,
-    url_encoded: string,
-    is_hires: boolean,
-    is_dsd: boolean,
-    is_dxd: boolean,
-  }
-}
+type QobuzArtistItem = {
+  id: string | number;
+  slug: string;
+  name: string;
+  image: string;
+  albumsCount: number;
+  url: string;
+  url_encoded: string;
+};
 
-type QobuzSearchResponseArtist = {
-  [index: number]: {
-    id: string | number,
-    slug: string,
-    name: string,
-    image: string,
-    albumsCount: number,
-    url: string,
-    url_encoded: string,
-  }
-}
+type QobuzTrackItem = {
+  id: string | number;
+  title: string;
+  album: string;
+  artist: string;
+  image: string;
+  url: string;
+  url_encoded: string;
+};
 
-type QobuzSearchResponseTrack = {
-  [index: number]: {
-    id: string | number,
-    title: string,
-    album: string,
-    artist: string,
-    image: string,
-    url: string,
-    url_encoded: string,
-  }
-}
+type QobuzSearchResponse = {
+  albums: Record<string, QobuzAlbumItem> | QobuzAlbumItem[];
+  artists: QobuzArtistItem[];
+  tracks: QobuzTrackItem[];
+  labels: [];
+};
 
 const QOBUZ_SEARCH_TYPES = {
   [MetadataType.Song]: 'tracks',
@@ -72,7 +65,7 @@ function qobuzSpecificComparison(title: string, query: string): number {
     // Strip commas here because we aggressively stripped them when creating the query
     title.toLowerCase().replace(',', ''),
     query.toLowerCase()
-  )
+  );
 }
 
 export async function getQobuzLink(query: string, metadata: SearchMetadata) {
@@ -88,7 +81,9 @@ export async function getQobuzLink(query: string, metadata: SearchMetadata) {
   //   https://www.qobuz.com/us-en
   // to:
   //   https://www.qobuz.com/v4/us-en/catalog/search/autosuggest
-  const url = new URL(`${ENV.adapters.qobuz.storeUrl.replace('qobuz.com/', 'qobuz.com/v4/')}/catalog/search/autosuggest`);
+  const url = new URL(
+    `${ENV.adapters.qobuz.storeUrl.replace('qobuz.com/', 'qobuz.com/v4/')}/catalog/search/autosuggest`
+  );
   url.search = params.toString();
 
   const cache = await getCachedSearchResultLink(url);
@@ -105,40 +100,46 @@ export async function getQobuzLink(query: string, metadata: SearchMetadata) {
       },
     });
 
-    if (!response.hasOwnProperty(searchType)) {
-      throw new Error(`No ${searchType} node found: ${JSON.stringify(response, null, 2)}`);
+    if (!(searchType in response)) {
+      throw new Error(
+        `No ${searchType} node found: ${JSON.stringify(response, null, 2)}`
+      );
     }
 
     let bestMatch: SearchResultLink | null = null;
     let highestScore = 0;
 
-    let items;
-    if (response[searchType].length) {
-      // The response node is already an iterable array of possible matches (artists, tracks)
-      items = response[searchType];
-    } else {
-      // The response is one or more keyed objects, but the keys are as-yet-unknown IDs (albums)
-      items = Object.values(response[searchType]);
-    }
-
-    for (const item of items) {
-      // NOTE: Albums and Tracks have `title` keys, while Artists have `name` keys
-
-      // The query we're matching against for albums and tracks is: "{Album|Track Title} {Artist}"
-      // so we can boost our match chances by mirroring that format here
-      // (this also helps greatly with self-titled albums)
-      const title = (searchType === 'artists') ? item.name : `${item.title} ${item.artist}`;
-
-      const score = searchType === 'albums' ? qobuzSpecificComparison(title, query) : compareTwoStrings(title.toLowerCase(), query.toLowerCase());
+    const evaluateMatch = (title: string, url: string, isAlbumSearch: boolean) => {
+      const score = isAlbumSearch
+        ? qobuzSpecificComparison(title, query)
+        : compareTwoStrings(title.toLowerCase(), query.toLowerCase());
 
       if (score > highestScore) {
         highestScore = score;
         bestMatch = {
           type: Adapter.Qobuz,
-          url: item.url,
+          url,
           isVerified: score >= RESPONSE_COMPARE_MIN_SCORE,
           notAvailable: score < RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
         };
+      }
+    };
+
+    if (searchType === 'artists') {
+      for (const artist of response.artists ?? []) {
+        evaluateMatch(artist.name, artist.url, false);
+      }
+    } else if (searchType === 'albums') {
+      const albums = Array.isArray(response.albums)
+        ? response.albums
+        : Object.values(response.albums ?? {});
+
+      for (const album of albums) {
+        evaluateMatch(`${album.title} ${album.artist}`, album.url, true);
+      }
+    } else {
+      for (const track of response.tracks ?? []) {
+        evaluateMatch(`${track.title} ${track.artist}`, track.url, false);
       }
     }
 
@@ -146,13 +147,15 @@ export async function getQobuzLink(query: string, metadata: SearchMetadata) {
       throw new Error('No valid matches found.');
     }
 
+    const match = bestMatch as SearchResultLink;
+
     logger.info(
-      `[Qobuz] Best match score: ${highestScore.toFixed(3)} (verified: ${bestMatch.isVerified ? 'yes' : 'no'}, available: ${!bestMatch.notAvailable ? 'yes' : 'no'})`
+      `[Qobuz] Best match score: ${highestScore.toFixed(3)} (verified: ${match.isVerified ? 'yes' : 'no'}, available: ${!match.notAvailable ? 'yes' : 'no'})`
     );
 
-    await cacheSearchResultLink(url, bestMatch);
+    await cacheSearchResultLink(url, match);
 
-    return bestMatch;
+    return match;
   } catch (error) {
     logger.error(`[Qobuz] (${url}) ${error}`);
     return null;

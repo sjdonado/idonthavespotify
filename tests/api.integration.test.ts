@@ -9,13 +9,10 @@ import {
   describe,
   expect,
   it,
-  type Mock,
-  spyOn,
 } from 'bun:test';
 
 import { Adapter, MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
-import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
 
 import { loadHeadSnapshots, loadSearchSnapshots } from './mocks/snapshots';
@@ -40,32 +37,23 @@ describe('Api router', () => {
   let searchEndpointUrl: string;
 
   let axiosMock: InstanceType<typeof AxiosMockAdapter>;
-  let getUniversalMetadataFromTidalaxiosMock: Mock<
-    typeof tidalUniversalLinkParser.getUniversalMetadataFromTidal
-  >;
 
   beforeAll(() => {
     app = createTestApp();
     searchEndpointUrl = apiSearchEndpoint(app.url);
 
     axiosMock = new AxiosMockAdapter(axios);
-    getUniversalMetadataFromTidalaxiosMock = spyOn(
-      tidalUniversalLinkParser,
-      'getUniversalMetadataFromTidal'
-    );
   });
 
   afterAll(() => {
     app.stop();
     axiosMock.reset();
-    getUniversalMetadataFromTidalaxiosMock.mockReset();
   });
 
   beforeEach(() => {
     cacheStore.reset();
     axiosMock.reset();
 
-    getUniversalMetadataFromTidalaxiosMock.mockResolvedValue(undefined);
     axiosMock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
     axiosMock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
     axiosMock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);

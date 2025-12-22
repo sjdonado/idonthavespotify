@@ -1,9 +1,10 @@
 import { getAppleMusicLink } from '~/adapters/apple-music';
+import { getBandcampLink } from '~/adapters/bandcamp';
 import { getDeezerLink } from '~/adapters/deezer';
+import { getQobuzLink } from '~/adapters/qobuz';
 import { getSoundCloudLink } from '~/adapters/sound-cloud';
 import { getSpotifyLink } from '~/adapters/spotify';
 import { getTidalLink } from '~/adapters/tidal';
-import { getQobuzLink } from '~/adapters/qobuz';
 import { getYouTubeLink } from '~/adapters/youtube';
 import { Adapter, MetadataType, Parser, type StreamingServiceType } from '~/config/enum';
 import { ENV } from '~/config/env';
@@ -11,9 +12,11 @@ import {
   getAppleMusicMetadata,
   getAppleMusicQueryFromMetadata,
 } from '~/parsers/apple-music';
+import { getBandcampMetadata, getBandcampQueryFromMetadata } from '~/parsers/bandcamp';
 import { getDeezerMetadata, getDeezerQueryFromMetadata } from '~/parsers/deezer';
 import { getGoogleMetadata, getGoogleQueryFromMetadata } from '~/parsers/google';
 import { getSearchParser } from '~/parsers/link';
+import { getQobuzMetadata, getQobuzQueryFromMetadata } from '~/parsers/qobuz';
 import {
   getSoundCloudMetadata,
   getSoundCloudQueryFromMetadata,
@@ -21,7 +24,6 @@ import {
 import { getSpotifyMetadata, getSpotifyQueryFromMetadata } from '~/parsers/spotify';
 import { getTidalMetadata, getTidalQueryFromMetadata } from '~/parsers/tidal';
 import { getYouTubeMetadata, getYouTubeQueryFromMetadata } from '~/parsers/youtube';
-import { getQobuzMetadata, getQobuzQueryFromMetadata } from '~/parsers/qobuz';
 import { generateId } from '~/utils/encoding';
 import { logger } from '~/utils/logger';
 import { shortenLink } from '~/utils/url-shortener';
@@ -87,6 +89,7 @@ export const search = async <T extends SearchProps>({
     Adapter.SoundCloud,
     Adapter.Tidal,
     Adapter.Qobuz,
+    Adapter.Bandcamp,
   ];
 
   logger.info(`[search] (searchAdapters) ${searchAdapters}`);
@@ -100,6 +103,7 @@ export const search = async <T extends SearchProps>({
     [Parser.Tidal]: getTidalMetadata,
     [Parser.Google]: getGoogleMetadata,
     [Parser.Qobuz]: getQobuzMetadata,
+    [Parser.Bandcamp]: getBandcampMetadata,
   };
 
   const queryExtractorsMap = {
@@ -111,6 +115,7 @@ export const search = async <T extends SearchProps>({
     [Parser.Tidal]: getTidalQueryFromMetadata,
     [Parser.Google]: getGoogleQueryFromMetadata,
     [Parser.Qobuz]: getQobuzQueryFromMetadata,
+    [Parser.Bandcamp]: getBandcampQueryFromMetadata,
   };
 
   const linkGettersMap = {
@@ -121,6 +126,7 @@ export const search = async <T extends SearchProps>({
     [Adapter.SoundCloud]: getSoundCloudLink,
     [Adapter.Tidal]: getTidalLink,
     [Adapter.Qobuz]: getQobuzLink,
+    [Adapter.Bandcamp]: getBandcampLink,
   };
 
   const metadataFetcher = metadataFetchersMap[searchParser.type];

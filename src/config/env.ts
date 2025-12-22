@@ -34,6 +34,10 @@ export const ENV = {
       streamUrl: Bun.env['QOBUZ_STREAM_URL']!,
       storeUrl: Bun.env['QOBUZ_STORE_URL']!,
     },
+    bandcamp: {
+      apiUrl: Bun.env['BANDCAMP_API_URL']!,
+      baseUrl: Bun.env['BANDCAMP_BASE_URL']!,
+    },
   },
   services: {
     urlShortener: {
