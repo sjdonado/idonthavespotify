@@ -88,8 +88,8 @@ export const search = async <T extends SearchProps>({
     Adapter.Deezer,
     Adapter.SoundCloud,
     Adapter.Tidal,
-    Adapter.Bandcamp,
     Adapter.Qobuz,
+    Adapter.Bandcamp,
   ];
 
   logger.info(`[search] (searchAdapters) ${searchAdapters}`);
@@ -102,8 +102,8 @@ export const search = async <T extends SearchProps>({
     [Parser.SoundCloud]: getSoundCloudMetadata,
     [Parser.Tidal]: getTidalMetadata,
     [Parser.Google]: getGoogleMetadata,
-    [Parser.Bandcamp]: getBandcampMetadata,
     [Parser.Qobuz]: getQobuzMetadata,
+    [Parser.Bandcamp]: getBandcampMetadata,
   };
 
   const queryExtractorsMap = {
@@ -114,8 +114,8 @@ export const search = async <T extends SearchProps>({
     [Parser.SoundCloud]: getSoundCloudQueryFromMetadata,
     [Parser.Tidal]: getTidalQueryFromMetadata,
     [Parser.Google]: getGoogleQueryFromMetadata,
-    [Parser.Bandcamp]: getBandcampQueryFromMetadata,
     [Parser.Qobuz]: getQobuzQueryFromMetadata,
+    [Parser.Bandcamp]: getBandcampQueryFromMetadata,
   };
 
   const linkGettersMap = {
@@ -125,8 +125,8 @@ export const search = async <T extends SearchProps>({
     [Adapter.Deezer]: getDeezerLink,
     [Adapter.SoundCloud]: getSoundCloudLink,
     [Adapter.Tidal]: getTidalLink,
-    [Adapter.Bandcamp]: getBandcampLink,
     [Adapter.Qobuz]: getQobuzLink,
+    [Adapter.Bandcamp]: getBandcampLink,
   };
 
   const metadataFetcher = metadataFetchersMap[searchParser.type];

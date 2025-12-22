@@ -21,11 +21,13 @@ const QOBUZ_METADATA_TO_METADATA_TYPE = {
   [QobuzMetadataType.Artist]: MetadataType.Artist,
 };
 
-const metadataCleanersMap = {
+const metadataCleanersMap: Partial<
+  Record<MetadataType, (metadata: SearchMetadata) => string>
+> = {
   [MetadataType.Song]: cleanQobuzTrackMetadataForQuery,
   [MetadataType.Album]: cleanQobuzAlbumMetadataForQuery,
   [MetadataType.Artist]: cleanQobuzArtistMetadataForQuery,
- };
+};
 
 export const getQobuzMetadata = async (id: string, link: string) => {
   const cached = await getCachedSearchMetadata(id, Parser.Qobuz);
@@ -39,7 +41,9 @@ export const getQobuzMetadata = async (id: string, link: string) => {
     if (!type) {
       throw new Error('Qobuz link unable to be parsed correctly');
     }
-    if (type === 'interpreter'){ type = 'artist';}
+    if (type === 'interpreter') {
+      type = 'artist';
+    }
 
     // `play.qobuz.com` pages require a login, so there's nothing to scrape...
     if (link.match(QOBUZ_LINK_REGEX)?.[1] === 'play') {
@@ -77,12 +81,14 @@ export const getQobuzMetadata = async (id: string, link: string) => {
 };
 
 function cleanQobuzAlbumMetadataForQuery(metadata: SearchMetadata) {
-  return metadata.title
-    // Remove comma, but leave Artist in place
-    // NOTE: this will remove more commas than the one we're technically targeting,
-    //       but that shouldn't have any negative effects on the string matching
-    //       (especially if we also remove commas in the `adapters` comparison)
-    .replace(',','');
+  return (
+    metadata.title
+      // Remove comma, but leave Artist in place
+      // NOTE: this will remove more commas than the one we're technically targeting,
+      //       but that shouldn't have any negative effects on the string matching
+      //       (especially if we also remove commas in the `adapters` comparison)
+      .replace(',', '')
+  );
 }
 
 function cleanQobuzArtistMetadataForQuery(metadata: SearchMetadata) {
@@ -94,10 +100,15 @@ function cleanQobuzArtistMetadataForQuery(metadata: SearchMetadata) {
   Discographie de ${Artist} - Téléchargez des albums en Hi-Res - Qobuz
   Discografia de ${Artist} - Baixar álbuns em Hi-Res - Qobuz
   */
-  return metadata.title
-    .replace(/^(Discographie|Discografia)\sde\s/, '')
-    // Accented characters regex from here: https://stackoverflow.com/a/26900132
-    .replace(/(Discography|Discografía|Discografia|-Diskographie)(\s-\s[A-Za-zÀ-ÖØ-öø-ÿ\s\-]+)-\sQobuz$/,'');
+  return (
+    metadata.title
+      .replace(/^(Discographie|Discografia)\sde\s/, '')
+      // Accented characters regex from here: https://stackoverflow.com/a/26900132
+      .replace(
+        /(Discography|Discografía|Discografia|-Diskographie)(\s-\s[A-Za-zÀ-ÖØ-öø-ÿ\s\-]+)-\sQobuz$/,
+        ''
+      )
+  );
 }
 
 function cleanQobuzTrackMetadataForQuery(metadata: SearchMetadata) {
@@ -105,17 +116,15 @@ function cleanQobuzTrackMetadataForQuery(metadata: SearchMetadata) {
 }
 
 export const getQobuzQueryFromMetadata = (metadata: SearchMetadata) => {
-  // TODO: Help! Typescript is confusing me.
-  // const cleanFunction = metadataCleanersMap[metadata.type];
+  const cleanFunction = metadataCleanersMap[metadata.type];
+  const cleaned = cleanFunction ? cleanFunction(metadata) : metadata.title;
 
-  const cleanFunction = metadata.type === 'album' ? cleanQobuzAlbumMetadataForQuery : (metadata.type === 'artist' ? cleanQobuzArtistMetadataForQuery : null);
-
-  const cleaned = typeof cleanFunction === 'function' ? cleanFunction(metadata) : metadata.title;
-
-  return cleaned
-    // Remove suffix added to the title
-    .replace(/\s\-\sQobuz$/, '')
-    // Clean extra whitespace
-    .replace(/\s+/g, ' ')
-    .trim();
+  return (
+    cleaned
+      // Remove suffix added to the title
+      .replace(/\s\-\sQobuz$/, '')
+      // Clean extra whitespace
+      .replace(/\s+/g, ' ')
+      .trim()
+  );
 };
