@@ -13,6 +13,7 @@ import {
   spyOn,
 } from 'bun:test';
 
+import * as bandcampAdapter from '~/adapters/bandcamp';
 import * as qobuzAdapter from '~/adapters/qobuz';
 import { Adapter, MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
@@ -35,6 +36,7 @@ describe('GET /search', () => {
   let searchEndpointUrl: string;
 
   let axiosMock: InstanceType<typeof AxiosMockAdapter>;
+  let getBandcampLinkMock: Mock<typeof bandcampAdapter.getBandcampLink>;
   let getQobuzLinkMock: Mock<typeof qobuzAdapter.getQobuzLink>;
 
   beforeAll(() => {
@@ -42,6 +44,7 @@ describe('GET /search', () => {
     searchEndpointUrl = apiSearchEndpoint(app.url);
 
     axiosMock = new AxiosMockAdapter(axios);
+    getBandcampLinkMock = spyOn(bandcampAdapter, 'getBandcampLink');
     getQobuzLinkMock = spyOn(qobuzAdapter, 'getQobuzLink');
   });
 
@@ -49,6 +52,7 @@ describe('GET /search', () => {
     app.stop();
     cacheStore.reset();
     axiosMock.reset();
+    getBandcampLinkMock.mockRestore();
     getQobuzLinkMock.mockRestore();
   });
 
@@ -56,6 +60,23 @@ describe('GET /search', () => {
     cacheStore.reset();
     axiosMock.reset();
 
+    getBandcampLinkMock.mockReset();
+    getBandcampLinkMock.mockImplementation(async (_query, metadata) => {
+      if (
+        [MetadataType.Song, MetadataType.Album, MetadataType.Artist].includes(
+          metadata.type
+        )
+      ) {
+        return {
+          type: Adapter.Bandcamp,
+          url: `https://mock.bandcamp.com/${metadata.type}`,
+          isVerified: true,
+          notAvailable: false,
+        };
+      }
+
+      return null;
+    });
     getQobuzLinkMock.mockReset();
     getQobuzLinkMock.mockImplementation(async (_query, metadata) => {
       if (
@@ -138,6 +159,12 @@ describe('GET /search', () => {
           {
             isVerified: true,
             notAvailable: false,
+            type: 'bandcamp',
+            url: 'https://mock.bandcamp.com/song',
+          },
+          {
+            isVerified: true,
+            notAvailable: false,
             type: 'deezer',
             url: 'https://www.deezer.com/track/14477354',
           },
@@ -212,6 +239,12 @@ describe('GET /search', () => {
             url: 'https://geo.music.apple.com/ca/album/like-a-rolling-stone/192688369?i=192688675',
             isVerified: true,
             notAvailable: false,
+          },
+          {
+            isVerified: true,
+            notAvailable: false,
+            type: 'bandcamp',
+            url: 'https://mock.bandcamp.com/song',
           },
           {
             type: 'deezer',
@@ -294,6 +327,12 @@ describe('GET /search', () => {
             notAvailable: false,
           },
           {
+            isVerified: true,
+            notAvailable: false,
+            type: 'bandcamp',
+            url: 'https://mock.bandcamp.com/song',
+          },
+          {
             type: 'deezer',
             url: 'https://www.deezer.com/track/14477354',
             isVerified: true,
@@ -365,6 +404,12 @@ describe('GET /search', () => {
         source: 'https://open.spotify.com/album/7dqftJ3kas6D0VAdmt3k3V',
         universalLink: urlShortenerResponseMock.data.refer,
         links: [
+          {
+            type: 'bandcamp',
+            url: 'https://mock.bandcamp.com/album',
+            isVerified: true,
+            notAvailable: false,
+          },
           {
             type: 'qobuz',
             url: 'https://www.qobuz.com/mock/album',
@@ -446,6 +491,12 @@ describe('GET /search', () => {
             notAvailable: false,
             type: 'appleMusic',
             url: 'https://geo.music.apple.com/ca/artist/j-cole/73705833',
+          },
+          {
+            isVerified: true,
+            notAvailable: false,
+            type: 'bandcamp',
+            url: 'https://mock.bandcamp.com/artist',
           },
           {
             isVerified: true,
