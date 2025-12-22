@@ -1,7 +1,7 @@
-import { MetadataType, Parser } from '~/config/enum';
-import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
-import { ENV } from '~/config/env';
 import { QOBUZ_LINK_REGEX } from '~/config/constants';
+import { MetadataType, Parser } from '~/config/enum';
+import { ENV } from '~/config/env';
+import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
 import { fetchMetadata } from '~/services/metadata';
 import type { SearchMetadata } from '~/services/search';
 import { logger } from '~/utils/logger';

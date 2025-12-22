@@ -1,13 +1,13 @@
 import {
   APPLE_MUSIC_LINK_REGEX,
+  BANDCAMP_LINK_REGEX,
   DEEZER_LINK_REGEX,
   GOOGLE_LINK_REGEX,
+  QOBUZ_LINK_REGEX,
   SOUNDCLOUD_LINK_REGEX,
   SPOTIFY_LINK_REGEX,
   TIDAL_LINK_REGEX,
   YOUTUBE_LINK_REGEX,
-  QOBUZ_LINK_REGEX,
-  BANDCAMP_LINK_REGEX,
 } from '~/config/constants';
 import { Parser } from '~/config/enum';
 import { getSourceFromId } from '~/utils/encoding';
