@@ -6,6 +6,7 @@ import {
   SPOTIFY_LINK_REGEX,
   TIDAL_LINK_REGEX,
   YOUTUBE_LINK_REGEX,
+  QOBUZ_LINK_REGEX,
   BANDCAMP_LINK_REGEX,
 } from '~/config/constants';
 import { Parser } from '~/config/enum';
@@ -64,7 +65,9 @@ export const getSearchParser = (link?: string, searchId?: string) => {
   }
 
   const soundCloudMatch = source.match(SOUNDCLOUD_LINK_REGEX);
-  const soundCloudId = soundCloudMatch ? soundCloudMatch[3] || soundCloudMatch[2] || soundCloudMatch[4] : null;
+  const soundCloudId = soundCloudMatch
+    ? soundCloudMatch[3] || soundCloudMatch[2] || soundCloudMatch[4]
+    : null;
   if (soundCloudId) {
     id = soundCloudId;
     type = Parser.SoundCloud;
@@ -74,6 +77,12 @@ export const getSearchParser = (link?: string, searchId?: string) => {
   if (tidalId) {
     id = tidalId;
     type = Parser.Tidal;
+  }
+
+  const qobuzId = source.match(QOBUZ_LINK_REGEX)?.[5];
+  if (qobuzId) {
+    id = qobuzId;
+    type = Parser.Qobuz;
   }
 
   const bandcampId = source.match(BANDCAMP_LINK_REGEX)?.[1];

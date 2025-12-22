@@ -31,6 +31,9 @@ const SEARCH_LINK_DICT = {
   [Adapter.Bandcamp]: {
     icon: 'ti ti-brand-bandcamp',
     label: 'Listen on Bandcamp',
+  [Adapter.Qobuz]: {
+    icon: 'ti ti-brand-qobuz',
+    label: 'Listen on Qobuz',
   },
 };
 

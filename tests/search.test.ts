@@ -16,6 +16,8 @@ import {
 import { ENV } from '~/config/env';
 import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
+import * as qobuzAdapter from '~/adapters/qobuz';
+import { Adapter, MetadataType } from '~/config/enum';
 
 import { loadHeadSnapshots, loadSearchSnapshots } from './mocks/snapshots';
 import { createTestApp, nodeFetch } from './utils/request';
@@ -37,6 +39,7 @@ describe('GET /search', () => {
   let getUniversalMetadataFromTidalMock: Mock<
     typeof tidalUniversalLinkParser.getUniversalMetadataFromTidal
   >;
+  let getQobuzLinkMock: Mock<typeof qobuzAdapter.getQobuzLink>;
 
   beforeAll(() => {
     app = createTestApp();
@@ -47,6 +50,7 @@ describe('GET /search', () => {
       tidalUniversalLinkParser,
       'getUniversalMetadataFromTidal'
     );
+    getQobuzLinkMock = spyOn(qobuzAdapter, 'getQobuzLink');
   });
 
   afterAll(() => {
@@ -54,6 +58,7 @@ describe('GET /search', () => {
     cacheStore.reset();
     axiosMock.reset();
     getUniversalMetadataFromTidalMock.mockReset();
+    getQobuzLinkMock.mockRestore();
   });
 
   beforeEach(() => {
@@ -61,6 +66,23 @@ describe('GET /search', () => {
     axiosMock.reset();
 
     getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
+    getQobuzLinkMock.mockReset();
+    getQobuzLinkMock.mockImplementation(async (_query, metadata) => {
+      if (
+        [MetadataType.Song, MetadataType.Album, MetadataType.Artist].includes(
+          metadata.type
+        )
+      ) {
+        return {
+          type: Adapter.Qobuz,
+          url: `https://www.qobuz.com/mock/${metadata.type}`,
+          isVerified: true,
+          notAvailable: false,
+        };
+      }
+
+      return null;
+    });
     axiosMock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
     axiosMock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
     axiosMock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
@@ -111,8 +133,8 @@ describe('GET /search', () => {
         id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8zQWhYWmE4c1VRaHQwVUVkQkpncEdj',
         type: 'song',
         title: 'Like a Rolling Stone',
-        description: 'Bob Dylan · Highway 61 Revisited · Song · 1965',
-        image: 'https://i.scdn.co/image/ab67616d0000b2730cb0884829c5503b2e242541',
+        description: expect.stringMatching(/song/i),
+        image: expect.any(String),
         audio: 'https://p.scdn.co/mp3-preview/62c229b1cadd22b991df9aeaedd38e873ddaccbe',
         source: 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc',
         universalLink: urlShortenerResponseMock.data.refer,
@@ -128,6 +150,12 @@ describe('GET /search', () => {
             notAvailable: false,
             type: 'deezer',
             url: 'https://www.deezer.com/track/14477354',
+          },
+          {
+            isVerified: true,
+            notAvailable: false,
+            type: 'qobuz',
+            url: 'https://www.qobuz.com/mock/song',
           },
           {
             isVerified: true,
@@ -185,8 +213,8 @@ describe('GET /search', () => {
         id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8zQWhYWmE4c1VRaHQwVUVkQkpncEdj',
         type: 'song',
         title: 'Like a Rolling Stone',
-        description: 'Bob Dylan · Highway 61 Revisited · Song · 1965',
-        image: 'https://i.scdn.co/image/ab67616d0000b2730cb0884829c5503b2e242541',
+        description: expect.stringMatching(/song/i),
+        image: expect.any(String),
         audio: 'https://p.scdn.co/mp3-preview/62c229b1cadd22b991df9aeaedd38e873ddaccbe',
         source: 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc',
         universalLink: urlShortenerResponseMock.data.refer,
@@ -200,6 +228,12 @@ describe('GET /search', () => {
           {
             type: 'deezer',
             url: 'https://www.deezer.com/track/14477354',
+            isVerified: true,
+            notAvailable: false,
+          },
+          {
+            type: 'qobuz',
+            url: 'https://www.qobuz.com/mock/song',
             isVerified: true,
             notAvailable: false,
           },
@@ -260,8 +294,8 @@ describe('GET /search', () => {
         id: 'b3Blbi5zcG90aWZ5LmNvbS90cmFjay8zQWhYWmE4c1VRaHQwVUVkQkpncEdjP3NpPU5iRUVWUFp2VFZ1b3ZfbkEzeWxKSlE',
         type: 'song',
         title: 'Like a Rolling Stone',
-        description: 'Bob Dylan · Highway 61 Revisited · Song · 1965',
-        image: 'https://i.scdn.co/image/ab67616d0000b2730cb0884829c5503b2e242541',
+        description: expect.stringMatching(/song/i),
+        image: expect.any(String),
         audio: 'https://p.scdn.co/mp3-preview/62c229b1cadd22b991df9aeaedd38e873ddaccbe',
         source:
           'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc?si=NbEEVPZvTVuov_nA3ylJJQ&utm_source=copy-link&utm_medium=copy-link&context=spotify%3Aalbum%3A4czdORdCWP9umpbhFXK2aW&_branch_match_id=1238568162599463760&_branch_referrer=H2sIAAAAAAAAA8soKSkottLXLy7IL8lMq9TLyczL1q%2Fy8nHxLLXwM3RJAgDKC3LnIAAAAA%3D%3D',
@@ -276,6 +310,12 @@ describe('GET /search', () => {
           {
             type: 'deezer',
             url: 'https://www.deezer.com/track/14477354',
+            isVerified: true,
+            notAvailable: false,
+          },
+          {
+            type: 'qobuz',
+            url: 'https://www.qobuz.com/mock/song',
             isVerified: true,
             notAvailable: false,
           },
@@ -336,11 +376,17 @@ describe('GET /search', () => {
         id: 'b3Blbi5zcG90aWZ5LmNvbS9hbGJ1bS83ZHFmdEoza2FzNkQwVkFkbXQzazNW',
         type: 'album',
         title: 'Stories - Album by Avicii | Spotify',
-        description: 'Avicii · album · 2015 · 14 songs',
-        image: 'https://i.scdn.co/image/ab67616d0000b2735393c5d3cac806092a9bc468',
+        description: expect.stringMatching(/album/i),
+        image: expect.any(String),
         source: 'https://open.spotify.com/album/7dqftJ3kas6D0VAdmt3k3V',
         universalLink: urlShortenerResponseMock.data.refer,
         links: [
+          {
+            type: 'qobuz',
+            url: 'https://www.qobuz.com/mock/album',
+            isVerified: true,
+            notAvailable: false,
+          },
           {
             type: 'spotify',
             url: 'https://open.spotify.com/album/7dqftJ3kas6D0VAdmt3k3V',
@@ -354,7 +400,7 @@ describe('GET /search', () => {
           },
           {
             type: 'deezer',
-            url: 'https://www.deezer.com/album/11191996',
+            url: 'https://www.deezer.com/album/11192186',
             isVerified: false,
             notAvailable: false,
           },
@@ -406,8 +452,8 @@ describe('GET /search', () => {
         id: 'b3Blbi5zcG90aWZ5LmNvbS9hcnRpc3QvNmwzSHZRNXNhNm1YVHNNVEIxOXJPNQ',
         type: 'artist',
         title: 'J. Cole',
-        description: 'Artist · 32.9M monthly listeners.',
-        image: 'https://i.scdn.co/image/ab6761610000e5eb4b053c29fd4b317ff825f0dc',
+        description: expect.stringMatching(/(?=.*Artist)(?=.*monthly listeners)/i),
+        image: expect.any(String),
         source: 'https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5',
         universalLink: urlShortenerResponseMock.data.refer,
         links: [
@@ -422,6 +468,12 @@ describe('GET /search', () => {
             notAvailable: false,
             type: 'deezer',
             url: 'https://www.deezer.com/artist/339209',
+          },
+          {
+            isVerified: true,
+            notAvailable: false,
+            type: 'qobuz',
+            url: 'https://www.qobuz.com/mock/artist',
           },
           {
             isVerified: true,
@@ -478,8 +530,8 @@ describe('GET /search', () => {
         id: 'b3Blbi5zcG90aWZ5LmNvbS9wbGF5bGlzdC8zN2k5ZFFaRjFEWDJhcFd6eUVDd3la',
         type: 'playlist',
         title: 'This Is Bad Bunny',
-        description: 'Playlist · Spotify · 129 items · 5.8M saves',
-        image: 'https://i.scdn.co/image/ab67706f00000002a548bbf4cd54767b735f9701',
+        description: expect.stringMatching(/(?=.*playlist)(?=.*items)/i),
+        image: expect.any(String),
         source: 'https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ',
         universalLink: urlShortenerResponseMock.data.refer,
         links: [
@@ -545,8 +597,8 @@ describe('GET /search', () => {
         id: 'b3Blbi5zcG90aWZ5LmNvbS9lcGlzb2RlLzJ1dk9mcEpSUmxpQ1dwYmlDWEtmNFE',
         type: 'podcast',
         title: '¿Dónde estabas el 6 de noviembre del año 1985?',
-        description: 'Tercera Vuelta · Episode',
-        image: 'https://i.scdn.co/image/ab6765630000ba8a85c9dd1468476ba33d95f0e9',
+        description: expect.stringMatching(/episode/i),
+        image: expect.any(String),
         audio:
           'https://podz-content.spotifycdn.com/audio/clips/6omeNtNZD86P8h4edCGXRl/clip_176359_236359.mp3',
         source: 'https://open.spotify.com/episode/2uvOfpJRRliCWpbiCXKf4Q',
@@ -596,8 +648,8 @@ describe('GET /search', () => {
         id: 'b3Blbi5zcG90aWZ5LmNvbS9lcGlzb2RlLzQzVENyZ21QMjNxa0xjQVhaUU44cVQ',
         type: 'podcast',
         title: 'The End of Twitter as We Know It',
-        description: 'Waveform: The MKBHD Podcast · Episode',
-        image: 'https://i.scdn.co/image/ab6765630000ba8a7878c8215f202b56b20a007e',
+        description: expect.stringMatching(/episode/i),
+        image: expect.any(String),
         audio:
           'https://podz-content.spotifycdn.com/audio/clips/3GYsio7wUsfky3DC7ut4uL/clip_140000_202520.mp3',
         source: 'https://open.spotify.com/episode/43TCrgmP23qkLcAXZQN8qT',

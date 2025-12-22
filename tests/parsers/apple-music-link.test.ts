@@ -53,4 +53,15 @@ describe('Apple Music Link Regex', () => {
     expect(match?.[1]).toBe('berghain');
     expect(match?.[2]).toBe('1848167516');
   });
+
+  test('Should match URL with encoded characters', () => {
+    const url =
+      'https://music.apple.com/de/album/el-paga-pato-versi%C3%B3n-trato-coleto/1849278000?i=1849278003&l=en-GB';
+    const match = url.match(APPLE_MUSIC_LINK_REGEX);
+
+    expect(match).not.toBeNull();
+    expect(match?.[0]).toBe(url);
+    expect(match?.[1]).toBe('el-paga-pato-versi%C3%B3n-trato-coleto');
+    expect(match?.[2]).toBe('1849278000');
+  });
 });

@@ -9,7 +9,7 @@ export const YOUTUBE_LINK_REGEX =
   /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be|music\.youtube\.com)\/(?:watch\?v=|embed\/|v\/|shorts\/|playlist\?list=|channel\/)?([^&\s]{11,})/;
 
 export const APPLE_MUSIC_LINK_REGEX =
-  /^https:\/\/music\.apple\.com\/(?:[a-z]{2}\/)?(?:album|playlist|station|artist|music-video|video-playlist|show|song)\/([\w.-]+)(?:\/([\w.-]+))?(?:\?.*)?$/;
+  /^https:\/\/music\.apple\.com\/(?:[a-z]{2}(?:-[a-z]{2})?\/)?(?:album|playlist|station|artist|music-video|video-playlist|show|song)\/([^/?]+)(?:\/([^/?]+))?(?:\?.*)?$/;
 
 export const DEEZER_LINK_REGEX =
   /^https:\/\/www\.deezer\.com\/(?:[a-z]{2}\/)?(?:track|album|playlist|artist|episode|show)\/(\d+)/;
@@ -23,10 +23,13 @@ export const TIDAL_LINK_REGEX =
 export const GOOGLE_LINK_REGEX =
   /^https:\/\/(?:www\.google\.com\/gasearch(?:[\?#].+)?|share\.google\/(.+))$/;
 
+export const QOBUZ_LINK_REGEX =
+  /^https:\/\/(open|play|www)\.qobuz\.com\/(\w{2}-\w{2}\/)?(artist|album|interpreter)\/([\w-]+\/)?(\w+)$/;
+
 export const BANDCAMP_LINK_REGEX =
   /^https:\/\/([^\.]+)\.bandcamp\.com\/(album|track)?\/?([^/?]+)?\/?$/;
 
-export const ALLOWED_LINKS_REGEX = `${SPOTIFY_LINK_REGEX.source}|${YOUTUBE_LINK_REGEX.source}|${APPLE_MUSIC_LINK_REGEX.source}|${DEEZER_LINK_REGEX.source}|${SOUNDCLOUD_LINK_REGEX.source}|${TIDAL_LINK_REGEX.source}|${GOOGLE_LINK_REGEX.source}|${BANDCAMP_LINK_REGEX.source}`;
+export const ALLOWED_LINKS_REGEX = `${SPOTIFY_LINK_REGEX.source}|${YOUTUBE_LINK_REGEX.source}|${APPLE_MUSIC_LINK_REGEX.source}|${DEEZER_LINK_REGEX.source}|${SOUNDCLOUD_LINK_REGEX.source}|${TIDAL_LINK_REGEX.source}|${QOBUZ_LINK_REGEX.source}|${GOOGLE_LINK_REGEX.source}`;
 
 export const ADAPTERS_QUERY_LIMIT = 4;
 export const RESPONSE_COMPARE_MIN_SCORE = 0.7;
