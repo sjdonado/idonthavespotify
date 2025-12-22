@@ -107,7 +107,7 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
 };
 
 export const getAppleMusicQueryFromMetadata = (metadata: SearchMetadata) => {
-  let query = metadata.title;
+  let query = metadata.description;
 
   if (metadata.type === MetadataType.Playlist) {
     query = `${query} playlist`;
