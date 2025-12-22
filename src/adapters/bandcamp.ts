@@ -13,66 +13,69 @@ import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 
 interface BandcampAlbumSearchResponse {
-		"type": "a",
-		"id": number,
-		"art_id": number | null,
-		"img_id": number | null,
-		"name": string,
-		"band_id": number,
-		"band_name": string,
-		"item_url_root": URL,
-		"item_url_path": URL,
-		"img": URL,
-		"tag_names": string[] | null,
-		"stat_params": string,
-};
+  type: 'a';
+  id: number;
+  art_id: number | null;
+  img_id: number | null;
+  name: string;
+  band_id: number;
+  band_name: string;
+  item_url_root: URL;
+  item_url_path: URL;
+  img: URL;
+  tag_names: string[] | null;
+  stat_params: string;
+}
 
 interface BandcampArtistSearchResponse {
-    "type": "b",
-    "id": number,
-    "art_id": number | null,
-    "img_id": number | null,
-    "name": string,
-    "item_url_root": URL,
-    "location": string,
-    "is_label": boolean,
-    "tag_names": string[] | null,
-    "img": URL,
-    "genre_name": string,
-    "stat_params": string,
-};
+  type: 'b';
+  id: number;
+  art_id: number | null;
+  img_id: number | null;
+  name: string;
+  item_url_root: URL;
+  location: string;
+  is_label: boolean;
+  tag_names: string[] | null;
+  img: URL;
+  genre_name: string;
+  stat_params: string;
+}
 
 interface BandcampTrackSearchResponse {
-		"type": "t",
-		"id": number,
-		"art_id": number | null,
-		"img_id": number | null,
-		"name": string,
-		"band_id": number,
-		"band_name": string,
-		"album_name": string,
-		"item_url_root": URL,
-		"item_url_path": URL,
-		"img": URL,
-		"album_id": number,
-		"stat_params": string,
-};
+  type: 't';
+  id: number;
+  art_id: number | null;
+  img_id: number | null;
+  name: string;
+  band_id: number;
+  band_name: string;
+  album_name: string;
+  item_url_root: URL;
+  item_url_path: URL;
+  img: URL;
+  album_id: number;
+  stat_params: string;
+}
 
-type BandcampTypedSearchResponse = BandcampAlbumSearchResponse | BandcampArtistSearchResponse | BandcampTrackSearchResponse;
+type BandcampTypedSearchResponse =
+  | BandcampAlbumSearchResponse
+  | BandcampArtistSearchResponse
+  | BandcampTrackSearchResponse;
 
 type BandcampSearchResponse = {
   auto: {
     results: BandcampTypedSearchResponse[];
-    stat_params_for_tag: string,
-    time_ms: number,
-  },
+    stat_params_for_tag: string;
+    time_ms: number;
+  };
   tag: {
-    matches: [],
-    count: number,
-    time_ms: number,
-  },
-  genre: {},
-}
+    matches: [];
+    count: number;
+    time_ms: number;
+  };
+  genre: Record<string, unknown>;
+};
 type BandcampSearchFilters = 'a' | 'b' | 't';
 
 const BANDCAMP_SEARCH_TYPES = {
@@ -85,11 +88,11 @@ const BANDCAMP_SEARCH_TYPES = {
 };
 
 interface BandcampSearchParams {
-    search_text: string,
-    search_filter: BandcampSearchFilters,
-    full_page: false,
-    fan_id: null,
-};
+  search_text: string;
+  search_filter: BandcampSearchFilters;
+  full_page: false;
+  fan_id: null;
+}
 
 function BandcampQueryMatcher(i: BandcampTypedSearchResponse): [string, string] {
   let q = '';
@@ -127,7 +130,7 @@ export async function getBandcampLink(query: string, metadata: SearchMetadata) {
   // So caching just the URL won't contain the unique query information
   // Here we'll make a fake unique URL for the purposes of the cache ID
   const cacheurl = new URL(ENV.adapters.bandcamp.baseUrl); // `base` is considerably shorter than the API URL
-  cacheurl.search = new URLSearchParams({q:query,t:searchType as string}).toString();
+  cacheurl.search = new URLSearchParams({ q: query, t: searchType as string }).toString();
 
   const cache = await getCachedSearchResultLink(cacheurl);
   if (cache) {
@@ -139,18 +142,14 @@ export async function getBandcampLink(query: string, metadata: SearchMetadata) {
   const body = JSON.stringify(params);
 
   try {
-    const response = await HttpClient.post<BandcampSearchResponse>(
-      url.toString(),
-      body,
-      {
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    const response = await HttpClient.post<BandcampSearchResponse>(url.toString(), body, {
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
 
-    if (!response.hasOwnProperty('auto') && !response.auto.hasOwnProperty('results')) {
+    if (!('auto' in response) || !('results' in response.auto)) {
       throw new Error(`Unexpected API response: ${JSON.stringify(response)}`);
     }
 
@@ -163,10 +162,15 @@ export async function getBandcampLink(query: string, metadata: SearchMetadata) {
     // Bandcamp mixes artists and labels in their results....
     // Before we slice to our query limit, make sure to filter out Labels from an Artist search
     if (searchType === 'b') {
-      _results = (_results as BandcampArtistSearchResponse[]).filter((r) => r.is_label === false);
+      _results = (_results as BandcampArtistSearchResponse[]).filter(
+        r => r.is_label === false
+      );
     }
 
-    const results = _results.length > ADAPTERS_QUERY_LIMIT ? _results.slice(0, ADAPTERS_QUERY_LIMIT) : _results;
+    const results =
+      _results.length > ADAPTERS_QUERY_LIMIT
+        ? _results.slice(0, ADAPTERS_QUERY_LIMIT)
+        : _results;
 
     let bestMatch: SearchResultLink | null = null;
     let highestScore = 0;

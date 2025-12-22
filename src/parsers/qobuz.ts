@@ -105,7 +105,7 @@ function cleanQobuzArtistMetadataForQuery(metadata: SearchMetadata) {
       .replace(/^(Discographie|Discografia)\sde\s/, '')
       // Accented characters regex from here: https://stackoverflow.com/a/26900132
       .replace(
-        /(Discography|Discografía|Discografia|-Diskographie)(\s-\s[A-Za-zÀ-ÖØ-öø-ÿ\s\-]+)-\sQobuz$/,
+        /(Discography|Discografía|Discografia|-Diskographie)(\s-\s[A-Za-zÀ-ÖØ-öø-ÿ\s-]+)-\sQobuz$/,
         ''
       )
   );
@@ -122,7 +122,7 @@ export const getQobuzQueryFromMetadata = (metadata: SearchMetadata) => {
   return (
     cleaned
       // Remove suffix added to the title
-      .replace(/\s\-\sQobuz$/, '')
+      .replace(/\s-\sQobuz$/, '')
       // Clean extra whitespace
       .replace(/\s+/g, ' ')
       .trim()

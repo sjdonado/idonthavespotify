@@ -40,6 +40,8 @@ export const getUniversalMetadataFromTidal = async (
       [Adapter.Deezer]: null,
       [Adapter.SoundCloud]: null,
       [Adapter.Tidal]: null,
+      [Adapter.Qobuz]: null,
+      [Adapter.Bandcamp]: null,
     };
 
     await cacheTidalUniversalLinkResponse(link, adapterLinks);

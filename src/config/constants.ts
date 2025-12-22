@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 export const SPOTIFY_LINK_REGEX =
   /^https:\/\/(open\.spotify\.com\/(?:intl-[a-z]{2}\/)?(track|album|playlist|artist|episode|show)|spotify\.link)\/(\w{11,24})(?:[\?#].*)?$/;
 
