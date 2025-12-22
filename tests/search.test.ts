@@ -13,10 +13,10 @@ import {
   spyOn,
 } from 'bun:test';
 
-import { ENV } from '~/config/env';
-import { cacheStore } from '~/services/cache';
 import * as qobuzAdapter from '~/adapters/qobuz';
 import { Adapter, MetadataType } from '~/config/enum';
+import { ENV } from '~/config/env';
+import { cacheStore } from '~/services/cache';
 
 import { loadHeadSnapshots, loadSearchSnapshots } from './mocks/snapshots';
 import { createTestApp, nodeFetch } from './utils/request';

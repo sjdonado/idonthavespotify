@@ -13,15 +13,13 @@ import {
 import { getCheerioDoc } from '~/utils/scraper';
 
 import { createTestApp, formDataFromObject, nodeFetch } from './utils/request';
-import { pageSearchEndpoint, urlShortenerResponseMock } from './utils/shared';
+import { urlShortenerResponseMock } from './utils/shared';
 
 describe('Page router', () => {
   let app: Server<undefined>;
-  let searchEndpointUrl: string;
 
   beforeAll(() => {
     app = createTestApp();
-    searchEndpointUrl = pageSearchEndpoint(app.url);
   });
 
   afterAll(() => {
