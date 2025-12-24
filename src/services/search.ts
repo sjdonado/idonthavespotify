@@ -1,5 +1,6 @@
 import { getAppleMusicLink } from '~/adapters/apple-music';
 import { getDeezerLink } from '~/adapters/deezer';
+import { getPandoraLink } from '~/adapters/pandora';
 import { getSoundCloudLink } from '~/adapters/sound-cloud';
 import { getSpotifyLink } from '~/adapters/spotify';
 import { getTidalLink } from '~/adapters/tidal';
@@ -17,6 +18,7 @@ import {
   getSoundCloudMetadata,
   getSoundCloudQueryFromMetadata,
 } from '~/parsers/sound-cloud';
+import { getPandoraMetadata, getPandoraQueryFromMetadata } from '~/parsers/pandora';
 import { getSpotifyMetadata, getSpotifyQueryFromMetadata } from '~/parsers/spotify';
 import { getTidalMetadata, getTidalQueryFromMetadata } from '~/parsers/tidal';
 import { getYouTubeMetadata, getYouTubeQueryFromMetadata } from '~/parsers/youtube';
@@ -84,6 +86,7 @@ export const search = async <T extends SearchProps>({
     Adapter.Deezer,
     Adapter.SoundCloud,
     Adapter.Tidal,
+    Adapter.Pandora,
   ];
 
   logger.info(`[search] (searchAdapters) ${searchAdapters}`);
@@ -95,6 +98,7 @@ export const search = async <T extends SearchProps>({
     [Parser.Deezer]: getDeezerMetadata,
     [Parser.SoundCloud]: getSoundCloudMetadata,
     [Parser.Tidal]: getTidalMetadata,
+    [Parser.Pandora]: getPandoraMetadata,
     [Parser.Google]: getGoogleMetadata,
   };
 
@@ -105,6 +109,7 @@ export const search = async <T extends SearchProps>({
     [Parser.Deezer]: getDeezerQueryFromMetadata,
     [Parser.SoundCloud]: getSoundCloudQueryFromMetadata,
     [Parser.Tidal]: getTidalQueryFromMetadata,
+    [Parser.Pandora]: getPandoraQueryFromMetadata,
     [Parser.Google]: getGoogleQueryFromMetadata,
   };
 
@@ -115,6 +120,7 @@ export const search = async <T extends SearchProps>({
     [Adapter.Deezer]: getDeezerLink,
     [Adapter.SoundCloud]: getSoundCloudLink,
     [Adapter.Tidal]: getTidalLink,
+    [Adapter.Pandora]: getPandoraLink,
   };
 
   const metadataFetcher = metadataFetchersMap[searchParser.type];

@@ -30,6 +30,9 @@ export const ENV = {
     soundCloud: {
       baseUrl: Bun.env['SOUNDCLOUD_BASE_URL']!,
     },
+    pandora: {
+      apiUrl: Bun.env['PANDORA_API_URL']!,
+    },
   },
   services: {
     urlShortener: {

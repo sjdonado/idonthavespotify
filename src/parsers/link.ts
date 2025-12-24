@@ -2,6 +2,7 @@ import {
   APPLE_MUSIC_LINK_REGEX,
   DEEZER_LINK_REGEX,
   GOOGLE_LINK_REGEX,
+  PANDORA_LINK_REGEX,
   SOUNDCLOUD_LINK_REGEX,
   SPOTIFY_LINK_REGEX,
   TIDAL_LINK_REGEX,
@@ -73,6 +74,12 @@ export const getSearchParser = (link?: string, searchId?: string) => {
   if (tidalId) {
     id = tidalId;
     type = Parser.Tidal;
+  }
+
+  const pandoraId = source.match(PANDORA_LINK_REGEX)?.[3];
+  if (pandoraId) {
+    id = pandoraId;
+    type = Parser.Pandora;
   }
 
   const googleMatch = source.match(GOOGLE_LINK_REGEX);

@@ -28,6 +28,10 @@ const SEARCH_LINK_DICT = {
     icon: 'ti ti-brand-soundcloud',
     label: 'Listen on SoundCloud',
   },
+  [Adapter.Pandora]: {
+    icon: 'ti ti-brand-pandora',
+    label: 'Listen on Pandora',
+  },
 };
 
 export default function SearchCard(props: { searchResult: SearchResult }) {
