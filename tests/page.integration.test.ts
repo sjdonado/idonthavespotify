@@ -13,15 +13,13 @@ import {
 import { getCheerioDoc } from '~/utils/scraper';
 
 import { createTestApp, formDataFromObject, nodeFetch } from './utils/request';
-import { pageSearchEndpoint, urlShortenerResponseMock } from './utils/shared';
+import { urlShortenerResponseMock } from './utils/shared';
 
 describe('Page router', () => {
   let app: Server<undefined>;
-  let searchEndpointUrl: string;
 
   beforeAll(() => {
     app = createTestApp();
-    searchEndpointUrl = pageSearchEndpoint(app.url);
   });
 
   afterAll(() => {
@@ -56,7 +54,7 @@ describe('Page router', () => {
 
       expect(doc('h1').text()).toEqual("I Don't Have Spotify");
       expect(doc('p').text()).toContain(
-        'Paste a link from Spotify, YouTube Music, Apple Music, Deezer, SoundCloud, Pandora, or Tidal to start.'
+        'Paste a link from Spotify, YouTube Music, Apple Music, Deezer, SoundCloud, Qobuz, Bandcamp, Pandora, or Tidal to start.'
       );
 
       const footerText = doc('footer').text();
@@ -255,7 +253,7 @@ describe('Page router', () => {
       const doc = getCheerioDoc(data);
       const errorMessage = doc('p').text();
       expect(errorMessage).toContain(
-        'Invalid link, please try with Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal, Pandora, or Google Music Share links.'
+        'Invalid link, please try with Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal, Qobuz, Bandcamp, Pandora, or Google Music Share links.'
       );
     });
 

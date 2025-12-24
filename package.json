@@ -1,6 +1,6 @@
 {
   "name": "idonthavespotify",
-  "version": "1.7.3",
+  "version": "1.8.0",
   "type": "module",
   "scripts": {
     "dev": "concurrently \"bun run watch:assets\" \"bun run watch:server\"",
@@ -11,7 +11,7 @@
     "test": "NODE_ENV=test bun test",
     "test:mocks:fetch": "bun run scripts/fetch-snapshots.ts",
     "test:ci": "bun run test:mocks:fetch && NODE_ENV=test bun test",
-    "lint": "eslint ./src",
+    "lint": "eslint 'src/**/*.{ts,tsx}' 'tests/**/*.ts'",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

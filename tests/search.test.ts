@@ -13,8 +13,10 @@ import {
   spyOn,
 } from 'bun:test';
 
+import * as bandcampAdapter from '~/adapters/bandcamp';
+import * as qobuzAdapter from '~/adapters/qobuz';
+import { Adapter, MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
-import * as tidalUniversalLinkParser from '~/parsers/tidal-universal-link';
 import { cacheStore } from '~/services/cache';
 
 import { loadHeadSnapshots, loadSearchSnapshots } from './mocks/snapshots';
@@ -34,33 +36,64 @@ describe('GET /search', () => {
   let searchEndpointUrl: string;
 
   let axiosMock: InstanceType<typeof AxiosMockAdapter>;
-  let getUniversalMetadataFromTidalMock: Mock<
-    typeof tidalUniversalLinkParser.getUniversalMetadataFromTidal
-  >;
+  let getBandcampLinkMock: Mock<typeof bandcampAdapter.getBandcampLink>;
+  let getQobuzLinkMock: Mock<typeof qobuzAdapter.getQobuzLink>;
 
   beforeAll(() => {
     app = createTestApp();
     searchEndpointUrl = apiSearchEndpoint(app.url);
 
     axiosMock = new AxiosMockAdapter(axios);
-    getUniversalMetadataFromTidalMock = spyOn(
-      tidalUniversalLinkParser,
-      'getUniversalMetadataFromTidal'
-    );
+    getBandcampLinkMock = spyOn(bandcampAdapter, 'getBandcampLink');
+    getQobuzLinkMock = spyOn(qobuzAdapter, 'getQobuzLink');
   });
 
   afterAll(() => {
     app.stop();
     cacheStore.reset();
     axiosMock.reset();
-    getUniversalMetadataFromTidalMock.mockReset();
+    getBandcampLinkMock.mockRestore();
+    getQobuzLinkMock.mockRestore();
   });
 
   beforeEach(() => {
     cacheStore.reset();
     axiosMock.reset();
 
-    getUniversalMetadataFromTidalMock.mockResolvedValue(undefined);
+    getBandcampLinkMock.mockReset();
+    getBandcampLinkMock.mockImplementation(async (_query, metadata) => {
+      if (
+        [MetadataType.Song, MetadataType.Album, MetadataType.Artist].includes(
+          metadata.type
+        )
+      ) {
+        return {
+          type: Adapter.Bandcamp,
+          url: `https://mock.bandcamp.com/${metadata.type}`,
+          isVerified: true,
+          notAvailable: false,
+        };
+      }
+
+      return null;
+    });
+    getQobuzLinkMock.mockReset();
+    getQobuzLinkMock.mockImplementation(async (_query, metadata) => {
+      if (
+        [MetadataType.Song, MetadataType.Album, MetadataType.Artist].includes(
+          metadata.type
+        )
+      ) {
+        return {
+          type: Adapter.Qobuz,
+          url: `https://www.qobuz.com/mock/${metadata.type}`,
+          isVerified: true,
+          notAvailable: false,
+        };
+      }
+
+      return null;
+    });
     axiosMock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
     axiosMock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
     axiosMock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
@@ -126,8 +159,20 @@ describe('GET /search', () => {
           {
             isVerified: true,
             notAvailable: false,
+            type: 'bandcamp',
+            url: 'https://mock.bandcamp.com/song',
+          },
+          {
+            isVerified: true,
+            notAvailable: false,
             type: 'deezer',
             url: 'https://www.deezer.com/track/14477354',
+          },
+          {
+            isVerified: true,
+            notAvailable: false,
+            type: 'qobuz',
+            url: 'https://www.qobuz.com/mock/song',
           },
           {
             isVerified: true,
@@ -142,8 +187,6 @@ describe('GET /search', () => {
           },
         ],
       });
-
-      expect(getUniversalMetadataFromTidalMock).toHaveBeenCalledTimes(0);
     });
 
     it('should return 200 - Mobile link', async () => {
@@ -198,8 +241,20 @@ describe('GET /search', () => {
             notAvailable: false,
           },
           {
+            isVerified: true,
+            notAvailable: false,
+            type: 'bandcamp',
+            url: 'https://mock.bandcamp.com/song',
+          },
+          {
             type: 'deezer',
             url: 'https://www.deezer.com/track/14477354',
+            isVerified: true,
+            notAvailable: false,
+          },
+          {
+            type: 'qobuz',
+            url: 'https://www.qobuz.com/mock/song',
             isVerified: true,
             notAvailable: false,
           },
@@ -216,8 +271,6 @@ describe('GET /search', () => {
           },
         ],
       });
-
-      expect(getUniversalMetadataFromTidalMock).toHaveBeenCalledTimes(0);
     });
 
     it('should return 200 - Extra query params', async () => {
@@ -274,8 +327,20 @@ describe('GET /search', () => {
             notAvailable: false,
           },
           {
+            isVerified: true,
+            notAvailable: false,
+            type: 'bandcamp',
+            url: 'https://mock.bandcamp.com/song',
+          },
+          {
             type: 'deezer',
             url: 'https://www.deezer.com/track/14477354',
+            isVerified: true,
+            notAvailable: false,
+          },
+          {
+            type: 'qobuz',
+            url: 'https://www.qobuz.com/mock/song',
             isVerified: true,
             notAvailable: false,
           },
@@ -292,8 +357,6 @@ describe('GET /search', () => {
           },
         ],
       });
-
-      expect(getUniversalMetadataFromTidalMock).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -341,6 +404,18 @@ describe('GET /search', () => {
         source: 'https://open.spotify.com/album/7dqftJ3kas6D0VAdmt3k3V',
         universalLink: urlShortenerResponseMock.data.refer,
         links: [
+          {
+            type: 'bandcamp',
+            url: 'https://mock.bandcamp.com/album',
+            isVerified: true,
+            notAvailable: false,
+          },
+          {
+            type: 'qobuz',
+            url: 'https://www.qobuz.com/mock/album',
+            isVerified: true,
+            notAvailable: false,
+          },
           {
             type: 'spotify',
             url: 'https://open.spotify.com/album/7dqftJ3kas6D0VAdmt3k3V',
@@ -420,8 +495,20 @@ describe('GET /search', () => {
           {
             isVerified: true,
             notAvailable: false,
+            type: 'bandcamp',
+            url: 'https://mock.bandcamp.com/artist',
+          },
+          {
+            isVerified: true,
+            notAvailable: false,
             type: 'deezer',
             url: 'https://www.deezer.com/artist/339209',
+          },
+          {
+            isVerified: true,
+            notAvailable: false,
+            type: 'qobuz',
+            url: 'https://www.qobuz.com/mock/artist',
           },
           {
             isVerified: true,

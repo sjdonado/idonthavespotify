@@ -28,6 +28,14 @@ const SEARCH_LINK_DICT = {
     icon: 'ti ti-brand-soundcloud',
     label: 'Listen on SoundCloud',
   },
+  [Adapter.Qobuz]: {
+    icon: 'ti ti-brand-qobuz',
+    label: 'Listen on Qobuz',
+  },
+  [Adapter.Bandcamp]: {
+    icon: 'ti ti-brand-bandcamp',
+    label: 'Listen on Bandcamp',
+  },
   [Adapter.Pandora]: {
     icon: 'ti ti-brand-pandora',
     label: 'Listen on Pandora',

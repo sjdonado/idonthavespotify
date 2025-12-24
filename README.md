@@ -16,6 +16,8 @@ Adapters represent the streaming services supported by the Web App and the Rayca
 | Apple Music      | Yes             | No                     | Yes            |
 | Deezer           | Yes             | Yes                    | Yes            |
 | SoundCloud       | Yes             | No                     | Yes            |
+| Qobuz            | Yes             | No                     | Yes            |
+| Bandcamp         | Yes             | No                     | Yes            |
 
 ## Disclaimer: Search-based results
 

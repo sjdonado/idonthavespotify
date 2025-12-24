@@ -6,6 +6,8 @@ export enum StreamingService {
   SoundCloud = 'soundCloud',
   Tidal = 'tidal',
   Google = 'google',
+  Qobuz = 'qobuz',
+  Bandcamp = 'bandcamp',
   Pandora = 'pandora',
 }
 
@@ -16,6 +18,8 @@ export enum Adapter {
   Deezer = StreamingService.Deezer,
   SoundCloud = StreamingService.SoundCloud,
   Tidal = StreamingService.Tidal,
+  Qobuz = StreamingService.Qobuz,
+  Bandcamp = StreamingService.Bandcamp,
   Pandora = StreamingService.Pandora,
 }
 
@@ -27,6 +31,8 @@ export enum Parser {
   SoundCloud = StreamingService.SoundCloud,
   Tidal = StreamingService.Tidal,
   Google = StreamingService.Google,
+  Qobuz = StreamingService.Qobuz,
+  Bandcamp = StreamingService.Bandcamp,
   Pandora = StreamingService.Pandora,
 }
 
