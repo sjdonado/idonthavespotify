@@ -29,7 +29,7 @@ const SEARCH_LINK_DICT = {
     label: 'Listen on SoundCloud',
   },
   [Adapter.Qobuz]: {
-    icon: 'ti ti-brand-qobuz',
+    icon: 'ti ti-brand-qobuz ti-inline-svg',
     label: 'Listen on Qobuz',
   },
   [Adapter.Bandcamp]: {
@@ -37,7 +37,7 @@ const SEARCH_LINK_DICT = {
     label: 'Listen on Bandcamp',
   },
   [Adapter.Pandora]: {
-    icon: 'ti ti-brand-pandora',
+    icon: 'ti ti-brand-pandora ti-inline-svg',
     label: 'Listen on Pandora',
   },
 };
