@@ -100,7 +100,14 @@ async function buildJS(options: BuildOptions = {}) {
 async function watchJS(options: BuildOptions) {
   console.log('👀 Starting JS watcher...');
 
-  const jsWatchCmd = ['bun', 'build', './src/views/controllers/index.js', '--outdir', './public/assets', '--watch'];
+  const jsWatchCmd = [
+    'bun',
+    'build',
+    './src/views/controllers/index.js',
+    '--outdir',
+    './public/assets',
+    '--watch',
+  ];
 
   if (options.minify || isProduction) {
     jsWatchCmd.push('--minify');

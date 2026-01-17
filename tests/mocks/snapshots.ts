@@ -6,6 +6,9 @@ export type SnapshotTarget = {
   url: string;
   file: string;
   staticBody?: string;
+  method?: 'GET' | 'POST';
+  requestBody?: string;
+  requestHeaders?: Record<string, string>;
 };
 
 export const headSnapshotTargets = {
@@ -100,6 +103,57 @@ export const searchSnapshotTargets = {
     url: 'https://youtube.googleapis.com/mock',
     file: 'tests/mocks/search/youtube-empty.json',
     staticBody: JSON.stringify({ items: [] }),
+  },
+  qobuzRollingStone: {
+    url: 'https://www.qobuz.com/v4/us-en/catalog/search/autosuggest?q=Like%20a%20Rolling%20Stone%20Bob%20Dylan&limit=4',
+    file: 'tests/mocks/search/qobuz-like-a-rolling-stone.json',
+    requestHeaders: { 'X-Requested-With': 'XMLHttpRequest' },
+  },
+  qobuzStoriesAvicii: {
+    url: 'https://www.qobuz.com/v4/us-en/catalog/search/autosuggest?q=Stories%20Avicii&limit=4',
+    file: 'tests/mocks/search/qobuz-stories-avicii.json',
+    requestHeaders: { 'X-Requested-With': 'XMLHttpRequest' },
+  },
+  qobuzJCole: {
+    url: 'https://www.qobuz.com/v4/us-en/catalog/search/autosuggest?q=J.%20Cole&limit=4',
+    file: 'tests/mocks/search/qobuz-j-cole.json',
+    requestHeaders: { 'X-Requested-With': 'XMLHttpRequest' },
+  },
+  bandcampRollingStone: {
+    url: 'https://bandcamp.com/api/bcsearch_public_api/1/autocomplete_elastic',
+    file: 'tests/mocks/search/bandcamp-like-a-rolling-stone.json',
+    method: 'POST',
+    requestBody: JSON.stringify({
+      search_text: 'Like a Rolling Stone Bob Dylan',
+      search_filter: 't',
+      full_page: false,
+      fan_id: null,
+    }),
+    requestHeaders: { 'Content-Type': 'application/json' },
+  },
+  bandcampStoriesAvicii: {
+    url: 'https://bandcamp.com/api/bcsearch_public_api/1/autocomplete_elastic',
+    file: 'tests/mocks/search/bandcamp-stories-avicii.json',
+    method: 'POST',
+    requestBody: JSON.stringify({
+      search_text: 'Stories Avicii',
+      search_filter: 'a',
+      full_page: false,
+      fan_id: null,
+    }),
+    requestHeaders: { 'Content-Type': 'application/json' },
+  },
+  bandcampJCole: {
+    url: 'https://bandcamp.com/api/bcsearch_public_api/1/autocomplete_elastic',
+    file: 'tests/mocks/search/bandcamp-j-cole.json',
+    method: 'POST',
+    requestBody: JSON.stringify({
+      search_text: 'J. Cole',
+      search_filter: 'b',
+      full_page: false,
+      fan_id: null,
+    }),
+    requestHeaders: { 'Content-Type': 'application/json' },
   },
 } as const satisfies Record<string, SnapshotTarget>;
 

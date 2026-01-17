@@ -9,7 +9,6 @@ import { getTidalLink } from '~/adapters/tidal';
 import { getYouTubeLink } from '~/adapters/youtube';
 import { Adapter, MetadataType, Parser, type StreamingServiceType } from '~/config/enum';
 import { ENV } from '~/config/env';
-import { getSearchParser } from '~/parsers/link';
 import {
   getAppleMusicMetadata,
   getAppleMusicQueryFromMetadata,
@@ -17,6 +16,7 @@ import {
 import { getBandcampMetadata, getBandcampQueryFromMetadata } from '~/parsers/bandcamp';
 import { getDeezerMetadata, getDeezerQueryFromMetadata } from '~/parsers/deezer';
 import { getGoogleMetadata, getGoogleQueryFromMetadata } from '~/parsers/google';
+import { getSearchParser } from '~/parsers/link';
 import { getPandoraMetadata, getPandoraQueryFromMetadata } from '~/parsers/pandora';
 import { getQobuzMetadata, getQobuzQueryFromMetadata } from '~/parsers/qobuz';
 import {

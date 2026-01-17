@@ -15,7 +15,11 @@ export default function Home({
       <LoadingIndicator />
       <main class="flex flex-1 flex-col items-center justify-start">
         <div class="mb-4 mt-8 flex flex-col gap-4 p-2 text-center sm:mt-12">
-          <h1 class="text-4xl uppercase md:text-5xl lg:text-6xl">I Don't Have Spotify</h1>
+          <a href="/">
+            <h1 class="text-4xl uppercase md:text-5xl lg:text-6xl">
+              I Don't Have Spotify
+            </h1>
+          </a>
           <p class="text-justify text-sm text-zinc-400 lg:text-base">
             Paste a link from Spotify, YouTube Music, Apple Music, Deezer, SoundCloud, Qobuz, Bandcamp, Pandora, or Tidal to start.
           </p>
@@ -30,7 +34,7 @@ export default function Home({
             hx-target="#search-results"
             hx-swap="innerHTML"
             hx-indicator="#loading-indicator"
-            hx-request='\"timeout\":8000'
+            hx-request='{"timeout":6000}'
             class="flex w-full max-w-3xl items-center justify-center px-2"
           >
             <label for="song-link" class="sr-only">

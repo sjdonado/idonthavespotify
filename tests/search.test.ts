@@ -9,13 +9,8 @@ import {
   describe,
   expect,
   it,
-  type Mock,
-  spyOn,
 } from 'bun:test';
 
-import * as bandcampAdapter from '~/adapters/bandcamp';
-import * as qobuzAdapter from '~/adapters/qobuz';
-import { Adapter, MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { cacheStore } from '~/services/cache';
 
@@ -23,6 +18,8 @@ import { loadHeadSnapshots, loadSearchSnapshots } from './mocks/snapshots';
 import { createTestApp, nodeFetch } from './utils/request';
 import {
   apiSearchEndpoint,
+  getBandcampApiUrl,
+  getQobuzSearchLink,
   getSoundCloudSearchLink,
   urlShortenerLink,
   urlShortenerResponseMock,
@@ -36,64 +33,24 @@ describe('GET /search', () => {
   let searchEndpointUrl: string;
 
   let axiosMock: InstanceType<typeof AxiosMockAdapter>;
-  let getBandcampLinkMock: Mock<typeof bandcampAdapter.getBandcampLink>;
-  let getQobuzLinkMock: Mock<typeof qobuzAdapter.getQobuzLink>;
 
   beforeAll(() => {
     app = createTestApp();
     searchEndpointUrl = apiSearchEndpoint(app.url);
 
     axiosMock = new AxiosMockAdapter(axios);
-    getBandcampLinkMock = spyOn(bandcampAdapter, 'getBandcampLink');
-    getQobuzLinkMock = spyOn(qobuzAdapter, 'getQobuzLink');
   });
 
   afterAll(() => {
     app.stop();
     cacheStore.reset();
     axiosMock.reset();
-    getBandcampLinkMock.mockRestore();
-    getQobuzLinkMock.mockRestore();
   });
 
   beforeEach(() => {
     cacheStore.reset();
     axiosMock.reset();
 
-    getBandcampLinkMock.mockReset();
-    getBandcampLinkMock.mockImplementation(async (_query, metadata) => {
-      if (
-        [MetadataType.Song, MetadataType.Album, MetadataType.Artist].includes(
-          metadata.type
-        )
-      ) {
-        return {
-          type: Adapter.Bandcamp,
-          url: `https://mock.bandcamp.com/${metadata.type}`,
-          isVerified: true,
-          notAvailable: false,
-        };
-      }
-
-      return null;
-    });
-    getQobuzLinkMock.mockReset();
-    getQobuzLinkMock.mockImplementation(async (_query, metadata) => {
-      if (
-        [MetadataType.Song, MetadataType.Album, MetadataType.Artist].includes(
-          metadata.type
-        )
-      ) {
-        return {
-          type: Adapter.Qobuz,
-          url: `https://www.qobuz.com/mock/${metadata.type}`,
-          isVerified: true,
-          notAvailable: false,
-        };
-      }
-
-      return null;
-    });
     axiosMock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
     axiosMock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
     axiosMock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
@@ -126,6 +83,19 @@ describe('GET /search', () => {
       axiosMock
         .onGet(soundCloudSearchUrl)
         .reply(200, searchSnapshots.soundCloudRollingStone);
+
+      const qobuzSearchUrl = getQobuzSearchLink(query);
+      axiosMock
+        .onGet(qobuzSearchUrl)
+        .reply(200, JSON.parse(searchSnapshots.qobuzRollingStone));
+
+      axiosMock.onPost(getBandcampApiUrl()).reply(config => {
+        const body = JSON.parse(config.data);
+        if (body.search_filter === 't') {
+          return [200, JSON.parse(searchSnapshots.bandcampRollingStone)];
+        }
+        return [404, {}];
+      });
 
       axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
       axiosMock.onGet(/youtube\.googleapis\.com/).reply(200, { items: [] });
@@ -160,7 +130,7 @@ describe('GET /search', () => {
             isVerified: true,
             notAvailable: false,
             type: 'bandcamp',
-            url: 'https://mock.bandcamp.com/song',
+            url: 'https://packband.bandcamp.com/track/like-a-rolling-stone-bob-dylan-cover',
           },
           {
             isVerified: true,
@@ -172,7 +142,7 @@ describe('GET /search', () => {
             isVerified: true,
             notAvailable: false,
             type: 'qobuz',
-            url: 'https://www.qobuz.com/mock/song',
+            url: 'https://www.qobuz.com/us-en/album/highway-61-revisited-bob-dylan/0827969239926',
           },
           {
             isVerified: true,
@@ -212,6 +182,19 @@ describe('GET /search', () => {
         .onGet(soundCloudSearchUrl)
         .reply(200, searchSnapshots.soundCloudRollingStone);
 
+      const qobuzSearchUrl = getQobuzSearchLink(query);
+      axiosMock
+        .onGet(qobuzSearchUrl)
+        .reply(200, JSON.parse(searchSnapshots.qobuzRollingStone));
+
+      axiosMock.onPost(getBandcampApiUrl()).reply(config => {
+        const body = JSON.parse(config.data);
+        if (body.search_filter === 't') {
+          return [200, JSON.parse(searchSnapshots.bandcampRollingStone)];
+        }
+        return [404, {}];
+      });
+
       axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
@@ -244,7 +227,7 @@ describe('GET /search', () => {
             isVerified: true,
             notAvailable: false,
             type: 'bandcamp',
-            url: 'https://mock.bandcamp.com/song',
+            url: 'https://packband.bandcamp.com/track/like-a-rolling-stone-bob-dylan-cover',
           },
           {
             type: 'deezer',
@@ -254,7 +237,7 @@ describe('GET /search', () => {
           },
           {
             type: 'qobuz',
-            url: 'https://www.qobuz.com/mock/song',
+            url: 'https://www.qobuz.com/us-en/album/highway-61-revisited-bob-dylan/0827969239926',
             isVerified: true,
             notAvailable: false,
           },
@@ -297,6 +280,19 @@ describe('GET /search', () => {
         .onGet(soundCloudSearchUrl)
         .reply(200, searchSnapshots.soundCloudRollingStone);
 
+      const qobuzSearchUrl = getQobuzSearchLink(query);
+      axiosMock
+        .onGet(qobuzSearchUrl)
+        .reply(200, JSON.parse(searchSnapshots.qobuzRollingStone));
+
+      axiosMock.onPost(getBandcampApiUrl()).reply(config => {
+        const body = JSON.parse(config.data);
+        if (body.search_filter === 't') {
+          return [200, JSON.parse(searchSnapshots.bandcampRollingStone)];
+        }
+        return [404, {}];
+      });
+
       axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
@@ -330,7 +326,7 @@ describe('GET /search', () => {
             isVerified: true,
             notAvailable: false,
             type: 'bandcamp',
-            url: 'https://mock.bandcamp.com/song',
+            url: 'https://packband.bandcamp.com/track/like-a-rolling-stone-bob-dylan-cover',
           },
           {
             type: 'deezer',
@@ -340,7 +336,7 @@ describe('GET /search', () => {
           },
           {
             type: 'qobuz',
-            url: 'https://www.qobuz.com/mock/song',
+            url: 'https://www.qobuz.com/us-en/album/highway-61-revisited-bob-dylan/0827969239926',
             isVerified: true,
             notAvailable: false,
           },
@@ -383,6 +379,19 @@ describe('GET /search', () => {
         .onGet(soundCloudSearchUrl)
         .reply(200, searchSnapshots.soundCloudStoriesAvicii);
 
+      const qobuzSearchUrl = getQobuzSearchLink('Stories Avicii');
+      axiosMock
+        .onGet(qobuzSearchUrl)
+        .reply(200, JSON.parse(searchSnapshots.qobuzStoriesAvicii));
+
+      axiosMock.onPost(getBandcampApiUrl()).reply(config => {
+        const body = JSON.parse(config.data);
+        if (body.search_filter === 'a') {
+          return [200, JSON.parse(searchSnapshots.bandcampStoriesAvicii)];
+        }
+        return [404, {}];
+      });
+
       axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
@@ -405,14 +414,8 @@ describe('GET /search', () => {
         universalLink: urlShortenerResponseMock.data.refer,
         links: [
           {
-            type: 'bandcamp',
-            url: 'https://mock.bandcamp.com/album',
-            isVerified: true,
-            notAvailable: false,
-          },
-          {
             type: 'qobuz',
-            url: 'https://www.qobuz.com/mock/album',
+            url: 'https://www.qobuz.com/us-en/album/stories-avicii/0060254748276',
             isVerified: true,
             notAvailable: false,
           },
@@ -426,6 +429,12 @@ describe('GET /search', () => {
             url: 'https://geo.music.apple.com/ca/album/stories/1440834059',
             isVerified: false,
             notAvailable: false,
+          },
+          {
+            type: 'bandcamp',
+            url: 'https://bubblesexrecords.bandcamp.com/album/alicia-the-cap-dagde-stories',
+            isVerified: false,
+            notAvailable: true,
           },
           {
             type: 'deezer',
@@ -465,6 +474,17 @@ describe('GET /search', () => {
       const soundCloudSearchUrl = getSoundCloudSearchLink('J. Cole');
       axiosMock.onGet(soundCloudSearchUrl).reply(200, searchSnapshots.soundCloudJCole);
 
+      const qobuzSearchUrl = getQobuzSearchLink('J. Cole');
+      axiosMock.onGet(qobuzSearchUrl).reply(200, JSON.parse(searchSnapshots.qobuzJCole));
+
+      axiosMock.onPost(getBandcampApiUrl()).reply(config => {
+        const body = JSON.parse(config.data);
+        if (body.search_filter === 'b') {
+          return [200, JSON.parse(searchSnapshots.bandcampJCole)];
+        }
+        return [404, {}];
+      });
+
       axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
@@ -495,12 +515,6 @@ describe('GET /search', () => {
           {
             isVerified: true,
             notAvailable: false,
-            type: 'bandcamp',
-            url: 'https://mock.bandcamp.com/artist',
-          },
-          {
-            isVerified: true,
-            notAvailable: false,
             type: 'deezer',
             url: 'https://www.deezer.com/artist/339209',
           },
@@ -508,7 +522,7 @@ describe('GET /search', () => {
             isVerified: true,
             notAvailable: false,
             type: 'qobuz',
-            url: 'https://www.qobuz.com/mock/artist',
+            url: 'https://www.qobuz.com/us-en/interpreter/j-cole/236973',
           },
           {
             isVerified: true,
@@ -520,6 +534,12 @@ describe('GET /search', () => {
             isVerified: true,
             type: 'spotify',
             url: 'https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5',
+          },
+          {
+            isVerified: false,
+            notAvailable: false,
+            type: 'bandcamp',
+            url: 'https://ianjcole.bandcamp.com',
           },
         ],
       });

@@ -2,23 +2,42 @@ import { QOBUZ_LINK_REGEX } from '~/config/constants';
 import { MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
-import { fetchMetadata } from '~/services/metadata';
 import type { SearchMetadata } from '~/services/search';
+import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
-import { getCheerioDoc, metaTagContent } from '~/utils/scraper';
 
 enum QobuzMetadataType {
-  // Tracks aren't parseable without switching to the private API,
-  // so the regex in `constants.ts` purposefully won't match it
   Song = 'track',
   Album = 'album',
   Artist = 'artist',
 }
 
-const QOBUZ_METADATA_TO_METADATA_TYPE = {
-  [QobuzMetadataType.Song]: MetadataType.Song,
-  [QobuzMetadataType.Album]: MetadataType.Album,
-  [QobuzMetadataType.Artist]: MetadataType.Artist,
+type QobuzTrackResponse = {
+  id: number;
+  title: string;
+  version?: string;
+  performer: { id: number; name: string };
+  album: {
+    id: string;
+    title: string;
+    image: { large: string };
+    artist: { name: string };
+  };
+};
+
+type QobuzAlbumResponse = {
+  id: string;
+  title: string;
+  version?: string;
+  image: { large: string };
+  artist: { name: string };
+};
+
+type QobuzArtistResponse = {
+  id: number;
+  name: string;
+  image?: { large: string };
+  picture?: string;
 };
 
 const metadataCleanersMap: Partial<
@@ -45,32 +64,7 @@ export const getQobuzMetadata = async (id: string, link: string) => {
       type = 'artist';
     }
 
-    // `play.qobuz.com` pages require a login, so there's nothing to scrape...
-    if (link.match(QOBUZ_LINK_REGEX)?.[1] === 'play') {
-      // ...but we can convert the link easily enough to something we *can* scrape
-      link = `${ENV.adapters.qobuz.storeUrl}/${type}/${id}`; // this will expand with a redirect
-      logger.info(`[Qobuz] Switching 'play' link to: ${link}`);
-    }
-
-    const html = await fetchMetadata(link);
-
-    const doc = getCheerioDoc(html);
-
-    const title = metaTagContent(doc, 'og:title', 'property');
-    const description = metaTagContent(doc, 'og:description', 'property');
-    const image = metaTagContent(doc, 'og:image', 'property');
-
-    if (!title) {
-      throw new Error('Qobuz metadata not found');
-    }
-
-    const metadata = {
-      id,
-      title: title?.trim(),
-      description: description?.trim(),
-      type: QOBUZ_METADATA_TO_METADATA_TYPE[type as QobuzMetadataType],
-      image,
-    } as SearchMetadata;
+    const metadata = await fetchQobuzMetadataFromApi(id, type as QobuzMetadataType);
 
     await cacheSearchMetadata(id, Parser.Qobuz, metadata);
 
@@ -80,35 +74,76 @@ export const getQobuzMetadata = async (id: string, link: string) => {
   }
 };
 
+async function fetchQobuzMetadataFromApi(
+  id: string,
+  type: QobuzMetadataType
+): Promise<SearchMetadata> {
+  const apiUrl = ENV.adapters.qobuz.apiUrl;
+  const appId = ENV.adapters.qobuz.appId;
+
+  const params = new URLSearchParams({ app_id: appId });
+
+  let url: string;
+  switch (type) {
+    case QobuzMetadataType.Song:
+      params.set('track_id', id);
+      url = `${apiUrl}/track/get?${params}`;
+      break;
+    case QobuzMetadataType.Album:
+      params.set('album_id', id);
+      url = `${apiUrl}/album/get?${params}`;
+      break;
+    case QobuzMetadataType.Artist:
+      params.set('artist_id', id);
+      url = `${apiUrl}/artist/get?${params}`;
+      break;
+  }
+
+  logger.info(`[Qobuz] Fetching metadata from API: ${url}`);
+
+  switch (type) {
+    case QobuzMetadataType.Song: {
+      const response = await HttpClient.get<QobuzTrackResponse>(url);
+      const title = response.version
+        ? `${response.title} (${response.version})`
+        : response.title;
+      return {
+        title: `${title} ${response.performer.name}`,
+        description: `${response.album.title} - ${response.album.artist.name}`,
+        type: MetadataType.Song,
+        image: response.album.image.large,
+      };
+    }
+    case QobuzMetadataType.Album: {
+      const response = await HttpClient.get<QobuzAlbumResponse>(url);
+      const title = response.version
+        ? `${response.title} (${response.version})`
+        : response.title;
+      return {
+        title: `${title} ${response.artist.name}`,
+        description: response.artist.name,
+        type: MetadataType.Album,
+        image: response.image.large,
+      };
+    }
+    case QobuzMetadataType.Artist: {
+      const response = await HttpClient.get<QobuzArtistResponse>(url);
+      return {
+        title: response.name,
+        description: response.name,
+        type: MetadataType.Artist,
+        image: response.image?.large ?? response.picture,
+      };
+    }
+  }
+}
+
 function cleanQobuzAlbumMetadataForQuery(metadata: SearchMetadata) {
-  return (
-    metadata.title
-      // Remove comma, but leave Artist in place
-      // NOTE: this will remove more commas than the one we're technically targeting,
-      //       but that shouldn't have any negative effects on the string matching
-      //       (especially if we also remove commas in the `adapters` comparison)
-      .replace(',', '')
-  );
+  return metadata.title.replace(',', '');
 }
 
 function cleanQobuzArtistMetadataForQuery(metadata: SearchMetadata) {
-  /*
-  ${Artist} Discography - Download Albums in Hi-Res - Qobuz
-  ${Artist} Discografía - Descarga de álbumes en Hi-Res - Qobuz
-  ${Artist} Discografia - Scarica gli album in Hi-Res - Qobuz
-  ${Artist}-Diskographie - Alben in Hi-Res herunterladen - Qobuz
-  Discographie de ${Artist} - Téléchargez des albums en Hi-Res - Qobuz
-  Discografia de ${Artist} - Baixar álbuns em Hi-Res - Qobuz
-  */
-  return (
-    metadata.title
-      .replace(/^(Discographie|Discografia)\sde\s/, '')
-      // Accented characters regex from here: https://stackoverflow.com/a/26900132
-      .replace(
-        /(Discography|Discografía|Discografia|-Diskographie)(\s-\s[A-Za-zÀ-ÖØ-öø-ÿ\s-]+)-\sQobuz$/,
-        ''
-      )
-  );
+  return metadata.title;
 }
 
 function cleanQobuzTrackMetadataForQuery(metadata: SearchMetadata) {
@@ -119,12 +154,5 @@ export const getQobuzQueryFromMetadata = (metadata: SearchMetadata) => {
   const cleanFunction = metadataCleanersMap[metadata.type];
   const cleaned = cleanFunction ? cleanFunction(metadata) : metadata.title;
 
-  return (
-    cleaned
-      // Remove suffix added to the title
-      .replace(/\s-\sQobuz$/, '')
-      // Clean extra whitespace
-      .replace(/\s+/g, ' ')
-      .trim()
-  );
+  return cleaned.replace(/\s+/g, ' ').trim();
 };
