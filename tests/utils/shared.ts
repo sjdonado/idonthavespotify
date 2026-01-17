@@ -123,3 +123,19 @@ export const getTidalSearchLink = (query: string, type: MetadataType) => {
 
   return url.toString();
 };
+
+export const getQobuzSearchLink = (query: string) => {
+  const params = new URLSearchParams({
+    q: query,
+    limit: '4',
+  });
+
+  const url = new URL(
+    `${ENV.adapters.qobuz.storeUrl.replace('qobuz.com/', 'qobuz.com/v4/')}/catalog/search/autosuggest`
+  );
+  url.search = params.toString();
+
+  return url.toString();
+};
+
+export const getBandcampApiUrl = () => ENV.adapters.bandcamp.apiUrl;

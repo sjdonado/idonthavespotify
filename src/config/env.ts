@@ -31,6 +31,8 @@ export const ENV = {
       baseUrl: Bun.env['SOUNDCLOUD_BASE_URL']!,
     },
     qobuz: {
+      apiUrl: Bun.env['QOBUZ_API_URL']!,
+      appId: Bun.env['QOBUZ_APP_ID']!,
       streamUrl: Bun.env['QOBUZ_STREAM_URL']!,
       storeUrl: Bun.env['QOBUZ_STORE_URL']!,
     },

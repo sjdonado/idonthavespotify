@@ -25,7 +25,7 @@ export const GOOGLE_LINK_REGEX =
   /^https:\/\/(?:www\.google\.com\/gasearch(?:[\?#].+)?|share\.google\/(.+))$/;
 
 export const QOBUZ_LINK_REGEX =
-  /^https:\/\/(open|play|www)\.qobuz\.com\/(\w{2}-\w{2}\/)?(artist|album|interpreter)\/([\w-]+\/)?(\w+)$/;
+  /^https:\/\/(open|play|www)\.qobuz\.com\/(\w{2}-\w{2}\/)?(artist|album|interpreter|track)\/([\w-]+\/)?(\w+)$/;
 
 export const BANDCAMP_LINK_REGEX =
   /^https:\/\/([^\.]+)\.bandcamp\.com\/(album|track)?\/?([^/?]+)?\/?$/;
