@@ -7,40 +7,40 @@ html {
   font-style: normal;
 }
 
-.htmx-indicator {
-  transition: opacity 100ms ease-in !important;
-}
-
-.animate-loading-bar {
-  animation: loading 2s linear infinite;
-}
-
-button {
-  @apply cursor-pointer;
-}
-
-@keyframes loading {
-  0% {
-    left: -100%;
+@layer components {
+  .custom-svg {
+    height: 1em;
+    width: 1em;
+    display: inline-block;
+    margin: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
   }
 
-  100% {
-    left: 100%;
+  .svg-brand-pandora {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 24 24'%3E%3Cpath d='M1.882 0v24H8.32a1.085 1.085 0 001.085-1.085v-4.61h1.612c7.88 0 11.103-4.442 11.103-9.636C22.119 2.257 17.247 0 12.662 0H1.882z'/%3E%3C/svg%3E");
   }
-}
 
-.ti-inline-svg {
-  height: 1em;
-  width: 1em;
-  display: inline-block;
-  margin-left: 0;
-  margin-right: 16px;
-}
+  .svg-brand-qobuz {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23fff' stroke-width='2' viewBox='0 0 24 24'%3E %3Ccircle cx='12' cy='12' r='10'/%3E %3Ccircle cx='12' cy='12' r='2' stroke-width='2.5'/%3E %3Cline x1='16.5' x2='19' y1='16.5' y2='19' stroke-linecap='round'/%3E %3Cline x1='19' x2='22' y1='19' y2='22'/%3E %3C/svg%3E");
+  }
 
-.ti-brand-qobuz {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23fff' stroke-width='2' viewBox='0 0 24 24'%3E %3Ccircle cx='12' cy='12' r='10'/%3E %3Ccircle cx='12' cy='12' r='2' stroke-width='2.5'/%3E %3Cline x1='16.5' x2='19' y1='16.5' y2='19' stroke-linecap='round'/%3E %3Cline x1='19' x2='22' y1='19' y2='22'/%3E %3C/svg%3E");
-}
+  .htmx-indicator {
+    transition: opacity 100ms ease-in !important;
+  }
 
-.ti-brand-pandora {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='-6 -4 30 30' xmlns='http://www.w3.org/2000/svg' fill='%23fff'%3E%3Cpath d='M1.882 0v24H8.32a1.085 1.085 0 001.085-1.085v-4.61h1.612c7.88 0 11.103-4.442 11.103-9.636C22.119 2.257 17.247 0 12.662 0H1.882z'/%3E%3C/svg%3E");
+  .animate-loading-bar {
+    animation: loading 2s linear infinite;
+  }
+
+  @keyframes loading {
+    0% {
+      left: -100%;
+    }
+
+    100% {
+      left: 100%;
+    }
+  }
 }
