@@ -3,7 +3,7 @@
   "version": "1.8.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"bun run watch:assets\" \"bun run watch:server\"",
+    "dev": "bun run watch:assets & bun run watch:server",
     "watch:assets": "bun run build.config.ts --watch",
     "watch:server": "bun run --watch src/index.ts",
     "build": "bun run build.config.ts --minify",
@@ -38,7 +38,6 @@
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.38.0",
     "axios-mock-adapter": "^2.1.0",
-    "concurrently": "^9.2.1",
     "domhandler": "^5.0.3",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
