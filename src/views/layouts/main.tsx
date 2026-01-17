@@ -62,7 +62,7 @@ const MainLayout = ({
           href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
         />
         <link href="https://fonts.cdnfonts.com/css/poppins" rel="stylesheet" />
-        <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+        <script src="https://unpkg.com/htmx.org@2.0.8"></script>
 
         <link href="/assets/index.min.css" rel="stylesheet" />
       </Helmet>
