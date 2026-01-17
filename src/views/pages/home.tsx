@@ -35,7 +35,7 @@ export default function Home({
             hx-target="#search-results"
             hx-swap="innerHTML"
             hx-indicator="#loading-indicator"
-            hx-request='\"timeout\":8000'
+            hx-request='{"timeout":6000}'
             class="flex w-full max-w-3xl items-center justify-center px-2"
           >
             <label for="song-link" class="sr-only">

@@ -18,7 +18,7 @@ import {
   withRateLimit,
   withRateLimitHTML,
 } from './utils/rate-limit-middleware';
-import { validationError } from './utils/zod';
+import { ValidationError, validationError } from './utils/zod';
 import ErrorMessage from './views/components/error-message';
 import RateLimitError from './views/components/rate-limit-error';
 import SearchCard from './views/components/search-card';
@@ -145,18 +145,23 @@ export const createApp = (port: string = '0') =>
                 const { error } = await err.json();
                 message = error;
                 statusCode = err.status;
-              }
-              if (err instanceof Error) {
+              } else if (err instanceof ValidationError) {
+                message = err.message;
+                statusCode = 400;
+              } else if (err instanceof Error) {
                 if (err.message) {
                   message = err.message;
                 }
               }
 
-              const html = renderSSR(h(ErrorMessage, { message }));
-
               logger.error(`[route /search]: ${message}`);
               logger.error(err);
 
+              if (statusCode === 400) {
+                return Response.json({ message }, { status: statusCode });
+              }
+
+              const html = renderSSR(h(ErrorMessage, { message }));
               return new Response(html, {
                 headers: { 'Content-Type': 'text/html' },
                 status: statusCode,
@@ -207,11 +212,20 @@ export const createApp = (port: string = '0') =>
             } catch (err) {
               if (err instanceof Response) return err;
 
-              const { message } = err as Error;
-              logger.error(`[route /api/search]: ${err}`);
+              let message = 'Something went wrong, please try again later.';
+              let statusCode = 500;
+
+              if (err instanceof ValidationError) {
+                message = err.message;
+                statusCode = 400;
+              } else if (err instanceof Error) {
+                message = err.message;
+              }
+
+              logger.error(`[route /api/search]: ${message}`);
               logger.error(err);
 
-              return Response.json({ error: message }, { status: 500 });
+              return Response.json({ error: message }, { status: statusCode });
             }
           },
           {

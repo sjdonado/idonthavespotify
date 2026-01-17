@@ -41,7 +41,13 @@ export default class extends Controller {
       }
     });
 
-    document.addEventListener('htmx:error', function () {
+    document.addEventListener('htmx:error', function (event) {
+      if (event.detail.errorInfo.xhr.status === 400) {
+        const response = JSON.parse(event.detail.errorInfo.xhr.responseText);
+        toast().error(response.message);
+        return;
+      }
+
       toast().error('Something went wrong, please try again later.');
     });
   }
