@@ -248,13 +248,12 @@ describe('Page router', () => {
           link: 'https://open.spotify.com/invalid',
         }),
       });
-      const data = await response.text();
+      const data = await response.json();
 
-      const doc = getCheerioDoc(data);
-      const errorMessage = doc('p').text();
-      expect(errorMessage).toContain(
-        'Invalid link, please try with Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal, Qobuz, Bandcamp, or Google Music Share links.'
-      );
+      expect(data).toEqual({
+        message:
+          'Invalid link, please try with Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal, Qobuz, Bandcamp, or Google Music Share links.',
+      });
     });
 
     it('should return error message when internal app error', async () => {
