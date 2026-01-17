@@ -5,7 +5,7 @@ import {
   RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
   RESPONSE_COMPARE_MIN_SCORE,
 } from '~/config/constants';
-import { Adapter, MetadataType } from '~/config/enum';
+import { Adapter, MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 import {
   cacheSearchResultLink,
@@ -47,7 +47,12 @@ const SPOTIFY_SEARCH_TYPES = {
   [MetadataType.Podcast]: 'episode',
 };
 
-export async function getSpotifyLink(query: string, metadata: SearchMetadata) {
+export async function getSpotifyLink(
+  query: string,
+  metadata: SearchMetadata,
+  sourceParser: Parser,
+  sourceId: string
+) {
   const searchType = SPOTIFY_SEARCH_TYPES[metadata.type];
   if (!searchType) return null;
 
@@ -60,7 +65,7 @@ export async function getSpotifyLink(query: string, metadata: SearchMetadata) {
   const url = new URL(ENV.adapters.spotify.apiUrl);
   url.search = params.toString();
 
-  const cache = await getCachedSearchResultLink(url);
+  const cache = await getCachedSearchResultLink(Adapter.Spotify, sourceParser, sourceId);
   if (cache) {
     logger.info(`[Spotify] (${url}) cache hit`);
     return cache;
@@ -93,7 +98,12 @@ export async function getSpotifyLink(query: string, metadata: SearchMetadata) {
       notAvailable: similarity < RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
     } as SearchResultLink;
 
-    await cacheSearchResultLink(url, searchResultLink);
+    await cacheSearchResultLink(
+      Adapter.Spotify,
+      sourceParser,
+      sourceId,
+      searchResultLink
+    );
 
     return searchResultLink;
   } catch (error) {

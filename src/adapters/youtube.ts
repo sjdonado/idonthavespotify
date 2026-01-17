@@ -1,4 +1,4 @@
-import { Adapter, MetadataType } from '~/config/enum';
+import { Adapter, MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
 import type { SearchMetadata, SearchResultLink } from '~/services/search';
@@ -44,7 +44,12 @@ const YOUTUBE_SEARCH_LINK_TYPE = (item: YoutubeSearchResponse['items'][number]) 
   [MetadataType.Show]: undefined,
 });
 
-export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
+export async function getYouTubeLink(
+  query: string,
+  metadata: SearchMetadata,
+  sourceParser: Parser,
+  sourceId: string
+) {
   const searchType = YOUTUBE_SEARCH_TYPES[metadata.type];
   if (!searchType) return null;
 
@@ -60,7 +65,7 @@ export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
   const url = new URL(`${ENV.adapters.youTube.apiUrl}/search`);
   url.search = params.toString();
 
-  const cache = await getCachedSearchResultLink(url);
+  const cache = await getCachedSearchResultLink(Adapter.YouTube, sourceParser, sourceId);
   if (cache) {
     logger.info(`[YouTube] (${url}) cache hit`);
     return cache;
@@ -82,7 +87,12 @@ export async function getYouTubeLink(query: string, metadata: SearchMetadata) {
       isVerified: false,
     } as SearchResultLink;
 
-    await cacheSearchResultLink(url, searchResultLink);
+    await cacheSearchResultLink(
+      Adapter.YouTube,
+      sourceParser,
+      sourceId,
+      searchResultLink
+    );
 
     return searchResultLink;
   } catch (error) {

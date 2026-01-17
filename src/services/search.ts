@@ -205,23 +205,25 @@ export const search = async <T extends SearchProps>({
         const linkGetter = linkGettersMap[adapter];
         if (!linkGetter) return null;
 
-        return linkGetter(query, metadata).then(link => {
-          if (link) {
-            logger.info(
-              `[${search.name}] Found ${adapter} link: ${link.url}, isVerified: ${link.isVerified}, notAvailable: ${link.notAvailable || false}`
-            );
-            links.push({
-              type: adapter,
-              url: link.url,
-              isVerified: link.isVerified,
-              notAvailable: link.notAvailable,
-            });
-          } else {
-            logger.info(
-              `[${search.name}] No ${adapter} link found for query: "${query}"`
-            );
+        return linkGetter(query, metadata, searchParser.type, searchParser.id).then(
+          link => {
+            if (link) {
+              logger.info(
+                `[${search.name}] Found ${adapter} link: ${link.url}, isVerified: ${link.isVerified}, notAvailable: ${link.notAvailable || false}`
+              );
+              links.push({
+                type: adapter,
+                url: link.url,
+                isVerified: link.isVerified,
+                notAvailable: link.notAvailable,
+              });
+            } else {
+              logger.info(
+                `[${search.name}] No ${adapter} link found for query: "${query}"`
+              );
+            }
           }
-        });
+        );
       })
       .filter(Boolean)
   );

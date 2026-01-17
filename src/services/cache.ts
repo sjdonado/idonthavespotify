@@ -86,16 +86,22 @@ export const cacheStore = {
 
 // Search result link caching
 export const cacheSearchResultLink = async (
-  url: URL,
+  adapter: Adapter,
+  sourceParser: Parser,
+  sourceId: string,
   searchResultLink: SearchResultLink
 ): Promise<void> => {
-  cache.set(`search:${url.toString()}`, searchResultLink);
+  cache.set(`search:${adapter}:${sourceParser}:${sourceId}`, searchResultLink);
 };
 
 export const getCachedSearchResultLink = async (
-  url: URL
+  adapter: Adapter,
+  sourceParser: Parser,
+  sourceId: string
 ): Promise<SearchResultLink | null> => {
-  const data = cache.get<SearchResultLink>(`search:${url.toString()}`);
+  const data = cache.get<SearchResultLink>(
+    `search:${adapter}:${sourceParser}:${sourceId}`
+  );
   return data || null;
 };
 

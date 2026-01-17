@@ -5,7 +5,7 @@ import {
   RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
   RESPONSE_COMPARE_MIN_SCORE,
 } from '~/config/constants';
-import { Adapter, MetadataType } from '~/config/enum';
+import { Adapter, MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
 import type { SearchMetadata, SearchResultLink } from '~/services/search';
@@ -24,6 +24,7 @@ const PANDORA_SEARCH_TYPES = {
 interface PandoraSearchResponse {
   searchToken: string;
   // These results would be needlessly verbose to model, and the fields vary a lot by type...
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   annotations: Record<string, any>;
   results: string[];
 }
@@ -36,10 +37,15 @@ interface PandoraSearchRequest {
   count: number;
   annotate: true;
   searchTime: number;
-  annotationRecipe: "CLASS_OF_2019"; // Adorable
+  annotationRecipe: 'CLASS_OF_2019'; // Adorable
 }
 
-export async function getPandoraLink(query: string, metadata: SearchMetadata) {
+export async function getPandoraLink(
+  query: string,
+  metadata: SearchMetadata,
+  sourceParser: Parser,
+  sourceId: string
+) {
   const searchType = PANDORA_SEARCH_TYPES[metadata.type];
   if (!searchType) return null;
 
@@ -51,15 +57,15 @@ export async function getPandoraLink(query: string, metadata: SearchMetadata) {
     count: Number(ADAPTERS_QUERY_LIMIT),
     annotate: true,
     searchTime: 0,
-    annotationRecipe: "CLASS_OF_2019",
+    annotationRecipe: 'CLASS_OF_2019',
   };
 
   // We're going to POST to the API, so our URL doesn't contain any query-specific information
   // Here we'll just construct a fake one for caching purposes
   const cacheurl = new URL('https://pandora.com/');
-  cacheurl.search = new URLSearchParams({q: query,t: searchType}).toString();
+  cacheurl.search = new URLSearchParams({ q: query, t: searchType }).toString();
 
-  const cache = await getCachedSearchResultLink(cacheurl);
+  const cache = await getCachedSearchResultLink(Adapter.Pandora, sourceParser, sourceId);
   if (cache) {
     logger.info(`[Pandora] (${cacheurl}) cache hit`);
     return cache;
@@ -120,7 +126,7 @@ export async function getPandoraLink(query: string, metadata: SearchMetadata) {
       `[Pandora] Best match score: ${highestScore.toFixed(3)} (verified: ${bestMatch.isVerified ? 'yes' : 'no'}, available: ${!bestMatch.notAvailable ? 'yes' : 'no'})`
     );
 
-    await cacheSearchResultLink(cacheurl, bestMatch);
+    await cacheSearchResultLink(Adapter.Pandora, sourceParser, sourceId, bestMatch);
 
     return bestMatch;
   } catch (error) {

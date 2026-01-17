@@ -4,7 +4,7 @@ import {
   RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
   RESPONSE_COMPARE_MIN_SCORE,
 } from '~/config/constants';
-import { Adapter, MetadataType } from '~/config/enum';
+import { Adapter, MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 import {
   cacheSearchResultLink,
@@ -45,7 +45,12 @@ export const TIDAL_SEARCH_TYPES = {
   [MetadataType.Podcast]: null,
 };
 
-export async function getTidalLink(query: string, metadata: SearchMetadata) {
+export async function getTidalLink(
+  query: string,
+  metadata: SearchMetadata,
+  sourceParser: Parser,
+  sourceId: string
+) {
   const searchType = TIDAL_SEARCH_TYPES[metadata.type];
   if (!searchType) return null;
 
@@ -59,7 +64,7 @@ export async function getTidalLink(query: string, metadata: SearchMetadata) {
   );
   url.search = params.toString();
 
-  const cache = await getCachedSearchResultLink(url);
+  const cache = await getCachedSearchResultLink(Adapter.Tidal, sourceParser, sourceId);
   if (cache) {
     logger.info(`[Tidal] (${url}) cache hit`);
     return cache;
@@ -103,7 +108,7 @@ export async function getTidalLink(query: string, metadata: SearchMetadata) {
       `[Tidal] Best match score: ${highestScore.toFixed(3)} (verified: ${bestMatch.isVerified ? 'yes' : 'no'}, available: ${!bestMatch.notAvailable ? 'yes' : 'no'})`
     );
 
-    await cacheSearchResultLink(url, bestMatch);
+    await cacheSearchResultLink(Adapter.Tidal, sourceParser, sourceId, bestMatch);
 
     return bestMatch;
   } catch (error) {

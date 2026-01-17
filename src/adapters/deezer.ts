@@ -5,7 +5,7 @@ import {
   RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
   RESPONSE_COMPARE_MIN_SCORE,
 } from '~/config/constants';
-import { Adapter, MetadataType } from '~/config/enum';
+import { Adapter, MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
 import type { SearchMetadata, SearchResultLink } from '~/services/search';
@@ -32,7 +32,12 @@ const DEEZER_SEARCH_TYPES = {
   [MetadataType.Podcast]: undefined,
 };
 
-export async function getDeezerLink(query: string, metadata: SearchMetadata) {
+export async function getDeezerLink(
+  query: string,
+  metadata: SearchMetadata,
+  sourceParser: Parser,
+  sourceId: string
+) {
   const searchType = DEEZER_SEARCH_TYPES[metadata.type];
   if (!searchType) return null;
 
@@ -44,7 +49,7 @@ export async function getDeezerLink(query: string, metadata: SearchMetadata) {
   const url = new URL(`${ENV.adapters.deezer.apiUrl}/${searchType}`);
   url.search = params.toString();
 
-  const cache = await getCachedSearchResultLink(url);
+  const cache = await getCachedSearchResultLink(Adapter.Deezer, sourceParser, sourceId);
   if (cache) {
     logger.info(`[Deezer] (${url}) cache hit`);
     return cache;
@@ -83,7 +88,7 @@ export async function getDeezerLink(query: string, metadata: SearchMetadata) {
       `[Deezer] Best match score: ${highestScore.toFixed(3)} (verified: ${bestMatch.isVerified ? 'yes' : 'no'}, available: ${!bestMatch.notAvailable ? 'yes' : 'no'})`
     );
 
-    await cacheSearchResultLink(url, bestMatch);
+    await cacheSearchResultLink(Adapter.Deezer, sourceParser, sourceId, bestMatch);
 
     return bestMatch;
   } catch (error) {

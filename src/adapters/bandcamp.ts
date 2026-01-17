@@ -5,7 +5,7 @@ import {
   RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
   RESPONSE_COMPARE_MIN_SCORE,
 } from '~/config/constants';
-import { Adapter, MetadataType } from '~/config/enum';
+import { Adapter, MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
 import type { SearchMetadata, SearchResultLink } from '~/services/search';
@@ -115,7 +115,12 @@ function BandcampQueryMatcher(i: BandcampTypedSearchResponse): [string, string] 
   return [q, u.toString()];
 }
 
-export async function getBandcampLink(query: string, metadata: SearchMetadata) {
+export async function getBandcampLink(
+  query: string,
+  metadata: SearchMetadata,
+  sourceParser: Parser,
+  sourceId: string
+) {
   const searchType = BANDCAMP_SEARCH_TYPES[metadata.type];
   if (!searchType) return null;
 
@@ -132,7 +137,7 @@ export async function getBandcampLink(query: string, metadata: SearchMetadata) {
   const cacheurl = new URL(ENV.adapters.bandcamp.baseUrl); // `base` is considerably shorter than the API URL
   cacheurl.search = new URLSearchParams({ q: query, t: searchType as string }).toString();
 
-  const cache = await getCachedSearchResultLink(cacheurl);
+  const cache = await getCachedSearchResultLink(Adapter.Bandcamp, sourceParser, sourceId);
   if (cache) {
     logger.info(`[Bandcamp] (${cacheurl}) cache hit`);
     return cache;
@@ -198,7 +203,7 @@ export async function getBandcampLink(query: string, metadata: SearchMetadata) {
       `[Bandcamp] Best match score: ${highestScore.toFixed(3)} (verified: ${bestMatch.isVerified ? 'yes' : 'no'}, available: ${!bestMatch.notAvailable ? 'yes' : 'no'})`
     );
 
-    await cacheSearchResultLink(url, bestMatch);
+    await cacheSearchResultLink(Adapter.Bandcamp, sourceParser, sourceId, bestMatch);
 
     return bestMatch;
   } catch (error) {

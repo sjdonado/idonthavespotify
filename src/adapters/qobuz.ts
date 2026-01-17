@@ -5,7 +5,7 @@ import {
   RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
   RESPONSE_COMPARE_MIN_SCORE,
 } from '~/config/constants';
-import { Adapter, MetadataType } from '~/config/enum';
+import { Adapter, MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
 import type { SearchMetadata, SearchResultLink } from '~/services/search';
@@ -68,7 +68,12 @@ function qobuzSpecificComparison(title: string, query: string): number {
   );
 }
 
-export async function getQobuzLink(query: string, metadata: SearchMetadata) {
+export async function getQobuzLink(
+  query: string,
+  metadata: SearchMetadata,
+  sourceParser: Parser,
+  sourceId: string
+) {
   const searchType = QOBUZ_SEARCH_TYPES[metadata.type];
   if (!searchType) return null;
 
@@ -86,7 +91,7 @@ export async function getQobuzLink(query: string, metadata: SearchMetadata) {
   );
   url.search = params.toString();
 
-  const cache = await getCachedSearchResultLink(url);
+  const cache = await getCachedSearchResultLink(Adapter.Qobuz, sourceParser, sourceId);
   if (cache) {
     logger.info(`[Qobuz] (${url}) cache hit`);
     return cache;
@@ -153,7 +158,7 @@ export async function getQobuzLink(query: string, metadata: SearchMetadata) {
       `[Qobuz] Best match score: ${highestScore.toFixed(3)} (verified: ${match.isVerified ? 'yes' : 'no'}, available: ${!match.notAvailable ? 'yes' : 'no'})`
     );
 
-    await cacheSearchResultLink(url, match);
+    await cacheSearchResultLink(Adapter.Qobuz, sourceParser, sourceId, match);
 
     return match;
   } catch (error) {
