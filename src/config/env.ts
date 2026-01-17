@@ -40,6 +40,9 @@ export const ENV = {
       apiUrl: Bun.env['BANDCAMP_API_URL']!,
       baseUrl: Bun.env['BANDCAMP_BASE_URL']!,
     },
+    pandora: {
+      apiUrl: Bun.env['PANDORA_API_URL']!,
+    },
   },
   services: {
     urlShortener: {

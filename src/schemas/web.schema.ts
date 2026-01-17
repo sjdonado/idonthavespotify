@@ -12,7 +12,7 @@ export const searchRouteSchema = z.object({
   body: z.object({
     link: z.string().regex(new RegExp(ALLOWED_LINKS_REGEX), {
       message:
-        'Invalid link, please try with Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal, Qobuz, Bandcamp, or Google Music Share links.',
+        'Invalid link, please try with Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal, Qobuz, Bandcamp, Pandora, or Google Music Share links.',
     }),
   }),
 });

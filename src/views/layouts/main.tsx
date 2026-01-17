@@ -30,7 +30,7 @@ const MainLayout = ({
 
         <meta
           name="description"
-          content="Turn any Spotify, Apple Music, YouTube, Deezer, Tidal, SoundCloud, Qobuz, or Bandcamp link into a shareable preview across the streaming services your friends use."
+          content="Turn any Spotify, Apple Music, YouTube, Deezer, Tidal, SoundCloud, Qobuz, Pandora, or Bandcamp link into a shareable preview across the streaming services your friends use."
         />
         <meta
           name="keywords"
@@ -45,7 +45,7 @@ const MainLayout = ({
           property="og:description"
           content={
             description ??
-            'Turn any Spotify, Apple Music, YouTube, Deezer, Tidal, SoundCloud, Qobuz, or Bandcamp link into a shareable preview across the streaming services your friends use.'
+            'Turn any Spotify, Apple Music, YouTube, Deezer, Tidal, SoundCloud, Qobuz, Pandora, or Bandcamp link into a shareable preview across the streaming services your friends use.'
           }
         />
         <meta

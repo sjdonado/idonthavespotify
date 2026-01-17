@@ -21,8 +21,7 @@ export default function Home({
             </h1>
           </a>
           <p class="text-justify text-sm text-zinc-400 lg:text-base">
-            Paste a link from Spotify, YouTube Music, Apple Music, Deezer, SoundCloud,
-            Qobuz, Bandcamp or Tidal to start.
+            Paste a link from Spotify, YouTube Music, Apple Music, Deezer, SoundCloud, Qobuz, Bandcamp, Pandora, or Tidal to start.
           </p>
         </div>
         <div

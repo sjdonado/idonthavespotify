@@ -1,6 +1,7 @@
 import { getAppleMusicLink } from '~/adapters/apple-music';
 import { getBandcampLink } from '~/adapters/bandcamp';
 import { getDeezerLink } from '~/adapters/deezer';
+import { getPandoraLink } from '~/adapters/pandora';
 import { getQobuzLink } from '~/adapters/qobuz';
 import { getSoundCloudLink } from '~/adapters/sound-cloud';
 import { getSpotifyLink } from '~/adapters/spotify';
@@ -16,6 +17,7 @@ import { getBandcampMetadata, getBandcampQueryFromMetadata } from '~/parsers/ban
 import { getDeezerMetadata, getDeezerQueryFromMetadata } from '~/parsers/deezer';
 import { getGoogleMetadata, getGoogleQueryFromMetadata } from '~/parsers/google';
 import { getSearchParser } from '~/parsers/link';
+import { getPandoraMetadata, getPandoraQueryFromMetadata } from '~/parsers/pandora';
 import { getQobuzMetadata, getQobuzQueryFromMetadata } from '~/parsers/qobuz';
 import {
   getSoundCloudMetadata,
@@ -90,6 +92,7 @@ export const search = async <T extends SearchProps>({
     Adapter.Tidal,
     Adapter.Qobuz,
     Adapter.Bandcamp,
+    Adapter.Pandora,
   ];
 
   logger.info(`[search] (searchAdapters) ${searchAdapters}`);
@@ -104,6 +107,7 @@ export const search = async <T extends SearchProps>({
     [Parser.Google]: getGoogleMetadata,
     [Parser.Qobuz]: getQobuzMetadata,
     [Parser.Bandcamp]: getBandcampMetadata,
+    [Parser.Pandora]: getPandoraMetadata,
   };
 
   const queryExtractorsMap = {
@@ -116,6 +120,7 @@ export const search = async <T extends SearchProps>({
     [Parser.Google]: getGoogleQueryFromMetadata,
     [Parser.Qobuz]: getQobuzQueryFromMetadata,
     [Parser.Bandcamp]: getBandcampQueryFromMetadata,
+    [Parser.Pandora]: getPandoraQueryFromMetadata,
   };
 
   const linkGettersMap = {
@@ -127,6 +132,7 @@ export const search = async <T extends SearchProps>({
     [Adapter.Tidal]: getTidalLink,
     [Adapter.Qobuz]: getQobuzLink,
     [Adapter.Bandcamp]: getBandcampLink,
+    [Adapter.Pandora]: getPandoraLink,
   };
 
   const metadataFetcher = metadataFetchersMap[searchParser.type];

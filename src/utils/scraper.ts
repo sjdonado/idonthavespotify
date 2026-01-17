@@ -13,3 +13,12 @@ export function metaTagContent(doc: cheerio.CheerioAPI, type: string, attr: stri
   // and properly handle Unicode characters
   return decode(content);
 }
+
+export function linkedDataScript(doc: cheerio.CheerioAPI, searchInBody: boolean = false) {
+	const context = searchInBody ? null : 'head';
+	const content = doc('script[type="application/ld+json"]', context).text();
+
+	if (!content) return content;
+
+	return JSON.parse(content);
+}

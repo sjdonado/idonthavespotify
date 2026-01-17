@@ -54,7 +54,7 @@ describe('Page router', () => {
 
       expect(doc('h1').text()).toEqual("I Don't Have Spotify");
       expect(doc('p').text()).toContain(
-        'Paste a link from Spotify, YouTube Music, Apple Music, Deezer, SoundCloud, Qobuz, Bandcamp or Tidal to start.'
+        'Paste a link from Spotify, YouTube Music, Apple Music, Deezer, SoundCloud, Qobuz, Bandcamp, Pandora, or Tidal to start.'
       );
 
       const footerText = doc('footer').text();
@@ -252,7 +252,7 @@ describe('Page router', () => {
 
       expect(data).toEqual({
         message:
-          'Invalid link, please try with Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal, Qobuz, Bandcamp, or Google Music Share links.',
+          'Invalid link, please try with Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal, Qobuz, Bandcamp, Pandora, or Google Music Share links.',
       });
     });
 

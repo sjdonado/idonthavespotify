@@ -29,12 +29,16 @@ const SEARCH_LINK_DICT = {
     label: 'Listen on SoundCloud',
   },
   [Adapter.Qobuz]: {
-    icon: 'ti ti-brand-qobuz',
+    icon: 'custom-svg svg-brand-qobuz',
     label: 'Listen on Qobuz',
   },
   [Adapter.Bandcamp]: {
     icon: 'ti ti-brand-bandcamp',
     label: 'Listen on Bandcamp',
+  },
+  [Adapter.Pandora]: {
+    icon: 'custom-svg svg-brand-pandora',
+    label: 'Listen on Pandora',
   },
 };
 
@@ -112,8 +116,8 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
                     aria-label={searchResult.label}
                     class="flex items-center"
                   >
-                    <i class={`${searchResult.icon} w-8 text-lg`} />
-                    <p class="underline decoration-0 underline-offset-2">
+                    <i class={`${searchResult.icon} text-lg`} />
+                    <p class="ml-2 underline decoration-0 underline-offset-2">
                       {searchResult.label}
                     </p>
                     {isVerified && (
