@@ -4,7 +4,7 @@ import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
 import { fetchMetadata } from '~/services/metadata';
 import type { SearchMetadata } from '~/services/search';
 import { logger } from '~/utils/logger';
-import { getCheerioDoc, metaTagContent, linkedDataScript } from '~/utils/scraper';
+import { getCheerioDoc, linkedDataScript, metaTagContent } from '~/utils/scraper';
 
 enum PandoraMetadataType {
   Song = 'TR',
@@ -67,7 +67,10 @@ export const getPandoraMetadata = async (id: string, link: string) => {
       // There is no `og:description` tag and `twitter:description` tags are inconsistently available
       // (and not populated with different info most of the time anyway)
       // So we're just going to use the `description` field to bake in the Artist for the eventual query
-      description = ('byArtist' in atts && 'name' in atts.byArtist) ? [title, atts.byArtist.name].join(' ') : title;
+      description =
+        'byArtist' in atts && 'name' in atts.byArtist
+          ? [title, atts.byArtist.name].join(' ')
+          : title;
     } else if (['PC', 'PE'].indexOf(type) !== -1) {
       // === Podcast Page ===
 
@@ -85,7 +88,10 @@ export const getPandoraMetadata = async (id: string, link: string) => {
       // But it doesn't exist cleanly in any tag or script anywhere in the document's HEAD
       // So our only options are to pull it from the HTML or accept the slugified version from the URL
       if (type === 'PE') {
-        const ep_title = link.match(PANDORA_LINK_REGEX)?.[2].replace(/[^\w]/g, ' ').trim();
+        const ep_title = link
+          .match(PANDORA_LINK_REGEX)?.[2]
+          .replace(/[^\w]/g, ' ')
+          .trim();
 
         title = [ep_title, title].join(' ');
       }

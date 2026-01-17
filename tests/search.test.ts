@@ -19,6 +19,7 @@ import { createTestApp, nodeFetch } from './utils/request';
 import {
   apiSearchEndpoint,
   getBandcampApiUrl,
+  getPandoraApiUrl,
   getQobuzSearchLink,
   getSoundCloudSearchLink,
   urlShortenerLink,
@@ -97,6 +98,14 @@ describe('GET /search', () => {
         return [404, {}];
       });
 
+      axiosMock.onPost(getPandoraApiUrl()).reply(config => {
+        const body = JSON.parse(config.data);
+        if (body.types.includes('TR')) {
+          return [200, JSON.parse(searchSnapshots.pandoraRollingStone)];
+        }
+        return [404, {}];
+      });
+
       axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
       axiosMock.onGet(/youtube\.googleapis\.com/).reply(200, { items: [] });
 
@@ -137,6 +146,12 @@ describe('GET /search', () => {
             notAvailable: false,
             type: 'deezer',
             url: 'https://www.deezer.com/track/14477354',
+          },
+          {
+            isVerified: true,
+            notAvailable: false,
+            type: 'pandora',
+            url: 'https://www.pandora.com/artist/bob-dylan/the-very-best-of/like-a-rolling-stone/TR9Pc9g74Z7KhxX',
           },
           {
             isVerified: true,
@@ -195,6 +210,14 @@ describe('GET /search', () => {
         return [404, {}];
       });
 
+      axiosMock.onPost(getPandoraApiUrl()).reply(config => {
+        const body = JSON.parse(config.data);
+        if (body.types.includes('TR')) {
+          return [200, JSON.parse(searchSnapshots.pandoraRollingStone)];
+        }
+        return [404, {}];
+      });
+
       axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
@@ -232,6 +255,12 @@ describe('GET /search', () => {
           {
             type: 'deezer',
             url: 'https://www.deezer.com/track/14477354',
+            isVerified: true,
+            notAvailable: false,
+          },
+          {
+            type: 'pandora',
+            url: 'https://www.pandora.com/artist/bob-dylan/the-very-best-of/like-a-rolling-stone/TR9Pc9g74Z7KhxX',
             isVerified: true,
             notAvailable: false,
           },
@@ -293,6 +322,14 @@ describe('GET /search', () => {
         return [404, {}];
       });
 
+      axiosMock.onPost(getPandoraApiUrl()).reply(config => {
+        const body = JSON.parse(config.data);
+        if (body.types.includes('TR')) {
+          return [200, JSON.parse(searchSnapshots.pandoraRollingStone)];
+        }
+        return [404, {}];
+      });
+
       axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
@@ -331,6 +368,12 @@ describe('GET /search', () => {
           {
             type: 'deezer',
             url: 'https://www.deezer.com/track/14477354',
+            isVerified: true,
+            notAvailable: false,
+          },
+          {
+            type: 'pandora',
+            url: 'https://www.pandora.com/artist/bob-dylan/the-very-best-of/like-a-rolling-stone/TR9Pc9g74Z7KhxX',
             isVerified: true,
             notAvailable: false,
           },
@@ -392,6 +435,14 @@ describe('GET /search', () => {
         return [404, {}];
       });
 
+      axiosMock.onPost(getPandoraApiUrl()).reply(config => {
+        const body = JSON.parse(config.data);
+        if (body.types.includes('AL')) {
+          return [200, JSON.parse(searchSnapshots.pandoraStoriesAvicii)];
+        }
+        return [404, {}];
+      });
+
       axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
@@ -413,6 +464,12 @@ describe('GET /search', () => {
         source: 'https://open.spotify.com/album/7dqftJ3kas6D0VAdmt3k3V',
         universalLink: urlShortenerResponseMock.data.refer,
         links: [
+          {
+            type: 'pandora',
+            url: 'https://www.pandora.com/artist/avicii/stories/ALxwtwm5b5dVbtw',
+            isVerified: true,
+            notAvailable: false,
+          },
           {
             type: 'qobuz',
             url: 'https://www.qobuz.com/us-en/album/stories-avicii/0060254748276',
@@ -485,6 +542,14 @@ describe('GET /search', () => {
         return [404, {}];
       });
 
+      axiosMock.onPost(getPandoraApiUrl()).reply(config => {
+        const body = JSON.parse(config.data);
+        if (body.types.includes('AR')) {
+          return [200, JSON.parse(searchSnapshots.pandoraJCole)];
+        }
+        return [404, {}];
+      });
+
       axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
@@ -517,6 +582,12 @@ describe('GET /search', () => {
             notAvailable: false,
             type: 'deezer',
             url: 'https://www.deezer.com/artist/339209',
+          },
+          {
+            isVerified: true,
+            notAvailable: false,
+            type: 'pandora',
+            url: 'https://www.pandora.com/artist/j-cole/AR2xp37zlVqdv5J',
           },
           {
             isVerified: true,
