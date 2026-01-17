@@ -21,11 +21,19 @@ const PANDORA_SEARCH_TYPES = {
   [MetadataType.Podcast]: 'PE',
 };
 
+interface PandoraAnnotationItem {
+  name?: string;
+  type?: string;
+  artistName?: string;
+  programName?: string;
+  shareableUrlPath?: string;
+  // These results would be needlessly verbose to model, and the fields vary a lot by type...
+  [key: string]: unknown;
+}
+
 interface PandoraSearchResponse {
   searchToken: string;
-  // These results would be needlessly verbose to model, and the fields vary a lot by type...
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  annotations: Record<string, any>;
+  annotations: Record<string, PandoraAnnotationItem>;
   results: string[];
 }
 
