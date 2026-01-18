@@ -28,6 +28,7 @@ import { getTidalMetadata, getTidalQueryFromMetadata } from '~/parsers/tidal';
 import { getYouTubeMetadata, getYouTubeQueryFromMetadata } from '~/parsers/youtube';
 import { generateId } from '~/utils/encoding';
 import { logger } from '~/utils/logger';
+import { cleanSearchQuery } from '~/utils/query';
 import { shortenLink } from '~/utils/url-shortener';
 
 export type SearchMetadata = {
@@ -144,7 +145,8 @@ export const search = async <T extends SearchProps>({
 
   // Even if headless, we need initial metadata and query for link extraction
   const metadata = await metadataFetcher(searchParser.id, searchParser.source);
-  const query = queryExtractor(metadata);
+  const rawQuery = queryExtractor(metadata);
+  const query = cleanSearchQuery(rawQuery);
   const parserType = searchParser.type as StreamingServiceType;
 
   logger.info(
