@@ -464,6 +464,12 @@ describe('GET /search', () => {
         universalLink: urlShortenerResponseMock.data.refer,
         links: [
           {
+            type: 'deezer',
+            url: 'https://www.deezer.com/album/11192186',
+            isVerified: true,
+            notAvailable: false,
+          },
+          {
             type: 'pandora',
             url: 'https://www.pandora.com/artist/avicii/stories/ALxwtwm5b5dVbtw',
             isVerified: true,
@@ -491,12 +497,6 @@ describe('GET /search', () => {
             url: 'https://bubblesexrecords.bandcamp.com/album/alicia-the-cap-dagde-stories',
             isVerified: false,
             notAvailable: true,
-          },
-          {
-            type: 'deezer',
-            url: 'https://www.deezer.com/album/11192186',
-            isVerified: false,
-            notAvailable: false,
           },
           {
             type: 'soundCloud',

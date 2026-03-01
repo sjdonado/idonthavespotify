@@ -1,14 +1,9 @@
-import { compareTwoStrings } from 'string-similarity';
-
-import {
-  ADAPTERS_QUERY_LIMIT,
-  RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
-  RESPONSE_COMPARE_MIN_SCORE,
-} from '~/config/constants';
+import { ADAPTERS_QUERY_LIMIT } from '~/config/constants';
 import { Adapter, MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
-import type { SearchMetadata, SearchResultLink } from '~/services/search';
+import type { SearchMetadata } from '~/services/search';
+import { findBestMatch, type MatchCandidate } from '~/utils/compare';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 
@@ -94,37 +89,29 @@ export async function getPandoraLink(
       throw new Error(`No results found: ${JSON.stringify(response)}`);
     }
 
-    let bestMatch: SearchResultLink | null = null;
-    let highestScore = 0;
+    const candidates: MatchCandidate[] = [];
 
     for (const key of response.results) {
       if (!(key in response.annotations)) continue;
 
       const item = response.annotations[key];
+      let artist: string | undefined;
 
-      // Debug
-      // logger.info(JSON.stringify(item, null, 2));
-
-      let title = item.name || '';
       if ((item.type === 'AL' || item.type === 'TR') && 'artistName' in item) {
-        title += ` ${item.artistName}`;
+        artist = item.artistName as string;
       }
       if (item.type === 'PE' && 'programName' in item) {
-        title += ` ${item.programName}`;
+        artist = item.programName as string;
       }
 
-      const score = compareTwoStrings(title.toLowerCase(), query.toLowerCase());
-
-      if (score > highestScore) {
-        highestScore = score;
-        bestMatch = {
-          type: Adapter.Pandora,
-          url: `https://www.pandora.com${item.shareableUrlPath}`,
-          isVerified: score >= RESPONSE_COMPARE_MIN_SCORE,
-          notAvailable: score < RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
-        };
-      }
+      candidates.push({
+        title: item.name || '',
+        artist,
+        url: `https://www.pandora.com${item.shareableUrlPath}`,
+      });
     }
+
+    const { bestMatch, highestScore } = findBestMatch(candidates, query, Adapter.Pandora);
 
     if (!bestMatch) {
       throw new Error('No valid matches found.');

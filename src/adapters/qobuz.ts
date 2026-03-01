@@ -1,14 +1,9 @@
-import { compareTwoStrings } from 'string-similarity';
-
-import {
-  ADAPTERS_QUERY_LIMIT,
-  RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
-  RESPONSE_COMPARE_MIN_SCORE,
-} from '~/config/constants';
+import { ADAPTERS_QUERY_LIMIT } from '~/config/constants';
 import { Adapter, MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
 import type { SearchMetadata, SearchResultLink } from '~/services/search';
+import { findBestMatch, type MatchCandidate } from '~/utils/compare';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 
@@ -60,14 +55,6 @@ const QOBUZ_SEARCH_TYPES = {
   [MetadataType.Podcast]: undefined,
 };
 
-function qobuzSpecificComparison(title: string, query: string): number {
-  return compareTwoStrings(
-    // Strip commas here because we aggressively stripped them when creating the query
-    title.toLowerCase().replace(',', ''),
-    query.toLowerCase()
-  );
-}
-
 export async function getQobuzLink(
   query: string,
   metadata: SearchMetadata,
@@ -111,42 +98,32 @@ export async function getQobuzLink(
       );
     }
 
-    let bestMatch: SearchResultLink | null = null;
-    let highestScore = 0;
-
-    const evaluateMatch = (title: string, url: string, isAlbumSearch: boolean) => {
-      const score = isAlbumSearch
-        ? qobuzSpecificComparison(title, query)
-        : compareTwoStrings(title.toLowerCase(), query.toLowerCase());
-
-      if (score > highestScore) {
-        highestScore = score;
-        bestMatch = {
-          type: Adapter.Qobuz,
-          url,
-          isVerified: score >= RESPONSE_COMPARE_MIN_SCORE,
-          notAvailable: score < RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
-        };
-      }
-    };
+    let candidates: MatchCandidate[] = [];
 
     if (searchType === 'artists') {
-      for (const artist of response.artists ?? []) {
-        evaluateMatch(artist.name, artist.url, false);
-      }
+      candidates = (response.artists ?? []).map(artist => ({
+        title: artist.name,
+        url: artist.url,
+      }));
     } else if (searchType === 'albums') {
       const albums = Array.isArray(response.albums)
         ? response.albums
         : Object.values(response.albums ?? {});
 
-      for (const album of albums) {
-        evaluateMatch(`${album.title} ${album.artist}`, album.url, true);
-      }
+      candidates = albums.map(album => ({
+        title: album.title,
+        artist: album.artist,
+        url: album.url,
+      }));
     } else {
-      for (const track of response.tracks ?? []) {
-        evaluateMatch(`${track.title} ${track.artist}`, track.url, false);
-      }
+      candidates = (response.tracks ?? []).map(track => ({
+        title: track.title,
+        artist: track.artist,
+        url: track.url,
+      }));
     }
+
+    const { bestMatch, highestScore } = findBestMatch(candidates, query, Adapter.Qobuz);
 
     if (!bestMatch) {
       throw new Error('No valid matches found.');

@@ -1,14 +1,9 @@
-import { compareTwoStrings } from 'string-similarity';
-
-import {
-  ADAPTERS_QUERY_LIMIT,
-  RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
-  RESPONSE_COMPARE_MIN_SCORE,
-} from '~/config/constants';
+import { ADAPTERS_QUERY_LIMIT } from '~/config/constants';
 import { Adapter, MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
-import type { SearchMetadata, SearchResultLink } from '~/services/search';
+import type { SearchMetadata } from '~/services/search';
+import { findBestMatch, type MatchCandidate } from '~/utils/compare';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 
@@ -94,25 +89,20 @@ interface BandcampSearchParams {
   fan_id: null;
 }
 
-function BandcampQueryMatcher(i: BandcampTypedSearchResponse): [string, string] {
-  let q = '';
-  let u = new URL(ENV.adapters.bandcamp.baseUrl);
-
+function toMatchCandidate(i: BandcampTypedSearchResponse): MatchCandidate {
   if (i.type === 'a' || i.type === 't') {
-    // Album and Track queries are ${album} ${artist}
-    q = `${i.name} ${i.band_name}`;
-
-    u = i.item_url_path;
+    return {
+      title: i.name,
+      artist: i.band_name,
+      url: i.item_url_path.toString(),
+    };
   }
 
-  if (i.type === 'b') {
-    // Artist query is just ${artist}
-    q = i.name;
-
-    u = i.item_url_root;
-  }
-
-  return [q, u.toString()];
+  // Artist type
+  return {
+    title: i.name,
+    url: i.item_url_root.toString(),
+  };
 }
 
 export async function getBandcampLink(
@@ -177,23 +167,13 @@ export async function getBandcampLink(
         ? _results.slice(0, ADAPTERS_QUERY_LIMIT)
         : _results;
 
-    let bestMatch: SearchResultLink | null = null;
-    let highestScore = 0;
+    const candidates: MatchCandidate[] = results.map(toMatchCandidate);
 
-    for (const item of results) {
-      const [matchedTitle, matchedUrl] = BandcampQueryMatcher(item);
-      const score = compareTwoStrings(matchedTitle.toLowerCase(), query.toLowerCase());
-
-      if (score > highestScore) {
-        highestScore = score;
-        bestMatch = {
-          type: Adapter.Bandcamp,
-          url: matchedUrl,
-          isVerified: score >= RESPONSE_COMPARE_MIN_SCORE,
-          notAvailable: score < RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
-        };
-      }
-    }
+    const { bestMatch, highestScore } = findBestMatch(
+      candidates,
+      query,
+      Adapter.Bandcamp
+    );
 
     if (!bestMatch) {
       throw new Error('No valid matches found.');

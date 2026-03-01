@@ -1,5 +1,3 @@
-import { compareTwoStrings } from 'string-similarity';
-
 import {
   RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
   RESPONSE_COMPARE_MIN_SCORE,
@@ -8,6 +6,7 @@ import { Adapter, MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
 import type { SearchMetadata, SearchResultLink } from '~/services/search';
+import { scoreMatch } from '~/utils/compare';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { getCheerioDoc } from '~/utils/scraper';
@@ -68,13 +67,14 @@ export async function getSpotifyLink(
       // Filter to only matching Spotify type paths
       if (!href.includes(`open.spotify.com/${searchType}/`)) return;
 
-      // Clean title: remove Spotify suffixes like " - song and lyrics by Artist | Spotify"
+      // Clean title: strip " | Spotify" suffix, then replace " - song and lyrics by " with space
+      // to preserve artist name in comparison (e.g. "Like a Rolling Stone Bob Dylan")
       const cleanedTitle = title
-        .replace(/\s*[-–—]\s*(song and lyrics by|album by|playlist by).*$/i, '')
         .replace(/\s*\|\s*Spotify\s*$/i, '')
+        .replace(/\s*[-–—]\s*(song and lyrics by|album by|playlist by)\s*/i, ' ')
         .trim();
 
-      const score = compareTwoStrings(cleanedTitle.toLowerCase(), query.toLowerCase());
+      const score = scoreMatch(cleanedTitle, query);
 
       if (score > highestScore) {
         highestScore = score;

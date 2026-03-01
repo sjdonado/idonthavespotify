@@ -1,9 +1,3 @@
-import { compareTwoStrings } from 'string-similarity';
-
-import {
-  RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
-  RESPONSE_COMPARE_MIN_SCORE,
-} from '~/config/constants';
 import { Adapter, MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 import {
@@ -12,8 +6,9 @@ import {
   getCachedSearchResultLink,
   getCachedTidalAccessToken,
 } from '~/services/cache';
-import type { SearchMetadata, SearchResultLink } from '~/services/search';
+import type { SearchMetadata } from '~/services/search';
 import { getOrUpdateAccessToken } from '~/utils/access-token';
+import { findBestMatch, type MatchCandidate } from '~/utils/compare';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 
@@ -82,23 +77,12 @@ export async function getTidalLink(
       throw new Error(`No results found: ${JSON.stringify(response)}`);
     }
 
-    let bestMatch: SearchResultLink | null = null;
-    let highestScore = 0;
+    const candidates: MatchCandidate[] = included.map((item, i) => ({
+      title: item.attributes.title ?? item.attributes.name ?? '',
+      url: `${ENV.adapters.tidal.baseUrl}/${searchType.slice(0, -1)}/${data[i]?.id ?? data[0].id}`,
+    }));
 
-    for (const item of included) {
-      const title = item.attributes.title ?? item.attributes.name ?? '';
-      const score = compareTwoStrings(title.toLowerCase(), query.toLowerCase());
-
-      if (score > highestScore) {
-        highestScore = score;
-        bestMatch = {
-          type: Adapter.Tidal,
-          url: `${ENV.adapters.tidal.baseUrl}/${searchType.slice(0, -1)}/${data[0].id}`,
-          isVerified: score >= RESPONSE_COMPARE_MIN_SCORE,
-          notAvailable: score < RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
-        };
-      }
-    }
+    const { bestMatch, highestScore } = findBestMatch(candidates, query, Adapter.Tidal);
 
     if (!bestMatch) {
       throw new Error('No valid matches found.');
