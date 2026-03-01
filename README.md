@@ -2,7 +2,7 @@
 
 Copy a link from your favorite streaming service, paste it into the search bar, and voilà! Links to the track on all other supported platforms are displayed. If the original source is Spotify you'll even get a quick audio preview to ensure it's the right track.
 
-**Note:** Currently, playlists are out of scope. Only individual tracks, albums, artists, and podcasts are supported.
+**Note:** Playlists are out of scope. Only individual tracks, albums, artists, and podcasts are supported.
 
 ## Supported Streaming Services
 
@@ -20,27 +20,25 @@ Adapters represent the streaming services supported by the Web App and the Rayca
 | Bandcamp         | Yes             | No                     | Yes            |
 | Pandora          | Yes             | No                     | Yes            |
 
-## Disclaimer: Search-based results
-
-IDHS extracts whatever metadata it can from the link you paste, then uses that information to build a fresh query for public search engines or official APIs (e.g. Apple Music, YouTube, SoundCloud). It picks the result that looks most relevant, but it can't guarantee the returned link is the exact track you want or even a song at all.
-
-Suggestions for a better query building workflow are welcome. The main constraint is keeping requests fast, so no brute-force retries for now.
-
 ## Architecture overview: Parsers and Adapters
 
-- Parsers (`src/parsers`) identify the incoming link's platform and extract normalized metadata (title, description, type, image, and optional audio) as well as a consistent search query. For example, a Spotify link is parsed to gather Open Graph metadata and produce a query string that represents the track/album/artist/show/episode. This query is later used to search other platforms.
+IDHS extracts metadata from the provided link and uses that information to create a new query for public search engines or official APIs, such as Apple Music, YouTube, and SoundCloud. It selects the result that seems most relevant, but it cannot guarantee that the returned link is the exact track you want or even a song at all. Suggestions for improving the query-building workflow are welcome, with the main constraint being to keep requests fast and excluding brute-force retries to avoid rate limits.
 
-- Adapters (`src/adapters`) turn that normalized query into outbound links for each destination platform (Spotify, YouTube Music, Apple Music, Deezer, SoundCloud, Tidal). Each adapter is responsible for:
-  - Performing a platform-specific search (API or HTML-based) using the normalized query
-  - Returning a result with `type`, `url`, and flags like `isVerified` and `notAvailable`
-  - Preferring "verified" links when the platform provides a reliable match signal
+### Parsers (`src/parsers`)
+Identify the incoming link's platform and extract normalized metadata (title, description, type, image, and optional audio) as well as a consistent search query. For example, a Spotify link is parsed to gather Open Graph metadata and produce a query string that represents the track/album/artist/show/episode. This query is later used to search other platforms.
+
+### Adapters (`src/adapters`)
+Turn that normalized query into outbound links for each destination platform (Spotify, YouTube Music, Apple Music, Deezer, SoundCloud, Tidal). Each adapter is responsible for:
+- Performing a platform-specific search (API or HTML-based) using the normalized query
+- Returning a result with `type`, `url`, and flags like `isVerified` and `notAvailable`
+- Preferring "verified" links when the platform provides a reliable match signal
 
 This separation keeps the system modular: parsers focus on understanding the source, while adapters focus on finding the best possible destination links.
 
 ## Web App
 
 <div align="center">
-  <img width="1200" alt="image" src="https://github.com/user-attachments/assets/ae6250f5-d1ed-41f2-ae21-8a2b2599a450" />
+<img width="1831" height="969" alt="image" src="https://github.com/user-attachments/assets/98d6f3ca-3627-49ea-ad2b-0c2b64668b14" />
 </div>
 
 ## Extensions
@@ -50,13 +48,6 @@ This separation keeps the system modular: parsers focus on understanding the sou
 <a title="Install idonthavespotify Raycast Extension" href="https://www.raycast.com/sjdonado/idonthavespotify"><img src="https://www.raycast.com/sjdonado/idonthavespotify/install_button@2x.png?v=1.1" height="64" style="height: 64px;" alt=""></a>
 
 Source code: https://github.com/raycast/extensions/tree/main/extensions/idonthavespotify
-
-#### To install run:
-
-```sh
-cd ~/.martillo
-./scripts/store-cli.sh add https://github.com/sjdonado/idonthavespotify/tree/master/extra/martillo
-```
 
 ## Local Setup
 
