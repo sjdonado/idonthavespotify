@@ -10,7 +10,7 @@ Adapters represent the streaming services supported by the Web App and the Rayca
 
 | Adapter          | Inverted Search | Official API           | Verified Links |
 | ---------------- | --------------- | ---------------------- | -------------- |
-| Spotify          | Yes             | Yes                    | Yes            |
+| Spotify          | Yes             | No                     | Yes            |
 | Tidal            | Yes             | Yes                    | Yes            |
 | YouTube Music    | Yes             | No                     | Yes            |
 | Apple Music      | Yes             | No                     | Yes            |
@@ -61,9 +61,10 @@ cd ~/.martillo
 ## Local Setup
 
 The list of environment variables is available in `.env.test`. To complete the values for the following variables:
-- `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET`, refer to [Spotify Web API Documentation](https://developer.spotify.com/documentation/web-api).
 - `TIDAL_CLIENT_ID` and `TIDAL_CLIENT_SECRET`, refer to [TIDAL Developer Portal](https://developer.tidal.com/).
 - `YOUTUBE_API_KEY`, refer to [Google Developers Console](https://console.developers.google.com/).
+
+**Note:** Spotify search uses DuckDuckGo web scraping instead of the official API, since Spotify now requires a Premium account for Development Mode apps (effective March 9, 2026).
 
 Ensure that the values are correctly added to your `.env` file to configure the API keys properly.
 

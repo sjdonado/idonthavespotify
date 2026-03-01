@@ -122,18 +122,6 @@ export const getCachedSearchMetadata = async (
   return data || null;
 };
 
-// Spotify access token caching
-export const cacheSpotifyAccessToken = async (
-  token: AccessToken,
-  expTime: number
-): Promise<void> => {
-  cache.set('spotify:accessToken', token, expTime);
-};
-
-export const getCachedSpotifyAccessToken = async (): Promise<AccessToken | undefined> => {
-  return cache.get<AccessToken>('spotify:accessToken');
-};
-
 // Tidal access token caching
 export const cacheTidalAccessToken = async (
   token: AccessToken,

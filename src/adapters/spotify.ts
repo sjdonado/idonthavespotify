@@ -1,42 +1,16 @@
 import { compareTwoStrings } from 'string-similarity';
 
 import {
-  ADAPTERS_QUERY_LIMIT,
   RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
   RESPONSE_COMPARE_MIN_SCORE,
 } from '~/config/constants';
 import { Adapter, MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
-import {
-  cacheSearchResultLink,
-  cacheSpotifyAccessToken,
-  getCachedSearchResultLink,
-  getCachedSpotifyAccessToken,
-} from '~/services/cache';
+import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
 import type { SearchMetadata, SearchResultLink } from '~/services/search';
-import { getOrUpdateAccessToken } from '~/utils/access-token';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
-
-interface SpotifyAuthResponse {
-  access_token: string;
-  token_type: string;
-  expires_in: number;
-}
-
-interface SpotifySearchResponse {
-  [type: string]: {
-    total: number;
-    items: [
-      {
-        name: string;
-        external_urls: {
-          spotify: string;
-        };
-      },
-    ];
-  };
-}
+import { getCheerioDoc } from '~/utils/scraper';
 
 const SPOTIFY_SEARCH_TYPES = {
   [MetadataType.Song]: 'track',
@@ -56,13 +30,10 @@ export async function getSpotifyLink(
   const searchType = SPOTIFY_SEARCH_TYPES[metadata.type];
   if (!searchType) return null;
 
-  const params = new URLSearchParams({
-    q: query,
-    type: searchType,
-    limit: String(ADAPTERS_QUERY_LIMIT),
-  });
+  const searchQuery = `site:open.spotify.com/${searchType} ${query}`;
+  const params = new URLSearchParams({ q: searchQuery });
 
-  const url = new URL(ENV.adapters.spotify.apiUrl);
+  const url = new URL(ENV.adapters.spotify.searchUrl);
   url.search = params.toString();
 
   const cache = await getCachedSearchResultLink(Adapter.Spotify, sourceParser, sourceId);
@@ -72,75 +43,63 @@ export async function getSpotifyLink(
   }
 
   try {
-    const response = await HttpClient.get<SpotifySearchResponse>(url.toString(), {
-      headers: {
-        Authorization: `Bearer ${await getOrUpdateSpotifyAccessToken()}`,
-      },
+    const html = await HttpClient.get<string>(url.toString());
+    const doc = getCheerioDoc(html);
+
+    const resultLinks = doc('a.result__a');
+
+    let bestMatch: SearchResultLink | null = null;
+    let highestScore = 0;
+
+    resultLinks.each((_, el) => {
+      let href = doc(el).attr('href') ?? '';
+      const title = doc(el).text().trim();
+
+      // Handle DuckDuckGo redirect URLs
+      if (href.includes('duckduckgo.com/l/?uddg=')) {
+        try {
+          const uddg = new URL(`https:${href}`).searchParams.get('uddg');
+          if (uddg) href = decodeURIComponent(uddg);
+        } catch {
+          return;
+        }
+      }
+
+      // Filter to only matching Spotify type paths
+      if (!href.includes(`open.spotify.com/${searchType}/`)) return;
+
+      // Clean title: remove Spotify suffixes like " - song and lyrics by Artist | Spotify"
+      const cleanedTitle = title
+        .replace(/\s*[-–—]\s*(song and lyrics by|album by|playlist by).*$/i, '')
+        .replace(/\s*\|\s*Spotify\s*$/i, '')
+        .trim();
+
+      const score = compareTwoStrings(cleanedTitle.toLowerCase(), query.toLowerCase());
+
+      if (score > highestScore) {
+        highestScore = score;
+        bestMatch = {
+          type: Adapter.Spotify,
+          url: href,
+          isVerified: score >= RESPONSE_COMPARE_MIN_SCORE,
+          notAvailable: score < RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
+        };
+      }
     });
 
-    const [[, data]] = Object.entries(response);
-    if (data.total === 0) {
-      throw new Error(`No results found: ${JSON.stringify(response)}`);
+    if (!bestMatch) {
+      throw new Error('No matching Spotify results found');
     }
 
-    const { name, external_urls } = data.items[0];
-    const similarity = compareTwoStrings(name?.toLowerCase() ?? '', query.toLowerCase());
-
-    logger.info(`[Spotify] Found result: "${name}" -> ${external_urls.spotify}`);
     logger.info(
-      `[Spotify] Similarity score: ${similarity.toFixed(3)} (verified: ${similarity >= RESPONSE_COMPARE_MIN_SCORE ? 'yes' : 'no'}, available: ${similarity >= RESPONSE_COMPARE_MIN_INCLUSION_SCORE ? 'yes' : 'no'})`
+      `[Spotify] Best match score: ${highestScore.toFixed(3)} (verified: ${(bestMatch as SearchResultLink).isVerified ? 'yes' : 'no'}, available: ${!(bestMatch as SearchResultLink).notAvailable ? 'yes' : 'no'})`
     );
 
-    const searchResultLink = {
-      type: Adapter.Spotify,
-      url: external_urls.spotify,
-      isVerified: similarity >= RESPONSE_COMPARE_MIN_SCORE,
-      notAvailable: similarity < RESPONSE_COMPARE_MIN_INCLUSION_SCORE,
-    } as SearchResultLink;
+    await cacheSearchResultLink(Adapter.Spotify, sourceParser, sourceId, bestMatch);
 
-    await cacheSearchResultLink(
-      Adapter.Spotify,
-      sourceParser,
-      sourceId,
-      searchResultLink
-    );
-
-    return searchResultLink;
+    return bestMatch;
   } catch (error) {
     logger.error(`[Spotify] (${url}) ${error}`);
     return null;
   }
-}
-
-export async function getOrUpdateSpotifyAccessToken() {
-  return getOrUpdateAccessToken(
-    getCachedSpotifyAccessToken,
-    async () => {
-      const data = new URLSearchParams({
-        grant_type: 'client_credentials',
-      });
-
-      const response = await HttpClient.post<SpotifyAuthResponse>(
-        ENV.adapters.spotify.authUrl,
-        data,
-        {
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded',
-            Authorization:
-              'Basic ' +
-              Buffer.from(
-                ENV.adapters.spotify.clientId + ':' + ENV.adapters.spotify.clientSecret
-              ).toString('base64'),
-          },
-        }
-      );
-
-      return {
-        accessToken: response.access_token,
-        expiresIn: response.expires_in,
-      };
-    },
-    cacheSpotifyAccessToken
-  );
 }

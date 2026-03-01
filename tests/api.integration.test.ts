@@ -54,7 +54,6 @@ describe('Api router', () => {
     cacheStore.reset();
     axiosMock.reset();
 
-    axiosMock.onPost(ENV.adapters.spotify.authUrl).reply(200, {});
     axiosMock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
     axiosMock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
   });
