@@ -55,7 +55,7 @@ The list of environment variables is available in `.env.test`. To complete the v
 - `TIDAL_CLIENT_ID` and `TIDAL_CLIENT_SECRET`, refer to [TIDAL Developer Portal](https://developer.tidal.com/).
 - `YOUTUBE_API_KEY`, refer to [Google Developers Console](https://console.developers.google.com/).
 
-**Note:** Spotify search uses DuckDuckGo web scraping instead of the official API, since Spotify now requires a Premium account for Development Mode apps (effective March 9, 2026).
+**Note:** Spotify search uses an anonymous access token extracted from the Spotify web player (`open.spotify.com`). The token is auto-refreshed (~1 hour expiry) and works with the public `api.spotify.com/v1/search` endpoint without requiring a developer account.
 
 Ensure that the values are correctly added to your `.env` file to configure the API keys properly.
 

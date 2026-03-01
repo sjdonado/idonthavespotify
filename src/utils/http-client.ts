@@ -33,13 +33,19 @@ function getRandomUserAgent() {
 }
 
 axiosRetry(axios, {
-  retries: 1,
+  retries: 2,
   retryCondition: error => {
-    // Retry on network errors or 5xx status codes
-    return axiosRetry.isNetworkError(error) || axiosRetry.isRetryableError(error);
+    return (
+      axiosRetry.isNetworkError(error) ||
+      axiosRetry.isRetryableError(error) ||
+      error.response?.status === 429
+    );
   },
-  retryDelay: retryCount => {
-    // Exponential backoff delay
+  retryDelay: (retryCount, error) => {
+    const retryAfter = error.response?.headers?.['retry-after'];
+    if (retryAfter) {
+      return (parseInt(retryAfter, 10) + 1) * 1000;
+    }
     return retryCount * 1000;
   },
 });

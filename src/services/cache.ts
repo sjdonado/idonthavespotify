@@ -134,6 +134,18 @@ export const getCachedTidalAccessToken = async (): Promise<AccessToken | undefin
   return cache.get<AccessToken>('tidal:accessToken');
 };
 
+// Spotify access token caching
+export const cacheSpotifyAccessToken = async (
+  token: AccessToken,
+  expTime: number
+): Promise<void> => {
+  cache.set('spotify:accessToken', token, expTime);
+};
+
+export const getCachedSpotifyAccessToken = async (): Promise<AccessToken | undefined> => {
+  return cache.get<AccessToken>('spotify:accessToken');
+};
+
 // Tidal universal link response caching
 export const cacheTidalUniversalLinkResponse = async (
   link: string,

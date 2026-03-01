@@ -3,8 +3,8 @@ import { version } from '../../package.json';
 export const ENV = {
   adapters: {
     spotify: {
-      searchUrl: Bun.env['SPOTIFY_SEARCH_URL']!,
-      clientVersion: Bun.env['SPOTIFY_CLIENT_VERSION']!,
+      apiUrl: Bun.env['SPOTIFY_API_URL']!,
+      baseUrl: Bun.env['SPOTIFY_BASE_URL']!,
     },
     tidal: {
       baseUrl: Bun.env['TIDAL_BASE_URL']!,
