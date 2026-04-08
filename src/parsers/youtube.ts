@@ -36,7 +36,11 @@ const METADATA_TO_YOUTUBE_ENDPOINT = {
 };
 
 export const getYouTubeMetadata = async (id: string, source: string) => {
-  let link = `${source}?v=${id}`;
+  const sourceUrl = new URL(source);
+  if (!sourceUrl.searchParams.has('v')) {
+    sourceUrl.searchParams.set('v', id);
+  }
+  let link = sourceUrl.toString();
 
   if (link.includes('youtu.be/')) {
     link = await resolveShortYouTubeLink(link);
