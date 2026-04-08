@@ -6,6 +6,7 @@ import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
 import type { SearchMetadata } from '~/services/search';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
+import { getServiceGuard } from '~/utils/service-guard';
 
 interface YoutubeDataResponse {
   kind: string;
@@ -52,6 +53,11 @@ export const getYouTubeMetadata = async (id: string, source: string) => {
     return cached;
   }
 
+  const guard = getServiceGuard('youTube');
+  if (!guard.acquire()) {
+    throw new Error('[YouTube] service temporarily unavailable');
+  }
+
   try {
     const parsed = parseYouTubeLink(link);
     if (!parsed) throw new Error('No resource ID found in the provided YouTube link');
@@ -71,6 +77,7 @@ export const getYouTubeMetadata = async (id: string, source: string) => {
     url.search = params.toString();
 
     const response = await HttpClient.get<YoutubeDataResponse>(url.toString());
+    guard.recordSuccess();
     const item = response?.items?.[0];
     if (!item) {
       throw new Error(
@@ -106,6 +113,7 @@ export const getYouTubeMetadata = async (id: string, source: string) => {
 
     return metadata;
   } catch (err) {
+    guard.recordFailure();
     throw new Error(`[${getYouTubeMetadata.name}] (${link}) ${err}`);
   }
 };

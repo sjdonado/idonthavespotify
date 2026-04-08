@@ -6,6 +6,7 @@ import type { SearchMetadata } from '~/services/search';
 import { findBestMatch, type MatchCandidate } from '~/utils/compare';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
+import { getServiceGuard } from '~/utils/service-guard';
 
 const PANDORA_SEARCH_TYPES = {
   [MetadataType.Song]: 'TR',
@@ -74,6 +75,12 @@ export async function getPandoraLink(
     return cache;
   }
 
+  const guard = getServiceGuard('pandora');
+  if (!guard.acquire()) {
+    logger.warn('[Pandora] service guard: request blocked');
+    return null;
+  }
+
   const url = new URL(ENV.adapters.pandora.apiUrl);
   const body = JSON.stringify(params);
 
@@ -84,6 +91,8 @@ export async function getPandoraLink(
         'Content-Type': 'application/json',
       },
     });
+
+    guard.recordSuccess();
 
     if (response.results.length === 0) {
       throw new Error(`No results found: ${JSON.stringify(response)}`);
@@ -125,6 +134,7 @@ export async function getPandoraLink(
 
     return bestMatch;
   } catch (error) {
+    guard.recordFailure();
     logger.error(`[Pandora] (${url}) ${error}`);
     return null;
   }

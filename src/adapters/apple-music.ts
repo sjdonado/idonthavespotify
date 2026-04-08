@@ -10,6 +10,7 @@ import { getResultWithBestScore } from '~/utils/compare';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { getCheerioDoc } from '~/utils/scraper';
+import { getServiceGuard } from '~/utils/service-guard';
 
 const APPLE_MUSIC_SEARCH_TYPES = {
   [MetadataType.Song]: 'Songs',
@@ -44,8 +45,15 @@ export async function getAppleMusicLink(
     return cache;
   }
 
+  const guard = getServiceGuard('appleMusic');
+  if (!guard.acquire()) {
+    logger.warn('[Apple Music] service guard: request blocked');
+    return null;
+  }
+
   try {
     const html = await HttpClient.get<string>(url.toString());
+    guard.recordSuccess();
     const doc = getCheerioDoc(html);
 
     const listElements = doc(
@@ -81,6 +89,7 @@ export async function getAppleMusicLink(
 
     return searchResultLink;
   } catch (err) {
+    guard.recordFailure();
     logger.error(`[Apple Music] (${url}) ${err} `);
     return null;
   }

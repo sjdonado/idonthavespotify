@@ -6,6 +6,7 @@ import type { SearchMetadata, SearchResultLink } from '~/services/search';
 import { findBestMatch, type MatchCandidate } from '~/utils/compare';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
+import { getServiceGuard } from '~/utils/service-guard';
 
 type QobuzAlbumItem = {
   id: string;
@@ -84,6 +85,12 @@ export async function getQobuzLink(
     return cache;
   }
 
+  const guard = getServiceGuard('qobuz');
+  if (!guard.acquire()) {
+    logger.warn('[Qobuz] service guard: request blocked');
+    return null;
+  }
+
   try {
     const response = await HttpClient.get<QobuzSearchResponse>(url.toString(), {
       headers: {
@@ -91,6 +98,7 @@ export async function getQobuzLink(
         'X-Requested-With': 'XMLHttpRequest',
       },
     });
+    guard.recordSuccess();
 
     if (!(searchType in response)) {
       throw new Error(
@@ -139,6 +147,7 @@ export async function getQobuzLink(
 
     return match;
   } catch (error) {
+    guard.recordFailure();
     logger.error(`[Qobuz] (${url}) ${error}`);
     return null;
   }

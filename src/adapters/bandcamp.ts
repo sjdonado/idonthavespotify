@@ -6,6 +6,7 @@ import type { SearchMetadata } from '~/services/search';
 import { findBestMatch, type MatchCandidate } from '~/utils/compare';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
+import { getServiceGuard } from '~/utils/service-guard';
 
 interface BandcampAlbumSearchResponse {
   type: 'a';
@@ -133,6 +134,12 @@ export async function getBandcampLink(
     return cache;
   }
 
+  const guard = getServiceGuard('bandcamp');
+  if (!guard.acquire()) {
+    logger.warn('[Bandcamp] service guard: request blocked');
+    return null;
+  }
+
   const url = new URL(ENV.adapters.bandcamp.apiUrl);
   const body = JSON.stringify(params);
 
@@ -143,6 +150,8 @@ export async function getBandcampLink(
         'Content-Type': 'application/json',
       },
     });
+
+    guard.recordSuccess();
 
     if (!('auto' in response) || !('results' in response.auto)) {
       throw new Error(`Unexpected API response: ${JSON.stringify(response)}`);
@@ -187,6 +196,7 @@ export async function getBandcampLink(
 
     return bestMatch;
   } catch (error) {
+    guard.recordFailure();
     logger.error(`[Bandcamp API] ${error}`);
     return null;
   }

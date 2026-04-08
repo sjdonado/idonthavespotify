@@ -9,6 +9,7 @@ import type { SearchMetadata, SearchResultLink } from '~/services/search';
 import { getResultWithBestScore } from '~/utils/compare';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
+import { getServiceGuard } from '~/utils/service-guard';
 import { getCheerioDoc } from '~/utils/scraper';
 
 export async function getSoundCloudLink(
@@ -38,8 +39,15 @@ export async function getSoundCloudLink(
     return cache;
   }
 
+  const guard = getServiceGuard('soundCloud');
+  if (!guard.acquire()) {
+    logger.warn('[SoundCloud] service guard: request blocked');
+    return null;
+  }
+
   try {
     const html = await HttpClient.get<string>(url.toString());
+    guard.recordSuccess();
     const doc = getCheerioDoc(html);
 
     // Extract contents of noscript
@@ -70,6 +78,7 @@ export async function getSoundCloudLink(
 
     return searchResultLink;
   } catch (err) {
+    guard.recordFailure();
     logger.error(`[SoundCloud] (${url}) ${err}`);
     return null;
   }

@@ -6,6 +6,7 @@ import type { SearchMetadata } from '~/services/search';
 import { findBestMatch, type MatchCandidate } from '~/utils/compare';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
+import { getServiceGuard } from '~/utils/service-guard';
 
 interface DeezerSearchResponse {
   total: number;
@@ -49,8 +50,15 @@ export async function getDeezerLink(
     return cache;
   }
 
+  const guard = getServiceGuard('deezer');
+  if (!guard.acquire()) {
+    logger.warn('[Deezer] service guard: request blocked');
+    return null;
+  }
+
   try {
     const response = await HttpClient.get<DeezerSearchResponse>(url.toString());
+    guard.recordSuccess();
 
     if (response.total === 0) {
       throw new Error(`No results found: ${JSON.stringify(response)}`);
@@ -76,6 +84,7 @@ export async function getDeezerLink(
 
     return bestMatch;
   } catch (error) {
+    guard.recordFailure();
     logger.error(`[Deezer] (${url}) ${error}`);
     return null;
   }

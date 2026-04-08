@@ -5,6 +5,7 @@ import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
 import type { SearchMetadata } from '~/services/search';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
+import { getServiceGuard } from '~/utils/service-guard';
 
 enum QobuzMetadataType {
   Song = 'track',
@@ -55,6 +56,11 @@ export const getQobuzMetadata = async (id: string, link: string) => {
     return cached;
   }
 
+  const guard = getServiceGuard('qobuz');
+  if (!guard.acquire()) {
+    throw new Error('[Qobuz] service temporarily unavailable');
+  }
+
   try {
     let type = link.match(QOBUZ_LINK_REGEX)?.[3];
     if (!type) {
@@ -65,11 +71,13 @@ export const getQobuzMetadata = async (id: string, link: string) => {
     }
 
     const metadata = await fetchQobuzMetadataFromApi(id, type as QobuzMetadataType);
+    guard.recordSuccess();
 
     await cacheSearchMetadata(id, Parser.Qobuz, metadata);
 
     return metadata;
   } catch (err) {
+    guard.recordFailure();
     throw new Error(`[${getQobuzMetadata.name}] (${link}) ${err}`);
   }
 };

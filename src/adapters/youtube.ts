@@ -4,6 +4,7 @@ import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cac
 import type { SearchMetadata, SearchResultLink } from '~/services/search';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
+import { getServiceGuard } from '~/utils/service-guard';
 
 interface YoutubeSearchResponse {
   kind: string;
@@ -71,8 +72,15 @@ export async function getYouTubeLink(
     return cache;
   }
 
+  const guard = getServiceGuard('youTube');
+  if (!guard.acquire()) {
+    logger.warn('[YouTube] service guard: request blocked');
+    return null;
+  }
+
   try {
     const response = await HttpClient.get<YoutubeSearchResponse>(url.toString());
+    guard.recordSuccess();
 
     const { items } = response;
     if (!items || !items[0]) {
@@ -96,6 +104,7 @@ export async function getYouTubeLink(
 
     return searchResultLink;
   } catch (error) {
+    guard.recordFailure();
     logger.error(`[YouTube] (${url}) ${error}`);
     return null;
   }

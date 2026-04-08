@@ -15,6 +15,7 @@ import { getOrUpdateAccessToken } from '~/utils/access-token';
 import { findBestMatch, type MatchCandidate } from '~/utils/compare';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
+import { getServiceGuard } from '~/utils/service-guard';
 
 interface SpotifyGraphQLResponse {
   data: {
@@ -110,6 +111,12 @@ export async function getSpotifyLink(
     return cache;
   }
 
+  const guard = getServiceGuard('spotify');
+  if (!guard.acquire()) {
+    logger.warn('[Spotify] service guard: request blocked');
+    return null;
+  }
+
   try {
     const accessToken = await getOrUpdateSpotifyAccessToken();
 
@@ -134,6 +141,8 @@ export async function getSpotifyLink(
         'app-platform': 'WebPlayer',
       },
     });
+
+    guard.recordSuccess();
 
     const search = data.data?.searchV2 ?? data.data?.search;
     if (!search) {
@@ -160,6 +169,7 @@ export async function getSpotifyLink(
 
     return bestMatch;
   } catch (error) {
+    guard.recordFailure();
     const axiosErr = error instanceof AxiosError ? error : null;
     if (axiosErr) {
       const status = axiosErr.response?.status ?? axiosErr.code;

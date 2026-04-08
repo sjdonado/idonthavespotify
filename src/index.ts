@@ -18,6 +18,7 @@ import {
   withRateLimit,
   withRateLimitHTML,
 } from './utils/rate-limit-middleware';
+import { getAllServiceGuardStatuses } from './utils/service-guard';
 import { ValidationError, validationError } from './utils/zod';
 import ErrorMessage from './views/components/error-message';
 import RateLimitError from './views/components/rate-limit-error';
@@ -255,6 +256,7 @@ export const createApp = (port: string = '0') =>
                     resetIn: Math.ceil(apiStatus.resetTime / 1000),
                   },
                 },
+                serviceGuards: getAllServiceGuardStatuses(),
                 storeSize: {
                   web: webRateLimiter.getStoreSize(),
                   api: apiRateLimiter.getStoreSize(),

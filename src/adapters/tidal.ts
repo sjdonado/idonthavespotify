@@ -11,6 +11,7 @@ import { getOrUpdateAccessToken } from '~/utils/access-token';
 import { findBestMatch, type MatchCandidate } from '~/utils/compare';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
+import { getServiceGuard } from '~/utils/service-guard';
 
 interface TidalAuthResponse {
   access_token: string;
@@ -65,12 +66,19 @@ export async function getTidalLink(
     return cache;
   }
 
+  const guard = getServiceGuard('tidal');
+  if (!guard.acquire()) {
+    logger.warn('[Tidal] service guard: request blocked');
+    return null;
+  }
+
   try {
     const response = await HttpClient.get<TidalSearchResponse>(url.toString(), {
       headers: {
         Authorization: `Bearer ${await getOrUpdateTidalAccessToken()}`,
       },
     });
+    guard.recordSuccess();
 
     const { data, included } = response;
     if (!data || data.length === 0) {
@@ -96,6 +104,7 @@ export async function getTidalLink(
 
     return bestMatch;
   } catch (error) {
+    guard.recordFailure();
     logger.error(`[Tidal] (${url}) ${error}`);
     return null;
   }

@@ -18,7 +18,7 @@ const config = {
   },
   api: {
     windowMs: 60 * 1000, // 1 minute
-    maxRequests: 10,
+    maxRequests: 5,
   },
   assets: {
     windowMs: 60 * 1000, // 1 minute
