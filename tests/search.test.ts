@@ -1,5 +1,3 @@
-import axios from 'axios';
-import AxiosMockAdapter from 'axios-mock-adapter';
 import type { Server } from 'bun';
 import {
   afterAll,
@@ -15,6 +13,7 @@ import { ENV } from '~/config/env';
 import { cacheStore } from '~/services/cache';
 
 import { loadHeadSnapshots, loadSearchSnapshots } from './mocks/snapshots';
+import { HttpMock } from './utils/http-mock';
 import { createTestApp, nodeFetch } from './utils/request';
 import {
   apiSearchEndpoint,
@@ -33,31 +32,31 @@ describe('GET /search', () => {
   let app: Server<undefined>;
   let searchEndpointUrl: string;
 
-  let axiosMock: InstanceType<typeof AxiosMockAdapter>;
+  let httpMock: HttpMock;
 
   beforeAll(() => {
     app = createTestApp();
     searchEndpointUrl = apiSearchEndpoint(app.url);
 
-    axiosMock = new AxiosMockAdapter(axios);
+    httpMock = new HttpMock();
   });
 
   afterAll(() => {
     app.stop();
     cacheStore.reset();
-    axiosMock.reset();
+    httpMock.restore();
   });
 
   beforeEach(() => {
     cacheStore.reset();
-    axiosMock.reset();
+    httpMock.reset();
 
-    axiosMock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
-    axiosMock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
+    httpMock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
+    httpMock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
   });
 
   afterEach(() => {
-    axiosMock.reset();
+    httpMock.reset();
   });
 
   describe('GET /search - Song', () => {
@@ -66,30 +65,30 @@ describe('GET /search', () => {
       const query = 'Like a Rolling Stone Bob Dylan';
 
       // Mock Spotify metadata API
-      axiosMock
+      httpMock
         .onGet('https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc')
         .reply(200, headSnapshots.spotifyTrackRollingStone);
 
       // Mock adapter API calls
-      axiosMock
+      httpMock
         .onGet(/music\.apple\.com.*search/)
         .reply(200, searchSnapshots.appleMusicRollingStone);
 
-      axiosMock
+      httpMock
         .onGet(/api\.deezer\.com.*search.*track/)
         .reply(200, JSON.parse(searchSnapshots.deezerRollingStone));
 
       const soundCloudSearchUrl = getSoundCloudSearchLink(query);
-      axiosMock
+      httpMock
         .onGet(soundCloudSearchUrl)
         .reply(200, searchSnapshots.soundCloudRollingStone);
 
       const qobuzSearchUrl = getQobuzSearchLink(query);
-      axiosMock
+      httpMock
         .onGet(qobuzSearchUrl)
         .reply(200, JSON.parse(searchSnapshots.qobuzRollingStone));
 
-      axiosMock.onPost(getBandcampApiUrl()).reply(config => {
+      httpMock.onPost(getBandcampApiUrl()).reply(config => {
         const body = JSON.parse(config.data);
         if (body.search_filter === 't') {
           return [200, JSON.parse(searchSnapshots.bandcampRollingStone)];
@@ -97,7 +96,7 @@ describe('GET /search', () => {
         return [404, {}];
       });
 
-      axiosMock.onPost(getPandoraApiUrl()).reply(config => {
+      httpMock.onPost(getPandoraApiUrl()).reply(config => {
         const body = JSON.parse(config.data);
         if (body.types.includes('TR')) {
           return [200, JSON.parse(searchSnapshots.pandoraRollingStone)];
@@ -105,8 +104,8 @@ describe('GET /search', () => {
         return [404, {}];
       });
 
-      axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
-      axiosMock.onGet(/youtube\.googleapis\.com/).reply(200, { items: [] });
+      httpMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
+      httpMock.onGet(/youtube\.googleapis\.com/).reply(200, { items: [] });
 
       const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
@@ -178,30 +177,30 @@ describe('GET /search', () => {
       const query = 'Like a Rolling Stone Bob Dylan';
 
       // Mock Spotify metadata API
-      axiosMock
+      httpMock
         .onGet(/open\.spotify\.com\/track\/3AhXZa8sUQht0UEdBJgpGc/)
         .reply(200, headSnapshots.spotifyTrackRollingStone);
 
       // Mock adapter API calls
-      axiosMock
+      httpMock
         .onGet(/music\.apple\.com.*search/)
         .reply(200, searchSnapshots.appleMusicRollingStone);
 
-      axiosMock
+      httpMock
         .onGet(/api\.deezer\.com.*search.*track/)
         .reply(200, JSON.parse(searchSnapshots.deezerRollingStone));
 
       const soundCloudSearchUrl = getSoundCloudSearchLink(query);
-      axiosMock
+      httpMock
         .onGet(soundCloudSearchUrl)
         .reply(200, searchSnapshots.soundCloudRollingStone);
 
       const qobuzSearchUrl = getQobuzSearchLink(query);
-      axiosMock
+      httpMock
         .onGet(qobuzSearchUrl)
         .reply(200, JSON.parse(searchSnapshots.qobuzRollingStone));
 
-      axiosMock.onPost(getBandcampApiUrl()).reply(config => {
+      httpMock.onPost(getBandcampApiUrl()).reply(config => {
         const body = JSON.parse(config.data);
         if (body.search_filter === 't') {
           return [200, JSON.parse(searchSnapshots.bandcampRollingStone)];
@@ -209,7 +208,7 @@ describe('GET /search', () => {
         return [404, {}];
       });
 
-      axiosMock.onPost(getPandoraApiUrl()).reply(config => {
+      httpMock.onPost(getPandoraApiUrl()).reply(config => {
         const body = JSON.parse(config.data);
         if (body.types.includes('TR')) {
           return [200, JSON.parse(searchSnapshots.pandoraRollingStone)];
@@ -217,7 +216,7 @@ describe('GET /search', () => {
         return [404, {}];
       });
 
-      axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
+      httpMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
@@ -290,30 +289,30 @@ describe('GET /search', () => {
       const query = 'Like a Rolling Stone Bob Dylan';
 
       // Mock Spotify metadata API
-      axiosMock
+      httpMock
         .onGet(/open\.spotify\.com\/track\/3AhXZa8sUQht0UEdBJgpGc/)
         .reply(200, headSnapshots.spotifyTrackRollingStone);
 
       // Mock adapter API calls
-      axiosMock
+      httpMock
         .onGet(/music\.apple\.com.*search/)
         .reply(200, searchSnapshots.appleMusicRollingStone);
 
-      axiosMock
+      httpMock
         .onGet(/api\.deezer\.com.*search.*track/)
         .reply(200, JSON.parse(searchSnapshots.deezerRollingStone));
 
       const soundCloudSearchUrl = getSoundCloudSearchLink(query);
-      axiosMock
+      httpMock
         .onGet(soundCloudSearchUrl)
         .reply(200, searchSnapshots.soundCloudRollingStone);
 
       const qobuzSearchUrl = getQobuzSearchLink(query);
-      axiosMock
+      httpMock
         .onGet(qobuzSearchUrl)
         .reply(200, JSON.parse(searchSnapshots.qobuzRollingStone));
 
-      axiosMock.onPost(getBandcampApiUrl()).reply(config => {
+      httpMock.onPost(getBandcampApiUrl()).reply(config => {
         const body = JSON.parse(config.data);
         if (body.search_filter === 't') {
           return [200, JSON.parse(searchSnapshots.bandcampRollingStone)];
@@ -321,7 +320,7 @@ describe('GET /search', () => {
         return [404, {}];
       });
 
-      axiosMock.onPost(getPandoraApiUrl()).reply(config => {
+      httpMock.onPost(getPandoraApiUrl()).reply(config => {
         const body = JSON.parse(config.data);
         if (body.types.includes('TR')) {
           return [200, JSON.parse(searchSnapshots.pandoraRollingStone)];
@@ -329,7 +328,7 @@ describe('GET /search', () => {
         return [404, {}];
       });
 
-      axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
+      httpMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
@@ -403,30 +402,30 @@ describe('GET /search', () => {
 
     it('should return 200', async () => {
       // Mock Spotify metadata API
-      axiosMock
+      httpMock
         .onGet(/open\.spotify\.com\/album\/7dqftJ3kas6D0VAdmt3k3V/)
         .reply(200, headSnapshots.spotifyAlbumStories);
 
       // Mock adapter API calls
-      axiosMock
+      httpMock
         .onGet(/music\.apple\.com.*search/)
         .reply(200, searchSnapshots.appleMusicStories);
 
-      axiosMock
+      httpMock
         .onGet(/api\.deezer\.com.*search.*album/)
         .reply(200, JSON.parse(searchSnapshots.deezerStories));
 
       const soundCloudSearchUrl = getSoundCloudSearchLink('Stories Avicii');
-      axiosMock
+      httpMock
         .onGet(soundCloudSearchUrl)
         .reply(200, searchSnapshots.soundCloudStoriesAvicii);
 
       const qobuzSearchUrl = getQobuzSearchLink('Stories Avicii');
-      axiosMock
+      httpMock
         .onGet(qobuzSearchUrl)
         .reply(200, JSON.parse(searchSnapshots.qobuzStoriesAvicii));
 
-      axiosMock.onPost(getBandcampApiUrl()).reply(config => {
+      httpMock.onPost(getBandcampApiUrl()).reply(config => {
         const body = JSON.parse(config.data);
         if (body.search_filter === 'a') {
           return [200, JSON.parse(searchSnapshots.bandcampStoriesAvicii)];
@@ -434,7 +433,7 @@ describe('GET /search', () => {
         return [404, {}];
       });
 
-      axiosMock.onPost(getPandoraApiUrl()).reply(config => {
+      httpMock.onPost(getPandoraApiUrl()).reply(config => {
         const body = JSON.parse(config.data);
         if (body.types.includes('AL')) {
           return [200, JSON.parse(searchSnapshots.pandoraStoriesAvicii)];
@@ -442,7 +441,7 @@ describe('GET /search', () => {
         return [404, {}];
       });
 
-      axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
+      httpMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
@@ -514,26 +513,26 @@ describe('GET /search', () => {
       const link = 'https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5';
 
       // Mock Spotify metadata API
-      axiosMock
+      httpMock
         .onGet('https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5')
         .reply(200, headSnapshots.spotifyArtistJCole);
 
       // Mock adapter API calls
-      axiosMock
+      httpMock
         .onGet(/music\.apple\.com.*search/)
         .reply(200, searchSnapshots.appleMusicJCole);
 
-      axiosMock
+      httpMock
         .onGet(/api\.deezer\.com.*search.*artist/)
         .reply(200, JSON.parse(searchSnapshots.deezerJCole));
 
       const soundCloudSearchUrl = getSoundCloudSearchLink('J. Cole');
-      axiosMock.onGet(soundCloudSearchUrl).reply(200, searchSnapshots.soundCloudJCole);
+      httpMock.onGet(soundCloudSearchUrl).reply(200, searchSnapshots.soundCloudJCole);
 
       const qobuzSearchUrl = getQobuzSearchLink('J. Cole');
-      axiosMock.onGet(qobuzSearchUrl).reply(200, JSON.parse(searchSnapshots.qobuzJCole));
+      httpMock.onGet(qobuzSearchUrl).reply(200, JSON.parse(searchSnapshots.qobuzJCole));
 
-      axiosMock.onPost(getBandcampApiUrl()).reply(config => {
+      httpMock.onPost(getBandcampApiUrl()).reply(config => {
         const body = JSON.parse(config.data);
         if (body.search_filter === 'b') {
           return [200, JSON.parse(searchSnapshots.bandcampJCole)];
@@ -541,7 +540,7 @@ describe('GET /search', () => {
         return [404, {}];
       });
 
-      axiosMock.onPost(getPandoraApiUrl()).reply(config => {
+      httpMock.onPost(getPandoraApiUrl()).reply(config => {
         const body = JSON.parse(config.data);
         if (body.types.includes('AR')) {
           return [200, JSON.parse(searchSnapshots.pandoraJCole)];
@@ -549,7 +548,7 @@ describe('GET /search', () => {
         return [404, {}];
       });
 
-      axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
+      httpMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
@@ -621,25 +620,25 @@ describe('GET /search', () => {
       const link = 'https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ';
 
       // Mock Spotify metadata API
-      axiosMock
+      httpMock
         .onGet('https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ')
         .reply(200, headSnapshots.spotifyPlaylistBadBunny);
 
       // Mock adapter API calls
-      axiosMock
+      httpMock
         .onGet(/music\.apple\.com.*search/)
         .reply(200, searchSnapshots.appleMusicBadBunnyPlaylist);
 
-      axiosMock
+      httpMock
         .onGet(/api\.deezer\.com.*search.*playlist/)
         .reply(200, JSON.parse(searchSnapshots.deezerBadBunnyPlaylist));
 
       const soundCloudSearchUrl = getSoundCloudSearchLink('This Is Bad Bunny');
-      axiosMock
+      httpMock
         .onGet(soundCloudSearchUrl)
         .reply(200, searchSnapshots.soundCloudThisIsBadBunny);
 
-      axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
+      httpMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
@@ -693,20 +692,20 @@ describe('GET /search', () => {
       const link = 'https://open.spotify.com/episode/2uvOfpJRRliCWpbiCXKf4Q';
 
       // Mock Spotify metadata API
-      axiosMock
+      httpMock
         .onGet(/open\.spotify\.com\/episode\/2uvOfpJRRliCWpbiCXKf4Q/)
         .reply(200, headSnapshots.spotifyEpisodeTerceraVuelta);
 
       // Mock adapter API calls - podcasts usually don't have matches on other platforms
-      axiosMock.onGet(/music\.apple\.com.*search/).reply(200, '<div></div>');
-      axiosMock.onGet(/api\.deezer\.com.*search/).reply(200, { data: [] });
+      httpMock.onGet(/music\.apple\.com.*search/).reply(200, '<div></div>');
+      httpMock.onGet(/api\.deezer\.com.*search/).reply(200, { data: [] });
       const soundCloudSearchUrl = getSoundCloudSearchLink(
         '¿Dónde estabas el 6 de noviembre del año 1985?'
       );
-      axiosMock
+      httpMock
         .onGet(soundCloudSearchUrl)
         .reply(200, searchSnapshots.soundCloudTerceraVuelta);
-      axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
+      httpMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
@@ -744,20 +743,20 @@ describe('GET /search', () => {
       const link = 'https://open.spotify.com/episode/43TCrgmP23qkLcAXZQN8qT';
 
       // Mock Spotify metadata API
-      axiosMock
+      httpMock
         .onGet('https://open.spotify.com/episode/43TCrgmP23qkLcAXZQN8qT')
         .reply(200, headSnapshots.spotifyEpisodeWaveform);
 
       // Mock adapter API calls
-      axiosMock.onGet(/music\.apple\.com.*search/).reply(200, '<div></div>');
-      axiosMock.onGet(/api\.deezer\.com.*search/).reply(200, { data: [] });
+      httpMock.onGet(/music\.apple\.com.*search/).reply(200, '<div></div>');
+      httpMock.onGet(/api\.deezer\.com.*search/).reply(200, { data: [] });
       const soundCloudSearchUrl = getSoundCloudSearchLink(
         'The End of Twitter as We Know It'
       );
-      axiosMock
+      httpMock
         .onGet(soundCloudSearchUrl)
         .reply(200, searchSnapshots.soundCloudWaveformEndOfTwitter);
-      axiosMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
+      httpMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',

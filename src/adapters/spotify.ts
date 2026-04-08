@@ -1,7 +1,5 @@
 import { createHmac } from 'node:crypto';
 
-import { AxiosError } from 'axios';
-
 import { Adapter, MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 import {
@@ -13,7 +11,7 @@ import {
 import type { SearchMetadata } from '~/services/search';
 import { getOrUpdateAccessToken } from '~/utils/access-token';
 import { findBestMatch, type MatchCandidate } from '~/utils/compare';
-import HttpClient from '~/utils/http-client';
+import HttpClient, { HttpClientError } from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { getServiceGuard } from '~/utils/service-guard';
 
@@ -85,10 +83,6 @@ const SEARCH_DESKTOP_HASH =
 
 const PLAYER_JS_REGEX = /"(https:\/\/[^" ]+\/(?:mobile-)?web-player\.[0-9a-f]+\.js)"/;
 const SECRETS_REGEX = /\{\s*secret\s*:\s*["']([^"']+)["']\s*,\s*version\s*:\s*(\d+)\s*\}/g;
-
-// Spotify rejects old Chrome UAs with an error page; HttpClient defaults are from 2021
-const SPOTIFY_UA =
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36';
 
 function uriToUrl(uri: string): string {
   // spotify:track:abc123 -> https://open.spotify.com/track/abc123
@@ -170,12 +164,10 @@ export async function getSpotifyLink(
     return bestMatch;
   } catch (error) {
     guard.recordFailure();
-    const axiosErr = error instanceof AxiosError ? error : null;
-    if (axiosErr) {
-      const status = axiosErr.response?.status ?? axiosErr.code;
-      const retryAfter = axiosErr.response?.headers?.['retry-after'];
+    const httpErr = error instanceof HttpClientError ? error : null;
+    if (httpErr) {
       logger.error(
-        `[Spotify] HTTP ${status} on ${axiosErr.config?.url}${retryAfter ? ` (retry-after: ${retryAfter}s)` : ''}`
+        `[Spotify] HTTP ${httpErr.status} on ${httpErr.url}${httpErr.retryAfter ? ` (retry-after: ${httpErr.retryAfter}s)` : ''}`
       );
     } else {
       logger.error(`[Spotify] ${error}`);
@@ -235,7 +227,7 @@ export async function getOrUpdateSpotifyAccessToken() {
       );
 
       const html = await HttpClient.get<string>(ENV.adapters.spotify.baseUrl, {
-        headers: { 'User-Agent': SPOTIFY_UA },
+        headers: {},
         timeout: TOKEN_FETCH_TIMEOUT,
       });
 

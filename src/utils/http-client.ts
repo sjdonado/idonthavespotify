@@ -1,5 +1,4 @@
-import axios, { AxiosError } from 'axios';
-import axiosRetry from 'axios-retry';
+import { Impit, TransportError } from 'impit';
 
 import { DEFAULT_TIMEOUT } from '~/config/constants';
 import { logger } from '~/utils/logger';
@@ -11,51 +10,70 @@ type HttpClientOptions = {
   retries?: number;
 };
 
-function getRandomUserAgent() {
-  const osOptions = [
-    'Windows NT 10.0; Win64; x64',
-    'Macintosh; Intel Mac OS X 10_15_7',
-    'X11; Linux x86_64',
-  ];
-
-  const chromeVersions = [
-    '91.0.4472.124',
-    '92.0.4515.107',
-    '93.0.4577.63',
-    '94.0.4606.71',
-    '95.0.4638.69',
-  ];
-
-  const os = osOptions[Math.floor(Math.random() * osOptions.length)];
-  const chromeVersion = chromeVersions[Math.floor(Math.random() * chromeVersions.length)];
-
-  return `Mozilla/5.0 (${os}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${chromeVersion} Safari/537.36 Edg/91.0.864.67`;
+export class HttpClientError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+    public statusText: string,
+    public url: string,
+    public retryAfter?: string
+  ) {
+    super(message);
+    this.name = 'HttpClientError';
+  }
 }
 
-axiosRetry(axios, {
-  retries: 2,
-  retryCondition: error => {
-    return (
-      axiosRetry.isNetworkError(error) ||
-      axiosRetry.isRetryableError(error) ||
-      error.response?.status === 429
-    );
-  },
-  retryDelay: (retryCount, error) => {
-    const retryAfter = error.response?.headers?.['retry-after'];
-    if (retryAfter) {
-      return (parseInt(retryAfter, 10) + 1) * 1000;
+const client = new Impit({ browser: 'chrome', timeout: DEFAULT_TIMEOUT });
+
+function isRetryable(error: unknown, status?: number): boolean {
+  if (status === 429) return true;
+  if (status && status >= 500) return true;
+  if (error instanceof TransportError) return true;
+  return false;
+}
+
+function getRetryDelay(attempt: number, retryAfter?: string | null): number {
+  if (retryAfter) {
+    return (parseInt(retryAfter, 10) + 1) * 1000;
+  }
+  return attempt * 1000;
+}
+
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  retries: number
+): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      const status = error instanceof HttpClientError ? error.status : undefined;
+      if (attempt < retries && isRetryable(error, status)) {
+        const retryAfter =
+          error instanceof HttpClientError ? error.retryAfter : undefined;
+        const delay = getRetryDelay(attempt + 1, retryAfter);
+        logger.debug(
+          `[HttpClient] Retry ${attempt + 1}/${retries} after ${delay}ms`
+        );
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      throw error;
     }
-    return retryCount * 1000;
-  },
-});
+  }
+  throw lastError;
+}
+
+function serializeBody(payload: unknown): string | URLSearchParams | undefined {
+  if (payload === undefined || payload === null) return undefined;
+  if (typeof payload === 'string') return payload;
+  if (payload instanceof URLSearchParams) return payload;
+  return JSON.stringify(payload);
+}
 
 export default class HttpClient {
-  static defaultHeaders = {
-    'Accept-Encoding': 'gzip',
-    'User-Agent': getRandomUserAgent(),
-  };
-
   static async get<T>(url: string, options?: HttpClientOptions) {
     logger.debug(`[HttpClient] GET - ${url}`);
     return HttpClient.request<T>('GET', url, options);
@@ -66,37 +84,55 @@ export default class HttpClient {
     return HttpClient.request<T>('POST', url, { ...options, payload });
   }
 
+  static async resolveRedirect(url: string, maxRedirects: number = 10): Promise<string> {
+    logger.debug(`[HttpClient] resolveRedirect - ${url}`);
+    const redirectClient = new Impit({
+      browser: 'chrome',
+      followRedirects: true,
+      maxRedirects,
+      timeout: DEFAULT_TIMEOUT,
+    });
+    const response = await redirectClient.fetch(url);
+    return response.url || url;
+  }
+
   private static async request<T>(
     method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     url: string,
     options?: HttpClientOptions
   ): Promise<T> {
-    const headers = {
-      ...HttpClient.defaultHeaders,
-      ...(options?.headers ?? {}),
-    };
+    const timeout = options?.timeout ?? DEFAULT_TIMEOUT;
+    const retries = options?.retries ?? 2;
 
-    try {
-      const { status, data } = await axios.request({
-        url,
+    return withRetry(async () => {
+      const response = await client.fetch(url, {
         method,
-        data: options?.payload,
-        headers,
-        timeout: options?.timeout ?? DEFAULT_TIMEOUT,
-        signal: AbortSignal.timeout(options?.timeout ?? DEFAULT_TIMEOUT),
+        headers: options?.headers,
+        body: method !== 'GET' ? serializeBody(options?.payload) : undefined,
+        timeout,
+        signal: AbortSignal.timeout(timeout),
       });
 
-      if (![200, 201, 204].includes(status)) {
-        throw new AxiosError(`Unexpected status code: ${status}`);
+      if (![200, 201, 204].includes(response.status)) {
+        const retryAfter = response.headers.get('retry-after') ?? undefined;
+        throw new HttpClientError(
+          `Unexpected status code: ${response.status}`,
+          response.status,
+          response.statusText,
+          url,
+          retryAfter
+        );
+      }
+
+      const contentType = response.headers.get('content-type') ?? '';
+      let data: unknown;
+      if (contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        data = await response.text();
       }
 
       return data as T;
-    } catch (err) {
-      const axiosError = err as AxiosError;
-      logger.error(
-        `[${HttpClient.request.name}] Request failed ${axiosError.message} ${JSON.stringify(axiosError)}`
-      );
-      throw err;
-    }
+    }, retries);
   }
 }

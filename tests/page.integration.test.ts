@@ -12,18 +12,22 @@ import {
 } from '~/services/cache';
 import { getCheerioDoc } from '~/utils/scraper';
 
+import { HttpMock } from './utils/http-mock';
 import { createTestApp, formDataFromObject, nodeFetch } from './utils/request';
 import { urlShortenerResponseMock } from './utils/shared';
 
 describe('Page router', () => {
   let app: Server<undefined>;
+  let httpMock: HttpMock;
 
   beforeAll(() => {
     app = createTestApp();
+    httpMock = new HttpMock();
   });
 
   afterAll(() => {
     app.stop();
+    httpMock.restore();
   });
 
   beforeEach(async () => {

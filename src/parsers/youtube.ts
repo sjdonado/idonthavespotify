@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 import { MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
@@ -171,16 +169,6 @@ function parseYouTubeLink(link: string) {
 }
 
 async function resolveShortYouTubeLink(shortLink: string): Promise<string> {
-  const response = await axios.request({
-    method: 'GET',
-    url: shortLink,
-    maxRedirects: 1,
-  });
-
-  const path =
-    response.request.path ||
-    response.request._currentUrl ||
-    response.request._headers?.path;
-
-  return path ? `https://youtube.com${path}` : shortLink;
+  const finalUrl = await HttpClient.resolveRedirect(shortLink, 1);
+  return finalUrl || shortLink;
 }

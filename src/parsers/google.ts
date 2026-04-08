@@ -1,8 +1,7 @@
-import axios from 'axios';
-
 import { MetadataType, Parser } from '~/config/enum';
 import { cacheSearchMetadata, getCachedSearchMetadata } from '~/services/cache';
 import type { SearchMetadata } from '~/services/search';
+import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 
 async function extractQueryFromGoogleLink(
@@ -13,16 +12,7 @@ async function extractQueryFromGoogleLink(
     // share.google links redirect to google.com/search
     logger.info(`[Google] Following redirects for: ${googleLink}`);
 
-    const response = await axios.get(googleLink, {
-      maxRedirects: 10,
-      validateStatus: () => true,
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-      },
-    });
-
-    const finalUrl = response.request?.res?.responseUrl || response.config.url;
+    const finalUrl = await HttpClient.resolveRedirect(googleLink, 10);
     logger.info(`[Google] Final URL: ${finalUrl}`);
 
     const urlObj = new URL(finalUrl);
