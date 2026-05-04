@@ -79,7 +79,7 @@ describe('Api router', () => {
         .onGet(getSoundCloudSearchLink(query))
         .reply(200, searchSnapshots.soundCloudRollingStone);
       httpMock
-        .onGet('https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc')
+        .onGet('https://open.spotify.com/embed/track/3AhXZa8sUQht0UEdBJgpGc')
         .reply(200, headSnapshots.spotifyTrackRollingStone);
 
       const response = await nodeFetch(searchEndpointUrl, {
@@ -140,7 +140,7 @@ describe('Api router', () => {
       httpMock.onGet(getSoundCloudSearchLink(query)).reply(500);
       // Mock Spotify metadata API
       httpMock
-        .onGet('https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc')
+        .onGet('https://open.spotify.com/embed/track/3AhXZa8sUQht0UEdBJgpGc')
         .reply(200, headSnapshots.spotifyTrackRollingStone);
 
       httpMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
@@ -176,7 +176,7 @@ describe('Api router', () => {
 
     it('should return 200 when adapter adapter matches the parser type', async () => {
       httpMock
-        .onGet('https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc')
+        .onGet('https://open.spotify.com/embed/track/3AhXZa8sUQht0UEdBJgpGc')
         .reply(200, headSnapshots.spotifyTrackRollingStone);
 
       const response = await nodeFetch(searchEndpointUrl, {
