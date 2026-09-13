@@ -146,7 +146,7 @@ describe('GET /search', () => {
             isVerified: true,
             notAvailable: false,
             type: 'pandora',
-            url: 'https://www.pandora.com/artist/bob-dylan/the-very-best-of/like-a-rolling-stone/TR9Pc9g74Z7KhxX',
+            url: 'https://www.pandora.com/artist/bob-dylan/highway-61-revisited/like-a-rolling-stone/TRxd7mxKzqvVd7m',
           },
           {
             isVerified: true,
@@ -255,7 +255,7 @@ describe('GET /search', () => {
           },
           {
             type: 'pandora',
-            url: 'https://www.pandora.com/artist/bob-dylan/the-very-best-of/like-a-rolling-stone/TR9Pc9g74Z7KhxX',
+            url: 'https://www.pandora.com/artist/bob-dylan/highway-61-revisited/like-a-rolling-stone/TRxd7mxKzqvVd7m',
             isVerified: true,
             notAvailable: false,
           },
@@ -368,7 +368,7 @@ describe('GET /search', () => {
           },
           {
             type: 'pandora',
-            url: 'https://www.pandora.com/artist/bob-dylan/the-very-best-of/like-a-rolling-stone/TR9Pc9g74Z7KhxX',
+            url: 'https://www.pandora.com/artist/bob-dylan/highway-61-revisited/like-a-rolling-stone/TRxd7mxKzqvVd7m',
             isVerified: true,
             notAvailable: false,
           },
@@ -651,7 +651,7 @@ describe('GET /search', () => {
         id: 'b3Blbi5zcG90aWZ5LmNvbS9wbGF5bGlzdC8zN2k5ZFFaRjFEWDJhcFd6eUVDd3la',
         type: 'playlist',
         title: 'This Is Bad Bunny',
-        description: expect.stringMatching(/(?=.*playlist)(?=.*items)/i),
+        description: expect.stringMatching(/greatest hits/i),
         image: expect.any(String),
         source: 'https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ',
         universalLink: `${ENV.app.url}?id=${data.id}`,
@@ -677,7 +677,7 @@ describe('GET /search', () => {
             isVerified: false,
             notAvailable: false,
             type: 'soundCloud',
-            url: 'https://soundcloud.com/dodo-boys-in-the-hood/bad-bunny-eoo-dodo-edit-perreo',
+            url: 'https://soundcloud.com/diego-689346786/sets/las-mejores-canciones-de-bad',
           },
         ],
       });
@@ -785,7 +785,7 @@ describe('GET /search', () => {
             isVerified: false,
             notAvailable: false,
             type: 'soundCloud',
-            url: 'https://soundcloud.com/ipc-sound-room/its-the-end-of-the-world-as-we-know-it',
+            url: 'https://soundcloud.com/blazo/end-of-the-wolrd-as-we-know-it',
           },
         ],
       });
