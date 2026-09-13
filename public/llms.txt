@@ -118,7 +118,7 @@ Convert a streaming service link to equivalent links on other platforms.
 - `image`: Cover art/thumbnail URL
 - `audio`: Preview audio URL (when available, primarily from Spotify)
 - `source`: Original input URL
-- `universalLink`: Shortened link that redirects to the web interface
+- `universalLink`: Shareable app link that opens the web interface with this result
 - `links`: Array of equivalent links on other platforms
 - `links[].type`: Streaming service identifier
 - `links[].url`: Direct link to content on that platform

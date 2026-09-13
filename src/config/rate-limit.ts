@@ -36,8 +36,9 @@ const productionConfig = {
   api: config.api,
 };
 
-const isDevelopment = process.env.NODE_ENV === 'development';
-const isTest = process.env.NODE_ENV === 'test';
+const nodeEnv = typeof process !== 'undefined' ? process.env['NODE_ENV'] : undefined;
+const isDevelopment = nodeEnv === 'development';
+const isTest = nodeEnv === 'test';
 
 export const rateLimitConfig = isTest
   ? developmentConfig // Use permissive limits for testing

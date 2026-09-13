@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "~/http-backend": ["./src/utils/http-backend-fetch.ts"],
+      "~/logger": ["./src/utils/logger-impl-console.ts"],
+      "~/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*"]
+}

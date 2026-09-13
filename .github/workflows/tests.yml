@@ -22,7 +22,41 @@ jobs:
             fi
           done < .env.test
       - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: 1.4.2
       - name: Install dependencies
         run: bun install
       - name: Run integration tests
         run: bun run test:ci
+
+  binary-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: 1.4.2
+      - name: Install dependencies
+        run: bun install
+      - name: Build assets, binary, and edge bundle
+        run: bun run build && bun run build:prod && bun run build:workers
+      - name: Audit edge bundle for native imports
+        run: |
+          ! grep -qE "from ['\"]bun['\"]" dist/workers.js
+          ! grep -qE "require\(['\"]bun['\"]\)" dist/workers.js
+          ! grep -qi impit dist/workers.js
+          ! grep -qi pino dist/workers.js
+      - name: Boot binary and smoke test
+        run: |
+          PORT=3100 NODE_ENV=test ./dist/idonthavespotify &
+          SRVPID=$!
+          for i in $(seq 1 50); do
+            curl -sf http://127.0.0.1:3100/ > /dev/null && break
+            sleep 0.2
+          done
+          curl -sf http://127.0.0.1:3100/ > /dev/null
+          curl -sf http://127.0.0.1:3100/assets/index.min.css > /dev/null
+          curl -sf http://127.0.0.1:3100/assets/index.js > /dev/null
+          curl -sf http://127.0.0.1:3100/api/status > /dev/null
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST --data-urlencode 'link=https://open.spotify.com/invalid' http://127.0.0.1:3100/search)" = "400"
+          kill $SRVPID

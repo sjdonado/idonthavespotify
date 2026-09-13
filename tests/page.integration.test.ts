@@ -2,19 +2,16 @@ import type { Server } from 'bun';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test';
 
 import { Adapter, MetadataType, Parser } from '~/config/enum';
-import { ENV } from '~/config/env';
 import * as linkParser from '~/parsers/link';
 import {
   cacheSearchMetadata,
   cacheSearchResultLink,
-  cacheShortenLink,
   cacheStore,
 } from '~/services/cache';
 import { getCheerioDoc } from '~/utils/scraper';
 
 import { HttpMock } from './utils/http-mock';
 import { createTestApp, formDataFromObject, nodeFetch } from './utils/request';
-import { urlShortenerResponseMock } from './utils/shared';
 
 describe('Page router', () => {
   let app: Server<undefined>;
@@ -33,19 +30,13 @@ describe('Page router', () => {
   beforeEach(async () => {
     cacheStore.reset();
 
-    await Promise.all([
-      cacheSearchMetadata('2KvHC9z14GSl4YpkNMX384', Parser.Spotify, {
-        title: 'Do Not Disturb',
-        description: 'Drake · Song · 2017',
-        type: MetadataType.Song,
-        image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
-        audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
-      }),
-      cacheShortenLink(
-        `${ENV.app.url}?id=2KvHC9z14GSl4YpkNMX384`,
-        urlShortenerResponseMock.data.refer
-      ),
-    ]);
+    await cacheSearchMetadata('2KvHC9z14GSl4YpkNMX384', Parser.Spotify, {
+      title: 'Do Not Disturb',
+      description: 'Drake · Song · 2017',
+      type: MetadataType.Song,
+      image: 'https://i.scdn.co/image/ab67616d0000b2734f0fd9dad63977146e685700',
+      audio: 'https://p.scdn.co/mp3-preview/df989a31c8233f46b6a997c59025f9c8021784aa',
+    });
   });
 
   describe('GET /', () => {

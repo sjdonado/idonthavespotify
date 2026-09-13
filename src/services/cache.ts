@@ -15,11 +15,8 @@ interface CacheEntry<T> {
 
 class InMemoryCache {
   private cache = new Map<string, CacheEntry<unknown>>();
-  private defaultTTL: number;
 
-  constructor(defaultTTL: number) {
-    this.defaultTTL = defaultTTL;
-
+  constructor() {
     // Clean up expired entries every 5 minutes
     setInterval(() => this.cleanup(), 5 * 60 * 1000);
   }
@@ -34,7 +31,9 @@ class InMemoryCache {
   }
 
   set<T>(key: string, value: T, ttl?: number): void {
-    const expiresAt = Date.now() + (ttl || this.defaultTTL) * 1000;
+    // TTL resolved per call (not at import) so edge bindings set after
+    // module load still apply.
+    const expiresAt = Date.now() + (ttl || ENV.cache.expTime) * 1000;
     this.cache.set(key, { value, expiresAt });
   }
 
@@ -65,7 +64,7 @@ class InMemoryCache {
   }
 }
 
-const cache = new InMemoryCache(ENV.cache.expTime);
+const cache = new InMemoryCache();
 export const cacheStore = {
   async get<T>(key: string): Promise<T | undefined> {
     return cache.get<T>(key);
@@ -158,13 +157,4 @@ export const getCachedTidalUniversalLinkResponse = async (
   link: string
 ): Promise<Record<Adapter, SearchResultLink | null> | undefined> => {
   return cache.get(`tidal:universalLink:${link}`);
-};
-
-// URL shortener caching
-export const cacheShortenLink = async (link: string, refer: string): Promise<void> => {
-  cache.set(`url-shortener:${link}`, refer);
-};
-
-export const getCachedShortenLink = async (link: string): Promise<string | undefined> => {
-  return cache.get(`url-shortener:${link}`);
 };

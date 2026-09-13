@@ -4,17 +4,10 @@ interface MainLayoutProps {
   title?: string;
   description?: string;
   image?: string;
-  isProduction: boolean;
   children: typeof Fragment;
 }
 
-const MainLayout = ({
-  title,
-  description,
-  image,
-  isProduction,
-  children,
-}: MainLayoutProps) => {
+const MainLayout = ({ title, description, image, children }: MainLayoutProps) => {
   return (
     <div>
       <Helmet>
@@ -62,7 +55,11 @@ const MainLayout = ({
           href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
         />
         <link href="https://fonts.cdnfonts.com/css/poppins" rel="stylesheet" />
-        <script src="https://unpkg.com/htmx.org@2.0.8"></script>
+        <script
+          src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.10/dist/htmx.min.js"
+          integrity="sha384-H5SrcfygHmAuTDZphMHqBJLc3FhssKjG7w/CeCpFReSfwBWDTKpkzPP8c+cLsK+V"
+          crossorigin="anonymous"
+        ></script>
 
         <link href="/assets/index.min.css" rel="stylesheet" />
       </Helmet>
@@ -70,14 +67,6 @@ const MainLayout = ({
       <body class="h-screen bg-black font-light text-white">{children}</body>
 
       <Helmet footer>
-        {isProduction && (
-          <script
-            defer
-            src="https://umami.donado.co/script.js"
-            data-website-id="da89a7a2-dd17-4c7f-b7ff-de28a7046a0e"
-            data-auto-track="false"
-          ></script>
-        )}
         <script src="assets/index.js" />
       </Helmet>
     </div>

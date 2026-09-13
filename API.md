@@ -33,7 +33,7 @@ Convert music links across streaming platforms.
   "image": "string (optional)",
   "audio": "string (optional)",
   "source": "string",
-  "universalLink": "string",
+  "universalLink": "string (plain `APP_URL?id=<id>` share link, e.g. `https://idonthavespotify.donado.co?id=encoded_id`)",
   "links": [
     {
       "type": "string",

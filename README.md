@@ -59,20 +59,30 @@ The list of environment variables is available in `.env.test`. To complete the v
 
 Ensure that the values are correctly added to your `.env` file to configure the API keys properly.
 
-- To get the app up:
+- To get the app up (requires Bun 1.4.2 or newer, check with `bun --version`):
 ```sh
 bun install
 bun dev
 ```
 
-- To run with url-shortener:
+## Self-host binary
 
-Set this ENV file `URL_SHORTENER_API_KEY`, with the value used in `docker-compose.yml`
 ```sh
-docker compose up -d
-bun install
-bun dev
+bun run build
+bun run build:prod
+./dist/idonthavespotify # serves everything, no sidecars, no `public/` copy needed
 ```
+
+`PORT` and `NODE_ENV` configure the binary; it reads `.env` from the working directory.
+
+## Cloudflare Workers (optional public instance)
+
+```sh
+bun run build:workers # emits dist/workers.js (fetch backend, no native modules)
+bunx wrangler deploy  # needs a logged-in Cloudflare account
+```
+
+`wrangler.toml` pins `nodejs_compat`, a compatibility date, and Workers Assets for `public/`. Configure secrets with `bunx wrangler secret put` using the same variable names as `.env.test`. Known edge deltas: platform `fetch` instead of TLS impersonation (guarded sources may answer differently), per-isolate in-memory cache and rate limits, production rate-limit defaults, no URL shortener (share links are always plain app URLs), and platform CPU and memory limits. Put Cloudflare rate limiting rules in front of any public instance.
 
 ## More info
 

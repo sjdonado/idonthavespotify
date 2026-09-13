@@ -1,3 +1,5 @@
+import type { Server } from 'bun';
+
 import { logger } from './logger';
 
 export interface RateLimitMiddlewareOptions {
@@ -15,7 +17,10 @@ export interface RateLimitInfo {
   resetTime: number;
 }
 
-type RequestHandler = (req: Request) => Response | Promise<Response>;
+type RequestHandler = (
+  req: Request,
+  server?: Server<undefined>
+) => Response | Promise<Response>;
 
 export function withRateLimit(
   handler: RequestHandler,
@@ -29,8 +34,8 @@ export function withRateLimit(
     statusCode = 429,
   } = options;
 
-  return async (req: Request) => {
-    const ip = getClientIP(req);
+  return async (req: Request, server?: Server<undefined>) => {
+    const ip = getClientIP(req, server);
 
     if (!rateLimiter.isAllowed(ip)) {
       const resetTime = rateLimiter.getTimeToReset(ip);
@@ -58,7 +63,7 @@ export function withRateLimit(
 
     try {
       // Execute the original handler
-      const response = await handler(req);
+      const response = await handler(req, server);
 
       // Skip counting if configured to do so
       if (skipSuccessfulRequests && response.status < 400) {
@@ -110,8 +115,8 @@ export function withRateLimitHTML(
     statusCode = 429,
   } = options;
 
-  return async (req: Request) => {
-    const ip = getClientIP(req);
+  return async (req: Request, server?: Server<undefined>) => {
+    const ip = getClientIP(req, server);
 
     // Check if rate limited
     if (!rateLimiter.isAllowed(ip)) {
@@ -158,7 +163,7 @@ export function withRateLimitHTML(
 
     try {
       // Execute the original handler
-      const response = await handler(req);
+      const response = await handler(req, server);
 
       // Skip counting if configured to do so
       if (skipSuccessfulRequests && response.status < 400) {
@@ -179,14 +184,15 @@ export function withRateLimitHTML(
 
 export function checkRateLimit(
   req: Request,
-  rateLimiter: RateLimiter
+  rateLimiter: RateLimiter,
+  server?: Server<undefined>
 ): {
   allowed: boolean;
   ip: string;
   resetTime: number;
   remaining: number;
 } {
-  const ip = getClientIP(req);
+  const ip = getClientIP(req, server);
   const allowed = rateLimiter.isAllowed(ip);
   const resetTime = rateLimiter.getTimeToReset(ip);
   const remaining = rateLimiter['maxRequests'] - rateLimiter.getRequestCount(ip);
@@ -332,7 +338,7 @@ export class RateLimiter {
   }
 }
 
-export function getClientIP(req: Request): string {
+export function getClientIP(req: Request, server?: Server<undefined>): string {
   // Check common headers for real IP (in case of proxies/load balancers)
   const headers = req.headers;
 
@@ -347,9 +353,20 @@ export function getClientIP(req: Request): string {
     return realIP.trim();
   }
 
+  const connectingIP = headers.get('cf-connecting-ip');
+  if (connectingIP) {
+    return connectingIP.trim();
+  }
+
   const clientIP = headers.get('x-client-ip');
   if (clientIP) {
     return clientIP.trim();
+  }
+
+  // Fall back to the direct peer address before giving up
+  const peerIP = server?.requestIP(req)?.address;
+  if (peerIP) {
+    return peerIP;
   }
 
   // Fallback to a default IP if we can't determine it

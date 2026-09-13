@@ -30,7 +30,8 @@ async function buildCSS(options: BuildOptions = {}) {
   }
 
   if (options.watch) {
-    tailwindCmd.push('--watch');
+    // =always: keep watching when stdin is closed (e.g. under `bun run --parallel`)
+    tailwindCmd.push('--watch=always');
   }
 
   try {
