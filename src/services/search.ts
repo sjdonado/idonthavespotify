@@ -29,7 +29,6 @@ import { getYouTubeMetadata, getYouTubeQueryFromMetadata } from '~/parsers/youtu
 import { generateId } from '~/utils/encoding';
 import { logger } from '~/utils/logger';
 import { cleanSearchQuery } from '~/utils/query';
-import { shortenLink } from '~/utils/url-shortener';
 
 export type SearchMetadata = {
   title: string;
@@ -181,8 +180,6 @@ export const search = async <T extends SearchProps>({
       return link as SearchReturn<T>;
     }
 
-    const shortLink = await shortenLink(universalLink);
-
     return {
       id,
       type: metadata.type,
@@ -191,7 +188,7 @@ export const search = async <T extends SearchProps>({
       image: metadata.image,
       audio: metadata.audio,
       source: searchParser.source,
-      universalLink: shortLink,
+      universalLink,
       links: [linkSearchResult!],
     } as SearchReturn<T>;
   }
@@ -239,7 +236,7 @@ export const search = async <T extends SearchProps>({
       return a.type.localeCompare(b.type);
     });
 
-  // If headless is true, skip updatedMetadata and universal link shortening
+  // If headless is true, skip updatedMetadata
   if (headless) {
     return parsedLinks.map(link => link.url) as SearchReturn<T>;
   }
@@ -258,8 +255,7 @@ export const search = async <T extends SearchProps>({
     !spotifyLink.notAvailable &&
     (!metadata.audio || !metadata.image); // Fetch if missing audio or image
 
-  const [parsedMetadata, shortLink] = await Promise.all([
-    needsSpotifyMetadata
+  const parsedMetadata = await (needsSpotifyMetadata
       ? (async () => {
           logger.info(
             `[${search.name}] Fetching Spotify metadata for verified available link: ${spotifyLink.url}`
@@ -292,9 +288,7 @@ export const search = async <T extends SearchProps>({
             }
           }
           return metadata;
-        })(),
-    shortenLink(universalLink),
-  ]);
+        })());
 
   const searchResult: SearchResult = {
     id,
@@ -304,7 +298,7 @@ export const search = async <T extends SearchProps>({
     image: parsedMetadata.image,
     audio: parsedMetadata.audio,
     source: searchParser.source,
-    universalLink: shortLink,
+    universalLink,
     links: parsedLinks,
   };
 

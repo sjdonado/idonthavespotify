@@ -59,20 +59,41 @@ The list of environment variables is available in `.env.test`. To complete the v
 
 Ensure that the values are correctly added to your `.env` file to configure the API keys properly.
 
-- To get the app up:
+- To get the app up (requires Bun 1.4.2 or newer, check with `bun --version`):
 ```sh
 bun install
 bun dev
 ```
 
-- To run with url-shortener:
+## Self-host binary
 
-Set this ENV file `URL_SHORTENER_API_KEY`, with the value used in `docker-compose.yml`
 ```sh
-docker compose up -d
-bun install
-bun dev
+bun run build
+bun run build:prod
+./dist/idonthavespotify # serves everything, no sidecars, no `public/` copy needed
 ```
+
+`PORT` and `NODE_ENV` configure the binary; it reads `.env` from the working directory.
+
+## Cloudflare Workers (optional public instance)
+
+```sh
+bun run build:workers # emits dist/workers.js (fetch backend, no native modules)
+bunx wrangler deploy  # needs a logged-in Cloudflare account
+```
+
+`wrangler.toml` pins `nodejs_compat`, a compatibility date, and Workers Assets for `public/`. Configure secrets with `bunx wrangler secret put` using the same variable names as `.env.test`. Known edge deltas: platform `fetch` instead of TLS impersonation (guarded sources may answer differently; Spotify metadata resolves via `__NEXT_DATA__` embed pages on both runtimes; Apple Music resolves via the same-host catalog chain — oEmbed for albums/playlists, storefront album/ID-constrained search scrape for songs/artists — with no audio preview), per-isolate in-memory cache (service-guard budgets stay the shared quota protection), no URL shortener (share links are always plain app URLs), no per-IP limiting in the app, and platform CPU and memory limits.
+
+### Edge abuse protection (public demo only)
+
+Self-hosted instances skip the Cloudflare rule but read the warning below: the app ships no per-IP limiter, so only expose it publicly behind Cloudflare (add the rule above to your zone) or a rate-limiting reverse proxy. The public demo sits behind one Cloudflare rate limiting rule (free plans include exactly one), because only the edge can count globally across isolates. Create it under Security > WAF > Rate limiting rules:
+
+- Rule name: `idhs-demo-abuse-guard`
+- Expression: `(http.request.uri.path in {"/" "/search" "/api/search"})`
+- Characteristics: IP; Requests: 4; Period: 10 seconds; Block for: 10 seconds (all three are free-plan-pinned — the API rejects any other period or mitigation timeout, and requires `cf.colo.id` alongside the IP characteristic; 4 admits a legit burst — page load plus search — while capping a paced abuser at ~24/min instead of ~60/min)
+- Action: Block (exceeding clients get an error response; confirm the exact status in the dashboard preview)
+
+The threshold is deliberately abuse-level, not UX-level: no human pasting links hits 60/min. There are no friendly in-app 429s anymore; floods die at the edge before consuming worker quota or subrequests, and per-service circuit breakers stay the final fuse for upstream quotas. Keep Bot Fight Mode on (free) for known-bot junk, and tighten or add Under Attack Mode only as incident response.
 
 ## More info
 

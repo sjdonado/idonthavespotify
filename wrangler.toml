@@ -1,0 +1,9 @@
+name = "idonthavespotify"
+main = "dist/workers.js"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Static files (assets, favicon, llms.txt) served by the platform;
+# dynamic routes fall through to the worker entry.
+[assets]
+directory = "./public"

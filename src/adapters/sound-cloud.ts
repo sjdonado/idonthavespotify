@@ -9,8 +9,8 @@ import type { SearchMetadata, SearchResultLink } from '~/services/search';
 import { getResultWithBestScore } from '~/utils/compare';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
-import { getServiceGuard } from '~/utils/service-guard';
 import { getCheerioDoc } from '~/utils/scraper';
+import { getServiceGuard } from '~/utils/service-guard';
 
 export async function getSoundCloudLink(
   query: string,

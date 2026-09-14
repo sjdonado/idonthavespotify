@@ -1,62 +1,73 @@
 import { version } from '../../package.json';
-
-export const ENV = {
+import { getEdgeEnvVersion, readEnv } from './edge-env';
+const buildEnv = () => ({
   adapters: {
     spotify: {
-      apiUrl: Bun.env['SPOTIFY_API_URL']!,
-      baseUrl: Bun.env['SPOTIFY_BASE_URL']!,
+      apiUrl: readEnv('SPOTIFY_API_URL')!,
+      baseUrl: readEnv('SPOTIFY_BASE_URL')!,
     },
     tidal: {
-      baseUrl: Bun.env['TIDAL_BASE_URL']!,
-      apiUrl: Bun.env['TIDAL_API_URL']!,
-      authUrl: Bun.env['TIDAL_AUTH_URL']!,
-      clientId: Bun.env['TIDAL_CLIENT_ID']!,
-      clientSecret: Bun.env['TIDAL_CLIENT_SECRET']!,
+      baseUrl: readEnv('TIDAL_BASE_URL')!,
+      apiUrl: readEnv('TIDAL_API_URL')!,
+      authUrl: readEnv('TIDAL_AUTH_URL')!,
+      clientId: readEnv('TIDAL_CLIENT_ID')!,
+      clientSecret: readEnv('TIDAL_CLIENT_SECRET')!,
     },
     youTube: {
-      apiUrl: Bun.env['YOUTUBE_API_URL']!,
-      apiKey: Bun.env['YOUTUBE_API_KEY']!,
-      musicBaseUrl: Bun.env['YOUTUBE_MUSIC_BASE_URL']!,
+      apiUrl: readEnv('YOUTUBE_API_URL')!,
+      apiKey: readEnv('YOUTUBE_API_KEY')!,
+      musicBaseUrl: readEnv('YOUTUBE_MUSIC_BASE_URL')!,
     },
     deezer: {
-      apiUrl: Bun.env['DEEZER_API_URL']!,
+      apiUrl: readEnv('DEEZER_API_URL')!,
     },
     appleMusic: {
-      apiUrl: Bun.env['APPLE_MUSIC_API_URL']!,
+      apiUrl: readEnv('APPLE_MUSIC_API_URL')!,
     },
     soundCloud: {
-      baseUrl: Bun.env['SOUNDCLOUD_BASE_URL']!,
+      baseUrl: readEnv('SOUNDCLOUD_BASE_URL')!,
     },
     qobuz: {
-      apiUrl: Bun.env['QOBUZ_API_URL']!,
-      appId: Bun.env['QOBUZ_APP_ID']!,
-      streamUrl: Bun.env['QOBUZ_STREAM_URL']!,
-      storeUrl: Bun.env['QOBUZ_STORE_URL']!,
+      apiUrl: readEnv('QOBUZ_API_URL')!,
+      appId: readEnv('QOBUZ_APP_ID')!,
+      streamUrl: readEnv('QOBUZ_STREAM_URL')!,
+      storeUrl: readEnv('QOBUZ_STORE_URL')!,
     },
     bandcamp: {
-      apiUrl: Bun.env['BANDCAMP_API_URL']!,
-      baseUrl: Bun.env['BANDCAMP_BASE_URL']!,
+      apiUrl: readEnv('BANDCAMP_API_URL')!,
+      baseUrl: readEnv('BANDCAMP_BASE_URL')!,
     },
     pandora: {
-      apiUrl: Bun.env['PANDORA_API_URL']!,
+      apiUrl: readEnv('PANDORA_API_URL')!,
     },
   },
-  services: {
-    urlShortener: {
-      apiUrl: Bun.env['URL_SHORTENER_API_URL']!,
-      apiKey: Bun.env['URL_SHORTENER_API_KEY']!,
-    },
-    umami: {
-      apiUrl: Bun.env['UMAMI_API_URL']!,
-    },
-  },
+  services: {},
   app: {
-    url: Bun.env['APP_URL']!,
+    url: readEnv('APP_URL')!,
     version: version,
-    apiKeyBeta: Bun.env['IDHS_API_KEY_BETA']!,
+    apiKeyBeta: readEnv('IDHS_API_KEY_BETA')!,
   },
   cache: {
-    databasePath: Bun.env['DATABASE_PATH'] ?? ':memory:',
     expTime: 60 * 60 * 24 * 7 * 4, // 4 weeks in seconds
   },
-};
+});
+
+export type EnvShape = ReturnType<typeof buildEnv>;
+
+let cached: EnvShape | undefined;
+let cachedVersion = -1;
+
+// Built on first access (not import) so Workers can set per-request
+// bindings via setEdgeEnv before any config is read. The version check
+// rebuilds if bindings ever change; on self-host this evaluates once
+// from the process env, exactly like the old import-time object.
+export const ENV: EnvShape = new Proxy({} as EnvShape, {
+  get: (_target, prop: keyof EnvShape) => {
+    const envVersion = getEdgeEnvVersion();
+    if (!cached || envVersion !== cachedVersion) {
+      cached = buildEnv();
+      cachedVersion = envVersion;
+    }
+    return cached[prop];
+  },
+});

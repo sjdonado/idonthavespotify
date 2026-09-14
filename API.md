@@ -33,7 +33,7 @@ Convert music links across streaming platforms.
   "image": "string (optional)",
   "audio": "string (optional)",
   "source": "string",
-  "universalLink": "string",
+  "universalLink": "string (plain `APP_URL?id=<id>` share link, e.g. `https://idonthavespotify.donado.co?id=encoded_id`)",
   "links": [
     {
       "type": "string",
@@ -47,7 +47,6 @@ Convert music links across streaming platforms.
 
 **Errors:**
 - `400`: Invalid link or missing parameters
-- `429`: Rate limit exceeded (10 requests/minute)
 - `500`: Processing failed
 
 **Example:**
@@ -62,27 +61,19 @@ curl -X POST "http://idonthavespotify.sjdonado.com/api/search?v=1" \
 
 ### GET `/api/status`
 
-Check rate limit status for your IP.
+Service quota and health overview (service-guard budgets plus timestamp).
 
 **Response (200):**
 ```json
 {
-  "ip": "string",
-  "rateLimits": {
-    "web": {
-      "allowed": "boolean",
-      "remaining": "number",
-      "resetIn": "number"
-    },
-    "api": {
-      "allowed": "boolean",
-      "remaining": "number",
-      "resetIn": "number"
+  "serviceGuards": {
+    "<service>": {
+      "callsUsed": "number",
+      "callsMax": "number",
+      "windowResetsIn": "number",
+      "circuitOpen": "boolean",
+      "failures": "number"
     }
-  },
-  "storeSize": {
-    "web": "number",
-    "api": "number"
   },
   "timestamp": "string"
 }
@@ -107,21 +98,11 @@ curl "http://idonthavespotify.sjdonado.com/api/status"
 **Output (searchable):**
 - Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal
 
-## Rate Limits
-
-- **Limit:** 10 requests per minute per IP
-- **Headers:**
-  - `X-RateLimit-Limit`: Maximum requests allowed
-  - `X-RateLimit-Remaining`: Requests remaining
-  - `X-RateLimit-Reset`: Reset timestamp
-  - `Retry-After`: Seconds to wait (when rate limited)
-
 ## Error Responses
 
 All errors follow this format:
 ```json
 {
-  "error": "error message",
-  "retryAfter": 60 (optional, only on 429)
+  "error": "error message"
 }
 ```

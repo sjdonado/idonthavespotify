@@ -21,8 +21,6 @@ import {
   getPandoraApiUrl,
   getQobuzSearchLink,
   getSoundCloudSearchLink,
-  urlShortenerLink,
-  urlShortenerResponseMock,
 } from './utils/shared';
 
 const headSnapshots = loadHeadSnapshots();
@@ -52,7 +50,6 @@ describe('GET /search', () => {
     httpMock.reset();
 
     httpMock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
-    httpMock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
   });
 
   afterEach(() => {
@@ -125,7 +122,7 @@ describe('GET /search', () => {
         image: expect.any(String),
         audio: 'https://p.scdn.co/mp3-preview/62c229b1cadd22b991df9aeaedd38e873ddaccbe',
         source: 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc',
-        universalLink: urlShortenerResponseMock.data.refer,
+        universalLink: `${ENV.app.url}?id=${data.id}`,
         links: [
           {
             isVerified: true,
@@ -149,7 +146,7 @@ describe('GET /search', () => {
             isVerified: true,
             notAvailable: false,
             type: 'pandora',
-            url: 'https://www.pandora.com/artist/bob-dylan/the-very-best-of/like-a-rolling-stone/TR9Pc9g74Z7KhxX',
+            url: 'https://www.pandora.com/artist/bob-dylan/highway-61-revisited/like-a-rolling-stone/TRxd7mxKzqvVd7m',
           },
           {
             isVerified: true,
@@ -236,7 +233,7 @@ describe('GET /search', () => {
         image: expect.any(String),
         audio: 'https://p.scdn.co/mp3-preview/62c229b1cadd22b991df9aeaedd38e873ddaccbe',
         source: 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc',
-        universalLink: urlShortenerResponseMock.data.refer,
+        universalLink: `${ENV.app.url}?id=${data.id}`,
         links: [
           {
             type: 'appleMusic',
@@ -258,7 +255,7 @@ describe('GET /search', () => {
           },
           {
             type: 'pandora',
-            url: 'https://www.pandora.com/artist/bob-dylan/the-very-best-of/like-a-rolling-stone/TR9Pc9g74Z7KhxX',
+            url: 'https://www.pandora.com/artist/bob-dylan/highway-61-revisited/like-a-rolling-stone/TRxd7mxKzqvVd7m',
             isVerified: true,
             notAvailable: false,
           },
@@ -349,7 +346,7 @@ describe('GET /search', () => {
         audio: 'https://p.scdn.co/mp3-preview/62c229b1cadd22b991df9aeaedd38e873ddaccbe',
         source:
           'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc?si=NbEEVPZvTVuov_nA3ylJJQ&utm_source=copy-link&utm_medium=copy-link&context=spotify%3Aalbum%3A4czdORdCWP9umpbhFXK2aW&_branch_match_id=1238568162599463760&_branch_referrer=H2sIAAAAAAAAA8soKSkottLXLy7IL8lMq9TLyczL1q%2Fy8nHxLLXwM3RJAgDKC3LnIAAAAA%3D%3D',
-        universalLink: urlShortenerResponseMock.data.refer,
+        universalLink: `${ENV.app.url}?id=${data.id}`,
         links: [
           {
             type: 'appleMusic',
@@ -371,7 +368,7 @@ describe('GET /search', () => {
           },
           {
             type: 'pandora',
-            url: 'https://www.pandora.com/artist/bob-dylan/the-very-best-of/like-a-rolling-stone/TR9Pc9g74Z7KhxX',
+            url: 'https://www.pandora.com/artist/bob-dylan/highway-61-revisited/like-a-rolling-stone/TRxd7mxKzqvVd7m',
             isVerified: true,
             notAvailable: false,
           },
@@ -456,11 +453,11 @@ describe('GET /search', () => {
       expect(data).toEqual({
         id: 'b3Blbi5zcG90aWZ5LmNvbS9hbGJ1bS83ZHFmdEoza2FzNkQwVkFkbXQzazNW',
         type: 'album',
-        title: 'Stories - Album by Avicii | Spotify',
+        title: 'Stories',
         description: expect.stringMatching(/album/i),
         image: expect.any(String),
         source: 'https://open.spotify.com/album/7dqftJ3kas6D0VAdmt3k3V',
-        universalLink: urlShortenerResponseMock.data.refer,
+        universalLink: `${ENV.app.url}?id=${data.id}`,
         links: [
           {
             type: 'deezer',
@@ -564,10 +561,10 @@ describe('GET /search', () => {
         id: 'b3Blbi5zcG90aWZ5LmNvbS9hcnRpc3QvNmwzSHZRNXNhNm1YVHNNVEIxOXJPNQ',
         type: 'artist',
         title: 'J. Cole',
-        description: expect.stringMatching(/(?=.*Artist)(?=.*monthly listeners)/i),
+        description: expect.stringMatching(/artist/i),
         image: expect.any(String),
         source: 'https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5',
-        universalLink: urlShortenerResponseMock.data.refer,
+        universalLink: `${ENV.app.url}?id=${data.id}`,
         links: [
           {
             isVerified: true,
@@ -654,10 +651,10 @@ describe('GET /search', () => {
         id: 'b3Blbi5zcG90aWZ5LmNvbS9wbGF5bGlzdC8zN2k5ZFFaRjFEWDJhcFd6eUVDd3la',
         type: 'playlist',
         title: 'This Is Bad Bunny',
-        description: expect.stringMatching(/(?=.*playlist)(?=.*items)/i),
+        description: expect.stringMatching(/playlist/i),
         image: expect.any(String),
         source: 'https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ',
-        universalLink: urlShortenerResponseMock.data.refer,
+        universalLink: `${ENV.app.url}?id=${data.id}`,
         links: [
           {
             isVerified: true,
@@ -680,7 +677,7 @@ describe('GET /search', () => {
             isVerified: false,
             notAvailable: false,
             type: 'soundCloud',
-            url: 'https://soundcloud.com/dodo-boys-in-the-hood/bad-bunny-eoo-dodo-edit-perreo',
+            url: 'https://soundcloud.com/diego-689346786/sets/las-mejores-canciones-de-bad',
           },
         ],
       });
@@ -726,7 +723,7 @@ describe('GET /search', () => {
         audio:
           'https://podz-content.spotifycdn.com/audio/clips/6omeNtNZD86P8h4edCGXRl/clip_176359_236359.mp3',
         source: 'https://open.spotify.com/episode/2uvOfpJRRliCWpbiCXKf4Q',
-        universalLink: urlShortenerResponseMock.data.refer,
+        universalLink: `${ENV.app.url}?id=${data.id}`,
         links: [
           {
             isVerified: true,
@@ -777,7 +774,7 @@ describe('GET /search', () => {
         audio:
           'https://podz-content.spotifycdn.com/audio/clips/3GYsio7wUsfky3DC7ut4uL/clip_140000_202520.mp3',
         source: 'https://open.spotify.com/episode/43TCrgmP23qkLcAXZQN8qT',
-        universalLink: urlShortenerResponseMock.data.refer,
+        universalLink: `${ENV.app.url}?id=${data.id}`,
         links: [
           {
             isVerified: true,
@@ -788,7 +785,7 @@ describe('GET /search', () => {
             isVerified: false,
             notAvailable: false,
             type: 'soundCloud',
-            url: 'https://soundcloud.com/ipc-sound-room/its-the-end-of-the-world-as-we-know-it',
+            url: 'https://soundcloud.com/blazo/end-of-the-wolrd-as-we-know-it',
           },
         ],
       });

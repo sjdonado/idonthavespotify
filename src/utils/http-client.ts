@@ -1,6 +1,5 @@
-import { Impit, TransportError } from 'impit';
-
 import { DEFAULT_TIMEOUT } from '~/config/constants';
+import { createHttpBackend } from '~/http-backend';
 import { logger } from '~/utils/logger';
 
 type HttpClientOptions = {
@@ -23,12 +22,12 @@ export class HttpClientError extends Error {
   }
 }
 
-const client = new Impit({ browser: 'chrome', timeout: DEFAULT_TIMEOUT });
+const backend = createHttpBackend();
 
 function isRetryable(error: unknown, status?: number): boolean {
   if (status === 429) return true;
   if (status && status >= 500) return true;
-  if (error instanceof TransportError) return true;
+  if (backend.isTransportError(error)) return true;
   return false;
 }
 
@@ -86,14 +85,7 @@ export default class HttpClient {
 
   static async resolveRedirect(url: string, maxRedirects: number = 10): Promise<string> {
     logger.debug(`[HttpClient] resolveRedirect - ${url}`);
-    const redirectClient = new Impit({
-      browser: 'chrome',
-      followRedirects: true,
-      maxRedirects,
-      timeout: DEFAULT_TIMEOUT,
-    });
-    const response = await redirectClient.fetch(url);
-    return response.url || url;
+    return backend.resolveRedirect(url, maxRedirects);
   }
 
   private static async request<T>(
@@ -105,7 +97,7 @@ export default class HttpClient {
     const retries = options?.retries ?? 2;
 
     return withRetry(async () => {
-      const response = await client.fetch(url, {
+      const response = await backend.request(url, {
         method,
         headers: options?.headers,
         body: method !== 'GET' ? serializeBody(options?.payload) : undefined,

@@ -2,13 +2,13 @@
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "esnext"],
     "target": "ESNext",
-    "module": "ESNext",
+    "module": "Preserve",
     "moduleDetection": "force",
     "jsx": "react",
     "jsxFactory": "Nano.h",
     "jsxFragmentFactory": "Nano.Fragment",
     "allowJs": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,
@@ -20,6 +20,8 @@
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
+      "~/http-backend": ["./src/utils/http-backend-impit.ts"],
+      "~/logger": ["./src/utils/logger-impl-pino.ts"],
       "~/*": ["./src/*"]
     }
   },

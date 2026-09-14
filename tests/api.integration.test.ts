@@ -18,14 +18,11 @@ import { HttpMock } from './utils/http-mock';
 import { createTestApp, nodeFetch } from './utils/request';
 import {
   apiSearchEndpoint,
-  cachedSpotifyLink,
   getAppleMusicSearchLink,
   getDeezerSearchLink,
   getSoundCloudSearchLink,
   getTidalSearchLink,
   getYouTubeSearchLink,
-  urlShortenerLink,
-  urlShortenerResponseMock,
 } from './utils/shared';
 
 const headSnapshots = loadHeadSnapshots();
@@ -54,7 +51,6 @@ describe('Api router', () => {
     httpMock.reset();
 
     httpMock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
-    httpMock.onPost(urlShortenerLink).reply(200, urlShortenerResponseMock);
   });
 
   afterEach(() => {
@@ -100,7 +96,7 @@ describe('Api router', () => {
         image: expect.any(String),
         audio: 'https://p.scdn.co/mp3-preview/62c229b1cadd22b991df9aeaedd38e873ddaccbe',
         source: 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc',
-        universalLink: urlShortenerResponseMock.data.refer,
+        universalLink: `${ENV.app.url}?id=${data.id}`,
         links: [
           {
             isVerified: true,
@@ -163,7 +159,7 @@ describe('Api router', () => {
         image: expect.any(String),
         audio: 'https://p.scdn.co/mp3-preview/62c229b1cadd22b991df9aeaedd38e873ddaccbe',
         source: link,
-        universalLink: urlShortenerResponseMock.data.refer,
+        universalLink: `${ENV.app.url}?id=${data.id}`,
         links: [
           {
             isVerified: true,
@@ -197,7 +193,7 @@ describe('Api router', () => {
         image: expect.any(String),
         audio: 'https://p.scdn.co/mp3-preview/62c229b1cadd22b991df9aeaedd38e873ddaccbe',
         source: 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc',
-        universalLink: urlShortenerResponseMock.data.refer,
+        universalLink: `${ENV.app.url}?id=${data.id}`,
         links: [
           {
             isVerified: true,
@@ -210,7 +206,9 @@ describe('Api router', () => {
 
     it('should return unknown error - could not parse Spotify metadata', async () => {
       const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
-      httpMock.onGet(cachedSpotifyLink).reply(200, '<html></html>');
+      httpMock
+        .onGet('https://open.spotify.com/embed/track/2KvHC9z14GSl4YpkNMX384')
+        .reply(200, '<script id="__NEXT_DATA__" type="application/json">{"props":{}}</script>');
 
       const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
