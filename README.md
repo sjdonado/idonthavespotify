@@ -82,7 +82,18 @@ bun run build:workers # emits dist/workers.js (fetch backend, no native modules)
 bunx wrangler deploy  # needs a logged-in Cloudflare account
 ```
 
-`wrangler.toml` pins `nodejs_compat`, a compatibility date, and Workers Assets for `public/`. Configure secrets with `bunx wrangler secret put` using the same variable names as `.env.test`. Known edge deltas: platform `fetch` instead of TLS impersonation (guarded sources may answer differently), per-isolate in-memory cache and rate limits, production rate-limit defaults, no URL shortener (share links are always plain app URLs), and platform CPU and memory limits. Put Cloudflare rate limiting rules in front of any public instance.
+`wrangler.toml` pins `nodejs_compat`, a compatibility date, and Workers Assets for `public/`. Configure secrets with `bunx wrangler secret put` using the same variable names as `.env.test`. Known edge deltas: platform `fetch` instead of TLS impersonation (guarded sources may answer differently), per-isolate in-memory cache and rate limits, production rate-limit defaults, no URL shortener (share links are always plain app URLs), and platform CPU and memory limits.
+
+### Edge abuse protection (public demo only)
+
+Self-hosted instances skip this section: with your own keys and host, the in-app limiter is enough. The public demo additionally sits behind one Cloudflare rate limiting rule (free plans include exactly one), because only the edge can count globally across isolates. Create it under Security > WAF > Rate limiting rules:
+
+- Rule name: `idhs-demo-abuse-guard`
+- Expression: `(http.request.uri.path in {"/" "/search" "/api/search"})`
+- Characteristics: IP; period: 1 minute; threshold: 60 requests
+- Action: Block (exceeding clients get an error response; confirm the exact status in the dashboard preview)
+
+The threshold is deliberately abuse-level, not UX-level: no human pasting links hits 60/min, so legit users only ever see the in-app limits (10 web / 5 api per minute with friendly errors). Blocked edge requests never reach the Worker, so they cost no worker quota or subrequests. Keep Bot Fight Mode on (free) for known-bot junk, and tighten or add Under Attack Mode only as incident response.
 
 ## More info
 
