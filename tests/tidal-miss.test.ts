@@ -25,7 +25,7 @@ describe('Tidal edge outcome', () => {
     const errorSpy = spyOn(logger, 'error');
     try {
       httpMock
-        .onGet(/openapi\.tidal\.com.*searchresults/)
+        .onGet(/openapi\.tidal\.com.*searchResults/)
         .reply(400, { errors: [{ status: '400', detail: 'Bad request' }] });
 
       const res = await getTidalLink(
