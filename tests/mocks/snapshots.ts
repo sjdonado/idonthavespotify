@@ -13,28 +13,28 @@ export type SnapshotTarget = {
 
 export const headSnapshotTargets = {
   spotifyTrackRollingStone: {
-    url: 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc',
-    file: 'tests/mocks/head/spotify-track-3AhXZa8sUQht0UEdBJgpGc.html',
+    url: 'https://open.spotify.com/embed/track/3AhXZa8sUQht0UEdBJgpGc',
+    file: 'tests/mocks/head/spotify-embed-track-3AhXZa8sUQht0UEdBJgpGc.html',
   },
   spotifyAlbumStories: {
-    url: 'https://open.spotify.com/album/7dqftJ3kas6D0VAdmt3k3V',
-    file: 'tests/mocks/head/spotify-album-7dqftJ3kas6D0VAdmt3k3V.html',
+    url: 'https://open.spotify.com/embed/album/7dqftJ3kas6D0VAdmt3k3V',
+    file: 'tests/mocks/head/spotify-embed-album-7dqftJ3kas6D0VAdmt3k3V.html',
   },
   spotifyArtistJCole: {
-    url: 'https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5',
-    file: 'tests/mocks/head/spotify-artist-6l3HvQ5sa6mXTsMTB19rO5.html',
+    url: 'https://open.spotify.com/embed/artist/6l3HvQ5sa6mXTsMTB19rO5',
+    file: 'tests/mocks/head/spotify-embed-artist-6l3HvQ5sa6mXTsMTB19rO5.html',
   },
   spotifyPlaylistBadBunny: {
-    url: 'https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ',
-    file: 'tests/mocks/head/spotify-playlist-37i9dQZF1DX2apWzyECwyZ.html',
+    url: 'https://open.spotify.com/embed/playlist/37i9dQZF1DX2apWzyECwyZ',
+    file: 'tests/mocks/head/spotify-embed-playlist-37i9dQZF1DX2apWzyECwyZ.html',
   },
   spotifyEpisodeTerceraVuelta: {
-    url: 'https://open.spotify.com/episode/2uvOfpJRRliCWpbiCXKf4Q',
-    file: 'tests/mocks/head/spotify-episode-2uvOfpJRRliCWpbiCXKf4Q.html',
+    url: 'https://open.spotify.com/embed/episode/2uvOfpJRRliCWpbiCXKf4Q',
+    file: 'tests/mocks/head/spotify-embed-episode-2uvOfpJRRliCWpbiCXKf4Q.html',
   },
   spotifyEpisodeWaveform: {
-    url: 'https://open.spotify.com/episode/43TCrgmP23qkLcAXZQN8qT',
-    file: 'tests/mocks/head/spotify-episode-43TCrgmP23qkLcAXZQN8qT.html',
+    url: 'https://open.spotify.com/embed/episode/43TCrgmP23qkLcAXZQN8qT',
+    file: 'tests/mocks/head/spotify-embed-episode-43TCrgmP23qkLcAXZQN8qT.html',
   },
 } as const satisfies Record<string, SnapshotTarget>;
 

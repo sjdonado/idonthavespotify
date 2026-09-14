@@ -66,7 +66,7 @@ describe('GET /search', () => {
 
       // Mock Spotify metadata API
       httpMock
-        .onGet('https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc')
+        .onGet('https://open.spotify.com/embed/track/3AhXZa8sUQht0UEdBJgpGc')
         .reply(200, headSnapshots.spotifyTrackRollingStone);
 
       // Mock adapter API calls
@@ -178,7 +178,7 @@ describe('GET /search', () => {
 
       // Mock Spotify metadata API
       httpMock
-        .onGet(/open\.spotify\.com\/track\/3AhXZa8sUQht0UEdBJgpGc/)
+        .onGet(/open\.spotify\.com\/embed\/track\/3AhXZa8sUQht0UEdBJgpGc/)
         .reply(200, headSnapshots.spotifyTrackRollingStone);
 
       // Mock adapter API calls
@@ -290,7 +290,7 @@ describe('GET /search', () => {
 
       // Mock Spotify metadata API
       httpMock
-        .onGet(/open\.spotify\.com\/track\/3AhXZa8sUQht0UEdBJgpGc/)
+        .onGet(/open\.spotify\.com\/embed\/track\/3AhXZa8sUQht0UEdBJgpGc/)
         .reply(200, headSnapshots.spotifyTrackRollingStone);
 
       // Mock adapter API calls
@@ -403,7 +403,7 @@ describe('GET /search', () => {
     it('should return 200', async () => {
       // Mock Spotify metadata API
       httpMock
-        .onGet(/open\.spotify\.com\/album\/7dqftJ3kas6D0VAdmt3k3V/)
+        .onGet(/open\.spotify\.com\/embed\/album\/7dqftJ3kas6D0VAdmt3k3V/)
         .reply(200, headSnapshots.spotifyAlbumStories);
 
       // Mock adapter API calls
@@ -514,7 +514,7 @@ describe('GET /search', () => {
 
       // Mock Spotify metadata API
       httpMock
-        .onGet('https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5')
+        .onGet('https://open.spotify.com/embed/artist/6l3HvQ5sa6mXTsMTB19rO5')
         .reply(200, headSnapshots.spotifyArtistJCole);
 
       // Mock adapter API calls
@@ -621,7 +621,7 @@ describe('GET /search', () => {
 
       // Mock Spotify metadata API
       httpMock
-        .onGet('https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ')
+        .onGet('https://open.spotify.com/embed/playlist/37i9dQZF1DX2apWzyECwyZ')
         .reply(200, headSnapshots.spotifyPlaylistBadBunny);
 
       // Mock adapter API calls
@@ -693,7 +693,7 @@ describe('GET /search', () => {
 
       // Mock Spotify metadata API
       httpMock
-        .onGet(/open\.spotify\.com\/episode\/2uvOfpJRRliCWpbiCXKf4Q/)
+        .onGet(/open\.spotify\.com\/embed\/episode\/2uvOfpJRRliCWpbiCXKf4Q/)
         .reply(200, headSnapshots.spotifyEpisodeTerceraVuelta);
 
       // Mock adapter API calls - podcasts usually don't have matches on other platforms
@@ -744,7 +744,7 @@ describe('GET /search', () => {
 
       // Mock Spotify metadata API
       httpMock
-        .onGet('https://open.spotify.com/episode/43TCrgmP23qkLcAXZQN8qT')
+        .onGet('https://open.spotify.com/embed/episode/43TCrgmP23qkLcAXZQN8qT')
         .reply(200, headSnapshots.spotifyEpisodeWaveform);
 
       // Mock adapter API calls
