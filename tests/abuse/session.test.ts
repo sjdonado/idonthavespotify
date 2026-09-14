@@ -9,7 +9,7 @@ import {
 
 const SECRET = 'session-test-secret';
 
-describe('Stateless session/bearer tokens', () => {
+describe('Stateless session tokens', () => {
   it('round-trips the email', async () => {
     const { token, expiresAt } = await issueSessionToken('user@gmail.com', SECRET);
     expect(expiresAt).toBeGreaterThan(Date.now() / 1000);

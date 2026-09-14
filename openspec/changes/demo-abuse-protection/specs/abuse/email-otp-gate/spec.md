@@ -27,14 +27,14 @@ The web UI SHALL offer email input in place (where search lives): submitting an 
 - **WHEN** a new visitor enters an allowed email and then the correct code
 - **THEN** they can search immediately, and the email is stored for abuse decisions only
 
-### Requirement: API clients authenticate with a bearer token
+### Requirement: Gated search needs the login cookie; no bearer tokens
 
-After OTP verification, API clients SHALL receive a short-lived bearer token (same verification call, `Accept: application/json`) usable in `Authorization: Bearer`; expiry SHALL be enforced.
+Only the session cookie minted by the web login SHALL authorize search on the gated instance; verify-code SHALL NOT issue bearer tokens. Programmatic API clients (e.g. Raycast) stay supported on self-hosted instances, where the gate is off.
 
-#### Scenario: Raycast-style flow
+#### Scenario: Cookie replay authorizes, bare API calls do not
 
-- **WHEN** a client completes OTP over JSON
-- **THEN** it receives a bearer token that authorizes `/api/search` until expiry
+- **WHEN** a logged-in browser replays its session cookie on `/api/search`
+- **THEN** it searches until the cookie expires; the same call without the cookie is 401
 
 ### Requirement: Provider allowlist and no aliases
 

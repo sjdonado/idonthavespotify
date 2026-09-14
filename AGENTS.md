@@ -7,7 +7,7 @@ Bun + TypeScript server that converts a streaming-service link into links on oth
 - `src/index.ts` — HTTP server (`Bun.serve` with `routes`): `GET /`, `POST /search` (htmx HTML fragment), `POST /api/search`, `POST /api/auth/request-code`, `POST /api/auth/verify-code`, `GET /api/status`, static fallback for `public/`.
 - `src/parsers/` — identify the incoming link's platform, extract normalized metadata + search query.
 - `src/adapters/` — turn the query into outbound links per destination platform.
-- `src/abuse/` — demo gate: stateless OTP (`otp.ts`), email policy (`email.ts`), Plunk client (`plunk.ts`), session/bearer tokens (`session.ts`), per-email quota (`quota.ts`), Durable Object (`quota-do.ts`), gate checks + auth route handlers (`gate.ts`, `routes.ts`).
+- `src/abuse/` — demo gate: stateless OTP (`otp.ts`), email policy (`email.ts`), Plunk client (`plunk.ts`), session tokens (`session.ts`, cookie-only, no bearers), per-email quota (`quota.ts`), Durable Object (`quota-do.ts`), gate checks + auth route handlers (`gate.ts`, `routes.ts`).
 - `src/services/` — `search.ts` orchestration, in-memory `cache.ts`, `metadata.ts` helpers.
 - `src/schemas/` — zod route schemas (`auth.schema.ts` covers the gate endpoints); `src/config/` — enums, constants, env.
 - `src/utils/` — `http-client.ts` (all outbound HTTP goes through `impit` here), logger, scraper, service guard (per-service upstream budgets + circuit breaker).
@@ -15,7 +15,7 @@ Bun + TypeScript server that converts a streaming-service link into links on oth
 - `tests/` — integration tests (`api`, `page`, `abuse/gate`), unit tests (`parsers`, `search`, `utils`, `abuse`, `spotify-totp`, `tidal-miss`); `tests/utils/http-mock.ts` stubs `HttpClient` statics (non-2xx mocks carry a body snippet, mirroring production `HttpClientError.body`); `tests/mocks/` holds HTML/JSON snapshots.
 - `scripts/fetch-snapshots.ts` — regenerates `tests/mocks/` from live URLs (network).
 - `build.config.ts` — Tailwind CLI + browser JS bundling for `public/assets/`.
-- `API.md` — public API contract (includes the gate auth endpoints and bearer flow); `README.md` — user/operator narrative.
+- `API.md` — public API contract (includes the gate auth endpoints; cookie session, no bearer flow — programmatic clients target self-host); `README.md` — user/operator narrative.
 
 ## Prerequisites
 
@@ -68,7 +68,7 @@ CI: PRs run `tests.yml` (loads `.env.test` into env, then `test:ci`, plus asset/
 ## Abuse-gate decisions (do not re-derive without new evidence)
 
 - Per-email quota in a Durable Object (6 searches per rolling 4 min, 2-min cooldown, fail-closed checks, email-hash keys, alarm expiry). An earlier no-DO sketch was rejected: scoped to identity keys the counter is small and abuse-meaningful, where a global per-IP counter was neither. Flip condition: quota abuse persisting past identity cost means tightening the provider allowlist, not adding more infra.
-- Stateless OTP and session tokens (HMAC with `SESSION_SECRET`, 5-min windows with ±1 tolerance, 30-day token TTL). No stored codes, no KV writes; any isolate verifies. Single-use spent-cache only if abuse appears (YAGNI until then).
+- Stateless OTP and session tokens (HMAC with `SESSION_SECRET`, 5-min windows with ±1 tolerance, 30-day cookie TTL, no bearer scheme). No stored codes, no KV writes; any isolate verifies. Single-use spent-cache only if abuse appears (YAGNI until then).
 - Provider allowlist is a checked-in const in `src/abuse/email.ts` (one-line change to adjust); plus-aliases rejected before any send; Plunk `/v1/verify` backstops disposables/MX/typos and fails open when unreachable (OTP still costs one inbox).
 - Emails are abuse-prevention data only: never marketing, codes sent with non-persistent Plunk template data. Say this in user-facing docs whenever the gate is mentioned.
 - Spotify TOTP uses WebCrypto (`crypto.subtle` HMAC-SHA1), never `node:crypto`/`Buffer` in `generateTotp` (async). The decimal-concatenated secret quirk is preserved byte-identically and pinned by `tests/spotify-totp.test.ts` against a `node:crypto` reference.

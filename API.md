@@ -52,25 +52,7 @@ Convert music links across streaming platforms.
 - `500`: Processing failed
 - `503`: Quota check or gate temporarily unavailable
 
-On the public demo, search is gated behind email verification. API clients complete the same two-step flow the web UI uses, but as JSON. First request a code, then exchange the address plus code for a bearer token, then search with it:
-
-```bash
-curl -X POST "http://idonthavespotify.sjdonado.com/api/auth/request-code" \
-  -H "Content-Type: application/json" \
-  -H "Accept: application/json" \
-  -d '{ "email": "you@gmail.com" }'
-
-curl -X POST "http://idonthavespotify.sjdonado.com/api/auth/verify-code" \
-  -H "Content-Type: application/json" \
-  -H "Accept: application/json" \
-  -d '{ "email": "you@gmail.com", "code": "123456" }'
-# -> { "token": "...", "expiresAt": 0, "email": "you@gmail.com" }
-
-curl -X POST "http://idonthavespotify.sjdonado.com/api/search?v=1" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <token>" \
-  -d '{ "link": "https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc" }'
-```
+On the public demo, search is gated behind a browser login: logging in mints a session cookie, and that cookie is the only credential `/api/search` accepts. There are no API tokens, so programmatic clients such as the Raycast extension target self-hosted instances, where the gate is off and search stays open.
 
 **Example:**
 ```bash
@@ -105,7 +87,7 @@ Send a 6-digit code to an email address (public demo only).
 
 ### POST `/api/auth/verify-code`
 
-Exchange an email plus code for a session. Send `Accept: application/json` for a bearer token (API clients), or post a form for a session cookie plus page refresh (web UI).
+Exchange an email plus code for a session. Post a form for a session cookie plus page refresh (web UI); with `Accept: application/json` the same call sets the cookie and answers `{ "ok": true }`. No tokens are issued.
 
 **Request Body:**
 ```json
@@ -117,12 +99,9 @@ Exchange an email plus code for a session. Send `Accept: application/json` for a
 
 **Response (200, JSON):**
 ```json
-{
-  "token": "string (use as `Authorization: Bearer`, 30-day TTL)",
-  "expiresAt": "number (unix seconds)",
-  "email": "string"
-}
+{ "ok": true }
 ```
+plus a `Set-Cookie: idhs_session=...` header (30-day TTL).
 
 **Errors:**
 - `400`: Invalid or expired code

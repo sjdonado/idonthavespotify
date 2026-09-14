@@ -150,22 +150,27 @@ export async function verifyCodeHandler(req: Request): Promise<Response> {
       : new Response('Invalid or expired code.', { status: 400 });
   }
 
-  const { token, expiresAt } = await issueSessionToken(policy.normalized, secret);
-  if (json) {
-    return Response.json({ token, expiresAt, email: policy.normalized });
-  }
-
-  // Web flow: cookie authenticates, HX-Refresh reveals search immediately.
+  const { token } = await issueSessionToken(policy.normalized, secret);
   // Secure follows the client-facing scheme: X-Forwarded-Proto wins behind
   // a TLS-terminating proxy, where Bun itself only ever sees http.
   const forwarded = req.headers.get('x-forwarded-proto')?.split(',')[0]?.trim().toLowerCase();
   const secure = forwarded ? forwarded === 'https' : new URL(req.url).protocol === 'https:';
+  const cookie = sessionCookieHeader(token, SESSION_TTL_SEC, secure);
+
+  // No bearer tokens: the cookie is the only credential, so only the
+  // first-party frontend (which stores it) authenticates. Third-party API
+  // clients stay a self-hosted story, where the gate is off.
+  if (json) {
+    return Response.json({ ok: true }, { headers: { 'Set-Cookie': cookie } });
+  }
+
+  // Web flow: cookie authenticates, HX-Refresh reveals search immediately.
   return new Response(
     `<p class="text-sm text-zinc-400">Verified. <a class="underline" href="/">Start searching</a>.</p>`,
     {
       headers: {
         'Content-Type': 'text/html',
-        'Set-Cookie': sessionCookieHeader(token, SESSION_TTL_SEC, secure),
+        'Set-Cookie': cookie,
         'HX-Refresh': 'true',
       },
     }

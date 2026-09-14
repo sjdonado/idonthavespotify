@@ -124,9 +124,9 @@ describe('Email OTP gate', () => {
       body: JSON.stringify({ email, code }),
     });
     expect(verified.status).toBe(200);
-    const data = (await verified.json()) as { token: string; expiresAt: number };
-    expect(data.token).toBeTruthy();
-    expect(data.expiresAt).toBeGreaterThan(Date.now() / 1000);
+    // No bearer tokens: the login cookie is the only credential.
+    expect(await verified.json()).toEqual({ ok: true });
+    expect(verified.headers.get('set-cookie')).toMatch(/^idhs_session=/);
   });
 
   it('rejects aliases and unknown providers before any send', async () => {
@@ -153,10 +153,13 @@ describe('Email OTP gate', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, code }),
     });
-    const { token } = (await verified.json()) as { token: string };
+    expect(verified.status).toBe(200);
+    // Replay the login cookie like the first-party frontend would.
+    const sessionCookie = verified.headers.get('set-cookie')?.split(';')[0] as string;
+    expect(sessionCookie).toMatch(/^idhs_session=/);
     const auth = {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
+      Cookie: sessionCookie,
     };
 
     const status = await nodeFetch(`${app.url}api/status`, { headers: auth });

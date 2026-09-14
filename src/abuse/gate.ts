@@ -4,7 +4,7 @@ import { logger } from '~/utils/logger';
 
 import { hashEmail, peekLocalQuota, type QuotaVerdict } from './quota';
 import { checkLocalQuota } from './quota';
-import { readBearerToken, readSessionCookie, verifySessionToken } from './session';
+import { readSessionCookie, verifySessionToken } from './session';
 
 interface QuotaStub {
   fetch(input: Request): Promise<Response>;
@@ -22,12 +22,8 @@ const sessionSecret = (): string | undefined => ENV.abuse.sessionSecret;
 export async function getVerifiedEmail(req: Request): Promise<string | null> {
   const secret = sessionSecret();
   if (!secret) return null;
-  // A present-but-invalid bearer must not suppress a valid cookie.
-  const bearer = readBearerToken(req);
-  if (bearer) {
-    const email = await verifySessionToken(bearer, secret);
-    if (email) return email;
-  }
+  // Cookie only: no bearer scheme exists, so only the first-party frontend
+  // (which holds the login cookie) authenticates on the public instance.
   const cookie = readSessionCookie(req);
   if (!cookie) return null;
   return verifySessionToken(cookie, secret);

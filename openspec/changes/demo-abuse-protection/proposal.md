@@ -6,7 +6,7 @@ The public Workers demo is live but two outbound adapters are dead on edge (Spot
 
 - Fix Spotify's TOTP HMAC via WebCrypto (`crypto.subtle`, universal across Bun/Node/Workers) so the anonymous token flow works on edge; drop the `node:crypto` import.
 - Diagnose the Tidal v2 search 400 (compare self-host vs edge with identical query, log upstream error bodies) and fix the query or document it as a demo gap like Apple Music was.
-- Gate demo usage behind email OTP via Plunk: inline flow (type email, receive code, enter code), session cookie for web, short-lived bearer for API clients; required unless disabled via env; email used only for abuse prevention.
+- Gate demo usage behind email OTP via Plunk: inline flow (type email, receive code, enter code), session cookie as the only credential (no API tokens); required unless disabled via env; email used only for abuse prevention.
 - Email policy: allowlisted popular providers only, no plus-aliases, Plunk `/v1/verify` as backstop for disposables/typos.
 - Replace the Dokku deploy workflow with a Cloudflare Workers deploy (wrangler, OIDC or API-token secret); Dokku is gone entirely (workflow, docs mentions, instance) — binary/Docker remains the self-host path.
 - Rewrite README as full guiding prose (terse style stays out of `.md` files); move Workers operational detail into AGENTS.md.

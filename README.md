@@ -40,7 +40,7 @@ The web app is the main interface, a single page with a search bar, instant resu
 
 Source code: https://github.com/raycast/extensions/tree/main/extensions/idonthavespotify
 
-If you run the extension against the public demo, read the demo section below first: API clients authenticate with a bearer token from the same email-code flow, and the extension needs to implement that flow before its searches will succeed.
+The extension talks to a self-hosted instance, where search stays open. It does not work against the public demo, which needs a browser login (see below) and issues no API tokens.
 
 ## Running it locally
 
@@ -71,7 +71,7 @@ bun run build:prod
 
 The public demo runs on Cloudflare Workers, and because it sits on shared upstream quotas, it asks who you are before it searches. There are no accounts, no passwords, and no signup page, just an email address that proves you can receive mail.
 
-On the web the flow happens inline, right where the search bar lives. You type your email, receive a six-digit code, type the code, and a session cookie is minted that unlocks search immediately. API clients do the same two calls as JSON: posting the address to `/api/auth/request-code`, then the address plus code to `/api/auth/verify-code` with `Accept: application/json`, which returns a bearer token to send as `Authorization: Bearer` on `/api/search`. The token lasts 30 days. Only popular mailbox providers are accepted, addresses with `+` aliases are rejected before anything is sent, and Plunk's verifier double-checks disposables, mail records, and typos. Gmail-style dot variations are normalized first, so `first.last` and `firstlast` count as the same address.
+On the web the flow happens inline, right where the search bar lives. You type your email, receive a six-digit code, type the code, and a session cookie is minted that unlocks search immediately, in the browser and for its API calls alike. The cookie lasts 30 days and is the only credential the demo accepts: there are no API tokens, so anything programmatic, including the Raycast extension, runs against a self-hosted instance instead. Only popular mailbox providers are accepted, addresses with `+` aliases are rejected before anything is sent, and Plunk's verifier double-checks disposables, mail records, and typos. Gmail-style dot variations are normalized first, so `first.last` and `firstlast` count as the same address.
 
 Every verified address gets 6 searches per rolling 4 minutes. Past that the API answers 429 with a retry hint and a 2-minute cooldown, without touching any upstream service. Unauthenticated search answers 401 with an `auth: "email-otp"` hint, also without touching upstream. The counters live in a Durable Object keyed by email hash, deliberate because an identity key makes each counter small and meaningful, and quota checks fail closed: if the counter store is unreachable, searches wait rather than running unlimited. The Cloudflare WAF rule and the per-service circuit breakers stay on as the outer layers, unchanged.
 

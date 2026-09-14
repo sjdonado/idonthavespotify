@@ -6,9 +6,10 @@ import {
   toHex,
 } from './crypto';
 
-// Stateless session/bearer: token = base64url(email|expiry|sig) with
-// sig = HMAC(session-secret, "session:email:expiry"). Same token rides the
-// HttpOnly cookie (web) or Authorization: Bearer (API); 30-day TTL.
+// Stateless session: token = base64url(email|expiry|sig) with
+// sig = HMAC(session-secret, "session:email:expiry"). It rides the HttpOnly
+// session cookie minted by the web login; there are no bearer tokens, so
+// only cookie-carrying requests (the first-party frontend) authenticate.
 export const SESSION_COOKIE = 'idhs_session';
 export const SESSION_TTL_SEC = 30 * 24 * 60 * 60;
 
@@ -73,12 +74,4 @@ export function readSessionCookie(req: Request): string | null {
     }
   }
   return null;
-}
-
-export function readBearerToken(req: Request): string | null {
-  const header = req.headers.get('authorization');
-  if (!header) return null;
-  const parts = header.trim().split(/\s+/);
-  if (parts.length !== 2) return null;
-  return parts[0]?.toLowerCase() === 'bearer' && parts[1] ? parts[1] : null;
 }
