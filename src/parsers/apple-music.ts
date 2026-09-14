@@ -24,45 +24,54 @@ const APPLE_MUSIC_METADATA_TO_METADATA_TYPE = {
 // a bot. Only reached on runtimes without browser-TLS impersonation.
 const BOT_WALL_TITLE = 'Apple Music Web Player';
 
-interface AppleMusicLookupItem {
-  trackName?: string;
-  collectionName?: string;
-  artistName?: string;
-  artworkUrl100?: string;
-  previewUrl?: string;
+interface AppleMusicOEmbedResponse {
+  title?: string;
+  author_name?: string;
+  author_url?: string;
+  thumbnail_url?: string;
 }
 
-interface AppleMusicLookupResponse {
-  resultCount?: number;
-  results?: AppleMusicLookupItem[];
-}
+const fetchOEmbed = (link: string) =>
+  HttpClient.get<AppleMusicOEmbedResponse>(
+    `https://music.apple.com/api/oembed?url=${encodeURIComponent(link)}`
+  ).catch(() => null);
 
-const lookup = (params: string) =>
-  HttpClient.get<AppleMusicLookupResponse>(
-    `https://itunes.apple.com/lookup?${params}`
-  ).catch(() => {
+const storefrontOf = (link: string) =>
+  link.match(/music\.apple\.com\/([a-z]{2})/)?.[1] ?? 'us';
+
+const searchAppleMusic = (storefront: string, term: string) =>
+  HttpClient.get<string>(
+    `https://music.apple.com/${storefront}/search?term=${encodeURIComponent(term)}`
+  ).catch(() => null);
+
+const splitLabel = (label: string): [string, string, string] => {
+  const parts = label
+    .replace(/\s+/g, ' ')
+    .split('·')
+    .map(part => part.trim());
+  return [parts[0] ?? '', parts[1] ?? '', parts[2] ?? ''];
+};
+
+const lastSrcsetUrl = (srcset?: string) =>
+  srcset?.split(',').pop()?.trim().split(' ')[0] || undefined;
+
+const normalizeWords = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+const upscaleArtwork = (url?: string) => url?.replace('300x300', '600x600');
+
+// Same-host resolution chain (never touches the iTunes host): oEmbed for
+// exact album/playlist metadata, search-page scrape for songs (slug plus
+// album match) and artists (ID match). Only reached for bot-walled or
+// empty pages, which never happens with the impit backend.
+const getAppleMusicMetadataFromCatalog = async (id: string, link: string) => {
+  const fail = (): never => {
     throw new Error('AppleMusic metadata not found');
-  });
+  };
 
-const searchSongs = (term: string) =>
-  HttpClient.get<AppleMusicLookupResponse>(
-    `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=song&limit=5`
-  ).catch(() => {
-    throw new Error('AppleMusic metadata not found');
-  });
-
-const upscaleArtwork = (url?: string) => url?.replace('100x100', '600x600');
-
-// Fallback over the public iTunes APIs (no auth, not bot-walled).
-// Song IDs from links do not resolve via lookup, so songs resolve in two
-// steps: album lookup for artist/artwork, then a song search for the exact
-// track. Playlists do not resolve at all and keep the original error.
-// Only reached for bot-walled or empty pages, which never happens with
-// the impit backend.
-const getAppleMusicMetadataFromLookup = async (id: string, link: string) => {
   const songId = link.match(/[?&]i=(\d+)/)?.[1];
   const slug = link.match(/\/(?:album|artist|playlist)\/([^/]+)/)?.[1] ?? '';
   const pathId = link.match(/\/(?:album|artist|playlist)\/[^/]*\/([^/?]+)/)?.[1];
+  const storefront = storefrontOf(link);
 
   let type = AppleMusicMetadataType.Album;
   if (songId) {
@@ -73,40 +82,91 @@ const getAppleMusicMetadataFromLookup = async (id: string, link: string) => {
     type = AppleMusicMetadataType.Artist;
   }
 
-  const fail = () => {
-    throw new Error('AppleMusic metadata not found');
-  };
-
   if (type === AppleMusicMetadataType.Song) {
-    const album = (await lookup(`id=${pathId}`)).results?.[0];
-    const artist = album?.artistName ?? '';
-    const query = `${slug.replace(/-/g, ' ')} ${artist}`.trim();
-    const track = (await searchSongs(query)).results?.find(
-      result => result.trackName
-    );
-    if (!track?.trackName || !pathId) fail();
-    const metadata = {
-      title: track!.trackName!,
-      description: artist ? `${track!.trackName} ${artist}` : track!.trackName!,
-      type: APPLE_MUSIC_METADATA_TO_METADATA_TYPE[type],
-      image: upscaleArtwork(track!.artworkUrl100 ?? album?.artworkUrl100),
-      audio: track!.previewUrl,
-    } as SearchMetadata;
-    await cacheSearchMetadata(id, Parser.AppleMusic, metadata);
-    return metadata;
+    if (!pathId) fail();
+    const html = await searchAppleMusic(storefront, slug.replace(/-/g, ' '));
+    if (html) {
+      const doc = getCheerioDoc(html);
+      const wantTitle = normalizeWords(slug.replace(/-/g, ' '));
+      let pick: { title: string; artist: string; artwork?: string } | undefined;
+      doc('[data-testid="top-search-result"]').each((_, element) => {
+        const block = doc(element);
+        const [title, kind, artist] = splitLabel(block.attr('aria-label') ?? '');
+        if (kind !== 'Song' || !title) return;
+        const href = block.find('a[data-testid="click-action"]').attr('href') ?? '';
+        if (!href.includes('/album/') || !href.includes(`/${pathId}`)) return;
+        const normalizedTitle = normalizeWords(title);
+        if (normalizedTitle !== wantTitle && !normalizedTitle.startsWith(wantTitle)) {
+          return;
+        }
+        pick = {
+          title,
+          artist,
+          artwork: lastSrcsetUrl(block.find('picture source').attr('srcset')),
+        };
+        return false;
+      });
+      if (pick) {
+        const metadata = {
+          title: pick.title,
+          description: pick.artist ? `${pick.title} ${pick.artist}` : pick.title,
+          type: APPLE_MUSIC_METADATA_TO_METADATA_TYPE[type],
+          image: pick.artwork,
+          audio: undefined,
+        } as SearchMetadata;
+        await cacheSearchMetadata(id, Parser.AppleMusic, metadata);
+        return metadata;
+      }
+    }
+    fail();
   }
 
-  if (!pathId) fail();
-  const item = (await lookup(`id=${pathId}`)).results?.[0];
-  const title = item?.collectionName ?? item?.artistName ?? item?.trackName;
-  const artist = item?.artistName ?? '';
+  if (type === AppleMusicMetadataType.Artist) {
+    if (!pathId) fail();
+    const html = await searchAppleMusic(storefront, slug.replace(/-/g, ' '));
+    if (html) {
+      const doc = getCheerioDoc(html);
+      let pick: { title: string; artwork?: string } | undefined;
+      doc('[data-testid="top-search-result"]').each((_, element) => {
+        const block = doc(element);
+        const href =
+          block.find('a[data-testid="click-action"]').attr('href') ??
+          block.find(`a[href*="/artist/"][href*="${pathId}"]`).attr('href') ??
+          '';
+        if (!href.includes('/artist/') || !href.includes(`/${pathId}`)) return;
+        const [title] = splitLabel(block.attr('aria-label') ?? '');
+        if (!title) return;
+        pick = {
+          title,
+          artwork: lastSrcsetUrl(block.find('picture source').attr('srcset')),
+        };
+        return false;
+      });
+      if (pick) {
+        const metadata = {
+          title: pick.title,
+          description: pick.title,
+          type: APPLE_MUSIC_METADATA_TO_METADATA_TYPE[type],
+          image: pick.artwork,
+          audio: undefined,
+        } as SearchMetadata;
+        await cacheSearchMetadata(id, Parser.AppleMusic, metadata);
+        return metadata;
+      }
+    }
+    fail();
+  }
+
+  const embedded = await fetchOEmbed(link);
+  const title = embedded?.title;
+  const artist = embedded?.author_name ?? '';
   if (!title) fail();
   const metadata = {
     title,
-    description: artist ? `${title} ${artist}` : title!,
+    description: artist ? `${title} ${artist}` : title,
     type: APPLE_MUSIC_METADATA_TO_METADATA_TYPE[type],
-    image: upscaleArtwork(item?.artworkUrl100),
-    audio: item?.previewUrl,
+    image: upscaleArtwork(embedded?.thumbnail_url),
+    audio: undefined,
   } as SearchMetadata;
   await cacheSearchMetadata(id, Parser.AppleMusic, metadata);
   return metadata;
@@ -150,7 +210,7 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
     if (!image || !ogTitle || normalizedTitle === BOT_WALL_TITLE) {
       // NOTE: `return await` is load-bearing here. A bare `return` would let
       // the rejection skip the catch below (standard async semantics).
-      return await getAppleMusicMetadataFromLookup(id, actualLink);
+      return await getAppleMusicMetadataFromCatalog(id, actualLink);
     }
 
     let type = AppleMusicMetadataType.Album;
