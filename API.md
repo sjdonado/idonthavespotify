@@ -1,6 +1,6 @@
 # API Documentation
 
-Base URL: `http://idonthavespotify.sjdonado.com`
+Base URL: `https://idonthavespotify.sjdonado.com`
 
 ## Endpoints
 
@@ -56,7 +56,7 @@ On the public instance, search is gated behind a browser login: logging in mints
 
 **Example:**
 ```bash
-curl -X POST "http://idonthavespotify.sjdonado.com/api/search?v=1" \
+curl -X POST "https://idonthavespotify.sjdonado.com/api/search?v=1" \
   -H "Content-Type: application/json" \
   -d '{
     "link": "https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc",
@@ -140,7 +140,7 @@ authenticated callers see their remaining searches.
 
 **Example:**
 ```bash
-curl "http://idonthavespotify.sjdonado.com/api/status"
+curl "https://idonthavespotify.sjdonado.com/api/status"
 ```
 
 ## Supported Platforms
