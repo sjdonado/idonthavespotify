@@ -35,7 +35,7 @@ Convert a streaming service link to equivalent links on other platforms.
 ```json
 {
   "link": "https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh",
-  "adapters": ["spotify", "appleMusic", "youTube", "deezer", "soundCloud", "tidal"]
+  "adapters": ["spotify", "appleMusic", "youTube", "deezer", "soundCloud"]
 }
 ```
 
@@ -49,10 +49,11 @@ Convert a streaming service link to equivalent links on other platforms.
 - `youTube`: YouTube Music
 - `deezer`: Deezer
 - `soundCloud`: SoundCloud
-- `tidal`: Tidal
 - `qobuz`: Qobuz
 - `bandcamp`: Bandcamp
 - `pandora`: Pandora
+
+Tidal links are accepted as input but Tidal is not a search target (parse-only).
 
 **Supported URL Patterns:**
 
@@ -261,7 +262,7 @@ curl -X POST "https://idonthavespotify.sjdonado.com/api/search?v=1" \
   -H "Content-Type: application/json" \
   -d '{
     "link": "https://music.apple.com/us/album/bohemian-rhapsody/1440650428?i=1440650450",
-    "adapters": ["spotify", "youTube", "tidal"]
+    "adapters": ["spotify", "youTube", "deezer"]
   }'
 ```
 

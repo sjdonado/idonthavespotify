@@ -6,13 +6,6 @@ const buildEnv = () => ({
       apiUrl: readEnv('SPOTIFY_API_URL')!,
       baseUrl: readEnv('SPOTIFY_BASE_URL')!,
     },
-    tidal: {
-      baseUrl: readEnv('TIDAL_BASE_URL')!,
-      apiUrl: readEnv('TIDAL_API_URL')!,
-      authUrl: readEnv('TIDAL_AUTH_URL')!,
-      clientId: readEnv('TIDAL_CLIENT_ID')!,
-      clientSecret: readEnv('TIDAL_CLIENT_SECRET')!,
-    },
     youTube: {
       apiUrl: readEnv('YOUTUBE_API_URL')!,
       apiKey: readEnv('YOUTUBE_API_KEY')!,

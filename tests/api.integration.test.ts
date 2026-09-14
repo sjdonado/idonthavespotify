@@ -21,7 +21,6 @@ import {
   getAppleMusicSearchLink,
   getDeezerSearchLink,
   getSoundCloudSearchLink,
-  getTidalSearchLink,
   getYouTubeSearchLink,
 } from './utils/shared';
 
@@ -49,8 +48,6 @@ describe('Api router', () => {
   beforeEach(() => {
     cacheStore.reset();
     httpMock.reset();
-
-    httpMock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
   });
 
   afterEach(() => {
@@ -63,7 +60,6 @@ describe('Api router', () => {
     it('should return 200', async () => {
       const query = 'Like a Rolling Stone Bob Dylan';
 
-      httpMock.onGet(getTidalSearchLink(query, MetadataType.Song)).reply(404);
       httpMock.onGet(getYouTubeSearchLink(query, MetadataType.Song)).reply(404);
       httpMock
         .onGet(getAppleMusicSearchLink(query))
@@ -129,7 +125,6 @@ describe('Api router', () => {
       const link = 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc';
       const query = 'Like a Rolling Stone Bob Dylan';
 
-      httpMock.onGet(getTidalSearchLink(query, MetadataType.Song)).reply(500);
       httpMock.onGet(getAppleMusicSearchLink(query)).reply(500);
       httpMock.onGet(getYouTubeSearchLink(query, MetadataType.Song)).reply(500);
       httpMock.onGet(getDeezerSearchLink(query, 'track')).reply(500);
@@ -138,8 +133,6 @@ describe('Api router', () => {
       httpMock
         .onGet('https://open.spotify.com/embed/track/3AhXZa8sUQht0UEdBJgpGc')
         .reply(200, headSnapshots.spotifyTrackRollingStone);
-
-      httpMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',

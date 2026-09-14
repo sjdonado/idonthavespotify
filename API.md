@@ -21,7 +21,7 @@ Convert music links across streaming platforms.
 
 - `link`: Valid music link from any supported platform
 - `adapters`: Target platforms (default: all platforms)
-  - Available: `spotify`, `youTube`, `appleMusic`, `deezer`, `soundCloud`, `tidal`
+  - Available: `spotify`, `youTube`, `appleMusic`, `deezer`, `soundCloud` (Tidal links are accepted as input but Tidal is not a search target)
 
 **Response (200):**
 ```json
@@ -155,7 +155,7 @@ curl "https://idonthavespotify.sjdonado.com/api/status"
 - Google Music Share: `https://www.google.com/gasearch*`, `https://share.google/*`
 
 **Output (searchable):**
-- Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal
+- Spotify, YouTube, Apple Music, Deezer, SoundCloud
 
 ## Error Responses
 

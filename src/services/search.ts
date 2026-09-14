@@ -5,7 +5,6 @@ import { getPandoraLink } from '~/adapters/pandora';
 import { getQobuzLink } from '~/adapters/qobuz';
 import { getSoundCloudLink } from '~/adapters/sound-cloud';
 import { getSpotifyLink } from '~/adapters/spotify';
-import { getTidalLink } from '~/adapters/tidal';
 import { getYouTubeLink } from '~/adapters/youtube';
 import { Adapter, MetadataType, Parser, type StreamingServiceType } from '~/config/enum';
 import { ENV } from '~/config/env';
@@ -44,6 +43,14 @@ export type SearchResultLink = {
   isVerified?: boolean;
   notAvailable?: boolean;
 };
+
+// Partial: parse-only services (Google, Tidal) have no outbound search.
+export type LinkGetter = (
+  query: string,
+  metadata: SearchMetadata,
+  sourceParser: Parser,
+  sourceId: string
+) => Promise<SearchResultLink | null>;
 
 export type SearchResult = {
   id: string;
@@ -89,7 +96,6 @@ export const search = async <T extends SearchProps>({
     Adapter.AppleMusic,
     Adapter.Deezer,
     Adapter.SoundCloud,
-    Adapter.Tidal,
     Adapter.Qobuz,
     Adapter.Bandcamp,
     Adapter.Pandora,
@@ -123,13 +129,12 @@ export const search = async <T extends SearchProps>({
     [Parser.Pandora]: getPandoraQueryFromMetadata,
   };
 
-  const linkGettersMap = {
+  const linkGettersMap: Partial<Record<Adapter, LinkGetter>> = {
     [Adapter.Spotify]: getSpotifyLink,
     [Adapter.YouTube]: getYouTubeLink,
     [Adapter.AppleMusic]: getAppleMusicLink,
     [Adapter.Deezer]: getDeezerLink,
     [Adapter.SoundCloud]: getSoundCloudLink,
-    [Adapter.Tidal]: getTidalLink,
     [Adapter.Qobuz]: getQobuzLink,
     [Adapter.Bandcamp]: getBandcampLink,
     [Adapter.Pandora]: getPandoraLink,
