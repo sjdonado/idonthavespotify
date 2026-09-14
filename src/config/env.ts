@@ -43,9 +43,8 @@ const buildEnv = () => ({
   },
   services: {},
   abuse: {
-    gateEnabled:
-      readEnv('GATE_ENABLED') === '1' ||
-      readEnv('GATE_ENABLED')?.toLowerCase() === 'true',
+    // No separate flag: the gate arms exactly when a Plunk key exists.
+    gateEnabled: (readEnv('PLUNK_API_KEY') ?? '').trim().length > 0,
     sessionSecret: readEnv('SESSION_SECRET'),
     plunkApiKey: readEnv('PLUNK_API_KEY'),
     plunkFromEmail: readEnv('PLUNK_FROM_EMAIL'),

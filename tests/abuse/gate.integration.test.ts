@@ -7,17 +7,17 @@ import { resetLocalQuota } from '~/abuse/quota';
 import { ENV } from '~/config/env';
 import { cacheStore } from '~/services/cache';
 
-// Gate on for this file only (bun test --isolate keeps it per-file).
-process.env['GATE_ENABLED'] = '1';
-process.env['SESSION_SECRET'] ??= 'test-gate-secret';
-process.env['PLUNK_API_KEY'] ??= 'test-plunk-key';
+// Gate on for this file only (bun test --isolate keeps it per-file): the
+// gate arms on a non-blank Plunk key, no separate flag exists.
+process.env['SESSION_SECRET'] ||= 'test-gate-secret';
+process.env['PLUNK_API_KEY'] ||= 'test-plunk-key';
 
 import { loadHeadSnapshots } from '../mocks/snapshots';
 import { HttpMock } from '../utils/http-mock';
 import { createTestApp, formDataFromObject, nodeFetch } from '../utils/request';
 
 // NOTE: no ../utils/shared import here — it reads ENV at module-eval time,
-// which would freeze config before the GATE_ENABLED assignment below runs.
+// which would freeze config before the per-file env assignment above runs.
 const apiSearchEndpoint = (baseUrl: URL) => `${baseUrl}api/search?v=1`;
 
 const headSnapshots = loadHeadSnapshots();

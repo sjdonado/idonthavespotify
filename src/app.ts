@@ -26,7 +26,7 @@ import Home from './views/pages/home';
 // Dynamic routes shared by every runtime (Bun.serve, edge fetch handler).
 // Static assets are NOT here: each runtime serves them its own way.
 // Abuse protection: the demo gate (email OTP + per-email quota) wraps the
-// search handlers below when GATE_ENABLED is set; the WAF rule and service
+// search handlers below when a Plunk key arms it; the WAF rule and service
 // guards stay the outer layers. /api/status and assets stay open.
 export const createRoutes = () => ({
   '/': {

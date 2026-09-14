@@ -6,8 +6,9 @@ import { ENV } from '~/config/env';
 
 import { HttpMock } from '../utils/http-mock';
 
-// Exercise the Plunk path even where the local .env lacks the new keys.
-process.env['PLUNK_API_KEY'] ??= 'test-plunk-key';
+// Exercise the Plunk path even where the local .env lacks the new keys
+// (||= because .env.test declares PLUNK_API_KEY blank, which ??= keeps).
+process.env['PLUNK_API_KEY'] ||= 'test-plunk-key';
 
 describe('Email policy', () => {
   it('accepts allowlisted providers', () => {

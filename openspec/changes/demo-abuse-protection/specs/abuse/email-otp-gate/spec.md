@@ -6,7 +6,7 @@ Gates demo usage behind a lightweight email identity so one actor cannot burn sh
 
 ### Requirement: Search requires a verified email session unless disabled
 
-Search endpoints (web and API) SHALL reject unauthenticated callers with 401 when the gate is enabled; setting the documented env flag SHALL disable the gate entirely (self-host default).
+Search endpoints (web and API) SHALL reject unauthenticated callers with 401 when the gate is enabled; a blank or unset Plunk key SHALL disable the gate entirely (self-host default, no separate flag).
 
 #### Scenario: Unauthenticated search is rejected
 
@@ -15,7 +15,7 @@ Search endpoints (web and API) SHALL reject unauthenticated callers with 401 whe
 
 #### Scenario: Kill-switch restores open access
 
-- **WHEN** the env flag disables the gate
+- **WHEN** no Plunk key is configured
 - **THEN** all search behavior is byte-identical to the pre-gate app
 
 ### Requirement: Inline OTP flow with no signup page
