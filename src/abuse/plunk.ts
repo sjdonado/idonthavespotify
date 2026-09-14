@@ -81,31 +81,28 @@ export function resetResendThrottle() {
   lastSentAt.clear();
 }
 
-// One-shot code delivery: template variables use non-persistent data so the
-// code is never stored on the Plunk contact.
+// One-shot code delivery through the dashboard template (sender, subject,
+// and body live there): the code travels as non-persistent data so it is
+// never stored on the Plunk contact.
 export async function sendOtpEmail(normalizedEmail: string, code: string): Promise<void> {
   const apiKey = ENV.abuse.plunkApiKey;
   if (!apiKey) throw new Error('Email gate is misconfigured (missing Plunk key).');
+  const template = ENV.abuse.plunkTemplateId;
+  if (!template) throw new Error('Email gate is misconfigured (missing template).');
 
-  const shared = {
-    to: normalizedEmail,
-    data: { code: { value: code, persistent: false } },
-  };
-
-  const payload = ENV.abuse.plunkTemplateId
-    ? { ...shared, template: ENV.abuse.plunkTemplateId }
-    : {
-        ...shared,
-        subject: 'Your IDHS demo code',
-        body: `<p>Your verification code is <strong>${code}</strong>. It expires in about 10 minutes.</p>`,
-        ...(ENV.abuse.plunkFromEmail ? { from: ENV.abuse.plunkFromEmail } : {}),
-      };
-
-  await HttpClient.post(`${ENV.abuse.plunkApiUrl}/v1/send`, payload, {
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
+  await HttpClient.post(
+    `${ENV.abuse.plunkApiUrl}/v1/send`,
+    {
+      to: normalizedEmail,
+      template,
+      data: { code: { value: code, persistent: false } },
     },
-    retries: 0,
-  });
+    {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      retries: 0,
+    }
+  );
 }

@@ -11,6 +11,7 @@ import { cacheStore } from '~/services/cache';
 // gate arms on a non-blank Plunk key, no separate flag exists.
 process.env['SESSION_SECRET'] ||= 'test-gate-secret';
 process.env['PLUNK_API_KEY'] ||= 'test-plunk-key';
+process.env['PLUNK_TEMPLATE_ID'] ||= 'test-template-id';
 
 import { loadHeadSnapshots } from '../mocks/snapshots';
 import { HttpMock } from '../utils/http-mock';

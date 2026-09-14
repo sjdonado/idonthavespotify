@@ -69,9 +69,9 @@ export async function requestCodeHandler(req: Request): Promise<Response> {
       : new Response(policy.error, { status: 400 });
   }
 
-  // Fail closed when the signing secret is missing: codes must verify.
+  // Fail closed when misconfigured: codes must verify and need a template.
   const secret = ENV.abuse.sessionSecret;
-  if (!secret) {
+  if (!secret || !ENV.abuse.plunkTemplateId) {
     return json
       ? Response.json({ error: 'Demo gate is misconfigured, try again later.' }, { status: 503 })
       : new Response('Demo gate is misconfigured, try again later.', { status: 503 });
