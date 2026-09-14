@@ -1,6 +1,6 @@
 # API Documentation
 
-Base URL: `http://idonthavespotify.sjdonado.com`
+Base URL: `https://idonthavespotify.sjdonado.com`
 
 ## Endpoints
 
@@ -47,16 +47,16 @@ Convert music links across streaming platforms.
 
 **Errors:**
 - `400`: Invalid link or missing parameters
-- `401`: Email verification required (public demo only; response carries `auth: "email-otp"`)
+- `401`: Email verification required (public instance only; response carries `auth: "email-otp"`)
 - `429`: Per-email quota reached (response carries `retryAfter` seconds)
 - `500`: Processing failed
 - `503`: Quota check or gate temporarily unavailable
 
-On the public demo, search is gated behind a browser login: logging in mints a session cookie, and that cookie is the only credential `/api/search` accepts. There are no API tokens, so programmatic clients such as the Raycast extension target self-hosted instances, where the gate is off and search stays open.
+On the public instance, search is gated behind a browser login: logging in mints a session cookie, and that cookie is the only credential `/api/search` accepts. There are no API tokens, so programmatic clients such as the Raycast extension target self-hosted instances, where the gate is off and search stays open.
 
 **Example:**
 ```bash
-curl -X POST "http://idonthavespotify.sjdonado.com/api/search?v=1" \
+curl -X POST "https://idonthavespotify.sjdonado.com/api/search?v=1" \
   -H "Content-Type: application/json" \
   -d '{
     "link": "https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc",
@@ -66,7 +66,7 @@ curl -X POST "http://idonthavespotify.sjdonado.com/api/search?v=1" \
 
 ### POST `/api/auth/request-code`
 
-Send a 6-digit code to an email address (public demo only).
+Send a 6-digit code to an email address (public instance only).
 
 **Request Body:**
 ```json
@@ -87,7 +87,7 @@ Send a 6-digit code to an email address (public demo only).
 
 ### POST `/api/auth/verify-code`
 
-Exchange an email plus code for a session. Post a form for a session cookie plus page refresh (web UI); with `Accept: application/json` the same call sets the cookie and answers `{ "ok": true }`. No tokens are issued.
+Exchange an email plus code for a session. Post a form for a session cookie plus page refresh (web UI); with `Accept: application/json` the same call sets the cookie and answers `{ "ok": true }`. No tokens are issued. Form posts from the web UI receive HTML fragments with the same statuses instead of JSON, so errors render inline where the action happened.
 
 **Request Body:**
 ```json
@@ -109,7 +109,7 @@ plus a `Set-Cookie: idhs_session=...` header (30-day TTL).
 ### GET `/api/status`
 
 Service quota and health overview (service-guard budgets plus timestamp).
-When the demo gate is on, the response also names the quota policy, and
+When the public instance gate is on, the response also names the quota policy, and
 authenticated callers see their remaining searches.
 
 **Response (200):**
@@ -140,7 +140,7 @@ authenticated callers see their remaining searches.
 
 **Example:**
 ```bash
-curl "http://idonthavespotify.sjdonado.com/api/status"
+curl "https://idonthavespotify.sjdonado.com/api/status"
 ```
 
 ## Supported Platforms

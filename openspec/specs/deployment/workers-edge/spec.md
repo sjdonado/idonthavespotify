@@ -40,9 +40,9 @@ Known edge differences SHALL be documented in the change: fetch-based HTTP inste
 - **WHEN** an operator reads the Workers deploy docs
 - **THEN** each delta above is listed with its user-visible consequence and the abuse controls required for the public instance (a Cloudflare rate limiting rule in front; service-guard circuits stay the final fuse for upstream quotas)
 
-### Requirement: Public demo sits behind the edge rate limiting rule
+### Requirement: Public instance sits behind the edge rate limiting rule
 
-The public demo deployment SHALL be guarded by exactly one Cloudflare rate limiting rule (the free-plan allowance) matching `(http.request.uri.path in {"/" "/search" "/api/search"})`, counted by IP with an abuse-level threshold (4 requests per 10 seconds, Block for 10 seconds — the free-plan-pinned values, verified live; the API rejects any other period or mitigation timeout and requires `cf.colo.id` in characteristics; 4 admits a legit page-load-plus-search burst while capping a paced abuser at ~24/min). Self-hosted instances SHALL NOT require any Cloudflare rule, but MUST be exposed publicly only behind Cloudflare (with the rule above) or a rate-limiting reverse proxy, since the app itself ships no per-IP limiter.
+The public instance deployment SHALL be guarded by exactly one Cloudflare rate limiting rule (the free-plan allowance) matching `(http.request.uri.path in {"/" "/search" "/api/search" "/api/auth/request-code" "/api/auth/verify-code"})`, counted by IP with an abuse-level threshold (4 requests per 10 seconds, Block for 10 seconds — the free-plan-pinned values, verified live; the API rejects any other period or mitigation timeout and requires `cf.colo.id` in characteristics; 4 admits a legit page-load-plus-search burst while capping a paced abuser at ~24/min). Self-hosted instances SHALL NOT require any Cloudflare rule, but MUST be exposed publicly only behind Cloudflare (with the rule above) or a rate-limiting reverse proxy, since the app itself ships no per-IP limiter.
 
 #### Scenario: Flood blocked before the Worker runs
 

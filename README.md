@@ -40,7 +40,7 @@ The web app is the main interface, a single page with a search bar, instant resu
 
 Source code: https://github.com/raycast/extensions/tree/main/extensions/idonthavespotify
 
-The extension talks to a self-hosted instance, where search stays open. It does not work against the public demo, which needs a browser login (see below) and issues no API tokens.
+The extension talks to a self-hosted instance, where search stays open. It does not work against the public instance, which needs a browser login (see below) and issues no API tokens.
 
 ## Running it locally
 
@@ -65,19 +65,19 @@ bun run build:prod
 ./dist/idonthavespotify # serves everything, no sidecars, no `public/` copy needed
 ```
 
-`PORT` and `NODE_ENV` configure the binary, and it reads `.env` from the working directory. Self-hosted instances leave the demo gate off by default, so search stays open exactly like it always was; the one thing the app deliberately does not ship is a per-IP rate limiter, so only expose your instance publicly behind Cloudflare (with a rate limiting rule like the demo's, described in AGENTS.md) or a rate-limiting reverse proxy.
+`PORT` and `NODE_ENV` configure the binary, and it reads `.env` from the working directory. Self-hosted instances leave the public instance gate off by default, so search stays open exactly like it always was; the one thing the app deliberately does not ship is a per-IP rate limiter, so only expose your instance publicly behind Cloudflare (with a rate limiting rule like the public instance's, described in AGENTS.md) or a rate-limiting reverse proxy.
 
-## The public demo and its abuse protection
+## The public instance and its abuse protection
 
-The public demo runs on Cloudflare Workers, and because it sits on shared upstream quotas, it asks who you are before it searches. There are no accounts, no passwords, and no signup page, just an email address that proves you can receive mail.
+The public instance runs on Cloudflare Workers, and because it sits on shared upstream quotas, it asks who you are before it searches. There are no accounts, no passwords, and no signup page, just an email address that proves you can receive mail.
 
-On the web the flow happens inline, right where the search bar lives. You type your email, receive a six-digit code, type the code, and a session cookie is minted that unlocks search immediately, in the browser and for its API calls alike. The cookie lasts 30 days and is the only credential the demo accepts: there are no API tokens, so anything programmatic, including the Raycast extension, runs against a self-hosted instance instead. Only popular mailbox providers are accepted, addresses with `+` aliases are rejected before anything is sent, and Plunk's verifier double-checks disposables, mail records, and typos. Gmail-style dot variations are normalized first, so `first.last` and `firstlast` count as the same address.
+On the web the flow happens inline, right where the search bar lives. You type your email, receive a six-digit code, type the code, and a session cookie is minted that unlocks search immediately, in the browser and for its API calls alike. The cookie lasts 30 days and is the only credential the public instance accepts: there are no API tokens, so anything programmatic, including the Raycast extension, runs against a self-hosted instance instead. Only popular mailbox providers are accepted, addresses with `+` aliases are rejected before anything is sent, and Plunk's verifier double-checks disposables, mail records, and typos. Gmail-style dot variations are normalized first, so `first.last` and `firstlast` count as the same address.
 
 Every verified address gets 6 searches per rolling 4 minutes. Past that the API answers 429 with a retry hint and a 2-minute cooldown, without touching any upstream service. Unauthenticated search answers 401 with an `auth: "email-otp"` hint, also without touching upstream. The counters live in a Durable Object keyed by email hash, deliberate because an identity key makes each counter small and meaningful, and quota checks fail closed: if the counter store is unreachable, searches wait rather than running unlimited. The Cloudflare WAF rule and the per-service circuit breakers stay on as the outer layers, unchanged.
 
 Your address is used for abuse decisions only. It is never used for marketing, and the code is delivered with non-persistent template data so it is never stored on your contact record. If the gate ever misbehaves, blanking the Plunk key restores fully open access without a redeploy, since the gate only arms when a key is set.
 
-### Operating the demo
+### Operating the public instance
 
 Deployments happen automatically: every push to `master` typechecks, lints, builds the edge bundle, audits it for native imports, deploys it with Wrangler, and then smokes `/`, `/api/status`, and an unauthenticated search that must answer 401 with the email-otp hint, proving the gate is armed. A failed check blocks the deploy. The GitHub secrets that make this work are `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, with an optional `DEMO_URL` overriding the default smoke target.
 
