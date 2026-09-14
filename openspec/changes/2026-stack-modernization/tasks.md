@@ -45,10 +45,11 @@ Deviation recorded: no Cloudflare credentials in this environment, so 7.2 was su
 
 ## 8. Tests, verification, and docs
 
-- [ ] 8.1 Add pinning tests: static assets and traversal, rate limit headers, layout script and asset tags
+- [x] 8.1 Add pinning tests: static assets and traversal, service-guard status, layout script and asset tags
 - [x] 8.2 Measure serial versus `--isolate` versus `--parallel`; lock in the fastest green flags in CI
 - [x] 8.3 Run the Chrome DevTools MCP manual protocol on dev server and binary (snapshot, screenshots desktop and mobile, network 200s, invalid-link toast and 400 shape, zero console errors) and attach evidence to the PR
 - [x] 8.4 Update README, API wording for unshortened links, and Workers deploy docs; record decisions with flip conditions
 - [x] 8.5 Document the demo-only Cloudflare rate limiting rule (expression, threshold, action, self-host skip) in README and the edge spec
+- [x] 8.6 Remove the in-app per-IP limiter entirely (config, middleware, error component, wrappers, headers, status fields); keep service guards; rewrite API/llms/README rate docs; self-host warning instead of limits
 
 Deviation recorded: all three test modes run in ~0.25s (suite too small to differentiate); locked `--isolate` for per-file hygiene at zero cost.

@@ -13,13 +13,12 @@ Local Development: http://localhost:3000
 
 ## Authentication
 
-No authentication required. The API uses rate limiting instead.
+No authentication required.
 
-## Rate Limits
+## Abuse Protection
 
-- API endpoints: Limited per IP address
-- Web endpoints: Separate rate limiting for web interface
-- Check current rate limit status: GET /api/status
+- No per-IP rate limiting in the app; abuse protection lives at the edge
+- Upstream service quotas are shared: prefer specific adapters to reduce load
 
 ## API Endpoints
 
@@ -126,27 +125,19 @@ Convert a streaming service link to equivalent links on other platforms.
 
 ### GET /api/status
 
-Check API rate limit status and system health.
+Check service quota usage and system health.
 
 **Response:**
 ```json
 {
-  "ip": "127.0.0.1",
-  "rateLimits": {
-    "web": {
-      "allowed": 100,
-      "remaining": 95,
-      "resetIn": 3600
-    },
-    "api": {
-      "allowed": 50,
-      "remaining": 48,
-      "resetIn": 3600
+  "serviceGuards": {
+    "<service>": {
+      "callsUsed": 0,
+      "callsMax": 300,
+      "windowResetsIn": 3600,
+      "circuitOpen": false,
+      "failures": 0
     }
-  },
-  "storeSize": {
-    "web": 5,
-    "api": 2
   },
   "timestamp": "2024-01-01T00:00:00.000Z"
 }
@@ -165,13 +156,6 @@ Check API rate limit status and system health.
 ```json
 {
   "error": "Unsupported API version"
-}
-```
-
-**429 Too Many Requests:**
-```json
-{
-  "error": "Rate limit exceeded. Please try again later."
 }
 ```
 
@@ -217,7 +201,7 @@ curl -X POST "https://idonthavespotify.donado.co/api/search?v=1" \
   }'
 ```
 
-### Check rate limit status:
+### Check service status:
 
 ```bash
 curl "https://idonthavespotify.donado.co/api/status"
@@ -226,7 +210,7 @@ curl "https://idonthavespotify.donado.co/api/status"
 ## Integration Tips for AI Agents
 
 1. **Always include the API version**: The `v=1` query parameter is required
-2. **Handle rate limits gracefully**: Check the 429 status code and respect retry timing
+2. **Respect shared upstream quotas**: use specific adapters when possible; if links come back unverified or missing, retry later
 3. **Validate URLs first**: Ensure the input URL matches one of the supported patterns
 4. **Remember playlist limitation**: Don't attempt to convert playlist URLs
 5. **Use specific adapters when possible**: Include only the platforms you need to reduce response size

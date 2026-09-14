@@ -66,11 +66,13 @@ describe('Static routes and shell', () => {
     expect(html).not.toContain('umami');
   });
 
-  it('exposes rate limit headers on JSON responses', async () => {
+  it('reports service-guard budgets from /api/status', async () => {
     const response = await nodeFetch(`${app.url}api/status`);
+    const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(response.headers.get('x-ratelimit-limit')).not.toBeNull();
-    expect(response.headers.get('x-ratelimit-remaining')).not.toBeNull();
+    expect(data.serviceGuards).toBeDefined();
+    expect(data.timestamp).toBeDefined();
+    expect(data.rateLimits).toBeUndefined();
   });
 });

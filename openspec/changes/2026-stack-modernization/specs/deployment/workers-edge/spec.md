@@ -33,18 +33,18 @@ The edge target SHALL read configuration from Worker bindings and secrets, never
 
 ### Requirement: Edge deltas are documented
 
-Known edge differences SHALL be documented in the change: fetch-based HTTP instead of TLS impersonation (results on guarded sources may differ), per-isolate in-memory cache and rate limiter state, no URL shortener, and platform CPU and memory limits.
+Known edge differences SHALL be documented in the change: fetch-based HTTP instead of TLS impersonation (results on guarded sources may differ), per-isolate in-memory cache (service-guard budgets stay the shared quota protection), no URL shortener, no per-IP limiting in the app, and platform CPU and memory limits.
 
 #### Scenario: Deltas visible to the operator
 
 - **WHEN** an operator reads the Workers deploy docs
-- **THEN** each delta above is listed with its user-visible consequence and the abuse controls required for the public instance (a Cloudflare rate limiting rule in front, in-app limits as backstop)
+- **THEN** each delta above is listed with its user-visible consequence and the abuse controls required for the public instance (a Cloudflare rate limiting rule in front; service-guard circuits stay the final fuse for upstream quotas)
 
 ### Requirement: Public demo sits behind the edge rate limiting rule
 
-The public demo deployment SHALL be guarded by exactly one Cloudflare rate limiting rule (the free-plan allowance) matching `(http.request.uri.path in {"/" "/search" "/api/search"})`, counted by IP over 1 minute with an abuse-level threshold (60 requests) and Block action. Self-hosted instances SHALL NOT require any Cloudflare rule; the in-app limiter is sufficient there.
+The public demo deployment SHALL be guarded by exactly one Cloudflare rate limiting rule (the free-plan allowance) matching `(http.request.uri.path in {"/" "/search" "/api/search"})`, counted by IP over 1 minute with an abuse-level threshold (60 requests) and Block action. Self-hosted instances SHALL NOT require any Cloudflare rule, but MUST be exposed publicly only behind Cloudflare (with the rule above) or a rate-limiting reverse proxy, since the app itself ships no per-IP limiter.
 
 #### Scenario: Flood blocked before the Worker runs
 
 - **WHEN** one IP exceeds the threshold within a minute
-- **THEN** further matching requests are blocked at the edge without consuming worker quota, subrequests, or isolate state, while the in-app limits keep serving friendly errors to everyone else
+- **THEN** further matching requests are blocked at the edge without consuming worker quota, subrequests, or isolate state
