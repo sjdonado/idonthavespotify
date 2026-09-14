@@ -47,4 +47,8 @@ jobs:
           BASE="${DEMO_URL:-https://idonthavespotify.donado.co}"
           curl -sf "$BASE/" > /dev/null
           curl -sf "$BASE/api/status" > /dev/null
-          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST --data-urlencode 'link=https://open.spotify.com/invalid' "$BASE/search")" = "400"
+          # The demo is gated: an unauthenticated search is 401 with the
+          # email-otp hint, which doubles as proof the gate is armed.
+          BODY="$(curl -s -w '\n%{http_code}' -X POST --data-urlencode 'link=https://open.spotify.com/invalid' "$BASE/search")"
+          test "$(printf '%s' "$BODY" | tail -n 1)" = "401"
+          printf '%s' "$BODY" | grep -q 'email-otp'
