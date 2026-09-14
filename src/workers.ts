@@ -1,3 +1,4 @@
+import { QuotaDO } from './abuse/quota-do';
 import { createRoutes } from './app';
 import { setEdgeEnv } from './config/edge-env';
 
@@ -13,6 +14,15 @@ const matchRoute = (pathname: string, method: string): RouteHandler | undefined 
   const handler = (route as Record<string, RouteHandler>)[method];
   return typeof handler === 'function' ? handler : undefined;
 };
+
+export { QuotaDO };
+
+export interface QuotaBindings {
+  QUOTA_DO?: {
+    idFromName(name: string): unknown;
+    get(id: unknown): { fetch(input: Request): Promise<Response> };
+  };
+}
 
 export default {
   async fetch(req: Request, env: Record<string, unknown>): Promise<Response> {

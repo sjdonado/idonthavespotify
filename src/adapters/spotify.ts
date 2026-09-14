@@ -1,5 +1,3 @@
-import { createHmac } from 'node:crypto';
-
 import { Adapter, MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 import {
@@ -167,7 +165,7 @@ export async function getSpotifyLink(
     const httpErr = error instanceof HttpClientError ? error : null;
     if (httpErr) {
       logger.error(
-        `[Spotify] HTTP ${httpErr.status} on ${httpErr.url}${httpErr.retryAfter ? ` (retry-after: ${httpErr.retryAfter}s)` : ''}`
+        `[Spotify] HTTP ${httpErr.status} on ${httpErr.url}${httpErr.retryAfter ? ` (retry-after: ${httpErr.retryAfter}s)` : ''}${httpErr.body ? ` body: ${httpErr.body}` : ''}`
       );
     } else {
       logger.error(`[Spotify] ${error}`);
@@ -270,7 +268,7 @@ export async function getOrUpdateSpotifyAccessToken() {
       }
 
       logger.info(`[Spotify] TOTP secret version: ${latestVersion}`);
-      const totp = generateTotp(serverTime, latestSecret);
+      const totp = await generateTotp(serverTime, latestSecret);
 
       const tokenUrl = new URL(`${ENV.adapters.spotify.baseUrl}/api/token`);
       tokenUrl.searchParams.set('reason', 'init');
@@ -306,20 +304,29 @@ export async function getOrUpdateSpotifyAccessToken() {
   );
 }
 
-function generateTotp(serverTime: number, secret: string): string {
+// TOTP via WebCrypto (universal across Bun/Node/Workers): the old
+// node:crypto shim breaks under the edge browser-target build.
+export async function generateTotp(serverTime: number, secret: string): Promise<string> {
   const secretArray = Array.from(secret, c => c.charCodeAt(0));
   const transformed = secretArray.map((element, index) => element ^ ((index % 33) + 9));
 
-  const hexSecret = Buffer.from(transformed.join(''), 'utf8').toString('hex');
-  const secretBytes = Buffer.from(hexSecret, 'hex');
+  // Historical quirk, kept byte-identical: the decimal-concatenated string
+  // round-tripped through utf8->hex->bytes, which is just its utf8 bytes.
+  const secretBytes = new TextEncoder().encode(transformed.join(''));
 
   const counter = Math.floor(serverTime / 30);
-  const counterBuffer = Buffer.alloc(8);
-  counterBuffer.writeBigUInt64BE(BigInt(counter));
+  const counterBytes = new ArrayBuffer(8);
+  new DataView(counterBytes).setBigUint64(0, BigInt(counter));
 
-  const hmac = createHmac('sha1', secretBytes);
-  hmac.update(counterBuffer);
-  const hmacResult = hmac.digest();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    secretBytes,
+    { name: 'HMAC', hash: 'SHA-1' },
+    false,
+    ['sign']
+  );
+  const signature = await crypto.subtle.sign('HMAC', key, counterBytes);
+  const hmacResult = new Uint8Array(signature);
 
   const offset = hmacResult[hmacResult.length - 1] & 0xf;
   const code =

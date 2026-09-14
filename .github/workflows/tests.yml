@@ -42,10 +42,13 @@ jobs:
         run: bun run build && bun run build:prod && bun run build:workers
       - name: Audit edge bundle for native imports
         run: |
-          ! grep -qE "from ['\"]bun['\"]" dist/workers.js
-          ! grep -qE "require\(['\"]bun['\"]\)" dist/workers.js
-          ! grep -qi impit dist/workers.js
-          ! grep -qi pino dist/workers.js
+          test -f dist/workers.js || { echo "missing edge bundle"; exit 1; }
+          for pattern in "from ['\"]bun['\"]" "require\(['\"]bun['\"]\)" "impit" "pino" "node:crypto"; do
+            if grep -qiE "$pattern" dist/workers.js; then
+              echo "forbidden pattern in edge bundle: $pattern"
+              exit 1
+            fi
+          done
       - name: Boot binary and smoke test
         run: |
           PORT=3100 NODE_ENV=test ./dist/idonthavespotify &

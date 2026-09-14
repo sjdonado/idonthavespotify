@@ -1,9 +1,20 @@
 import { h, Helmet, renderSSR } from 'nano-jsx';
 
+import {
+  checkSearchQuota,
+  consumeQuota,
+  getVerifiedEmail,
+  isGateEnabled,
+  peekQuotaFor,
+  requireGateIdentity,
+} from './abuse/gate';
+import { QUOTA_COOLDOWN_SEC, QUOTA_LIMIT, QUOTA_WINDOW_SEC } from './abuse/quota';
+import { requestCodeHandler, verifyCodeHandler } from './abuse/routes';
 import { Adapter } from './config/enum';
+import { ENV } from './config/env';
 import { apiRouteSchema } from './schemas/api.schema';
 import { indexRouteSchema, searchRouteSchema } from './schemas/web.schema';
-import { search } from './services/search';
+import { search, type SearchResult } from './services/search';
 import { logger } from './utils/logger';
 import { getAllServiceGuardStatuses } from './utils/service-guard';
 import { ValidationError, validationError } from './utils/zod';
@@ -14,8 +25,9 @@ import Home from './views/pages/home';
 
 // Dynamic routes shared by every runtime (Bun.serve, edge fetch handler).
 // Static assets are NOT here: each runtime serves them its own way.
-// No per-IP rate limiting here: abuse protection lives at the edge
-// (Cloudflare rule on the public demo) and in the service guards below.
+// Abuse protection: the demo gate (email OTP + per-email quota) wraps the
+// search handlers below when a Plunk key arms it; the WAF rule and service
+// guards stay the outer layers. /api/status and assets stay open.
 export const createRoutes = () => ({
   '/': {
     GET: async function (req: Request) {
@@ -30,29 +42,32 @@ export const createRoutes = () => ({
         if (!result.success) throw validationError(result.error);
         const { id } = result.data.query;
 
-        const searchResult = id
-          ? await search({ searchId: id, headless: false })
-          : null;
+        const gateEnabled = isGateEnabled();
+        const email = gateEnabled ? await getVerifiedEmail(req) : null;
+        const gate = gateEnabled
+          ? { enabled: true, authenticated: email !== null }
+          : undefined;
 
-        const content = h(
-          Home,
-          { source: searchResult?.source },
-          searchResult ? h(SearchCard, { searchResult }) : null
-        );
+        const render = (searchResult: SearchResult | null, status = 200) => {
+          const content = h(
+            Home,
+            { source: searchResult?.source, gate },
+            searchResult ? h(SearchCard, { searchResult }) : null
+          );
 
-        const html = renderSSR(
-          h(MainLayout, {
-            title: searchResult?.title,
-            description: searchResult?.description,
-            image: searchResult?.image,
-            children: content,
-          })
-        );
+          const html = renderSSR(
+            h(MainLayout, {
+              title: searchResult?.title,
+              description: searchResult?.description,
+              image: searchResult?.image,
+              children: content,
+            })
+          );
 
-        const { body, head, footer, attributes } = Helmet.SSR(html);
+          const { body, head, footer, attributes } = Helmet.SSR(html);
 
-        return new Response(
-          `<!DOCTYPE html>
+          return new Response(
+            `<!DOCTYPE html>
                 <html ${attributes.html.toString()}>
                   <head>
                     ${head.join('\n')}
@@ -63,10 +78,41 @@ export const createRoutes = () => ({
                   </body>
                 </html>
               `,
-          {
-            headers: { 'Content-Type': 'text/html' },
+            {
+              headers: { 'Content-Type': 'text/html' },
+              status,
+            }
+          );
+        };
+
+        if (id && gateEnabled) {
+          if (!ENV.abuse.sessionSecret) return render(null, 503);
+          if (!email) {
+            // Machine-readable hint for page loads: the JSON search
+            // endpoints carry `auth: "email-otp"` in the body instead.
+            const denied = render(null, 401);
+            denied.headers.set('X-Auth-Required', 'email-otp');
+            return denied;
           }
-        );
+          const quota = await consumeQuota(email);
+          if ('doError' in quota || !quota.verdict.allowed) {
+            const message =
+              'doError' in quota
+                ? 'Quota check unavailable, try again shortly.'
+                : `Demo quota reached. Try again in ${quota.verdict.retryAfterSec}s.`;
+            const html = renderSSR(h(ErrorMessage, { message }));
+            return new Response(html, {
+              headers: { 'Content-Type': 'text/html' },
+              status: 'doError' in quota ? 503 : 429,
+            });
+          }
+        }
+
+        const searchResult = id
+          ? await search({ searchId: id, headless: false })
+          : null;
+
+        return render(searchResult);
       } catch (err) {
         if (err instanceof Response) return err;
 
@@ -89,6 +135,11 @@ export const createRoutes = () => ({
   '/search': {
     POST: async function (req: Request) {
       try {
+        // Identity before validation (no validity oracle for strangers),
+        // quota after (invalid links burn nothing).
+        const identity = await requireGateIdentity(req, false);
+        if (identity instanceof Response) return identity;
+
         const body = req.body ? Object.fromEntries(await req.formData()) : null;
 
         const result = searchRouteSchema.safeParse({
@@ -97,6 +148,11 @@ export const createRoutes = () => ({
 
         if (!result.success) throw validationError(result.error);
         const { link } = result.data.body;
+
+        if (identity !== null) {
+          const quotaDeny = await checkSearchQuota(identity);
+          if (quotaDeny) return quotaDeny;
+        }
 
         const searchResult = await search({ link, headless: false });
         const html = renderSSR(h(SearchCard, { searchResult }));
@@ -124,7 +180,7 @@ export const createRoutes = () => ({
         logger.error(`[route /search]: ${message}`);
         logger.error(err);
 
-        if (statusCode === 400) {
+        if (statusCode === 400 || statusCode === 401 || statusCode === 429) {
           return Response.json({ message }, { status: statusCode });
         }
 
@@ -139,6 +195,10 @@ export const createRoutes = () => ({
   '/api/search': {
     POST: async function (req: Request) {
       try {
+        // Identity before validation, quota after: see /search above.
+        const identity = await requireGateIdentity(req, true);
+        if (identity instanceof Response) return identity;
+
         const url = new URL(req.url);
         const queryParams = Object.fromEntries(url.searchParams);
         const body = req.body ? await req.json() : null;
@@ -150,6 +210,11 @@ export const createRoutes = () => ({
 
         if (!result.success) throw validationError(result.error);
         const { link, adapters } = result.data.body;
+
+        if (identity !== null) {
+          const quotaDeny = await checkSearchQuota(identity);
+          if (quotaDeny) return quotaDeny;
+        }
 
         const searchResult = await search({
           link,
@@ -178,12 +243,59 @@ export const createRoutes = () => ({
       }
     },
   },
-  '/api/status': {
-    GET: async function () {
+  '/api/auth/request-code': {
+    POST: async function (req: Request) {
       try {
+        return await requestCodeHandler(req);
+      } catch (err) {
+        logger.error(`[route /api/auth/request-code]: ${err}`);
+        return Response.json({ error: 'Something went wrong, please try again later.' }, { status: 500 });
+      }
+    },
+  },
+  '/api/auth/verify-code': {
+    POST: async function (req: Request) {
+      try {
+        return await verifyCodeHandler(req);
+      } catch (err) {
+        logger.error(`[route /api/auth/verify-code]: ${err}`);
+        return Response.json({ error: 'Something went wrong, please try again later.' }, { status: 500 });
+      }
+    },
+  },
+  '/api/status': {
+    GET: async function (req: Request) {
+      try {
+        const gate = {
+          enabled: isGateEnabled(),
+          quota: {
+            limit: QUOTA_LIMIT,
+            windowSec: QUOTA_WINDOW_SEC,
+            cooldownSec: QUOTA_COOLDOWN_SEC,
+          },
+        };
+        let identity: { remaining: number; resetInSec: number } | undefined;
+        if (gate.enabled) {
+          try {
+            const email = await getVerifiedEmail(req);
+            if (email) {
+              const verdict = await peekQuotaFor(email);
+              if (verdict) {
+                identity = {
+                  remaining: verdict.remaining,
+                  resetInSec: verdict.resetInSec,
+                };
+              }
+            }
+          } catch {
+            // Quota visibility is best-effort; status stays open.
+          }
+        }
         return Response.json({
           serviceGuards: getAllServiceGuardStatuses(),
           timestamp: new Date().toISOString(),
+          gate,
+          ...(identity ? { identity } : {}),
         });
       } catch (err) {
         logger.error(`[route /api/status]: ${err}`);

@@ -48,13 +48,27 @@ export class HttpMock {
             typeof payload === 'string' ? payload : JSON.stringify(payload);
           const [status, data] = entry.reply({ data: serialized });
           if (![200, 201, 204].includes(status)) {
-            throw new HttpClientError(`Mock: ${status}`, status, '', url);
+            throw new HttpClientError(
+              `Mock: ${status} body: ${JSON.stringify(data)?.slice(0, 500)}`,
+              status,
+              '',
+              url,
+              undefined,
+              JSON.stringify(data)?.slice(0, 500)
+            );
           }
           return data;
         }
         const [status, data] = entry.reply;
         if (![200, 201, 204].includes(status)) {
-          throw new HttpClientError(`Mock: ${status}`, status, '', url);
+          throw new HttpClientError(
+            `Mock: ${status} body: ${JSON.stringify(data)?.slice(0, 500)}`,
+            status,
+            '',
+            url,
+            undefined,
+            JSON.stringify(data)?.slice(0, 500)
+          );
         }
         return data;
       }

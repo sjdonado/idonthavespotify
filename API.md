@@ -47,7 +47,12 @@ Convert music links across streaming platforms.
 
 **Errors:**
 - `400`: Invalid link or missing parameters
+- `401`: Email verification required (public demo only; response carries `auth: "email-otp"`)
+- `429`: Per-email quota reached (response carries `retryAfter` seconds)
 - `500`: Processing failed
+- `503`: Quota check or gate temporarily unavailable
+
+On the public demo, search is gated behind a browser login: logging in mints a session cookie, and that cookie is the only credential `/api/search` accepts. There are no API tokens, so programmatic clients such as the Raycast extension target self-hosted instances, where the gate is off and search stays open.
 
 **Example:**
 ```bash
@@ -59,9 +64,53 @@ curl -X POST "http://idonthavespotify.sjdonado.com/api/search?v=1" \
   }'
 ```
 
+### POST `/api/auth/request-code`
+
+Send a 6-digit code to an email address (public demo only).
+
+**Request Body:**
+```json
+{
+  "email": "string (required, popular providers only, no `+` aliases)"
+}
+```
+
+**Response (200):**
+```json
+{ "ok": true }
+```
+
+**Errors:**
+- `400`: Rejected address (unknown provider, alias, disposable, typo hint)
+- `429`: Code already sent, retry with `retryAfter` seconds
+- `502`: Code could not be sent
+
+### POST `/api/auth/verify-code`
+
+Exchange an email plus code for a session. Post a form for a session cookie plus page refresh (web UI); with `Accept: application/json` the same call sets the cookie and answers `{ "ok": true }`. No tokens are issued.
+
+**Request Body:**
+```json
+{
+  "email": "string (required)",
+  "code": "string (required, 6 digits)"
+}
+```
+
+**Response (200, JSON):**
+```json
+{ "ok": true }
+```
+plus a `Set-Cookie: idhs_session=...` header (30-day TTL).
+
+**Errors:**
+- `400`: Invalid or expired code
+
 ### GET `/api/status`
 
 Service quota and health overview (service-guard budgets plus timestamp).
+When the demo gate is on, the response also names the quota policy, and
+authenticated callers see their remaining searches.
 
 **Response (200):**
 ```json
@@ -75,9 +124,19 @@ Service quota and health overview (service-guard budgets plus timestamp).
       "failures": "number"
     }
   },
-  "timestamp": "string"
+  "timestamp": "string",
+  "gate": {
+    "enabled": "boolean",
+    "quota": { "limit": "number", "windowSec": "number", "cooldownSec": "number" }
+  },
+  "identity": {
+    "remaining": "number",
+    "resetInSec": "number"
+  }
 }
 ```
+
+`identity` is present only on authenticated calls.
 
 **Example:**
 ```bash

@@ -15,8 +15,41 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Push to dokku
-        uses: dokku/github-action@master
+      - uses: oven-sh/setup-bun@v1
         with:
-          git_remote_url: ${{ secrets.GIT_REMOTE_URL }}
-          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          bun-version: 1.4.2
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Typecheck
+        run: bun run typecheck
+      - name: Lint
+        run: bun run lint
+      - name: Build assets and edge bundle
+        run: bun run build && bun run build:workers
+      - name: Audit edge bundle for native imports
+        run: |
+          test -f dist/workers.js || { echo "missing edge bundle"; exit 1; }
+          for pattern in "from ['\"]bun['\"]" "require\(['\"]bun['\"]\)" "impit" "pino" "node:crypto"; do
+            if grep -qiE "$pattern" dist/workers.js; then
+              echo "forbidden pattern in edge bundle: $pattern"
+              exit 1
+            fi
+          done
+      - name: Deploy worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
+      - name: Post-deploy smoke
+        env:
+          DEMO_URL: ${{ secrets.DEMO_URL }}
+        run: |
+          BASE="${DEMO_URL:-https://idonthavespotify.donado.co}"
+          curl -sf "$BASE/" > /dev/null
+          curl -sf "$BASE/api/status" > /dev/null
+          # The demo is gated: an unauthenticated search is 401 with the
+          # email-otp hint, which doubles as proof the gate is armed.
+          BODY="$(curl -s -w '\n%{http_code}' -X POST --data-urlencode 'link=https://open.spotify.com/invalid' "$BASE/search")"
+          test "$(printf '%s' "$BODY" | tail -n 1)" = "401"
+          printf '%s' "$BODY" | grep -q 'email-otp'

@@ -42,6 +42,14 @@ const buildEnv = () => ({
     },
   },
   services: {},
+  abuse: {
+    // No separate flag: the gate arms exactly when a Plunk key exists.
+    gateEnabled: (readEnv('PLUNK_API_KEY') ?? '').trim().length > 0,
+    sessionSecret: readEnv('SESSION_SECRET'),
+    plunkApiKey: readEnv('PLUNK_API_KEY'),
+    plunkTemplateId: readEnv('PLUNK_TEMPLATE_ID'),
+    plunkApiUrl: readEnv('PLUNK_API_URL') ?? 'https://next-api.useplunk.com',
+  },
   app: {
     url: readEnv('APP_URL')!,
     version: version,
