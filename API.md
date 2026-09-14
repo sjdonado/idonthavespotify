@@ -129,11 +129,14 @@ authenticated callers see their remaining searches.
     "enabled": "boolean",
     "quota": { "limit": "number", "windowSec": "number", "cooldownSec": "number" }
   },
-  "identity": "object (optional, when authenticated)",
-  "identity.remaining": "number",
-  "identity.resetInSec": "number"
+  "identity": {
+    "remaining": "number",
+    "resetInSec": "number"
+  }
 }
 ```
+
+`identity` is present only on authenticated calls.
 
 **Example:**
 ```bash

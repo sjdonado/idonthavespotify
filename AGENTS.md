@@ -61,7 +61,7 @@ CI: PRs run `tests.yml` (loads `.env.test` into env, then `test:ci`, plus asset/
 - Edge abuse protection is two layers plus the gate: one Cloudflare rate limiting rule (free plans include exactly one), because only the edge can count globally across isolates. Create it under Security > WAF > Rate limiting rules:
   - Rule name: `idhs-demo-abuse-guard`
   - Expression: `(http.request.uri.path in {"/" "/search" "/api/search" "/api/auth/request-code" "/api/auth/verify-code"})` (auth endpoints included so OTP codes cannot be hammered past the identity cost)
-  - Characteristics: IP; Requests: 4; Period: 10 seconds; Block for: 10 seconds (all three are free-plan-pinned — the API rejects any other period or mitigation timeout, and requires `cf.colo.id` alongside the IP characteristic; 4 admits a legit burst — page load plus search — while capping a paced abuser at ~24/min instead of ~60/min)
+  - Characteristics: IP plus `cf.colo.id`; Requests: 4; Period: 10 seconds; Block for: 10 seconds (all three are free-plan-pinned — the API rejects any other period or mitigation timeout, and requires `cf.colo.id` alongside the IP characteristic; 4 admits a legit burst — page load plus search — while capping a paced abuser at ~24/min instead of ~60/min)
   - Action: Block (exceeding clients get an error response; confirm the exact status in the dashboard preview)
 - The threshold is deliberately abuse-level, not UX-level: no human pasting links hits 60/min. Floods die at the edge before consuming worker quota or subrequests; per-email quota 429s are the identity layer above it, and per-service circuit breakers stay the final fuse for upstream quotas. Keep Bot Fight Mode on (free) for known-bot junk, and tighten or add Under Attack Mode only as incident response.
 
