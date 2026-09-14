@@ -45,7 +45,7 @@ jobs:
         env:
           DEMO_URL: ${{ secrets.DEMO_URL }}
         run: |
-          BASE="${DEMO_URL:-https://idonthavespotify.donado.co}"
+          BASE="${DEMO_URL:-https://idonthavespotify.sjdonado.com}"
           curl -sf "$BASE/" > /dev/null
           curl -sf "$BASE/api/status" > /dev/null
           # The demo is gated: an unauthenticated search is 401 with the

@@ -31,7 +31,7 @@ const MainLayout = ({ title, description, image, children }: MainLayoutProps) =>
         />
 
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://idonthavespotify.donado.co" />
+        <meta property="og:url" content="https://idonthavespotify.sjdonado.com" />
         <meta property="og:site_name" content="I Don't Have Spotify" />
         <meta property="og:title" content={title ?? "I Don't Have Spotify"} />
         <meta
