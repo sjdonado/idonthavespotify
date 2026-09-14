@@ -2,22 +2,24 @@
 
 ## Overview
 
-I Don't Have Spotify is a service that converts music streaming links between different platforms. It accepts a link from one streaming service (Spotify, Apple Music, YouTube Music, Tidal, Deezer, SoundCloud) and returns equivalent links for all other supported platforms.
+I Don't Have Spotify is a service that converts music streaming links between different platforms. It accepts a link from one streaming service (Spotify, Apple Music, YouTube Music, Tidal, Deezer, SoundCloud, Qobuz, Bandcamp, Pandora) and returns equivalent links for all other supported platforms.
 
 **Important Limitation**: Playlists are out of scope. Only individual tracks, albums, artists, and podcasts are supported.
 
 ## Base URL
 
-Production: https://idonthavespotify.donado.co
+Production: https://idonthavespotify.sjdonado.com
 Local Development: http://localhost:3000
 
 ## Authentication
 
-No authentication required.
+The public demo requires a browser login: logging in with an email code mints a session cookie, and that cookie is the only credential search accepts. There are no API tokens. Programmatic clients must target a self-hosted instance, where the gate is off and search stays open.
 
 ## Abuse Protection
 
-- No per-IP rate limiting in the app; abuse protection lives at the edge
+- The public demo gates search behind an email-code login (session cookie, no API tokens); programmatic clients must use a self-hosted instance
+- Verified emails get 6 searches per rolling 4 minutes; past that the API answers 429 with a retry delay, without touching upstream services
+- No per-IP rate limiting in the app; floods die at the Cloudflare edge rule
 - Upstream service quotas are shared: prefer specific adapters to reduce load
 
 ## API Endpoints
@@ -48,6 +50,9 @@ Convert a streaming service link to equivalent links on other platforms.
 - `deezer`: Deezer
 - `soundCloud`: SoundCloud
 - `tidal`: Tidal
+- `qobuz`: Qobuz
+- `bandcamp`: Bandcamp
+- `pandora`: Pandora
 
 **Supported URL Patterns:**
 
@@ -83,6 +88,24 @@ Convert a streaming service link to equivalent links on other platforms.
 - https://soundcloud.com/[user]/[track]
 - https://on.soundcloud.com/[id]
 
+**Qobuz:**
+- https://open.qobuz.com/track/[id]
+- https://open.qobuz.com/album/[id]
+- https://open.qobuz.com/artist/[id]
+
+**Bandcamp:**
+- https://[artist].bandcamp.com/track/[name]
+- https://[artist].bandcamp.com/album/[name]
+
+**Pandora:**
+- https://www.pandora.com/artist/[name]/[id]
+- https://www.pandora.com/playlist/[name]/[id]
+- https://www.pandora.com/podcast/[name]/[id]
+
+**Google Music Share (parse-only, not a search target):**
+- https://www.google.com/gasearch?...
+- https://share.google/[id]
+
 **Response Format:**
 ```json
 {
@@ -93,7 +116,7 @@ Convert a streaming service link to equivalent links on other platforms.
   "image": "https://image-url.com/cover.jpg",
   "audio": "https://audio-preview-url.com/preview.mp3",
   "source": "https://original-link.com",
-  "universalLink": "https://idonthavespotify.donado.co?id=encoded_id",
+  "universalLink": "https://idonthavespotify.sjdonado.com?id=encoded_id",
   "links": [
     {
       "type": "spotify",
@@ -125,7 +148,7 @@ Convert a streaming service link to equivalent links on other platforms.
 
 ### GET /api/status
 
-Check service quota usage and system health.
+Check service quota usage and system health. When the gate is on, the response also names the quota policy, and authenticated callers (login cookie) see their remaining searches.
 
 **Response:**
 ```json
@@ -139,9 +162,27 @@ Check service quota usage and system health.
       "failures": 0
     }
   },
-  "timestamp": "2024-01-01T00:00:00.000Z"
+  "timestamp": "2024-01-01T00:00:00.000Z",
+  "gate": {
+    "enabled": "boolean",
+    "quota": { "limit": "number", "windowSec": "number", "cooldownSec": "number" }
+  },
+  "identity": {
+    "remaining": "number",
+    "resetInSec": "number"
+  }
 }
 ```
+
+`identity` is present only on authenticated calls.
+
+### POST /api/auth/request-code
+
+Send a 6-digit login code to an email address (popular providers only, no `+` aliases). Response: `{ "ok": true }`.
+
+### POST /api/auth/verify-code
+
+Exchange email plus code for a session. Answers `{ "ok": true }` plus a `Set-Cookie: idhs_session=...` header (30-day TTL). No tokens are issued.
 
 ## Error Responses
 
@@ -156,6 +197,29 @@ Check service quota usage and system health.
 ```json
 {
   "error": "Unsupported API version"
+}
+```
+
+**401 Unauthorized (public demo, login required):**
+```json
+{
+  "error": "Verify your email to use this demo.",
+  "auth": "email-otp"
+}
+```
+
+**429 Too Many Requests (per-email quota reached):**
+```json
+{
+  "error": "Demo quota reached. Try again in 120s.",
+  "retryAfter": 120
+}
+```
+
+**503 Service Unavailable (quota check or gate temporarily unavailable):**
+```json
+{
+  "error": "Quota check unavailable, try again shortly."
 }
 ```
 
@@ -183,7 +247,7 @@ The API supports these content types:
 ### Convert a Spotify track to all platforms:
 
 ```bash
-curl -X POST "https://idonthavespotify.donado.co/api/search?v=1" \
+curl -X POST "https://idonthavespotify.sjdonado.com/api/search?v=1" \
   -H "Content-Type: application/json" \
   -d '{
     "link": "https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh"
@@ -193,7 +257,7 @@ curl -X POST "https://idonthavespotify.donado.co/api/search?v=1" \
 ### Convert to specific platforms only:
 
 ```bash
-curl -X POST "https://idonthavespotify.donado.co/api/search?v=1" \
+curl -X POST "https://idonthavespotify.sjdonado.com/api/search?v=1" \
   -H "Content-Type: application/json" \
   -d '{
     "link": "https://music.apple.com/us/album/bohemian-rhapsody/1440650428?i=1440650450",
@@ -204,7 +268,7 @@ curl -X POST "https://idonthavespotify.donado.co/api/search?v=1" \
 ### Check service status:
 
 ```bash
-curl "https://idonthavespotify.donado.co/api/status"
+curl "https://idonthavespotify.sjdonado.com/api/status"
 ```
 
 ## Integration Tips for AI Agents
@@ -217,6 +281,8 @@ curl "https://idonthavespotify.donado.co/api/status"
 6. **Check isVerified field**: Prioritize verified links in your responses
 7. **Handle missing audio**: Not all content has preview audio available
 8. **Universal links**: Use the `universalLink` field for shareable links that work across platforms
+9. **Public demo login**: `/api/search` needs the `idhs_session` login cookie there; a 401 with `auth: "email-otp"` means log in through the web UI first
+10. **Honor 429s**: Back off for `retryAfter` seconds instead of retrying immediately; no upstream call is made while over quota
 
 ## Web Interface
 
