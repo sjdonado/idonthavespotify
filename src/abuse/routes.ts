@@ -63,12 +63,12 @@ const codeBoxes = (email: string, code = ''): string => `
       .join('')}
   </div>
   <input type="hidden" name="email" value="${esc(email)}" />
-  <input type="hidden" name="code" data-gate-target="code" value="${esc(code)}" />
-  <noscript>
-    <label class="sr-only" for="otp-code-fallback">Code</label>
-    <input id="otp-code-fallback" type="text" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6"
-      class="min-h-[48px] w-full rounded-lg bg-zinc-700 p-2.5 text-center text-base text-white" placeholder="123456" />
-  </noscript>`;
+  <input type="hidden" name="code" data-gate-target="code" value="${esc(code)}" />`;
+  // NOTE: no <noscript> fallback input here. htmx parses swap responses
+  // inside a <template> element, where scripting is disabled and <noscript>
+  // content parses as live, submittable controls. A fallback code input
+  // would double-submit alongside the hidden field and the server keeps
+  // the last value, which broke every verify (always the empty fallback).
 
 const codeFormFragment = (email: string, error = '', code = ''): string => `
   ${panelOpen}

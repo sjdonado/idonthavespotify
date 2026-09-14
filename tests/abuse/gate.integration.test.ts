@@ -191,6 +191,26 @@ describe('Email OTP gate', () => {
     expect(data).toContain('Invalid or expired code.');
   });
 
+  it('keeps exactly one submittable code field in gate fragments', async () => {
+    // htmx parses swap responses inside a <template> element, where
+    // scripting is disabled and <noscript> content parses as live,
+    // submittable controls. A fallback code input there double-submits
+    // alongside the hidden field and the server keeps the last (empty)
+    // value, so every verify fails. Cheerio cannot model the scripting
+    // flag, so this guards the raw markup instead.
+    const { codeSentFragment, emailFormFragment } = await import(
+      '~/abuse/routes'
+    );
+    for (const html of [
+      codeSentFragment('web.user@gmail.com'),
+      emailFormFragment('web.user@gmail.com', 'Some error'),
+    ]) {
+      expect(html).not.toMatch(
+        /<noscript[^>]*>.*?(input|select|textarea|button)/s
+      );
+    }
+  });
+
   it('enforces the per-email quota and surfaces it on status', async () => {
     const email = 'quota.user@yahoo.com';
     await nodeFetch(`${app.url}api/auth/request-code`, {
