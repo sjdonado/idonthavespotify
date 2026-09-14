@@ -77,52 +77,6 @@ function parseSpotifyResourceFromLink(
   return { type: m[1], id: m[2] };
 }
 
-const SPOTIFY_LINK_TYPE_TO_METADATA_TYPE = {
-  track: MetadataType.Song,
-  album: MetadataType.Album,
-  playlist: MetadataType.Playlist,
-  artist: MetadataType.Artist,
-  episode: MetadataType.Podcast,
-  show: MetadataType.Show,
-} as const;
-
-interface SpotifyOEmbedResponse {
-  title?: string;
-  thumbnail_url?: string;
-}
-
-// Last-resort fallback for runtimes without browser-TLS impersonation
-// (edge): the oEmbed endpoint is not bot-walled, but carries no
-// description, audio preview, or precise type. Only reached when embed
-// parsing yields nothing. Under evaluation for removal once the embed
-// path is proven on edge.
-const getSpotifyMetadataFromOEmbed = async (id: string, link: string) => {
-  const type = link.match(
-    /open\.spotify\.com\/(?:intl-[a-z]{2}\/)?(track|album|playlist|artist|episode|show)/
-  )?.[1] as keyof typeof SPOTIFY_LINK_TYPE_TO_METADATA_TYPE | undefined;
-
-  const data = await HttpClient.get<SpotifyOEmbedResponse>(
-    `https://open.spotify.com/oembed?url=${encodeURIComponent(link)}`
-  ).catch(() => {
-    throw new Error('Spotify metadata not found');
-  });
-
-  if (!data?.title || !type) {
-    throw new Error('Spotify metadata not found');
-  }
-
-  const metadata = {
-    title: data.title,
-    description: data.title,
-    type: SPOTIFY_LINK_TYPE_TO_METADATA_TYPE[type],
-    image: data.thumbnail_url,
-  } as SearchMetadata;
-
-  await cacheSearchMetadata(id, Parser.Spotify, metadata);
-
-  return metadata;
-};
-
 // __NEXT_DATA__ nests the entity under pageProps somewhere; walk
 // (bounded) for the first object with our expected shape. We use
 // (name + uri + type) as the entity signature — works for tracks,
@@ -131,9 +85,9 @@ function findEntity(o: unknown, depth = 0): SpotifyEntity | null {
   if (depth > 8 || o === null || typeof o !== 'object') return null;
   const obj = o as Record<string, unknown>;
   if (
-    typeof obj.name === 'string' &&
-    typeof obj.uri === 'string' &&
-    typeof obj.type === 'string'
+    typeof obj['name'] === 'string' &&
+    typeof obj['uri'] === 'string' &&
+    typeof obj['type'] === 'string'
   ) {
     return obj as SpotifyEntity;
   }
@@ -143,6 +97,25 @@ function findEntity(o: unknown, depth = 0): SpotifyEntity | null {
   }
   return null;
 }
+
+// Returns null (instead of throwing) when the embed page is unusable.
+// Logs the reason for debuggability.
+const getSpotifyEntityFromEmbed = async (
+  embedURL: string
+): Promise<SpotifyEntity | null> => {
+  try {
+    const html = await HttpClient.get<string>(embedURL, { retries: 2 });
+    const nextDataMatch = html.match(NEXT_DATA_REGEX);
+    if (!nextDataMatch) {
+      logger.debug(`[spotify embed] no __NEXT_DATA__ in ${embedURL}`);
+      return null;
+    }
+    return findEntity(JSON.parse(nextDataMatch[1]));
+  } catch (err) {
+    logger.debug(`[spotify embed] unusable ${embedURL}: ${err}`);
+    return null;
+  }
+};
 
 export const getSpotifyMetadata = async (id: string, link: string) => {
   const cached = await getCachedSearchMetadata(id, Parser.Spotify);
@@ -167,15 +140,7 @@ export const getSpotifyMetadata = async (id: string, link: string) => {
 
     const embedURL = `https://open.spotify.com/embed/${resource.type}/${resource.id}`;
     logger.info(`[${getSpotifyMetadata.name}] fetching embed: ${embedURL}`);
-    const html = await HttpClient.get<string>(embedURL, { retries: 2 });
-
-    const nextDataMatch = html.match(NEXT_DATA_REGEX);
-    if (!nextDataMatch) {
-      throw new Error('Spotify embed page missing __NEXT_DATA__');
-    }
-
-    const nextData = JSON.parse(nextDataMatch[1]);
-    const entity = findEntity(nextData);
+    const entity = await getSpotifyEntityFromEmbed(embedURL);
     if (!entity) throw new Error('Spotify metadata not found');
 
     const title = (entity.name ?? entity.title ?? '').trim();
@@ -214,9 +179,7 @@ export const getSpotifyMetadata = async (id: string, link: string) => {
 
     const spotifyType = SPOTIFY_TYPE_TO_METADATA[resource.type];
     if (!title || !image || !spotifyType) {
-      // NOTE: `return await` is load-bearing here. A bare `return` would let
-      // the rejection skip the catch below (standard async semantics).
-      return await getSpotifyMetadataFromOEmbed(id, resolvedLink);
+      throw new Error('Spotify metadata not found');
     }
 
     const metadata = {

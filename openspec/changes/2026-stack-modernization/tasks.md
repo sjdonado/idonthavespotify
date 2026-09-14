@@ -51,7 +51,7 @@ Deviation recorded: no Cloudflare credentials in this environment, so 7.2 was su
 - [x] 8.4 Update README, API wording for unshortened links, and Workers deploy docs; record decisions with flip conditions
 - [x] 8.5 Document the demo-only Cloudflare rate limiting rule (expression, threshold, action, self-host skip) in README and the edge spec
 - [x] 8.6 Remove the in-app per-IP limiter entirely (config, middleware, error component, wrappers, headers, status fields); keep service guards; rewrite API/llms/README rate docs; self-host warning instead of limits
-- [x] 8.7 Spotify oEmbed metadata fallback (edge bot-wall recovery; fallback-only, self-host path untouched) plus parser tests; live-verified on the deployed worker
+- [x] 8.7 Spotify oEmbed metadata fallback evaluated live, then removed: post-rebase embed pages serve `__NEXT_DATA__` to Workers egress (proven live, full metadata incl. audio), so the fallback was dead code on both runtimes; kept the bracket-access typecheck fix and debug logging in the embed helper
 - [x] 8.8 Apple Music iTunes fallback (Lookup plus song search; NBSP wall-title detection) plus parser tests; live shows iTunes unreachable from Workers egress, documented as known demo gap; self-host untouched
 
 Deviation recorded: all three test modes run in ~0.25s (suite too small to differentiate); locked `--isolate` for per-file hygiene at zero cost.

@@ -82,7 +82,7 @@ bun run build:workers # emits dist/workers.js (fetch backend, no native modules)
 bunx wrangler deploy  # needs a logged-in Cloudflare account
 ```
 
-`wrangler.toml` pins `nodejs_compat`, a compatibility date, and Workers Assets for `public/`. Configure secrets with `bunx wrangler secret put` using the same variable names as `.env.test`. Known edge deltas: platform `fetch` instead of TLS impersonation (guarded sources may answer differently; Spotify page scrapes fall back to oEmbed metadata with no audio preview and mostly unverified matches; Apple Music page scrapes are bot-walled and the iTunes Lookup fallback is currently unreachable from Workers egress, so Apple Music links return a clear error for now — self-host is unaffected in both cases), per-isolate in-memory cache (service-guard budgets stay the shared quota protection), no URL shortener (share links are always plain app URLs), no per-IP limiting in the app, and platform CPU and memory limits.
+`wrangler.toml` pins `nodejs_compat`, a compatibility date, and Workers Assets for `public/`. Configure secrets with `bunx wrangler secret put` using the same variable names as `.env.test`. Known edge deltas: platform `fetch` instead of TLS impersonation (guarded sources may answer differently; Spotify metadata resolves via `__NEXT_DATA__` embed pages on both runtimes), per-isolate in-memory cache (service-guard budgets stay the shared quota protection), no URL shortener (share links are always plain app URLs), no per-IP limiting in the app, and platform CPU and memory limits.
 
 ### Edge abuse protection (public demo only)
 
