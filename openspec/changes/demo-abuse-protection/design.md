@@ -44,4 +44,4 @@ See proposal.md. Current state (post-#81, all live-verified): Workers demo serve
 ## Open Questions
 
 - Exact provider allowlist (propose the const in review; one-line change either way).
-- Locked: 6-digit codes, 10-minute validity, 30-day session-cookie TTL, Dokku fully removed, per-email quota 6/4min + 2-min cooldown in a DO, fail-closed quota checks.
+- Locked: 6-digit codes over 5-minute windows with ±1-window tolerance, which verifies for 10 to 15 minutes depending on where issuance falls in the window (user-facing copy says "about 10 minutes", the guaranteed minimum); 30-day session-cookie TTL, Dokku fully removed, per-email quota 6/4min + 2-min cooldown in a DO, fail-closed quota checks.
