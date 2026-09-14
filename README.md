@@ -82,7 +82,7 @@ bun run build:workers # emits dist/workers.js (fetch backend, no native modules)
 bunx wrangler deploy  # needs a logged-in Cloudflare account
 ```
 
-`wrangler.toml` pins `nodejs_compat`, a compatibility date, and Workers Assets for `public/`. Configure secrets with `bunx wrangler secret put` using the same variable names as `.env.test`. Known edge deltas: platform `fetch` instead of TLS impersonation (guarded sources may answer differently), per-isolate in-memory cache and rate limits, production rate-limit defaults, no URL shortener (share links are always plain app URLs), and platform CPU and memory limits.
+`wrangler.toml` pins `nodejs_compat`, a compatibility date, and Workers Assets for `public/`. Configure secrets with `bunx wrangler secret put` using the same variable names as `.env.test`. Known edge deltas: platform `fetch` instead of TLS impersonation (guarded sources may answer differently; Spotify page scrapes fall back to oEmbed metadata with no audio preview and mostly unverified matches), per-isolate in-memory cache (service-guard budgets stay the shared quota protection), no URL shortener (share links are always plain app URLs), no per-IP limiting in the app, and platform CPU and memory limits.
 
 ### Edge abuse protection (public demo only)
 

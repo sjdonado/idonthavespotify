@@ -77,6 +77,52 @@ function parseSpotifyResourceFromLink(
   return { type: m[1], id: m[2] };
 }
 
+const SPOTIFY_LINK_TYPE_TO_METADATA_TYPE = {
+  track: MetadataType.Song,
+  album: MetadataType.Album,
+  playlist: MetadataType.Playlist,
+  artist: MetadataType.Artist,
+  episode: MetadataType.Podcast,
+  show: MetadataType.Show,
+} as const;
+
+interface SpotifyOEmbedResponse {
+  title?: string;
+  thumbnail_url?: string;
+}
+
+// Last-resort fallback for runtimes without browser-TLS impersonation
+// (edge): the oEmbed endpoint is not bot-walled, but carries no
+// description, audio preview, or precise type. Only reached when embed
+// parsing yields nothing. Under evaluation for removal once the embed
+// path is proven on edge.
+const getSpotifyMetadataFromOEmbed = async (id: string, link: string) => {
+  const type = link.match(
+    /open\.spotify\.com\/(?:intl-[a-z]{2}\/)?(track|album|playlist|artist|episode|show)/
+  )?.[1] as keyof typeof SPOTIFY_LINK_TYPE_TO_METADATA_TYPE | undefined;
+
+  const data = await HttpClient.get<SpotifyOEmbedResponse>(
+    `https://open.spotify.com/oembed?url=${encodeURIComponent(link)}`
+  ).catch(() => {
+    throw new Error('Spotify metadata not found');
+  });
+
+  if (!data?.title || !type) {
+    throw new Error('Spotify metadata not found');
+  }
+
+  const metadata = {
+    title: data.title,
+    description: data.title,
+    type: SPOTIFY_LINK_TYPE_TO_METADATA_TYPE[type],
+    image: data.thumbnail_url,
+  } as SearchMetadata;
+
+  await cacheSearchMetadata(id, Parser.Spotify, metadata);
+
+  return metadata;
+};
+
 // __NEXT_DATA__ nests the entity under pageProps somewhere; walk
 // (bounded) for the first object with our expected shape. We use
 // (name + uri + type) as the entity signature — works for tracks,
@@ -168,7 +214,9 @@ export const getSpotifyMetadata = async (id: string, link: string) => {
 
     const spotifyType = SPOTIFY_TYPE_TO_METADATA[resource.type];
     if (!title || !image || !spotifyType) {
-      throw new Error('Spotify metadata not found');
+      // NOTE: `return await` is load-bearing here. A bare `return` would let
+      // the rejection skip the catch below (standard async semantics).
+      return await getSpotifyMetadataFromOEmbed(id, resolvedLink);
     }
 
     const metadata = {
