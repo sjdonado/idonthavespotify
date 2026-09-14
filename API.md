@@ -47,7 +47,30 @@ Convert music links across streaming platforms.
 
 **Errors:**
 - `400`: Invalid link or missing parameters
+- `401`: Email verification required (public demo only; response carries `auth: "email-otp"`)
+- `429`: Per-email quota reached (response carries `retryAfter` seconds)
 - `500`: Processing failed
+- `503`: Quota check or gate temporarily unavailable
+
+On the public demo, search is gated behind email verification. API clients complete the same two-step flow the web UI uses, but as JSON. First request a code, then exchange the address plus code for a bearer token, then search with it:
+
+```bash
+curl -X POST "http://idonthavespotify.sjdonado.com/api/auth/request-code" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{ "email": "you@gmail.com" }'
+
+curl -X POST "http://idonthavespotify.sjdonado.com/api/auth/verify-code" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{ "email": "you@gmail.com", "code": "123456" }'
+# -> { "token": "...", "expiresAt": 0, "email": "you@gmail.com" }
+
+curl -X POST "http://idonthavespotify.sjdonado.com/api/search?v=1" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
+  -d '{ "link": "https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc" }'
+```
 
 **Example:**
 ```bash
@@ -59,9 +82,56 @@ curl -X POST "http://idonthavespotify.sjdonado.com/api/search?v=1" \
   }'
 ```
 
+### POST `/api/auth/request-code`
+
+Send a 6-digit code to an email address (public demo only).
+
+**Request Body:**
+```json
+{
+  "email": "string (required, popular providers only, no `+` aliases)"
+}
+```
+
+**Response (200):**
+```json
+{ "ok": true }
+```
+
+**Errors:**
+- `400`: Rejected address (unknown provider, alias, disposable, typo hint)
+- `429`: Code already sent, retry with `retryAfter` seconds
+- `502`: Code could not be sent
+
+### POST `/api/auth/verify-code`
+
+Exchange an email plus code for a session. Send `Accept: application/json` for a bearer token (API clients), or post a form for a session cookie plus page refresh (web UI).
+
+**Request Body:**
+```json
+{
+  "email": "string (required)",
+  "code": "string (required, 6 digits)"
+}
+```
+
+**Response (200, JSON):**
+```json
+{
+  "token": "string (use as `Authorization: Bearer`, 30-day TTL)",
+  "expiresAt": "number (unix seconds)",
+  "email": "string"
+}
+```
+
+**Errors:**
+- `400`: Invalid or expired code
+
 ### GET `/api/status`
 
 Service quota and health overview (service-guard budgets plus timestamp).
+When the demo gate is on, the response also names the quota policy, and
+authenticated callers see their remaining searches.
 
 **Response (200):**
 ```json
@@ -75,7 +145,14 @@ Service quota and health overview (service-guard budgets plus timestamp).
       "failures": "number"
     }
   },
-  "timestamp": "string"
+  "timestamp": "string",
+  "gate": {
+    "enabled": "boolean",
+    "quota": { "limit": "number", "windowSec": "number", "cooldownSec": "number" }
+  },
+  "identity": "object (optional, when authenticated)",
+  "identity.remaining": "number",
+  "identity.resetInSec": "number"
 }
 ```
 

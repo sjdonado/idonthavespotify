@@ -1,15 +1,19 @@
 import Nano, { Fragment } from 'nano-jsx';
 
 import Footer from '../components/footer';
+import GatePanel from '../components/gate';
 import LoadingIndicator from '../components/loading-indicator';
 
 export default function Home({
   source,
   children,
+  gate,
 }: {
   source?: string;
   children?: typeof Fragment;
+  gate?: { enabled: boolean; authenticated: boolean };
 }) {
+  const gated = gate?.enabled === true && gate.authenticated !== true;
   return (
     <div class="flex h-svh flex-col gap-2 p-2">
       <LoadingIndicator />
@@ -28,6 +32,9 @@ export default function Home({
           data-controller="search"
           class="my-4 flex w-full flex-col items-center gap-4"
         >
+          {gated ? (
+            <GatePanel />
+          ) : (
           <form
             data-search-target="form"
             hx-post="/search"
@@ -57,6 +64,7 @@ export default function Home({
               <span class="sr-only">Search</span>
             </button>
           </form>
+          )}
           <div id="search-results">{children}</div>
         </div>
       </main>

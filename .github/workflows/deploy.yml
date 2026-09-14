@@ -15,8 +15,35 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Push to dokku
-        uses: dokku/github-action@master
+      - uses: oven-sh/setup-bun@v1
         with:
-          git_remote_url: ${{ secrets.GIT_REMOTE_URL }}
-          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          bun-version: 1.4.2
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Typecheck
+        run: bun run typecheck
+      - name: Lint
+        run: bun run lint
+      - name: Build assets and edge bundle
+        run: bun run build && bun run build:workers
+      - name: Audit edge bundle for native imports
+        run: |
+          ! grep -qE "from ['\"]bun['\"]" dist/workers.js
+          ! grep -qE "require\(['\"]bun['\"]\)" dist/workers.js
+          ! grep -qi impit dist/workers.js
+          ! grep -qi pino dist/workers.js
+          ! grep -q "node:crypto" dist/workers.js
+      - name: Deploy worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
+      - name: Post-deploy smoke
+        env:
+          DEMO_URL: ${{ secrets.DEMO_URL }}
+        run: |
+          BASE="${DEMO_URL:-https://idonthavespotify.donado.co}"
+          curl -sf "$BASE/" > /dev/null
+          curl -sf "$BASE/api/status" > /dev/null
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST --data-urlencode 'link=https://open.spotify.com/invalid' "$BASE/search")" = "400"

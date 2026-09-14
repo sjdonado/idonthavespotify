@@ -1,12 +1,16 @@
 > IDHS (I Don't Have Spotify)
 
-Copy a link from your favorite streaming service, paste it into the search bar, and voilà! Links to the track on all other supported platforms are displayed. If the original source is Spotify you'll even get a quick audio preview to ensure it's the right track.
+You get a link on a streaming service you don't use, and you want to hear the song anyway. Copy the link, paste it into the search bar, and the app hands back the same track on every other service it knows about. When the original link comes from Spotify you even get a short audio preview, so you can confirm it found the right song before you tap through.
 
-**Note:** Playlists are out of scope. Only individual tracks, albums, artists, and podcasts are supported.
+Playlists are deliberately out of scope. The app converts individual tracks, albums, artists, and podcasts, and it does that one job well instead of many jobs poorly.
 
-## Supported Streaming Services
+## How a link becomes links
 
-Adapters represent the streaming services supported by the Web App and the Raycast Extension. Each adapter allows the app to convert links from one platform to others. The table below shows which features are available for each one:
+Every conversion runs through two stages, and keeping them separate is what makes a new service easy to add.
+
+First a parser figures out which platform your link came from and pulls out normalized metadata: the title, the artist, what kind of thing it is, cover art when it can find it. From that metadata it builds one clean search query, the same shape no matter which service the link started on. You can read this stage in `src/parsers`, one file per platform.
+
+Then adapters take that query and search each destination platform for the best match, each in its own way: some have official APIs, others are searched through their public pages. Every adapter answers the same question with the same shape, a URL plus two honest flags. `isVerified` means the platform gave a strong match signal, and `notAvailable` means the score was so low you probably should not trust it. That logic lives in `src/adapters`, again one file per platform.
 
 | Adapter          | Inverted Search | Official API           | Verified Links |
 | ---------------- | --------------- | ---------------------- | -------------- |
@@ -20,28 +24,15 @@ Adapters represent the streaming services supported by the Web App and the Rayca
 | Bandcamp         | Yes             | No                     | Yes            |
 | Pandora          | Yes             | No                     | Yes            |
 
-## Architecture overview: Parsers and Adapters
+"Inverted search" means the adapter can be a search target. A few notes on the ones that behave unusually: Spotify has no usable official API for this project, so search runs through the same internal GraphQL API the Spotify web player uses, with an anonymous access token minted by a TOTP flow (more on that below). Tidal does have an official API, and it works from self-hosted instances; from Cloudflare Workers egress its search endpoint currently answers 400, which the adapter surfaces as an ordinary miss while the cause is being diagnosed, so self-host results are unaffected. Apple Music on the edge resolves through its catalog pages with no audio preview.
 
-IDHS extracts metadata from the provided link and uses that information to create a new query for public search engines or official APIs, such as Apple Music, YouTube, and SoundCloud. It selects the result that seems most relevant, but it cannot guarantee that the returned link is the exact track you want or even a song at all. Suggestions for improving the query-building workflow are welcome, with the main constraint being to keep requests fast and excluding brute-force retries to avoid rate limits.
+## The web app and the Raycast extension
 
-### Parsers (`src/parsers`)
-Identify the incoming link's platform and extract normalized metadata (title, description, type, image, and optional audio) as well as a consistent search query. For example, a Spotify link is parsed to gather Open Graph metadata and produce a query string that represents the track/album/artist/show/episode. This query is later used to search other platforms.
-
-### Adapters (`src/adapters`)
-Turn that normalized query into outbound links for each destination platform (Spotify, YouTube Music, Apple Music, Deezer, SoundCloud, Tidal). Each adapter is responsible for:
-- Performing a platform-specific search (API or HTML-based) using the normalized query
-- Returning a result with `type`, `url`, and flags like `isVerified` and `notAvailable`
-- Preferring "verified" links when the platform provides a reliable match signal
-
-This separation keeps the system modular: parsers focus on understanding the source, while adapters focus on finding the best possible destination links.
-
-## Web App
+The web app is the main interface, a single page with a search bar, instant result cards, and shareable universal links in the form `APP_URL?id=<id>`. Anyone opening your universal link sees the same result card without searching again.
 
 <div align="center">
 <img width="1831" height="969" alt="image" src="https://github.com/user-attachments/assets/98d6f3ca-3627-49ea-ad2b-0c2b64668b14" />
 </div>
-
-## Extensions
 
 ### Raycast
 
@@ -49,23 +40,24 @@ This separation keeps the system modular: parsers focus on understanding the sou
 
 Source code: https://github.com/raycast/extensions/tree/main/extensions/idonthavespotify
 
-## Local Setup
+If you run the extension against the public demo, read the demo section below first: API clients authenticate with a bearer token from the same email-code flow, and the extension needs to implement that flow before its searches will succeed.
 
-The list of environment variables is available in `.env.test`. To complete the values for the following variables:
-- `TIDAL_CLIENT_ID` and `TIDAL_CLIENT_SECRET`, refer to [TIDAL Developer Portal](https://developer.tidal.com/).
-- `YOUTUBE_API_KEY`, refer to [Google Developers Console](https://console.developers.google.com/).
+## Running it locally
 
-**Note:** Spotify search uses an anonymous access token extracted from the Spotify web player (`open.spotify.com`) via a TOTP-based authentication flow. This is necessary because as of March 2026, Spotify [restricted their Web API](https://www.reddit.com/r/webdev/comments/1rflyiz/changes_to_spotify_api/) to require a Premium account for Development Mode and limited the available endpoints. Since this project doesn't have a premium account, we use the same internal GraphQL API that the Spotify web player itself uses. The token is auto-refreshed (~1 hour expiry) and requires no developer account.
+You need Bun 1.4.2 or newer; check with `bun --version`. The full list of environment variable names lives in `.env.test`, and only real values go in your own `.env`, which is never committed. Two of them need accounts elsewhere: `TIDAL_CLIENT_ID` and `TIDAL_CLIENT_SECRET` come from the [TIDAL Developer Portal](https://developer.tidal.com/), and `YOUTUBE_API_KEY` comes from the [Google Developers Console](https://console.developers.google.com/).
 
-Ensure that the values are correctly added to your `.env` file to configure the API keys properly.
+A note on Spotify, since it surprises people: as of March 2026, Spotify [restricted its Web API](https://www.reddit.com/r/webdev/comments/1rflyiz/changes_to_spotify_api/) to require a Premium account for Development Mode and cut down the available endpoints. This project has no premium account, so instead of the official API it uses the web player's own internal API with an automatically refreshed anonymous token, which needs no developer account and expires after about an hour. That is why the Spotify adapter scrapes the player bundle for its TOTP secret at token time.
 
-- To get the app up (requires Bun 1.4.2 or newer, check with `bun --version`):
+Once the values are in place, starting the app is two commands:
+
 ```sh
 bun install
 bun dev
 ```
 
-## Self-host binary
+## Self-hosting
+
+The supported self-host path is the single compiled binary, bare or inside Docker. It serves everything on its own: pages, API, and static assets, with no sidecars and no separate asset copy to manage.
 
 ```sh
 bun run build
@@ -73,27 +65,23 @@ bun run build:prod
 ./dist/idonthavespotify # serves everything, no sidecars, no `public/` copy needed
 ```
 
-`PORT` and `NODE_ENV` configure the binary; it reads `.env` from the working directory.
+`PORT` and `NODE_ENV` configure the binary, and it reads `.env` from the working directory. Self-hosted instances leave the demo gate off by default, so search stays open exactly like it always was; the one thing the app deliberately does not ship is a per-IP rate limiter, so only expose your instance publicly behind Cloudflare (with a rate limiting rule like the demo's, described in AGENTS.md) or a rate-limiting reverse proxy.
 
-## Cloudflare Workers (optional public instance)
+## The public demo and its abuse protection
 
-```sh
-bun run build:workers # emits dist/workers.js (fetch backend, no native modules)
-bunx wrangler deploy  # needs a logged-in Cloudflare account
-```
+The public demo runs on Cloudflare Workers, and because it sits on shared upstream quotas, it asks who you are before it searches. There are no accounts, no passwords, and no signup page, just an email address that proves you can receive mail.
 
-`wrangler.toml` pins `nodejs_compat`, a compatibility date, and Workers Assets for `public/`. Configure secrets with `bunx wrangler secret put` using the same variable names as `.env.test`. Known edge deltas: platform `fetch` instead of TLS impersonation (guarded sources may answer differently; Spotify metadata resolves via `__NEXT_DATA__` embed pages on both runtimes; Apple Music resolves via the same-host catalog chain — oEmbed for albums/playlists, storefront album/ID-constrained search scrape for songs/artists — with no audio preview), per-isolate in-memory cache (service-guard budgets stay the shared quota protection), no URL shortener (share links are always plain app URLs), no per-IP limiting in the app, and platform CPU and memory limits.
+On the web the flow happens inline, right where the search bar lives. You type your email, receive a six-digit code, type the code, and a session cookie is minted that unlocks search immediately. API clients do the same two calls as JSON: posting the address to `/api/auth/request-code`, then the address plus code to `/api/auth/verify-code` with `Accept: application/json`, which returns a bearer token to send as `Authorization: Bearer` on `/api/search`. The token lasts 30 days. Only popular mailbox providers are accepted, addresses with `+` aliases are rejected before anything is sent, and Plunk's verifier double-checks disposables, mail records, and typos. Gmail-style dot variations are normalized first, so `first.last` and `firstlast` count as the same address.
 
-### Edge abuse protection (public demo only)
+Every verified address gets 6 searches per rolling 4 minutes. Past that the API answers 429 with a retry hint and a 2-minute cooldown, without touching any upstream service. Unauthenticated search answers 401 with an `auth: "email-otp"` hint, also without touching upstream. The counters live in a Durable Object keyed by email hash, deliberate because an identity key makes each counter small and meaningful, and quota checks fail closed: if the counter store is unreachable, searches wait rather than running unlimited. The Cloudflare WAF rule and the per-service circuit breakers stay on as the outer layers, unchanged.
 
-Self-hosted instances skip the Cloudflare rule but read the warning below: the app ships no per-IP limiter, so only expose it publicly behind Cloudflare (add the rule above to your zone) or a rate-limiting reverse proxy. The public demo sits behind one Cloudflare rate limiting rule (free plans include exactly one), because only the edge can count globally across isolates. Create it under Security > WAF > Rate limiting rules:
+Your address is used for abuse decisions only. It is never used for marketing, and the code is delivered with non-persistent template data so it is never stored on your contact record. If the gate ever misbehaves, setting `GATE_ENABLED` to `0` or unsetting it restores fully open access without a redeploy.
 
-- Rule name: `idhs-demo-abuse-guard`
-- Expression: `(http.request.uri.path in {"/" "/search" "/api/search"})`
-- Characteristics: IP; Requests: 4; Period: 10 seconds; Block for: 10 seconds (all three are free-plan-pinned — the API rejects any other period or mitigation timeout, and requires `cf.colo.id` alongside the IP characteristic; 4 admits a legit burst — page load plus search — while capping a paced abuser at ~24/min instead of ~60/min)
-- Action: Block (exceeding clients get an error response; confirm the exact status in the dashboard preview)
+### Operating the demo
 
-The threshold is deliberately abuse-level, not UX-level: no human pasting links hits 60/min. There are no friendly in-app 429s anymore; floods die at the edge before consuming worker quota or subrequests, and per-service circuit breakers stay the final fuse for upstream quotas. Keep Bot Fight Mode on (free) for known-bot junk, and tighten or add Under Attack Mode only as incident response.
+Deployments happen automatically: every push to `master` typechecks, lints, builds the edge bundle, audits it for native imports, deploys it with Wrangler, and then smokes `/`, `/api/status`, and an invalid-link 400. A failed check blocks the deploy. The GitHub secrets that make this work are `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, with an optional `DEMO_URL` overriding the default smoke target.
+
+Before the gate can run on a fresh Cloudflare account, four values have to exist as worker secrets, set with `bunx wrangler secret put` and never written into the repo: `GATE_ENABLED` set to `1` to switch the gate on, `SESSION_SECRET` which signs both the one-time codes and the session tokens, `PLUNK_API_KEY` for sending mail, and `PLUNK_FROM_EMAIL` unless the Plunk template already defines a sender. An optional `PLUNK_TEMPLATE_ID` switches sending to a dashboard template with the code passed as one-shot data. Plunk also needs a verified sender domain, which you arrange in the Plunk dashboard. The edge worker guide, including the WAF rule and the Durable Object details, lives in AGENTS.md.
 
 ## More info
 

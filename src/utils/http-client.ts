@@ -15,7 +15,8 @@ export class HttpClientError extends Error {
     public status: number,
     public statusText: string,
     public url: string,
-    public retryAfter?: string
+    public retryAfter?: string,
+    public body?: string
   ) {
     super(message);
     this.name = 'HttpClientError';
@@ -36,6 +37,47 @@ function getRetryDelay(attempt: number, retryAfter?: string | null): number {
     return (parseInt(retryAfter, 10) + 1) * 1000;
   }
   return attempt * 1000;
+}
+
+const SNIPPET_MAX_BYTES = 2048;
+const SNIPPET_MAX_CHARS = 500;
+
+async function readSnippet(response: {
+  readonly body: ReadableStream<Uint8Array> | null;
+  text(): Promise<string>;
+}): Promise<string | undefined> {
+  try {
+    const reader = response.body?.getReader();
+    if (!reader) {
+      const text = await response.text();
+      return text.length > SNIPPET_MAX_CHARS
+        ? `${text.slice(0, SNIPPET_MAX_CHARS)}…`
+        : text || undefined;
+    }
+    const chunks: Uint8Array[] = [];
+    let total = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done || !value) break;
+      const take = Math.min(value.length, SNIPPET_MAX_BYTES - total);
+      chunks.push(value.subarray(0, take));
+      total += take;
+      if (total >= SNIPPET_MAX_BYTES) break;
+    }
+    await reader.cancel().catch(() => undefined);
+    const merged = new Uint8Array(total);
+    let offset = 0;
+    for (const chunk of chunks) {
+      merged.set(chunk, offset);
+      offset += chunk.length;
+    }
+    const text = new TextDecoder().decode(merged);
+    return text.length > SNIPPET_MAX_CHARS
+      ? `${text.slice(0, SNIPPET_MAX_CHARS)}…`
+      : text || undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 async function withRetry<T>(
@@ -107,12 +149,18 @@ export default class HttpClient {
 
       if (![200, 201, 204].includes(response.status)) {
         const retryAfter = response.headers.get('retry-after') ?? undefined;
+        // Capture a bounded upstream body snippet: without it an edge 400
+        // is undebuggable (this exact blindness cost a Tidal debug round).
+        // Bounded reader, never a full buffered read: a hostile error body
+        // must not reach memory no matter what headers it declares.
+        const snippet = await readSnippet(response);
         throw new HttpClientError(
-          `Unexpected status code: ${response.status}`,
+          `Unexpected status code: ${response.status}${snippet ? ` body: ${snippet}` : ''}`,
           response.status,
           response.statusText,
           url,
-          retryAfter
+          retryAfter,
+          snippet
         );
       }
 

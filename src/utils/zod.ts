@@ -7,13 +7,16 @@ export class ValidationError extends Error {
   }
 }
 
-export function validationError(error: ZodError): never {
+export function firstValidationMessage(error: ZodError): string {
   const fieldErrors = error.flatten().fieldErrors;
   const errorKeys = Object.keys(fieldErrors);
-  const firstError =
-    errorKeys.length > 0
+  return (
+    (errorKeys.length > 0
       ? fieldErrors[errorKeys[0] as keyof typeof fieldErrors]?.[0]
-      : undefined;
+      : undefined) ?? 'Validation error'
+  );
+}
 
-  throw new ValidationError(firstError ?? 'Validation error');
+export function validationError(error: ZodError): never {
+  throw new ValidationError(firstValidationMessage(error));
 }

@@ -7,3 +7,13 @@ compatibility_flags = ["nodejs_compat"]
 # dynamic routes fall through to the worker entry.
 [assets]
 directory = "./public"
+
+# Per-email search quota (demo abuse gate). One DO subrequest per search;
+# rows hold only email-hash window counters and self-expire via alarms.
+[[durable_objects.bindings]]
+name = "QUOTA_DO"
+class_name = "QuotaDO"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["QuotaDO"]

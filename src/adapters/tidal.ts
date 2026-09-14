@@ -9,7 +9,7 @@ import {
 import type { SearchMetadata } from '~/services/search';
 import { getOrUpdateAccessToken } from '~/utils/access-token';
 import { findBestMatch, type MatchCandidate } from '~/utils/compare';
-import HttpClient from '~/utils/http-client';
+import HttpClient, { HttpClientError } from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { getServiceGuard } from '~/utils/service-guard';
 
@@ -105,7 +105,16 @@ export async function getTidalLink(
     return bestMatch;
   } catch (error) {
     guard.recordFailure();
-    logger.error(`[Tidal] (${url}) ${error}`);
+    // Upstream bodies are logged, never swallowed: a bare 400 from edge
+    // egress is otherwise indistinguishable from a moved v2 API.
+    const httpErr = error instanceof HttpClientError ? error : null;
+    if (httpErr) {
+      logger.error(
+        `[Tidal] (${url}) HTTP ${httpErr.status}${httpErr.body ? ` body: ${httpErr.body}` : ` ${httpErr.message}`}`
+      );
+    } else {
+      logger.error(`[Tidal] (${url}) ${error}`);
+    }
     return null;
   }
 }
@@ -118,6 +127,14 @@ export async function getOrUpdateTidalAccessToken() {
         grant_type: 'client_credentials',
       });
 
+      // btoa over utf8 bytes, not Buffer: universal across Bun/Node/Workers,
+      // and safe for non-latin1 secrets.
+      const credentials = new TextEncoder().encode(
+        ENV.adapters.tidal.clientId + ':' + ENV.adapters.tidal.clientSecret
+      );
+      let binary = '';
+      for (const byte of credentials) binary += String.fromCharCode(byte);
+
       const response = await HttpClient.post<TidalAuthResponse>(
         ENV.adapters.tidal.authUrl,
         data,
@@ -125,11 +142,7 @@ export async function getOrUpdateTidalAccessToken() {
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded',
-            Authorization:
-              'Basic ' +
-              Buffer.from(
-                ENV.adapters.tidal.clientId + ':' + ENV.adapters.tidal.clientSecret
-              ).toString('base64'),
+            Authorization: 'Basic ' + btoa(binary),
           },
         }
       );

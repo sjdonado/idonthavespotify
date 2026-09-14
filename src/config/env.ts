@@ -42,6 +42,16 @@ const buildEnv = () => ({
     },
   },
   services: {},
+  abuse: {
+    gateEnabled:
+      readEnv('GATE_ENABLED') === '1' ||
+      readEnv('GATE_ENABLED')?.toLowerCase() === 'true',
+    sessionSecret: readEnv('SESSION_SECRET'),
+    plunkApiKey: readEnv('PLUNK_API_KEY'),
+    plunkFromEmail: readEnv('PLUNK_FROM_EMAIL'),
+    plunkTemplateId: readEnv('PLUNK_TEMPLATE_ID'),
+    plunkApiUrl: readEnv('PLUNK_API_URL') ?? 'https://api.useplunk.com',
+  },
   app: {
     url: readEnv('APP_URL')!,
     version: version,
