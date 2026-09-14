@@ -15,11 +15,8 @@ interface CacheEntry<T> {
 
 class InMemoryCache {
   private cache = new Map<string, CacheEntry<unknown>>();
-
-  constructor() {
-    // Clean up expired entries every 5 minutes
-    setInterval(() => this.cleanup(), 5 * 60 * 1000);
-  }
+  private lastCleanup = 0;
+  private static readonly CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
 
   private cleanup(): void {
     const now = Date.now();
@@ -31,9 +28,15 @@ class InMemoryCache {
   }
 
   set<T>(key: string, value: T, ttl?: number): void {
-    // TTL resolved per call (not at import) so edge bindings set after
-    // module load still apply.
-    const expiresAt = Date.now() + (ttl || ENV.cache.expTime) * 1000;
+    // Opportunistic cleanup (no timers: Workers forbids them in global
+    // scope, and this instance is constructed at module load). TTL resolved
+    // per call so edge bindings set after module load still apply.
+    const now = Date.now();
+    if (now - this.lastCleanup >= InMemoryCache.CLEANUP_INTERVAL_MS) {
+      this.lastCleanup = now;
+      this.cleanup();
+    }
+    const expiresAt = now + (ttl || ENV.cache.expTime) * 1000;
     this.cache.set(key, { value, expiresAt });
   }
 
