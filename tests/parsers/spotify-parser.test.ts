@@ -1,8 +1,11 @@
-import { describe, expect, it } from 'bun:test';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test';
 
 import { MetadataType } from '~/config/enum';
-import { getSpotifyQueryFromMetadata } from '~/parsers/spotify';
+import { getSpotifyMetadata, getSpotifyQueryFromMetadata } from '~/parsers/spotify';
+import { cacheStore } from '~/services/cache';
 import type { SearchMetadata } from '~/services/search';
+
+import { HttpMock } from '../utils/http-mock';
 
 describe('Spotify Parser', () => {
   describe('getSpotifyQueryFromMetadata', () => {
@@ -88,6 +91,39 @@ describe('Spotify Parser', () => {
       };
       const query = getSpotifyQueryFromMetadata(metadata);
       expect(query).toBe('My Awesome Song My Artist');
+    });
+  });
+
+  describe('getSpotifyMetadata locale links', () => {
+    const link = 'https://open.spotify.com/intl-de/track/3AhXZa8sUQht0UEdBJgpGc';
+    let httpMock: HttpMock;
+
+    beforeAll(() => {
+      httpMock = new HttpMock();
+    });
+
+    beforeEach(() => {
+      cacheStore.reset();
+      httpMock.reset();
+    });
+
+    afterAll(() => {
+      httpMock.restore();
+    });
+
+    it('resolves intl-prefixed links through the embed page', async () => {
+      httpMock
+        .onGet('https://open.spotify.com/embed/track/3AhXZa8sUQht0UEdBJgpGc')
+        .reply(
+          200,
+          '<script id="__NEXT_DATA__" type="application/json">{"name":"Like a Rolling Stone","uri":"spotify:track:3AhXZa8sUQht0UEdBJgpGc","type":"track","artists":[{"name":"Bob Dylan"}],"visualIdentity":{"image":[{"url":"https://example.com/cover.jpg","maxWidth":640}]},"audioPreview":{"url":"https://example.com/preview.mp3"},"releaseDate":{"isoString":"1965-01-01T00:00:00.000Z"}}</script>'
+        );
+
+      const metadata = await getSpotifyMetadata('intl-track', link);
+
+      expect(metadata.title).toBe('Like a Rolling Stone');
+      expect(metadata.type).toBe(MetadataType.Song);
+      expect(metadata.audio).toBe('https://example.com/preview.mp3');
     });
   });
 });

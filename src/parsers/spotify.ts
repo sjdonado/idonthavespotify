@@ -1,20 +1,7 @@
-// PATCHED VERSION OF UPSTREAM src/parsers/spotify.ts
-//
-// As of 2026, open.spotify.com no longer ships server-side OG meta
-// tags for resource pages — only `og:site_name` is present, the rest
-// are rendered client-side by the SPA. So scraping `og:title` /
-// `og:description` / `og:image` from the resource page returns null
-// and every Spotify-as-source request 500s with "Spotify metadata
-// not found".
-//
-// This patch replaces the OG-tag scrape with a fetch of
-// /embed/<type>/<id>, which still server-renders a Next.js
-// __NEXT_DATA__ JSON blob containing all the metadata we need
-// (name, artists, release date, image, audio preview).
-//
-// Applied at build time by scripts/build-backend.sh so the upstream
-// submodule stays clean. When the upstream maintainer ships a fix
-// for this, drop this file + the cp step from the build script.
+// Spotify resource pages no longer server-render OG meta tags (only
+// `og:site_name` is present; the rest is client-side SPA state), so this
+// parser fetches /embed/<type>/<id> and extracts the server-rendered
+// Next.js __NEXT_DATA__ blob instead.
 import {
   SPOTIFY_LINK_DESKTOP_REGEX,
   SPOTIFY_LINK_MOBILE_REGEX,
@@ -25,34 +12,16 @@ import { type SearchMetadata } from '~/services/search';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 
-enum SpotifyMetadataType {
-  Song = 'music.song',
-  Album = 'music.album',
-  Playlist = 'music.playlist',
-  Artist = 'profile',
-  Podcast = 'music.episode',
-  Show = 'website',
-}
-
-const SPOTIFY_METADATA_TO_METADATA_TYPE = {
-  [SpotifyMetadataType.Song]: MetadataType.Song,
-  [SpotifyMetadataType.Album]: MetadataType.Album,
-  [SpotifyMetadataType.Playlist]: MetadataType.Playlist,
-  [SpotifyMetadataType.Artist]: MetadataType.Artist,
-  [SpotifyMetadataType.Podcast]: MetadataType.Podcast,
-  [SpotifyMetadataType.Show]: MetadataType.Show,
+const SPOTIFY_TYPE_TO_METADATA_TYPE: Record<string, MetadataType> = {
+  track: MetadataType.Song,
+  album: MetadataType.Album,
+  artist: MetadataType.Artist,
+  playlist: MetadataType.Playlist,
+  episode: MetadataType.Podcast,
+  show: MetadataType.Show,
 };
 
 const NEXT_DATA_REGEX = /<script id="__NEXT_DATA__"[^>]*>(.+?)<\/script>/s;
-
-const SPOTIFY_TYPE_TO_METADATA: Record<string, SpotifyMetadataType> = {
-  track: SpotifyMetadataType.Song,
-  album: SpotifyMetadataType.Album,
-  artist: SpotifyMetadataType.Artist,
-  playlist: SpotifyMetadataType.Playlist,
-  episode: SpotifyMetadataType.Podcast,
-  show: SpotifyMetadataType.Show,
-};
 
 interface SpotifyEntity {
   name?: string;
@@ -71,7 +40,7 @@ function parseSpotifyResourceFromLink(
   link: string
 ): { type: string; id: string } | null {
   const m = link.match(
-    /open\.spotify\.com\/(track|album|artist|playlist|episode|show)\/([A-Za-z0-9]+)/
+    /open\.spotify\.com\/(?:intl-[a-z]{2}\/)?(track|album|artist|playlist|episode|show)\/([A-Za-z0-9]+)/
   );
   if (!m) return null;
   return { type: m[1], id: m[2] };
@@ -136,7 +105,7 @@ export const getSpotifyMetadata = async (id: string, link: string) => {
     }
 
     const resource = parseSpotifyResourceFromLink(resolvedLink);
-    if (!resource) throw new Error('Unrecognised Spotify URL');
+    if (!resource) throw new Error('Unrecognized Spotify URL');
 
     const embedURL = `https://open.spotify.com/embed/${resource.type}/${resource.id}`;
     logger.info(`[${getSpotifyMetadata.name}] fetching embed: ${embedURL}`);
@@ -177,7 +146,7 @@ export const getSpotifyMetadata = async (id: string, link: string) => {
 
     const audio = entity.audioPreview?.url ?? undefined;
 
-    const spotifyType = SPOTIFY_TYPE_TO_METADATA[resource.type];
+    const spotifyType = SPOTIFY_TYPE_TO_METADATA_TYPE[resource.type];
     if (!title || !image || !spotifyType) {
       throw new Error('Spotify metadata not found');
     }
@@ -186,7 +155,7 @@ export const getSpotifyMetadata = async (id: string, link: string) => {
       id,
       title,
       description,
-      type: SPOTIFY_METADATA_TO_METADATA_TYPE[spotifyType],
+      type: spotifyType,
       image,
       audio,
     } as SearchMetadata;
