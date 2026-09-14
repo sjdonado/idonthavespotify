@@ -49,7 +49,7 @@ const buildEnv = () => ({
     plunkApiKey: readEnv('PLUNK_API_KEY'),
     plunkFromEmail: readEnv('PLUNK_FROM_EMAIL'),
     plunkTemplateId: readEnv('PLUNK_TEMPLATE_ID'),
-    plunkApiUrl: readEnv('PLUNK_API_URL') ?? 'https://api.useplunk.com',
+    plunkApiUrl: readEnv('PLUNK_API_URL') ?? 'https://next-api.useplunk.com',
   },
   app: {
     url: readEnv('APP_URL')!,

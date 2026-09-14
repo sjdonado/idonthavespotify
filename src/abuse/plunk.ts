@@ -9,6 +9,8 @@ interface PlunkVerifyData {
   isPlusAddressed?: boolean;
   hasMxRecords?: boolean;
   domainExists?: boolean;
+  // Official field name; some mirrors document `suggestion`.
+  suggestedEmail?: string;
   suggestion?: string;
 }
 
@@ -44,18 +46,19 @@ export async function verifyEmailWithPlunk(
   if (data.isPlusAddressed) {
     return { ok: false, error: 'Plus-aliases (+) are not accepted; use your base address.' };
   }
+  const hint = data.suggestedEmail ?? data.suggestion;
   if (data.valid === false || data.hasMxRecords === false || data.domainExists === false) {
     return {
       ok: false,
-      error: data.suggestion
-        ? `That address looks undeliverable. Did you mean ${data.suggestion}?`
+      error: hint
+        ? `That address looks undeliverable. Did you mean ${hint}?`
         : 'That address looks undeliverable; check for typos.',
     };
   }
-  if (data.isTypo && data.suggestion) {
-    return { ok: false, error: `Possible typo. Did you mean ${data.suggestion}?` };
+  if (data.isTypo && hint) {
+    return { ok: false, error: `Possible typo. Did you mean ${hint}?` };
   }
-  return { ok: true, suggestion: data.suggestion };
+  return { ok: true, suggestion: hint };
 }
 
 const RESEND_THROTTLE_MS = 60_000;
