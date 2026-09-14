@@ -47,12 +47,12 @@ Only allowlisted popular providers SHALL be accepted; addresses with `+` aliases
 
 ### Requirement: Per-email search quota with cooldown
 
-Each verified email SHALL get 6 searches per rolling 4 minutes; past the quota the API SHALL return 429 with a retry hint and enforce a 2-minute cooldown. Counters live in a Durable Object keyed by email hash with auto-expiring windows; quota checks SHALL fail closed on DO errors.
+Each verified email SHALL get 6 searches per rolling 4 minutes; past the quota the API SHALL return 429 with a retry hint and enforce a 2-minute cooldown. The hint SHALL name a delay the client can honor: at least the cooldown, longer when the rolling window is still full. Counters live in a Durable Object keyed by email hash with auto-expiring windows; quota checks SHALL fail closed on DO errors.
 
 #### Scenario: Quota exhausted
 
 - **WHEN** a verified email makes a 7th search within 4 minutes
-- **THEN** the response is 429 naming the 2-minute cooldown, no upstream calls are made, and searches succeed again after the window lapses
+- **THEN** the response is 429 naming an honest retry delay (2-minute cooldown minimum, rolling-window expiry after burst traffic), no upstream calls are made, and searches succeed again after the window lapses
 
 ### Requirement: Stateless codes, minimal email data
 

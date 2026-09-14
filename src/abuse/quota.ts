@@ -21,6 +21,26 @@ export interface QuotaVerdict {
 export const hashEmail = (normalizedEmail: string): Promise<string> =>
   sha256Hex(`quota:${normalizedEmail}`);
 
+// Time until a retry can succeed: the later of the cooldown expiry and the
+// oldest rolling-timestamp expiry. A bare cooldown lies after burst traffic,
+// because the six timestamps outlive it and deny the first retry.
+export function effectiveRetrySec(
+  timestamps: number[],
+  blockedUntil: number | undefined,
+  nowMs: number
+): number {
+  const candidates: number[] = [];
+  if (blockedUntil !== undefined && nowMs < blockedUntil) {
+    candidates.push(Math.ceil((blockedUntil - nowMs) / 1000));
+  }
+  const oldest = timestamps[0];
+  if (oldest !== undefined) {
+    const windowExpiry = Math.ceil((oldest + QUOTA_WINDOW_SEC * 1000 - nowMs) / 1000);
+    if (windowExpiry > 0) candidates.push(windowExpiry);
+  }
+  return candidates.length ? Math.max(...candidates) : 0;
+}
+
 export function checkQuota(
   state: QuotaState | undefined,
   nowMs: number = Date.now()
@@ -29,7 +49,7 @@ export function checkQuota(
   const timestamps = (state?.timestamps ?? []).filter(t => t > windowStart);
 
   if (state?.blockedUntil && nowMs < state.blockedUntil) {
-    const retryAfterSec = Math.ceil((state.blockedUntil - nowMs) / 1000);
+    const retryAfterSec = effectiveRetrySec(timestamps, state.blockedUntil, nowMs);
     return {
       verdict: { allowed: false, retryAfterSec, remaining: 0, resetInSec: retryAfterSec },
       state: { timestamps, blockedUntil: state.blockedUntil },
@@ -38,12 +58,13 @@ export function checkQuota(
 
   if (timestamps.length >= QUOTA_LIMIT) {
     const blockedUntil = nowMs + QUOTA_COOLDOWN_SEC * 1000;
+    const retryAfterSec = effectiveRetrySec(timestamps, blockedUntil, nowMs);
     return {
       verdict: {
         allowed: false,
-        retryAfterSec: QUOTA_COOLDOWN_SEC,
+        retryAfterSec,
         remaining: 0,
-        resetInSec: QUOTA_COOLDOWN_SEC,
+        resetInSec: retryAfterSec,
       },
       state: { timestamps, blockedUntil },
     };
@@ -69,11 +90,16 @@ export function peekQuota(
   const windowStart = nowMs - QUOTA_WINDOW_SEC * 1000;
   const timestamps = (state?.timestamps ?? []).filter(t => t > windowStart);
   if (state?.blockedUntil && nowMs < state.blockedUntil) {
-    const retryAfterSec = Math.ceil((state.blockedUntil - nowMs) / 1000);
+    const retryAfterSec = effectiveRetrySec(timestamps, state.blockedUntil, nowMs);
     return { allowed: false, retryAfterSec, remaining: 0, resetInSec: retryAfterSec };
   }
   if (timestamps.length >= QUOTA_LIMIT) {
-    return { allowed: false, retryAfterSec: QUOTA_COOLDOWN_SEC, remaining: 0, resetInSec: QUOTA_COOLDOWN_SEC };
+    return {
+      allowed: false,
+      retryAfterSec: effectiveRetrySec(timestamps, undefined, nowMs),
+      remaining: 0,
+      resetInSec: effectiveRetrySec(timestamps, undefined, nowMs),
+    };
   }
   const oldest = timestamps[0];
   return {

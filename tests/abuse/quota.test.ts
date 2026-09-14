@@ -23,19 +23,33 @@ describe('Per-email quota windows', () => {
     expect(state?.timestamps).toHaveLength(QUOTA_LIMIT);
   });
 
-  it('denies the 7th search with a 2-minute cooldown', () => {
+  it('denies the 7th search with a retry delay that can succeed', () => {
     let state: QuotaState | undefined;
     const now = Date.now();
     for (let i = 0; i < QUOTA_LIMIT; i++) state = checkQuota(state, now).state;
+    // Burst traffic: the rolling window outlives the cooldown, so the
+    // reported delay is the window expiry, not the bare 2 minutes.
     const denied = checkQuota(state, now);
     expect(denied.verdict.allowed).toBe(false);
-    expect(denied.verdict.retryAfterSec).toBe(QUOTA_COOLDOWN_SEC);
+    expect(denied.verdict.retryAfterSec).toBe(QUOTA_WINDOW_SEC);
 
     const duringCooldown = checkQuota(denied.state, now + 30_000);
     expect(duringCooldown.verdict.allowed).toBe(false);
 
     const afterWindow = checkQuota(denied.state, now + (QUOTA_WINDOW_SEC + QUOTA_COOLDOWN_SEC + 1) * 1000);
     expect(afterWindow.verdict.allowed).toBe(true);
+  });
+
+  it('floors the retry delay at the cooldown for spread traffic', () => {
+    let state: QuotaState | undefined;
+    const now = Date.now();
+    // Six searches spread so the oldest slot frees before the cooldown ends.
+    for (let i = 0; i < QUOTA_LIMIT; i++) {
+      state = checkQuota(state, now - (QUOTA_WINDOW_SEC - 10) * 1000 + i * 1000).state;
+    }
+    const denied = checkQuota(state, now);
+    expect(denied.verdict.allowed).toBe(false);
+    expect(denied.verdict.retryAfterSec).toBe(QUOTA_COOLDOWN_SEC);
   });
 
   it('peek does not consume quota', () => {
