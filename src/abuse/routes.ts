@@ -85,7 +85,10 @@ export async function requestCodeHandler(req: Request): Promise<Response> {
           { error: `Code already sent. Try again in ${waitSec}s.`, retryAfter: waitSec },
           { status: 429, headers: { 'Retry-After': String(waitSec) } }
         )
-      : new Response(`Code already sent. Try again in ${waitSec}s.`, { status: 429 });
+      : new Response(`Code already sent. Try again in ${waitSec}s.`, {
+          status: 429,
+          headers: { 'Retry-After': String(waitSec) },
+        });
   }
 
   const backstop = await verifyEmailWithPlunk(policy.normalized);
@@ -99,7 +102,7 @@ export async function requestCodeHandler(req: Request): Promise<Response> {
   try {
     await sendOtpEmail(policy.normalized, code);
   } catch (err) {
-    logger.error(`[abuse] Plunk send failed for ${policy.normalized}: ${err}`);
+    logger.error(`[abuse] Plunk send failed: ${err}`);
     return json
       ? Response.json({ error: 'Could not send the code, try again later.' }, { status: 502 })
       : new Response('Could not send the code, try again later.', { status: 502 });

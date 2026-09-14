@@ -38,7 +38,8 @@ export async function verifyEmailWithPlunk(
     );
     data = res.data ?? {};
   } catch (err) {
-    logger.warn(`[abuse] Plunk verify unreachable, allowing ${normalizedEmail}: ${err}`);
+    // No address in logs: abuse-prevention data stays out of log retention.
+    logger.warn(`[abuse] Plunk verify unreachable, failing open: ${err}`);
     return { ok: true };
   }
 
