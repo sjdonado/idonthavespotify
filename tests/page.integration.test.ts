@@ -55,7 +55,7 @@ describe('Page router', () => {
       const footerText = doc('footer').text();
 
       expect(footerText).toContain('@sjdonado');
-      expect(footerText).toContain('Status');
+      expect(footerText).not.toContain('Status');
       expect(footerText).toContain('Source');
       expect(footerText).toContain('Spooky Planning');
     });
