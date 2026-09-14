@@ -124,9 +124,11 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
                   class={`flex min-h-[56px] items-center gap-1 rounded-xl bg-zinc-900 py-1 pl-3 pr-1 ${notAvailable ? 'pointer-events-none opacity-60' : ''}`}
                 >
                   <a
-                    href={url}
-                    target="_blank"
-                    rel="noreferrer"
+                    href={notAvailable ? undefined : url}
+                    target={notAvailable ? undefined : '_blank'}
+                    rel={notAvailable ? undefined : 'noreferrer'}
+                    tabindex={notAvailable ? '-1' : undefined}
+                    aria-disabled={notAvailable ? 'true' : undefined}
                     aria-label={searchResult.label}
                     title={notAvailable ? `${shortLabel} (not available)` : shortLabel}
                     class="flex min-w-0 flex-1 items-center"

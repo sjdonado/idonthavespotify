@@ -22,8 +22,13 @@ export default class extends Controller {
   }
 
   connect() {
-    // htmx 4 swaps HTTP error bodies into the target, but transport
-    // failures (timeout, offline) never reach a swap. Those land here.
+    // While the gate modal owns the screen, remove the background from the
+    // keyboard and accessibility trees. The footer stays interactive by
+    // explicit decision (single always-visible footer); everything else
+    // behind the modal goes inert. htmx 4 swaps HTTP error bodies into the
+    // target, but transport failures (timeout, offline) never reach a swap.
+    // Those land here.
+    if (document.getElementById('gate-modal')) this.element.inert = true;
     this.element.addEventListener('htmx:error', this.showTransportError);
   }
 
