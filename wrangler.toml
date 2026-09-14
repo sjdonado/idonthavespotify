@@ -16,4 +16,4 @@ class_name = "QuotaDO"
 
 [[migrations]]
 tag = "v1"
-new_classes = ["QuotaDO"]
+new_sqlite_classes = ["QuotaDO"]
