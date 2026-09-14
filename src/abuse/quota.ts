@@ -94,11 +94,12 @@ export function peekQuota(
     return { allowed: false, retryAfterSec, remaining: 0, resetInSec: retryAfterSec };
   }
   if (timestamps.length >= QUOTA_LIMIT) {
+    const retryAfterSec = effectiveRetrySec(timestamps, undefined, nowMs);
     return {
       allowed: false,
-      retryAfterSec: effectiveRetrySec(timestamps, undefined, nowMs),
+      retryAfterSec,
       remaining: 0,
-      resetInSec: effectiveRetrySec(timestamps, undefined, nowMs),
+      resetInSec: retryAfterSec,
     };
   }
   const oldest = timestamps[0];

@@ -42,6 +42,7 @@ jobs:
         run: bun run build && bun run build:prod && bun run build:workers
       - name: Audit edge bundle for native imports
         run: |
+          test -f dist/workers.js || { echo "missing edge bundle"; exit 1; }
           for pattern in "from ['\"]bun['\"]" "require\(['\"]bun['\"]\)" "impit" "pino" "node:crypto"; do
             if grep -qiE "$pattern" dist/workers.js; then
               echo "forbidden pattern in edge bundle: $pattern"

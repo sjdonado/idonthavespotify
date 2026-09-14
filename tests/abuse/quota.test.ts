@@ -36,6 +36,10 @@ describe('Per-email quota windows', () => {
     const duringCooldown = checkQuota(denied.state, now + 30_000);
     expect(duringCooldown.verdict.allowed).toBe(false);
 
+    // Waiting exactly the reported delay succeeds on the first retry.
+    const afterReported = checkQuota(denied.state, now + denied.verdict.retryAfterSec * 1000);
+    expect(afterReported.verdict.allowed).toBe(true);
+
     const afterWindow = checkQuota(denied.state, now + (QUOTA_WINDOW_SEC + QUOTA_COOLDOWN_SEC + 1) * 1000);
     expect(afterWindow.verdict.allowed).toBe(true);
   });

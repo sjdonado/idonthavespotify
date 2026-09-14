@@ -175,7 +175,7 @@ describe('Email OTP gate', () => {
     httpMock
       .onGet('https://open.spotify.com/embed/track/3AhXZa8sUQht0UEdBJgpGc')
       .reply(200, headSnapshots.spotifyTrackRollingStone);
-    httpMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
+    httpMock.onGet(/openapi\.tidal\.com.*searchResults/).reply(404);
     httpMock.onGet(/youtube/).reply(500);
     httpMock.onGet(/music\.apple\.com/).reply(500);
     httpMock.onGet(/deezer/).reply(500);
