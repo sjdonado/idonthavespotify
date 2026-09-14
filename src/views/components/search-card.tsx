@@ -123,27 +123,36 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
                   data-search-link-url-value={url}
                   class={`flex min-h-[56px] items-center gap-1 rounded-xl bg-zinc-900 py-1 pl-3 pr-1 ${notAvailable ? 'pointer-events-none opacity-60' : ''}`}
                 >
-                  <a
-                    href={notAvailable ? undefined : url}
-                    target={notAvailable ? undefined : '_blank'}
-                    rel={notAvailable ? undefined : 'noreferrer'}
-                    tabindex={notAvailable ? '-1' : undefined}
-                    aria-disabled={notAvailable ? 'true' : undefined}
-                    aria-label={searchResult.label}
-                    title={notAvailable ? `${shortLabel} (not available)` : shortLabel}
-                    class="flex min-w-0 flex-1 items-center"
-                  >
-                    <i class={`${searchResult.icon} shrink-0 text-xl`} />
-                    <span class="ml-2 truncate text-sm">{shortLabel}</span>
-                    {isVerified && (
-                      <span
-                        class="ml-1 inline-flex shrink-0 items-center justify-center rounded-full bg-green-500 p-1 text-[0.56rem] text-black"
-                        aria-label="Verified"
-                      >
-                        <i class="ti ti-check" />
-                      </span>
-                    )}
-                  </a>
+                  {notAvailable ? (
+                    <span
+                      aria-label={`${shortLabel} (not available)`}
+                      title={`${shortLabel} (not available)`}
+                      class="flex min-w-0 flex-1 items-center"
+                    >
+                      <i class={`${searchResult.icon} shrink-0 text-xl`} />
+                      <span class="ml-2 truncate text-sm">{shortLabel}</span>
+                    </span>
+                  ) : (
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={searchResult.label}
+                      title={shortLabel}
+                      class="flex min-w-0 flex-1 items-center"
+                    >
+                      <i class={`${searchResult.icon} shrink-0 text-xl`} />
+                      <span class="ml-2 truncate text-sm">{shortLabel}</span>
+                      {isVerified && (
+                        <span
+                          class="ml-1 inline-flex shrink-0 items-center justify-center rounded-full bg-green-500 p-1 text-[0.56rem] text-black"
+                          aria-label="Verified"
+                        >
+                          <i class="ti ti-check" />
+                        </span>
+                      )}
+                    </a>
+                  )}
                   {notAvailable ? (
                     <span class="mr-2 shrink-0 text-xs text-zinc-400" aria-label="Not available">
                       N/A
