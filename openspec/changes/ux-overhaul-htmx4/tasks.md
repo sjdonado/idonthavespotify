@@ -86,6 +86,6 @@
 - [x] 14.1 Verify cascade-layer fix in a live browser (compact/`has-results` wins, skeleton shows)
 - [x] 14.2 Verify sample-track click runs a real search in a live browser
 - [x] 14.3 Drop the unused `notyf` dependency (package.json + lockfile)
-- [ ] 14.4 Archive `demo-abuse-protection` (verify, sync specs, archive)
-- [ ] 14.5 Adversarial review round, triage findings in the tree
-- [ ] 14.6 Squash to one commit, push, open PR, drive all checks green
+- [x] 14.4 Archive `demo-abuse-protection` (verify, sync specs, archive)
+- [x] 14.5 Adversarial review round, triage findings in the tree
+- [x] 14.6 Squash to one commit, push, open PR, drive all checks green
