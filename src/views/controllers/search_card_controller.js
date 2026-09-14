@@ -90,32 +90,33 @@ export default class extends Controller {
   }
 
   /**
-   * Starts updating the audio progress bar.
+   * Starts updating the audio progress ring (2πr for r=20 ≈ 125.66).
    */
   startAudioProgress() {
-    this.audioProgressTarget.parentNode.classList.remove('hidden');
     this.audioProgressInterval = setInterval(() => {
       const duration = this.soundPlayer.duration();
       const seek = this.soundPlayer.seek();
-      const progress = (seek / duration) * 100;
-      this.audioProgressTarget.style.width = `${progress}%`;
-    }, 10);
+      const progress = duration > 0 ? seek / duration : 0;
+      this.audioProgressTarget.setAttribute(
+        'stroke-dashoffset',
+        String(125.66 * (1 - progress))
+      );
+    }, 100);
   }
 
   /**
-   * Stops updating the audio progress bar.
+   * Stops updating the audio progress ring.
    */
   stopProgressUpdate() {
     clearInterval(this.audioProgressInterval);
   }
 
   /**
-   * Resets the audio progress bar.
+   * Resets the audio progress ring.
    */
   resetProgressBar() {
     clearInterval(this.audioProgressInterval);
-    this.audioProgressTarget.style.width = '0%';
-    this.audioProgressTarget.parentNode.classList.add('hidden');
+    this.audioProgressTarget.setAttribute('stroke-dashoffset', '125.66');
   }
 
   /**

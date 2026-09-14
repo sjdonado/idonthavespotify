@@ -52,12 +52,16 @@ describe('Page router', () => {
         'Paste a link from Spotify, YouTube Music, Apple Music, Deezer, SoundCloud, Qobuz, Bandcamp, Pandora, or Tidal to start.'
       );
 
+      // Google pattern: hero on landing, sample-track shortcut present.
+      expect(html).toContain('home-hero');
+      expect(html).toContain('Try a sample track');
+
       const footerText = doc('footer').text();
 
-      expect(footerText).toContain('@sjdonado');
+      expect(footerText).not.toContain('@sjdonado');
       expect(footerText).not.toContain('Status');
       expect(footerText).toContain('Source');
-      expect(footerText).toContain('Spooky Planning');
+      expect(footerText).toContain('Planning Tool');
     });
   });
 
@@ -108,6 +112,10 @@ describe('Page router', () => {
         method: 'POST',
         body: formDataFromObject({ link }),
       });
+
+      // The shareable URL travels in the same response via header.
+      expect(response.headers.get('hx-replace-url')).toMatch(/^\/?\?id=.+/);
+
       const data = await response.text();
 
       const doc = getCheerioDoc(data);
@@ -224,7 +232,7 @@ describe('Page router', () => {
       expect(searchLinks).toHaveLength(0);
     });
 
-    it('should return error message when sent an invalid link', async () => {
+    it('should return an HTML error fragment when sent an invalid link', async () => {
       const endpoint = `${app.url}/search`;
       const response = await nodeFetch(endpoint, {
         method: 'POST',
@@ -232,12 +240,15 @@ describe('Page router', () => {
           link: 'https://open.spotify.com/invalid',
         }),
       });
-      const data = await response.json();
 
-      expect(data).toEqual({
-        message:
-          'Invalid link, please try with Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal, Qobuz, Bandcamp, Pandora, or Google Music Share links.',
-      });
+      expect(response.status).toBe(400);
+      expect(response.headers.get('content-type')).toContain('text/html');
+
+      const data = await response.text();
+      const doc = getCheerioDoc(data);
+      expect(doc('p').text()).toContain(
+        'Invalid link, please try with Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal, Qobuz, Bandcamp, Pandora, or Google Music Share links.'
+      );
     });
 
     it('should return error message when internal app error', async () => {

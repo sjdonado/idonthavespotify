@@ -16,7 +16,7 @@ const MainLayout = ({ title, description, image, children }: MainLayoutProps) =>
         <title>I Don't Have Spotify</title>
         <meta
           name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
+          content="width=device-width, initial-scale=1.0"
         />
         <link rel="icon" href="/assets/favicon.ico" />
         <meta name="theme-color" content="#000000" />
@@ -56,8 +56,8 @@ const MainLayout = ({ title, description, image, children }: MainLayoutProps) =>
         />
         <link href="https://fonts.cdnfonts.com/css/poppins" rel="stylesheet" />
         <script
-          src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.10/dist/htmx.min.js"
-          integrity="sha384-H5SrcfygHmAuTDZphMHqBJLc3FhssKjG7w/CeCpFReSfwBWDTKpkzPP8c+cLsK+V"
+          src="https://cdn.jsdelivr.net/npm/htmx.org@4.0.0/dist/htmx.min.js"
+          integrity="sha384-BvJpBiO8Kh31EqtJe5DRIeWrHWnCGkwytKs9NKFi86Hhw96dEqdEMzZDeK9iEGTc"
           crossorigin="anonymous"
         ></script>
 

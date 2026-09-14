@@ -6,7 +6,10 @@ import {
   getVerifiedEmail,
   isGateEnabled,
   peekQuotaFor,
+  quotaExceededResponse,
+  quotaUnavailableResponse,
   requireGateIdentity,
+  wantsJson,
 } from './abuse/gate';
 import { QUOTA_COOLDOWN_SEC, QUOTA_LIMIT, QUOTA_WINDOW_SEC } from './abuse/quota';
 import { requestCodeHandler, verifyCodeHandler } from './abuse/routes';
@@ -25,7 +28,7 @@ import Home from './views/pages/home';
 
 // Dynamic routes shared by every runtime (Bun.serve, edge fetch handler).
 // Static assets are NOT here: each runtime serves them its own way.
-// Abuse protection: the demo gate (email OTP + per-email quota) wraps the
+// Abuse protection: the public instance gate (email OTP + per-email quota) wraps the
 // search handlers below when a Plunk key arms it; the WAF rule and service
 // guards stay the outer layers. /api/status and assets stay open.
 export const createRoutes = () => ({
@@ -95,17 +98,9 @@ export const createRoutes = () => ({
             return denied;
           }
           const quota = await consumeQuota(email);
-          if ('doError' in quota || !quota.verdict.allowed) {
-            const message =
-              'doError' in quota
-                ? 'Quota check unavailable, try again shortly.'
-                : `Demo quota reached. Try again in ${quota.verdict.retryAfterSec}s.`;
-            const html = renderSSR(h(ErrorMessage, { message }));
-            return new Response(html, {
-              headers: { 'Content-Type': 'text/html' },
-              status: 'doError' in quota ? 503 : 429,
-            });
-          }
+          if ('doError' in quota) return quotaUnavailableResponse(false);
+          if (!quota.verdict.allowed)
+            return quotaExceededResponse(quota.verdict, false);
         }
 
         const searchResult = id
@@ -150,15 +145,20 @@ export const createRoutes = () => ({
         const { link } = result.data.body;
 
         if (identity !== null) {
-          const quotaDeny = await checkSearchQuota(identity);
+          const quotaDeny = await checkSearchQuota(identity, false);
           if (quotaDeny) return quotaDeny;
         }
 
         const searchResult = await search({ link, headless: false });
         const html = renderSSR(h(SearchCard, { searchResult }));
 
+        // The shareable URL follows the result in the same response; no
+        // client URL hack needed.
         return new Response(html, {
-          headers: { 'Content-Type': 'text/html' },
+          headers: {
+            'Content-Type': 'text/html',
+            'HX-Replace-Url': `/?id=${searchResult.id}`,
+          },
         });
       } catch (err) {
         let message = 'Something went wrong, please try again later.';
@@ -171,17 +171,24 @@ export const createRoutes = () => ({
         } else if (err instanceof ValidationError) {
           message = err.message;
           statusCode = 400;
-        } else if (err instanceof Error) {
-          if (err.message) {
-            message = err.message;
-          }
         }
+        // Unknown errors keep the generic message: err.message may carry
+        // upstream internals. It still reaches the logs below.
 
         logger.error(`[route /search]: ${message}`);
         logger.error(err);
 
+        // htmx 4 swaps error bodies into the target: web failures must be
+        // fragments, never JSON. (API clients use /api/search instead.)
         if (statusCode === 400 || statusCode === 401 || statusCode === 429) {
-          return Response.json({ message }, { status: statusCode });
+          if (wantsJson(req)) {
+            return Response.json({ message }, { status: statusCode });
+          }
+          const html = renderSSR(h(ErrorMessage, { message }));
+          return new Response(html, {
+            headers: { 'Content-Type': 'text/html' },
+            status: statusCode,
+          });
         }
 
         const html = renderSSR(h(ErrorMessage, { message }));
@@ -212,7 +219,7 @@ export const createRoutes = () => ({
         const { link, adapters } = result.data.body;
 
         if (identity !== null) {
-          const quotaDeny = await checkSearchQuota(identity);
+          const quotaDeny = await checkSearchQuota(identity, true);
           if (quotaDeny) return quotaDeny;
         }
 

@@ -60,8 +60,12 @@ describe('Static routes and shell', () => {
 
     const htmxScript = doc('script[src*="htmx.org"]').toArray();
     expect(htmxScript).toHaveLength(1);
-    expect(htmxScript[0].attribs['src']).toContain('htmx.org@2.0.10');
+    expect(htmxScript[0].attribs['src']).toContain('htmx.org@4.0.0');
     expect(htmxScript[0].attribs['integrity']).toMatch(/^sha384-/);
+
+    // Mobile-first shell: skeleton placeholder, zoomable viewport.
+    expect(html).toContain('id="search-skeleton"');
+    expect(html).not.toContain('user-scalable=no');
 
     expect(html).not.toContain('umami');
   });

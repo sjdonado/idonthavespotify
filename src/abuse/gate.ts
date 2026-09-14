@@ -64,7 +64,7 @@ export async function requireGateIdentity(
   json: boolean
 ): Promise<string | Response | null> {
   if (!isGateEnabled()) return null;
-  if (!sessionSecret()) return gateMisconfiguredResponse();
+  if (!sessionSecret()) return gateMisconfiguredResponse(json);
   const email = await getVerifiedEmail(req);
   if (!email) return unauthenticatedResponse(json);
   return email;
@@ -72,11 +72,13 @@ export async function requireGateIdentity(
 
 // Quota only (429/503). Call after input validation: bad input burns nothing.
 export async function checkSearchQuota(
-  normalizedEmail: string
+  normalizedEmail: string,
+  json: boolean
 ): Promise<Response | null> {
   const quota = await consumeQuota(normalizedEmail);
-  if ('doError' in quota) return quotaUnavailableResponse();
-  if (!quota.verdict.allowed) return quotaExceededResponse(quota.verdict);
+  if ('doError' in quota) return quotaUnavailableResponse(json);
+  if (!quota.verdict.allowed)
+    return quotaExceededResponse(quota.verdict, json);
   return null;
 }
 
@@ -113,34 +115,59 @@ export const wantsJson = (req: Request): boolean =>
   req.headers.get('accept')?.includes('application/json') === true ||
   req.headers.get('content-type')?.includes('application/json') === true;
 
-export const unauthenticatedResponse = (json: boolean): Response =>
-  json
-    ? Response.json(
-        { error: 'Verify your email to use this demo.', auth: 'email-otp' },
-        { status: 401 }
-      )
-    : Response.json(
-        { message: 'Verify your email to use this demo.', auth: 'email-otp' },
-        { status: 401 }
-      );
+export const esc = (s: string): string =>
+  s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 
-export const quotaExceededResponse = (verdict: QuotaVerdict): Response =>
-  Response.json(
-    {
-      error: `Demo quota reached. Try again in ${verdict.retryAfterSec}s.`,
-      retryAfter: verdict.retryAfterSec,
-    },
-    {
-      status: 429,
-      headers: { 'Retry-After': String(verdict.retryAfterSec) },
-    }
+// Web-flow error fragment: htmx 4 swaps 4xx/5xx bodies into the target, so
+// web errors must be HTML, never JSON. Same centered style as ErrorMessage.
+const webErrorFragment = (message: string): string =>
+  `<p class="mt-8 text-center" role="alert">${esc(message)}</p>`;
+
+const webError = (message: string, status: number, headers?: HeadersInit): Response =>
+  new Response(webErrorFragment(message), {
+    status,
+    headers: { 'Content-Type': 'text/html', ...headers },
+  });
+
+export const unauthenticatedResponse = (json: boolean): Response => {
+  if (json) {
+    return Response.json(
+      { error: 'Verify your email to use the public instance.', auth: 'email-otp' },
+      { status: 401 }
+    );
+  }
+  return new Response(
+    `<p class="mt-8 text-center" role="alert">Verify your email to use the public instance. <a class="underline" href="/">Get a code</a>.</p>`,
+    { status: 401, headers: { 'Content-Type': 'text/html' } }
   );
+};
 
-export const quotaUnavailableResponse = (): Response =>
-  Response.json(
-    { error: 'Quota check unavailable, try again shortly.' },
-    { status: 503 }
+export const quotaExceededResponse = (
+  verdict: QuotaVerdict,
+  json = true
+): Response => {
+  const message = `Public instance quota reached. Try again in ${verdict.retryAfterSec}s.`;
+  const headers = { 'Retry-After': String(verdict.retryAfterSec) };
+  if (!json) return webError(message, 429, headers);
+  return Response.json(
+    { error: message, retryAfter: verdict.retryAfterSec },
+    { status: 429, headers }
   );
+};
 
-export const gateMisconfiguredResponse = (): Response =>
-  Response.json({ error: 'Demo gate is misconfigured, try again later.' }, { status: 503 });
+export const quotaUnavailableResponse = (json = true): Response => {
+  const message = 'Quota check unavailable, try again shortly.';
+  if (!json) return webError(message, 503);
+  return Response.json({ error: message }, { status: 503 });
+};
+
+export const gateMisconfiguredResponse = (json = true): Response => {
+  const message = 'Public instance login is misconfigured, try again later.';
+  if (!json) return webError(message, 503);
+  return Response.json({ error: message }, { status: 503 });
+};

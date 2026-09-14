@@ -51,7 +51,7 @@ export function checkEmailPolicy(input: string): EmailCheck {
     return { ok: false, error: 'Enter a valid email address.' };
   }
   if (!ALLOWED_EMAIL_DOMAINS.has(domain)) {
-    return { ok: false, error: 'Only popular mailbox providers are accepted on this demo.' };
+    return { ok: false, error: 'Only popular mailbox providers are accepted on the public instance.' };
   }
   return { ok: true, normalized: normalizeEmail(email) };
 }

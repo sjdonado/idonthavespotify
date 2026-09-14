@@ -2,9 +2,10 @@ import { ENV } from '~/config/env';
 import { requestCodeSchema, verifyCodeSchema } from '~/schemas/auth.schema';
 import { logger } from '~/utils/logger';
 import { firstValidationMessage } from '~/utils/zod';
+import { primaryButtonFullClass } from '~/views/components/button';
 
 import { checkEmailPolicy } from './email';
-import { isGateEnabled, wantsJson } from './gate';
+import { esc, isGateEnabled, wantsJson } from './gate';
 import { issueOtp, verifyOtp } from './otp';
 import {
   checkResendThrottle,
@@ -27,75 +28,138 @@ async function readBody(req: Request): Promise<Record<string, unknown> | null> {
   return null;
 }
 
-const esc = (s: string): string =>
-  s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+// Composed gate panel: heading + guidance + form, one step at a time.
+// The wrapper carries the gate Stimulus controller (focus, 6-box input,
+// resend countdown); #gate-panel itself persists across swaps and announces.
+const panelOpen = `<div data-controller="gate" class="flex w-full flex-col items-center gap-3">`;
 
-export const codeSentFragment = (email: string): string => `
-  <p class="text-sm text-zinc-400">Code sent to ${esc(email)}. It expires in about 10 minutes.</p>
-  <form hx-post="/api/auth/verify-code" hx-target="#gate-panel" hx-swap="innerHTML" class="flex w-full max-w-3xl items-center justify-center px-2">
-    <input type="hidden" name="email" value="${esc(email)}" />
-    <label for="otp-code" class="sr-only">Code</label>
-    <input id="otp-code" type="text" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required
-      class="flex-1 rounded-lg bg-zinc-700 p-2.5 text-base font-normal text-white placeholder:text-zinc-400"
-      placeholder="123456" />
-    <button type="submit" class="ml-2 rounded-lg border border-green-500 bg-green-500 p-2.5 text-sm font-medium text-black">Verify</button>
-  </form>`;
+export const emailFormFragment = (
+  email = '',
+  error = '',
+  countdownSec = 0
+): string => `
+  ${panelOpen}
+    <h2 class="text-center text-2xl font-light uppercase text-white md:text-3xl">Welcome</h2>
+    <p class="text-center text-sm text-zinc-400">Try the public instance. It runs on free tiers, so we ask for your email to confirm you are human and track fair use. Never marketing. We will send a 6-digit code, and your session lasts 30 days.</p>
+    ${error ? `<p class="text-center text-sm text-red-400" role="alert">${esc(error)}</p>` : ''}
+    ${countdownSec > 0 ? `<p class="text-center text-sm text-zinc-400" data-gate-target="countdown" data-gate-seconds-value="${countdownSec}">Try again in ${countdownSec}s.</p>` : ''}
+    <form hx-post="/api/auth/request-code" hx-target="#gate-panel" hx-swap="innerHTML" class="flex w-full flex-col gap-2">
+      <label for="gate-email" class="sr-only">Email</label>
+      <input id="gate-email" type="email" name="email" required value="${esc(email)}"
+        class="min-h-[48px] w-full rounded-lg bg-zinc-700 p-2.5 text-base font-normal text-white placeholder:text-zinc-400"
+        placeholder="you@gmail.com" />
+      <button type="submit" class="${primaryButtonFullClass}">Get code</button>
+    </form>
+  </div>`;
+
+const codeBoxes = (email: string, code = ''): string => `
+  <div class="grid w-full grid-cols-6 gap-2" role="group" aria-label="6-digit code">
+    ${[0, 1, 2, 3, 4, 5]
+      .map(
+        i => `<input type="text" data-gate-target="box" data-action="input->gate#fill keydown->gate#move paste->gate#split"
+          inputmode="numeric" pattern="[0-9]" maxlength="1" autocomplete="${i === 0 ? 'one-time-code' : 'off'}" aria-label="Digit ${i + 1}" value="${esc(code[i] ?? '')}"
+          class="h-14 rounded-lg bg-zinc-700 text-center text-2xl font-normal text-white focus:outline-none focus:ring-1 focus:ring-white" />`
+      )
+      .join('')}
+  </div>
+  <input type="hidden" name="email" value="${esc(email)}" />
+  <input type="hidden" name="code" data-gate-target="code" value="${esc(code)}" />
+  <noscript>
+    <label class="sr-only" for="otp-code-fallback">Code</label>
+    <input id="otp-code-fallback" type="text" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6"
+      class="min-h-[48px] w-full rounded-lg bg-zinc-700 p-2.5 text-center text-base text-white" placeholder="123456" />
+  </noscript>`;
+
+const codeFormFragment = (email: string, error = '', code = ''): string => `
+  ${panelOpen}
+    <h2 class="text-lg font-medium">Check your inbox</h2>
+    <p class="text-center text-sm text-zinc-400">Code sent to ${esc(email)}. It expires in about 10 minutes.</p>
+    ${error ? `<p class="text-center text-sm text-red-400" role="alert">${esc(error)}</p>` : ''}
+    <form hx-post="/api/auth/verify-code" hx-target="#gate-panel" hx-swap="innerHTML" class="flex w-full flex-col items-center gap-3">
+      ${codeBoxes(email, code)}
+      <button type="submit" class="${primaryButtonFullClass}">Verify</button>
+    </form>
+  </div>`;
+
+const webFormError = (
+  fragment: string,
+  status: number,
+  headers?: HeadersInit
+): Response =>
+  new Response(fragment, {
+    status,
+    headers: { 'Content-Type': 'text/html', ...headers },
+  });
+
+export const codeSentFragment = (email: string): string =>
+  codeFormFragment(email);
 
 export async function requestCodeHandler(req: Request): Promise<Response> {
   const json = wantsJson(req);
   if (!isGateEnabled()) {
     return json
       ? Response.json({ error: 'Gate is disabled.' }, { status: 400 })
-      : new Response('Gate is disabled.', { status: 400 });
+      : webFormError(emailFormFragment('', 'Gate is disabled.'), 400);
   }
 
-  const parsed = requestCodeSchema.safeParse({ body: await readBody(req) });
+  const raw = await readBody(req);
+  const typedEmail =
+    raw && typeof raw['email'] === 'string' ? raw['email'] : '';
+  const parsed = requestCodeSchema.safeParse({ body: raw });
   if (!parsed.success) {
     const message = firstValidationMessage(parsed.error);
     return json
       ? Response.json({ error: message }, { status: 400 })
-      : new Response(message, { status: 400 });
+      : webFormError(emailFormFragment(typedEmail, message), 400);
   }
 
   const policy = checkEmailPolicy(parsed.data.body.email);
   if (!policy.ok) {
     return json
       ? Response.json({ error: policy.error }, { status: 400 })
-      : new Response(policy.error, { status: 400 });
+      : webFormError(
+          emailFormFragment(parsed.data.body.email, policy.error),
+          400
+        );
   }
 
   // Fail closed when misconfigured: codes must verify and need a template.
   const secret = ENV.abuse.sessionSecret;
   if (!secret || !ENV.abuse.plunkTemplateId) {
+    const message = 'Public instance login is misconfigured, try again later.';
     return json
-      ? Response.json({ error: 'Demo gate is misconfigured, try again later.' }, { status: 503 })
-      : new Response('Demo gate is misconfigured, try again later.', { status: 503 });
+      ? Response.json({ error: message }, { status: 503 })
+      : webFormError(
+          emailFormFragment(parsed.data.body.email, message),
+          503
+        );
   }
 
   // Throttle before the Plunk backstop: throttled resends cost no subrequest.
   const waitSec = checkResendThrottle(policy.normalized);
   if (waitSec > 0) {
+    const message = `Code already sent. Try again in ${waitSec}s.`;
+    const headers = { 'Retry-After': String(waitSec) };
     return json
       ? Response.json(
-          { error: `Code already sent. Try again in ${waitSec}s.`, retryAfter: waitSec },
-          { status: 429, headers: { 'Retry-After': String(waitSec) } }
+          { error: message, retryAfter: waitSec },
+          { status: 429, headers }
         )
-      : new Response(`Code already sent. Try again in ${waitSec}s.`, {
-          status: 429,
-          headers: { 'Retry-After': String(waitSec) },
-        });
+      : webFormError(
+          emailFormFragment(parsed.data.body.email, message, waitSec),
+          429,
+          headers
+        );
   }
 
   const backstop = await verifyEmailWithPlunk(policy.normalized);
   if (!backstop.ok) {
     return json
       ? Response.json({ error: backstop.error }, { status: 400 })
-      : new Response(backstop.error, { status: 400 });
+      : webFormError(
+          emailFormFragment(parsed.data.body.email, backstop.error),
+          400
+        );
   }
 
   const code = await issueOtp(policy.normalized, secret);
@@ -103,9 +167,13 @@ export async function requestCodeHandler(req: Request): Promise<Response> {
     await sendOtpEmail(policy.normalized, code);
   } catch (err) {
     logger.error(`[abuse] Plunk send failed: ${err}`);
+    const message = 'Could not send the code, try again later.';
     return json
-      ? Response.json({ error: 'Could not send the code, try again later.' }, { status: 502 })
-      : new Response('Could not send the code, try again later.', { status: 502 });
+      ? Response.json({ error: message }, { status: 502 })
+      : webFormError(
+          emailFormFragment(parsed.data.body.email, message),
+          502
+        );
   }
   markSent(policy.normalized);
 
@@ -121,36 +189,52 @@ export async function verifyCodeHandler(req: Request): Promise<Response> {
   if (!isGateEnabled()) {
     return json
       ? Response.json({ error: 'Gate is disabled.' }, { status: 400 })
-      : new Response('Gate is disabled.', { status: 400 });
+      : webFormError(emailFormFragment('', 'Gate is disabled.'), 400);
   }
 
-  const parsed = verifyCodeSchema.safeParse({ body: await readBody(req) });
+  const raw = await readBody(req);
+  const typedEmail =
+    raw && typeof raw['email'] === 'string' ? raw['email'] : '';
+  const parsed = verifyCodeSchema.safeParse({ body: raw });
   if (!parsed.success) {
     const message = firstValidationMessage(parsed.error);
     return json
       ? Response.json({ error: message }, { status: 400 })
-      : new Response(message, { status: 400 });
+      : webFormError(
+          typedEmail
+            ? codeFormFragment(typedEmail, message)
+            : emailFormFragment('', message),
+          400
+        );
   }
 
   const policy = checkEmailPolicy(parsed.data.body.email);
   if (!policy.ok) {
     return json
       ? Response.json({ error: policy.error }, { status: 400 })
-      : new Response(policy.error, { status: 400 });
+      : webFormError(
+          emailFormFragment(parsed.data.body.email, policy.error),
+          400
+        );
   }
 
   const secret = ENV.abuse.sessionSecret;
   if (!secret) {
+    const message = 'Public instance login is misconfigured, try again later.';
     return json
-      ? Response.json({ error: 'Demo gate is misconfigured, try again later.' }, { status: 503 })
-      : new Response('Demo gate is misconfigured, try again later.', { status: 503 });
+      ? Response.json({ error: message }, { status: 503 })
+      : webFormError(codeFormFragment(policy.normalized, message), 503);
   }
 
   const valid = await verifyOtp(policy.normalized, parsed.data.body.code, secret);
   if (!valid) {
+    const message = 'Invalid or expired code.';
     return json
-      ? Response.json({ error: 'Invalid or expired code.' }, { status: 400 })
-      : new Response('Invalid or expired code.', { status: 400 });
+      ? Response.json({ error: message }, { status: 400 })
+      : webFormError(
+          codeFormFragment(policy.normalized, message, parsed.data.body.code),
+          400
+        );
   }
 
   const { token } = await issueSessionToken(policy.normalized, secret);

@@ -74,6 +74,8 @@ describe('Email OTP gate', () => {
       body: formDataFromObject({ link: LINK }),
     });
     expect(web.status).toBe(401);
+    expect(web.headers.get('content-type')).toContain('text/html');
+    expect(await web.text()).toContain('Verify your email');
 
     // Gate runs before validation: no validity oracle for strangers.
     const invalid = await nodeFetch(searchEndpointUrl, {
@@ -90,7 +92,13 @@ describe('Email OTP gate', () => {
     const page = await nodeFetch(`${app.url}?id=whatever`);
     expect(page.status).toBe(401);
     expect(page.headers.get('x-auth-required')).toBe('email-otp');
-    expect(await page.text()).toContain('gate-panel');
+    const pageHtml = await page.text();
+    expect(pageHtml).toContain('gate-modal');
+    expect(pageHtml).toContain('gate-panel');
+    // Modal card carries its own welcome + footer: the page footer sits
+    // under the backdrop.
+    expect(pageHtml).toContain('Welcome');
+    expect(pageHtml).toContain('Source');
   });
 
   it('requests, throttles, and verifies codes', async () => {
@@ -139,6 +147,48 @@ describe('Email OTP gate', () => {
       });
       expect(response.status).toBe(400);
     }
+  });
+
+  it('returns the email form with an inline error for web failures', async () => {
+    const response = await nodeFetch(`${app.url}api/auth/request-code`, {
+      method: 'POST',
+      body: formDataFromObject({ email: 'name+tag@gmail.com' }),
+    });
+    expect(response.status).toBe(400);
+    expect(response.headers.get('content-type')).toContain('text/html');
+
+    const data = await response.text();
+    // Form survives with the value retained, error renders inline.
+    // (The footer lives outside the swap target, so it is asserted on the
+    // initial gate page instead.)
+    expect(data).toContain('id="gate-email"');
+    expect(data).toContain('name+tag@gmail.com');
+    expect(data).toContain('role="alert"');
+    expect(data).toContain('Plus-aliases');
+    expect(data).toContain('Welcome');
+  });
+
+  it('returns the code form with an inline error for a wrong web code', async () => {
+    const email = 'web.user@gmail.com';
+    const requested = await nodeFetch(`${app.url}api/auth/request-code`, {
+      method: 'POST',
+      body: formDataFromObject({ email }),
+    });
+    expect(requested.status).toBe(200);
+
+    const wrong = await nodeFetch(`${app.url}api/auth/verify-code`, {
+      method: 'POST',
+      body: formDataFromObject({ email, code: '000000' }),
+    });
+    expect(wrong.status).toBe(400);
+    expect(wrong.headers.get('content-type')).toContain('text/html');
+
+    const data = await wrong.text();
+    // 6-box code form survives, error renders inline.
+    expect(data).toContain('data-gate-target="box"');
+    expect(data).toContain('name="code"');
+    expect(data).toContain('role="alert"');
+    expect(data).toContain('Invalid or expired code.');
   });
 
   it('enforces the per-email quota and surfaces it on status', async () => {

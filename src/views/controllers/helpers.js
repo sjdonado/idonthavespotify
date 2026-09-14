@@ -1,30 +1,43 @@
-import { Notyf } from 'notyf';
-
-/** @type {Notyf | undefined} */
-let _toast;
+/** @type {HTMLElement | undefined} */
+let container;
 
 /**
- * Initializes and returns a Notyf instance for displaying toast notifications.
- *
- * @returns {Notyf} The Notyf instance for toast notifications.
+ * Dependency-free replacement for Notyf: toasts confirm outcomes only.
+ * Field and action failures render inline and never toast; the one
+ * exception is a failed copy itself, which has no inline surface to land
+ * on, so the failure to confirm still toasts.
  */
-export const toast = () => {
-  if (_toast) return _toast;
+const ensureContainer = () => {
+  if (container) return container;
 
-  _toast = new Notyf({
-    ripple: false,
-    dismissible: true,
-    duration: 2000,
-    types: [
-      {
-        type: 'success',
-        background: 'black',
-      },
-    ],
-  });
+  container = document.createElement('div');
+  container.setAttribute('aria-live', 'polite');
+  container.className =
+    'pointer-events-none fixed bottom-4 left-1/2 z-50 flex w-full max-w-sm -translate-x-1/2 flex-col items-center gap-2 px-4';
+  document.body.appendChild(container);
 
-  return _toast;
+  return container;
 };
+
+/**
+ * @param {string} message
+ * @param {boolean} ok
+ */
+const show = (message, ok) => {
+  const toast = document.createElement('p');
+  toast.className = `pointer-events-auto w-full rounded-lg border px-4 py-3 text-center text-sm font-normal shadow-lg ${
+    ok ? 'border-green-500 bg-zinc-900 text-white' : 'border-red-500 bg-zinc-900 text-white'
+  }`;
+  toast.textContent = message;
+  ensureContainer().appendChild(toast);
+
+  setTimeout(() => toast.remove(), 2000);
+};
+
+export const toast = () => ({
+  success: message => show(message, true),
+  error: message => show(message, false),
+});
 
 /**
  * Copies the provided link to the clipboard and shows a success toast notification.

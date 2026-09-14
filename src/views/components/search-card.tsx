@@ -60,26 +60,39 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
           />
         )}
         <div class="flex flex-col gap-1">
-          <h3 class="hyphens-auto text-lg font-normal md:text-start md:text-2xl">
+          <h3
+            title={props.searchResult.title}
+            class="hyphens-auto text-lg font-normal line-clamp-2 md:text-start md:text-2xl"
+          >
             {props.searchResult.title}
           </h3>
-          <p class="text-sm text-zinc-400">{props.searchResult.description}</p>
+          <p title={props.searchResult.description} class="text-sm text-zinc-400 line-clamp-2">
+            {props.searchResult.description}
+          </p>
           <div class="mt-2 flex gap-2">
             {props.searchResult.audio && (
               <button
                 data-action="search-card#toggleAudio"
                 type="button"
-                class="relative flex items-center justify-center gap-2 rounded-lg bg-zinc-700 px-3 py-1 text-sm font-semibold"
+                aria-label="Play preview"
+                class="relative flex h-9 w-9 items-center justify-center rounded-full bg-zinc-700 focus:outline-none focus:ring-1 focus:ring-white"
               >
-                <i data-search-card-target="icon" class="ti ti-player-play-filled w-3" />
-                Audio Preview
-                <div class="absolute bottom-0 left-0 mx-[0.3rem] my-[0.01rem] hidden h-[0.15rem] w-[93%] rounded-lg bg-zinc-600 duration-300 ease-in-out">
-                  <div
+                <svg viewBox="0 0 48 48" aria-hidden="true" class="absolute inset-0 h-full w-full -rotate-90">
+                  <circle cx="24" cy="24" r="20" fill="none" stroke="#3f3f46" stroke-width="3" />
+                  <circle
                     data-search-card-target="audioProgress"
-                    class="h-full rounded-lg bg-white"
-                    style={{ width: '0%' }}
-                  ></div>
-                </div>
+                    cx="24"
+                    cy="24"
+                    r="20"
+                    fill="none"
+                    stroke="#22c55e"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-dasharray="125.66"
+                    stroke-dashoffset="125.66"
+                  />
+                </svg>
+                <i data-search-card-target="icon" class="ti ti-player-play-filled" />
               </button>
             )}
             <button
@@ -100,29 +113,29 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
           </p>
         )}
         {props.searchResult.links.length > 0 && (
-          <ul class="w-full">
+          <ul class="grid w-full grid-cols-2 gap-2 sm:grid-cols-3">
             {props.searchResult.links.map(({ type, url, isVerified, notAvailable }) => {
               const searchResult = SEARCH_LINK_DICT[type];
+              const shortLabel = searchResult.label.replace('Listen on ', '');
               return (
                 <li
                   data-controller="search-link"
                   data-search-link-url-value={url}
-                  class={`flex items-center justify-between gap-1 rounded-lg p-2 ${notAvailable ? 'pointer-events-none text-zinc-400' : 'hover:bg-zinc-700'}`}
+                  class={`flex min-h-[56px] items-center gap-1 rounded-xl bg-zinc-900 py-1 pl-3 pr-1 ${notAvailable ? 'pointer-events-none opacity-60' : ''}`}
                 >
                   <a
                     href={url}
                     target="_blank"
                     rel="noreferrer"
                     aria-label={searchResult.label}
-                    class="flex items-center"
+                    title={notAvailable ? `${shortLabel} (not available)` : shortLabel}
+                    class="flex min-w-0 flex-1 items-center"
                   >
-                    <i class={`${searchResult.icon} text-lg`} />
-                    <p class="ml-2 underline decoration-0 underline-offset-2">
-                      {searchResult.label}
-                    </p>
+                    <i class={`${searchResult.icon} shrink-0 text-xl`} />
+                    <span class="ml-2 truncate text-sm">{shortLabel}</span>
                     {isVerified && (
                       <span
-                        class="ml-1 inline-flex items-center justify-center rounded-full bg-green-500 p-1 text-[0.56rem] text-black"
+                        class="ml-1 inline-flex shrink-0 items-center justify-center rounded-full bg-green-500 p-1 text-[0.56rem] text-black"
                         aria-label="Verified"
                       >
                         <i class="ti ti-check" />
@@ -130,12 +143,17 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
                     )}
                   </a>
                   {notAvailable ? (
-                    <span class="ml-1 rounded-md p-1 text-xs" aria-label="Not available">
-                      Not available
+                    <span class="mr-2 shrink-0 text-xs text-zinc-400" aria-label="Not available">
+                      N/A
                     </span>
                   ) : (
-                    <button type="button" data-action="search-link#share">
-                      <i class="ti ti-copy px-2" />
+                    <button
+                      type="button"
+                      data-action="search-link#share"
+                      aria-label={`Copy ${shortLabel} link`}
+                      class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg focus:outline-none focus:ring-1 focus:ring-white"
+                    >
+                      <i class="ti ti-copy" />
                     </button>
                   )}
                 </li>

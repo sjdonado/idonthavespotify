@@ -1,10 +1,10 @@
-@import 'notyf/notyf.min.css';
 @import 'tailwindcss';
 
 html {
   font-family: 'Poppins', sans-serif;
   font-weight: normal;
   font-style: normal;
+  color-scheme: dark;
 }
 
 @layer components {
@@ -30,6 +30,39 @@ html {
     transition: opacity 100ms ease-in !important;
   }
 
+  /* Hero/results home layout: the server renders the starting class from
+     result presence; a submit action compacts the hero before results land.
+     NOTE: the rules live UNLAYERED at the bottom of this file on purpose.
+     Tailwind v4 puts utilities in a later layer, and layers beat
+     specificity, so components-layer rules could never override the
+     `justify-center` / `hidden` utilities in markup. Unlayered CSS wins. */
+
+  /* Skeleton placeholder: hidden until htmx marks it requested (also
+     unlayered: must beat the `hidden` utility). */
+  #search-skeleton {
+    display: none;
+  }
+
+  #search-skeleton.htmx-request {
+    display: flex;
+  }
+
+  /* In-flight forms go quiet instead of double-submitting. */
+  form.htmx-request {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .htmx-indicator {
+      transition: none !important;
+    }
+
+    .animate-loading-bar {
+      animation: none;
+    }
+  }
+
   .animate-loading-bar {
     animation: loading 2s linear infinite;
   }
@@ -43,4 +76,18 @@ html {
       left: 100%;
     }
   }
+}
+
+/* Unlayered overrides (see note above): these must beat Tailwind utilities. */
+#home-main.home-hero {
+  justify-content: center;
+}
+
+#home-main.home-hero .home-title {
+  font-size: clamp(2.75rem, 9vw, 4.75rem);
+  line-height: 1.05;
+}
+
+#home-main.has-results {
+  justify-content: flex-start;
 }
