@@ -90,8 +90,9 @@ Self-hosted instances skip the Cloudflare rule but read the warning below: the a
 
 - Rule name: `idhs-demo-abuse-guard`
 - Expression: `(http.request.uri.path in {"/" "/search" "/api/search"})`
-- Characteristics: IP; period: 1 minute; threshold: 60 requests
+- Characteristics: IP; Requests: 10; Period: 10 seconds (free plans only offer the 10-second period — 10 per 10s matches the same ~60/min abuse-level pace)
 - Action: Block (exceeding clients get an error response; confirm the exact status in the dashboard preview)
+- For duration: 10 seconds (or the longest the dropdown offers)
 
 The threshold is deliberately abuse-level, not UX-level: no human pasting links hits 60/min. There are no friendly in-app 429s anymore; floods die at the edge before consuming worker quota or subrequests, and per-service circuit breakers stay the final fuse for upstream quotas. Keep Bot Fight Mode on (free) for known-bot junk, and tighten or add Under Attack Mode only as incident response.
 
