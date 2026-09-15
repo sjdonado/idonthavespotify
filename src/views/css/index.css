@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import 'toastify-js/src/toastify.css';
 
 html {
   font-family: 'Poppins', sans-serif;

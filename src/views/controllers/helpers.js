@@ -1,5 +1,4 @@
 import Toastify from 'toastify-js';
-import 'toastify-js/src/toastify.css';
 
 /**
  * Toast notifications via toastify-js (zero-dep): red is the default theme

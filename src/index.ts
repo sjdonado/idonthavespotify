@@ -30,7 +30,6 @@ export const createApp = (port: string = '0') =>
         file(join(publicDir, 'assets/favicon.ico'))
       ),
       '/assets/index.js': new Response(file(join(publicDir, 'assets/index.js'))),
-      '/assets/index.css': new Response(file(join(publicDir, 'assets/index.css'))),
       '/assets/index.min.css': new Response(
         file(join(publicDir, 'assets/index.min.css'))
       ),

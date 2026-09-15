@@ -23,14 +23,6 @@ describe('Static routes and shell', () => {
     expect(response.headers.get('content-type')).toContain('text/css');
   });
 
-  it('serves the toast stylesheet bundled with the client script', async () => {
-    const response = await nodeFetch(`${app.url}assets/index.css`);
-
-    expect(response.status).toBe(200);
-    expect(response.headers.get('content-type')).toContain('text/css');
-    await expect(response.text()).resolves.toContain('.toastify');
-  });
-
   it('serves the built client script', async () => {
     const response = await nodeFetch(`${app.url}assets/index.js`);
 

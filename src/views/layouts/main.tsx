@@ -61,7 +61,6 @@ const MainLayout = ({ title, description, image, children }: MainLayoutProps) =>
           crossorigin="anonymous"
         ></script>
 
-        <link href="/assets/index.css" rel="stylesheet" />
         <link href="/assets/index.min.css" rel="stylesheet" />
       </Helmet>
 
