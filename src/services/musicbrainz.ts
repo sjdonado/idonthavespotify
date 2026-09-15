@@ -251,7 +251,12 @@ export async function resolveMusicBrainzLinks({
 
   try {
     const hit = await searchMbids(metadata, query);
-    if (!hit) return [];
+    // A clean no-match is a healthy response, not a failure: reset the
+    // failure count so misses can't trip the circuit on their own.
+    if (!hit) {
+      guard.recordSuccess();
+      return [];
+    }
 
     const resolved: SearchResultLink[] = [];
     for (const mbid of hit.mbids) {
