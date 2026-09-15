@@ -91,6 +91,14 @@ html {
   white-space: nowrap;
 }
 
+/* Only below 380px the fixed title would overflow: scale it to fit instead
+   of wrapping or scrolling. Wider phones keep the exact approved size. */
+@media (max-width: 380px) {
+  #home-main .home-title {
+    font-size: 8.3vw;
+  }
+}
+
 #home-main.has-results {
   justify-content: flex-start;
 }
