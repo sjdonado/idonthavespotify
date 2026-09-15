@@ -15,7 +15,7 @@ Then adapters take that query and search each destination platform for the best 
 | Adapter          | Inverted Search | Official API           | Verified Links |
 | ---------------- | --------------- | ---------------------- | -------------- |
 | Spotify          | Yes             | No                     | Yes            |
-| Tidal            | No              | No                     | Yes            |
+| Tidal            | Yes (fallback)  | No                     | Yes            |
 | YouTube Music    | Yes             | No                     | Yes            |
 | Apple Music      | Yes             | No                     | Yes            |
 | Deezer           | Yes             | Yes                    | Yes            |
@@ -24,7 +24,7 @@ Then adapters take that query and search each destination platform for the best 
 | Bandcamp         | Yes             | No                     | Yes            |
 | Pandora          | Yes             | No                     | Yes            |
 
-"Inverted search" means the adapter can be a search target. A few notes on the ones that behave unusually: Spotify has no usable official API for this project, so search runs through the same internal GraphQL API the Spotify web player uses, with an anonymous access token minted by a TOTP flow (more on that below). Tidal is parse-only: pasting a Tidal link works, but the app no longer searches Tidal as a destination, because Tidal's search API requires a portal-granted entitlement this project was never given and its pages sit behind a bot wall. Apple Music on the edge resolves through its catalog pages with no audio preview.
+"Inverted search" means the adapter can be a search target. A few notes on the ones that behave unusually: Spotify has no usable official API for this project, so search runs through the same internal GraphQL API the Spotify web player uses, with an anonymous access token minted by a TOTP flow (more on that below). Tidal has no usable search of its own for this project (its API needs a portal-granted entitlement that was refused, and its pages sit behind a bot wall), so it resolves through a MusicBrainz fallback instead: the work is matched by title and artist, and its curated streaming links fill whichever adapters missed, Tidal included. Apple Music on the edge resolves through its catalog pages with no audio preview.
 
 ## The web app and the Raycast extension
 

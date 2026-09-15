@@ -25,6 +25,7 @@ import {
 import { getSpotifyMetadata, getSpotifyQueryFromMetadata } from '~/parsers/spotify';
 import { getTidalMetadata, getTidalQueryFromMetadata } from '~/parsers/tidal';
 import { getYouTubeMetadata, getYouTubeQueryFromMetadata } from '~/parsers/youtube';
+import { resolveMusicBrainzLinks } from '~/services/musicbrainz';
 import { generateId } from '~/utils/encoding';
 import { logger } from '~/utils/logger';
 import { cleanSearchQuery } from '~/utils/query';
@@ -231,6 +232,18 @@ export const search = async <T extends SearchProps>({
       })
       .filter(Boolean)
   );
+
+  // Global fallback: MusicBrainz streaming relations fill adapters that
+  // missed (including Tidal, which has no outbound adapter). Cached and
+  // verified-only; playlists/shows unsupported.
+  const present = new Set(links.map(link => link.type));
+  const missing = searchAdapters.filter(
+    adapter => adapter !== parserType && !present.has(adapter)
+  );
+  if (missing.length > 0) {
+    const fallback = await resolveMusicBrainzLinks({ query, metadata, missing });
+    links.push(...fallback);
+  }
 
   const parsedLinks = links
     .filter(link => searchAdapters.includes(link.type))

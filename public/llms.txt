@@ -49,11 +49,10 @@ Convert a streaming service link to equivalent links on other platforms.
 - `youTube`: YouTube Music
 - `deezer`: Deezer
 - `soundCloud`: SoundCloud
+- `tidal`: Tidal (via the MusicBrainz fallback below)
 - `qobuz`: Qobuz
 - `bandcamp`: Bandcamp
 - `pandora`: Pandora
-
-Tidal links are accepted as input but Tidal is not a search target (parse-only).
 
 **Supported URL Patterns:**
 
