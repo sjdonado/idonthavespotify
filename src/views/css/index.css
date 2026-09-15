@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import 'toastify-js/src/toastify.css';
 
 html {
   font-family: 'Poppins', sans-serif;
@@ -30,23 +31,6 @@ html {
     transition: opacity 100ms ease-in !important;
   }
 
-  /* Hero/results home layout: the server renders the starting class from
-     result presence; a submit action compacts the hero before results land.
-     NOTE: the rules live UNLAYERED at the bottom of this file on purpose.
-     Tailwind v4 puts utilities in a later layer, and layers beat
-     specificity, so components-layer rules could never override the
-     `justify-center` / `hidden` utilities in markup. Unlayered CSS wins. */
-
-  /* Skeleton placeholder: hidden until htmx marks it requested (also
-     unlayered: must beat the `hidden` utility). */
-  #search-skeleton {
-    display: none;
-  }
-
-  #search-skeleton.htmx-request {
-    display: flex;
-  }
-
   /* In-flight forms go quiet instead of double-submitting. */
   form.htmx-request {
     opacity: 0.7;
@@ -76,9 +60,13 @@ html {
       left: 100%;
     }
   }
+
 }
 
-/* Unlayered overrides (see note above): these must beat Tailwind utilities. */
+/* Unlayered overrides (see note above): these must beat Tailwind utilities.
+   NOTE: Tailwind v4 puts utilities in a later layer, and layers beat
+   specificity — anything here that fights a utility MUST live in this
+   unlayered block, never in @layer components. */
 #home-main.home-hero {
   justify-content: center;
 }
@@ -100,5 +88,41 @@ html {
 }
 
 #home-main.has-results {
-  justify-content: flex-start;
+  /* Safe centering: content sits centered like the hero while it fits, and
+     falls back to top-aligned (scrollable, nothing clipped) on overflow.
+     Older browsers ignore `safe` and keep today's top alignment. */
+  justify-content: safe center;
+}
+
+/* Loading placeholder: hidden until htmx marks it requested. Unlayered:
+   the `hidden` utility would otherwise win and the spinner never shows. */
+#search-skeleton {
+  display: none;
+}
+
+#search-skeleton.htmx-request {
+  display: flex;
+}
+
+/* Toast theme, UNLAYERED on purpose like the overrides above: toastify's
+   own stylesheet is unlayered, and unlayered beats layered, so a layered
+   theme would lose to its blue default. Every toast we fire is an error,
+   so red is the default theme, not a variant; the copy confirmation keeps
+   a quiet dark pill so success never shouts. */
+.toastify.idhs-toast {
+  background: #dc2626;
+  border: 1px solid #b91c1c;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 25px rgb(0 0 0 / 0.5);
+  color: #fafafa;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 400;
+  max-width: min(90vw, 360px);
+  padding: 12px 20px;
+}
+
+.toastify.idhs-toast--success {
+  background: #18181b;
+  border-color: #3f3f46;
 }
