@@ -41,15 +41,6 @@ export const YOUTUBE_SEARCH_TYPES = {
   [MetadataType.Show]: undefined,
 };
 
-const YOUTUBE_SEARCH_LINK_TYPE = (item: YoutubeSearchResponse['items'][number]) => ({
-  [MetadataType.Song]: `watch?v=${item.id.videoId}`,
-  [MetadataType.Album]: `playlist?list=${item.id.playlistId}`,
-  [MetadataType.Playlist]: `playlist?list=${item.id.playlistId}`,
-  [MetadataType.Artist]: `channel/${item.id.channelId}`,
-  [MetadataType.Podcast]: `podcast/${item.id.videoId}`,
-  [MetadataType.Show]: undefined,
-});
-
 export async function getYouTubeLink(
   query: string,
   metadata: SearchMetadata,
@@ -94,8 +85,26 @@ export async function getYouTubeLink(
 
     const candidates: MatchCandidate[] = [];
     for (const item of items) {
-      const path = YOUTUBE_SEARCH_LINK_TYPE(item)[metadata.type];
-      if (!path || path.includes('undefined')) continue;
+      const ids = item.id;
+      let path: string | undefined;
+      switch (metadata.type) {
+        case MetadataType.Song:
+          path = ids.videoId ? `watch?v=${ids.videoId}` : undefined;
+          break;
+        case MetadataType.Album:
+        case MetadataType.Playlist:
+          path = ids.playlistId ? `playlist?list=${ids.playlistId}` : undefined;
+          break;
+        case MetadataType.Artist:
+          path = ids.channelId ? `channel/${ids.channelId}` : undefined;
+          break;
+        case MetadataType.Podcast:
+          path = ids.videoId ? `podcast/${ids.videoId}` : undefined;
+          break;
+        default:
+          path = undefined;
+      }
+      if (!path) continue;
       candidates.push({
         title: item.snippet?.title ?? '',
         artist: item.snippet?.channelTitle,

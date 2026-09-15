@@ -97,6 +97,7 @@ export const search = async <T extends SearchProps>({
     Adapter.AppleMusic,
     Adapter.Deezer,
     Adapter.SoundCloud,
+    Adapter.Tidal,
     Adapter.Qobuz,
     Adapter.Bandcamp,
     Adapter.Pandora,

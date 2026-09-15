@@ -143,6 +143,7 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
                     >
                       <i class={`${searchResult.icon} shrink-0 text-xl`} />
                       <span class="ml-2 truncate text-sm">{shortLabel}</span>
+                      {isVerified && <span class="sr-only"> (verified)</span>}
                     </a>
                   )}
                   {notAvailable ? (

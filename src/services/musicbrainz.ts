@@ -57,9 +57,10 @@ function guessArtist(query: string, title: string, type: MetadataType): string {
     return '';
   }
   const idx = query.toLowerCase().indexOf(title.toLowerCase());
-  const rest = (idx < 0 ? query : query.slice(0, idx) + query.slice(idx + title.length))
+  if (idx < 0) return '';
+  const rest = (query.slice(0, idx) + query.slice(idx + title.length))
     .replace(/\s+/g, ' ')
-    .replace(/\s*\b(album|single|ep|playlist|podcast|episode|show)\b\s*/gi, ' ')
+    .replace(/\s*\b(album|single|ep|playlist|podcast|episode|show)$/i, '')
     .trim();
   return rest;
 }
@@ -103,7 +104,7 @@ async function searchMbids(
   const kind = MB_ENTITY[metadata.type];
   if (!kind) return null;
 
-  const key = `mb:search:${kind.entity}:${query}`;
+  const key = `mb:search:${kind.entity}:${metadata.type}:${query}`;
   const cached = await cacheStore.get<{ entity: string; mbids: string[] }>(key);
   if (cached) return cached;
 
@@ -128,11 +129,10 @@ async function searchMbids(
     .sort((a, b) => b.score - a.score)
     .slice(0, 3)
     .map(hit => hit.id);
-  if (mbids.length === 0) return null;
-
+  // Cache empty results briefly too: weak matches re-hit on every search.
   const hit = { entity: kind.entity, mbids };
-  await cacheStore.set(key, hit);
-  return hit;
+  await cacheStore.set(key, hit, mbids.length === 0 ? 3600 : undefined);
+  return mbids.length === 0 ? null : hit;
 }
 
 async function fetchRelations(
@@ -144,7 +144,7 @@ async function fetchRelations(
   if (cached) return cached;
 
   const data = await mbGet<{ relations?: MbRelation[] }>(
-    `${MB_API}/${entity}/${mbid}?inc=url-rels&fmt=json`
+    `${MB_API}/${entity}/${encodeURIComponent(mbid)}?inc=url-rels&fmt=json`
   );
   const rels = (data.relations ?? [])
     .map(rel => ({ type: rel.type ?? '', url: rel.url?.resource ?? '' }))
@@ -193,25 +193,27 @@ function normalizeLink(type: Adapter, raw: string): string | null {
     return parsed.toString();
   }
   if (type === Adapter.YouTube) {
-    if (parsed.hostname.toLowerCase() === 'youtu.be') {
+    const host = parsed.hostname.toLowerCase();
+    if (host === 'youtu.be') {
       const id = parsed.pathname.split('/').filter(Boolean)[0];
-      if (id) return `https://music.youtube.com/watch?v=${id}`;
-      return parsed.toString();
+      return id ? `https://music.youtube.com/watch?v=${id}` : null;
     }
     const video = parsed.searchParams.get('v');
     const list = parsed.searchParams.get('list');
     if (video) return `https://music.youtube.com/watch?v=${video}`;
     if (list) return `https://music.youtube.com/playlist?list=${list}`;
-    const channel = parsed.pathname.match(/\/(channel|@[^/]+|user\/[^/]+|c\/[^/]+)/);
-    if (channel) return `https://music.youtube.com/${channel[1]}`;
-    return parsed.toString();
+    // Channel/user/handle pages stay on youtube.com; only watch and
+    // playlist URLs move to the music host.
+    if (host === 'music.youtube.com') return parsed.toString();
+    return /\/(channel|@[^/]+|user\/[^/]+|c\/[^/]+)/.test(parsed.pathname)
+      ? parsed.toString()
+      : null;
   }
   if (type === Adapter.Tidal) {
     const match = parsed.pathname.match(
       /(?:browse\/)?(track|album|artist|playlist|mix|video)\/([\w-]+)/
     );
-    if (match) return `https://tidal.com/browse/${match[1]}/${match[2]}`;
-    return parsed.toString();
+    return match ? `https://tidal.com/browse/${match[1]}/${match[2]}` : null;
   }
   return parsed.toString();
 }
@@ -255,6 +257,9 @@ export async function resolveMusicBrainzLinks({
     for (const mbid of hit.mbids) {
       const rels = await fetchRelations(hit.entity, mbid);
       for (const rel of rels) {
+        // Only playback relations become links: lyrics pages, social
+        // profiles, and the like must never certify as verified results.
+        if (!/stream|download|purchase/i.test(rel.type)) continue;
         const link = mapRelationToLink(rel.url);
         if (!link || !missing.includes(link.type)) continue;
         if (resolved.some(existing => existing.type === link.type)) continue;
