@@ -1,5 +1,5 @@
 import type { Server } from 'bun';
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'bun:test';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test';
 
 import { cacheStore } from '~/services/cache';
 
@@ -31,10 +31,6 @@ describe('MusicBrainz fallback replaces unavailable links', () => {
 
   beforeEach(() => {
     cacheStore.reset();
-    httpMock.reset();
-  });
-
-  afterEach(() => {
     httpMock.reset();
   });
 

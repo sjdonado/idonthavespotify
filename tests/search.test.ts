@@ -782,4 +782,3 @@ describe('GET /search', () => {
     });
   });
 });
-

@@ -100,13 +100,13 @@ async function mbGet<T>(url: string): Promise<T> {
 async function searchMbids(
   metadata: SearchMetadata,
   query: string
-): Promise<{ entity: string; mbids: string[] } | null> {
+): Promise<{ entity: string; mbids: string[]; cached: boolean } | null> {
   const kind = MB_ENTITY[metadata.type];
   if (!kind) return null;
 
   const key = `mb:search:${kind.entity}:${metadata.type}:${query}`;
   const cached = await cacheStore.get<{ entity: string; mbids: string[] }>(key);
-  if (cached) return cached;
+  if (cached) return { ...cached, cached: true };
 
   const luceneParts = [`${kind.field}:"${escapeLucene(metadata.title)}"`];
   const artist = guessArtist(query, metadata.title, metadata.type);
@@ -130,7 +130,7 @@ async function searchMbids(
     .slice(0, 3)
     .map(hit => hit.id);
   // Cache empty results briefly too: weak matches re-hit on every search.
-  const hit = { entity: kind.entity, mbids };
+  const hit = { entity: kind.entity, mbids, cached: false };
   await cacheStore.set(key, hit, mbids.length === 0 ? 3600 : undefined);
   return mbids.length === 0 ? null : hit;
 }
@@ -138,10 +138,10 @@ async function searchMbids(
 async function fetchRelations(
   entity: string,
   mbid: string
-): Promise<Array<{ type: string; url: string }>> {
+): Promise<{ rels: Array<{ type: string; url: string }>; cached: boolean }> {
   const key = `mb:rels:${entity}:${mbid}`;
   const cached = await cacheStore.get<Array<{ type: string; url: string }>>(key);
-  if (cached) return cached;
+  if (cached) return { rels: cached, cached: true };
 
   const data = await mbGet<{ relations?: MbRelation[] }>(
     `${MB_API}/${entity}/${encodeURIComponent(mbid)}?inc=url-rels&fmt=json`
@@ -150,7 +150,7 @@ async function fetchRelations(
     .map(rel => ({ type: rel.type ?? '', url: rel.url?.resource ?? '' }))
     .filter(rel => rel.url.length > 0);
   await cacheStore.set(key, rels);
-  return rels;
+  return { rels, cached: false };
 }
 
 function platformFromHost(host: string): Adapter | null {
@@ -251,16 +251,20 @@ export async function resolveMusicBrainzLinks({
 
   try {
     const hit = await searchMbids(metadata, query);
-    // A clean no-match is a healthy response, not a failure: reset the
-    // failure count so misses can't trip the circuit on their own.
+    // A clean no-match is a healthy response, not a failure — but only when
+    // the service was actually probed. Silent cache hits touch nothing, so
+    // they neither reset failures nor record them.
     if (!hit) {
       guard.recordSuccess();
       return [];
     }
+    if (hit.mbids.length === 0) return [];
 
     const resolved: SearchResultLink[] = [];
+    let probed = !hit.cached;
     for (const mbid of hit.mbids) {
-      const rels = await fetchRelations(hit.entity, mbid);
+      const { rels, cached } = await fetchRelations(hit.entity, mbid);
+      if (!cached) probed = true;
       for (const rel of rels) {
         // Only playback relations become links: lyrics pages, social
         // profiles, and the like must never certify as verified results.
@@ -272,7 +276,7 @@ export async function resolveMusicBrainzLinks({
       }
       if (missing.every(adapter => resolved.some(link => link.type === adapter))) break;
     }
-    guard.recordSuccess();
+    if (probed) guard.recordSuccess();
 
     logger.info(
       `[MusicBrainz] fallback filled: ${resolved.map(link => link.type).join(',') || 'none'}`
