@@ -1,7 +1,8 @@
 import { Adapter, MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
-import type { SearchMetadata, SearchResultLink } from '~/services/search';
+import type { SearchMetadata } from '~/services/search';
+import { findBestMatch, type MatchCandidate } from '~/utils/compare';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { getServiceGuard } from '~/utils/service-guard';
@@ -23,6 +24,10 @@ interface YoutubeSearchResponse {
       videoId?: string;
       playlistId?: string;
       channelId?: string;
+    };
+    snippet?: {
+      title?: string;
+      channelTitle?: string;
     };
   }>;
 }
@@ -58,7 +63,7 @@ export async function getYouTubeLink(
     type: searchType,
     regionCode: 'US',
     q: query,
-    part: 'id',
+    part: 'id,snippet',
     safeSearch: 'none',
     key: ENV.adapters.youTube.apiKey,
   });
@@ -87,22 +92,35 @@ export async function getYouTubeLink(
       throw new Error(`No results found: ${JSON.stringify(response)}`);
     }
 
-    const link = `${ENV.adapters.youTube.musicBaseUrl}/${YOUTUBE_SEARCH_LINK_TYPE(items[0])[metadata.type]}`;
+    const candidates: MatchCandidate[] = [];
+    for (const item of items) {
+      const path = YOUTUBE_SEARCH_LINK_TYPE(item)[metadata.type];
+      if (!path || path.includes('undefined')) continue;
+      candidates.push({
+        title: item.snippet?.title ?? '',
+        artist: item.snippet?.channelTitle,
+        url: `${ENV.adapters.youTube.musicBaseUrl}/${path}`,
+      });
+    }
 
-    const searchResultLink = {
-      type: Adapter.YouTube,
-      url: link,
-      isVerified: false,
-    } as SearchResultLink;
+    const { bestMatch, highestScore } = findBestMatch(candidates, query, Adapter.YouTube);
+
+    if (!bestMatch) {
+      throw new Error('No valid matches found.');
+    }
+
+    logger.info(
+      `[YouTube] Best match score: ${highestScore.toFixed(3)} (verified: ${bestMatch.isVerified ? 'yes' : 'no'}, available: ${!bestMatch.notAvailable ? 'yes' : 'no'})`
+    );
 
     await cacheSearchResultLink(
       Adapter.YouTube,
       sourceParser,
       sourceId,
-      searchResultLink
+      bestMatch
     );
 
-    return searchResultLink;
+    return bestMatch;
   } catch (error) {
     guard.recordFailure();
     logger.error(`[YouTube] (${url}) ${error}`);

@@ -53,7 +53,7 @@ export const getYouTubeSearchLink = (query: string, type: MetadataType) => {
     type: searchType,
     regionCode: 'US',
     q: query,
-    part: 'id',
+    part: 'id,snippet',
     safeSearch: 'none',
     key: ENV.adapters.youTube.apiKey,
   });
