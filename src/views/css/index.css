@@ -30,23 +30,6 @@ html {
     transition: opacity 100ms ease-in !important;
   }
 
-  /* Hero/results home layout: the server renders the starting class from
-     result presence; a submit action compacts the hero before results land.
-     NOTE: the rules live UNLAYERED at the bottom of this file on purpose.
-     Tailwind v4 puts utilities in a later layer, and layers beat
-     specificity, so components-layer rules could never override the
-     `justify-center` / `hidden` utilities in markup. Unlayered CSS wins. */
-
-  /* Skeleton placeholder: hidden until htmx marks it requested (also
-     unlayered: must beat the `hidden` utility). */
-  #search-skeleton {
-    display: none;
-  }
-
-  #search-skeleton.htmx-request {
-    display: flex;
-  }
-
   /* In-flight forms go quiet instead of double-submitting. */
   form.htmx-request {
     opacity: 0.7;
@@ -79,7 +62,10 @@ html {
 
 }
 
-/* Unlayered overrides (see note above): these must beat Tailwind utilities. */
+/* Unlayered overrides (see note above): these must beat Tailwind utilities.
+   NOTE: Tailwind v4 puts utilities in a later layer, and layers beat
+   specificity — anything here that fights a utility MUST live in this
+   unlayered block, never in @layer components. */
 #home-main.home-hero {
   justify-content: center;
 }
@@ -105,6 +91,16 @@ html {
      falls back to top-aligned (scrollable, nothing clipped) on overflow.
      Older browsers ignore `safe` and keep today's top alignment. */
   justify-content: safe center;
+}
+
+/* Loading placeholder: hidden until htmx marks it requested. Unlayered:
+   the `hidden` utility would otherwise win and the spinner never shows. */
+#search-skeleton {
+  display: none;
+}
+
+#search-skeleton.htmx-request {
+  display: flex;
 }
 
 /* Toast theme, UNLAYERED on purpose like the overrides above: toastify's

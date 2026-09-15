@@ -2,9 +2,8 @@ import Toastify from 'toastify-js';
 import 'toastify-js/src/toastify.css';
 
 /**
- * Dependency-free toast notifications, themed to the app: dark zinc pill,
- * single accent edge, bottom-center. Same call surface as before, so no
- * controller changes beyond this file.
+ * Toast notifications via toastify-js (zero-dep): red is the default theme
+ * because every toast we fire is an error, except the copy confirmation.
  * @param {string} message
  * @param {boolean} ok
  */

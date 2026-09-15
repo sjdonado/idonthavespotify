@@ -21,6 +21,7 @@ export default class extends Controller {
     // utility so no stale class lingers for the next reader.
     main?.classList.replace('home-hero', 'has-results');
     main?.classList.remove('justify-center');
+    main?.classList.add('has-results');
     // The sample shortcut and subtitle belong to the empty state only.
     if (this.hasSampleTarget) this.sampleTarget.classList.add('hidden');
     if (this.hasSubtitleTarget) this.subtitleTarget.classList.add('hidden');
@@ -36,21 +37,17 @@ export default class extends Controller {
     if (document.getElementById('gate-modal')) this.element.inert = true;
     this.element.addEventListener('htmx:error', this.showTransportError);
     this.element.addEventListener('htmx:response:error', this.showRequestError);
-    this.element.addEventListener('htmx:afterSwap', this.compactAfterSwap);
     this.element.addEventListener('htmx:after:swap', this.compactAfterSwap);
   }
 
   disconnect() {
     this.element.removeEventListener('htmx:error', this.showTransportError);
     this.element.removeEventListener('htmx:response:error', this.showRequestError);
-    this.element.removeEventListener('htmx:afterSwap', this.compactAfterSwap);
     this.element.removeEventListener('htmx:after:swap', this.compactAfterSwap);
   }
 
-  // Results (or an HTTP error fragment) just landed: now move to the
-  // results state. Bound so it can hang off addEventListener. Only a real
-  // result card compacts: error bodies never swap (hx-status) and must
-  // leave the hero untouched.
+  // A settled swap just landed: move to the results state, but only for a
+  // real result card. Bound so it can hang off addEventListener.
   compactAfterSwap = () => {
     const results = document.getElementById('search-results');
     if (!results?.querySelector('[data-controller="search-card"]')) return;
@@ -59,16 +56,18 @@ export default class extends Controller {
 
   // HTTP error statuses never reach the page (hx-status: swap:none): toast
   // the fragment text instead. Scoped to the search form; gate forms keep
-  // their inline field errors.
+  // their inline field errors. Prior results stay put: a failed search must
+  // not nuke good state.
   showRequestError = event => {
-    if (this.hasFormTarget && event.target !== this.formTarget) return;
+    if (this.hasFormTarget && event?.target !== this.formTarget) return;
     let message = 'Something went wrong, please try again later.';
     const text = event?.detail?.ctx?.text ?? '';
     if (text) {
       try {
         const parsed = new DOMParser()
           .parseFromString(text, 'text/html')
-          .body.textContent?.trim();
+          .body.textContent?.trim()
+          .slice(0, 200);
         if (parsed) message = parsed;
       } catch {
         // Keep the generic message.
@@ -77,7 +76,8 @@ export default class extends Controller {
     toast().error(message);
   };
 
-  showTransportError = () => {
+  showTransportError = event => {
+    if (this.hasFormTarget && event?.target !== this.formTarget) return;
     toast().error('The search timed out or the connection dropped. Please try again.');
   };
 

@@ -20,8 +20,8 @@ export default function Home({
 }) {
   const gated = gate?.enabled === true && gate.authenticated !== true;
   // Google pattern: centered hero until there is something to show, then a
-  // compact top header. The server owns the starting state; a submit action
-  // compacts the hero before the request lands.
+  // compact top header. The server owns the starting state; the client
+  // compacts once a result swap lands (the swap covers only results).
   // nano-jsx hands empty children as a truthy empty array, so test for
   // rendered content, not mere presence.
   const hasContent = Array.isArray(children)
