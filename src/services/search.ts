@@ -237,13 +237,22 @@ export const search = async <T extends SearchProps>({
   // Global fallback: MusicBrainz streaming relations fill adapters that
   // missed (including Tidal, which has no outbound adapter). Cached and
   // verified-only; playlists/shows unsupported.
-  const present = new Set(links.map(link => link.type));
+  const present = new Set(
+    links.filter(link => !link.notAvailable).map(link => link.type)
+  );
   const missing = searchAdapters.filter(
     adapter => adapter !== parserType && !present.has(adapter)
   );
   if (missing.length > 0) {
     const fallback = await resolveMusicBrainzLinks({ query, metadata, missing });
-    links.push(...fallback);
+    // Replace unavailable placeholders instead of duplicating the card.
+    for (const link of fallback) {
+      const unavailableIndex = links.findIndex(
+        existing => existing.type === link.type && existing.notAvailable
+      );
+      if (unavailableIndex >= 0) links[unavailableIndex] = link;
+      else links.push(link);
+    }
   }
 
   const parsedLinks = links
