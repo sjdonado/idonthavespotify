@@ -76,6 +76,7 @@ html {
       left: 100%;
     }
   }
+
 }
 
 /* Unlayered overrides (see note above): these must beat Tailwind utilities. */
@@ -100,5 +101,31 @@ html {
 }
 
 #home-main.has-results {
-  justify-content: flex-start;
+  /* Safe centering: content sits centered like the hero while it fits, and
+     falls back to top-aligned (scrollable, nothing clipped) on overflow.
+     Older browsers ignore `safe` and keep today's top alignment. */
+  justify-content: safe center;
+}
+
+/* Toast theme, UNLAYERED on purpose like the overrides above: toastify's
+   own stylesheet is unlayered, and unlayered beats layered, so a layered
+   theme would lose to its blue default. Every toast we fire is an error,
+   so red is the default theme, not a variant; the copy confirmation keeps
+   a quiet dark pill so success never shouts. */
+.toastify.idhs-toast {
+  background: #dc2626;
+  border: 1px solid #b91c1c;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 25px rgb(0 0 0 / 0.5);
+  color: #fafafa;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 400;
+  max-width: min(90vw, 360px);
+  padding: 12px 20px;
+}
+
+.toastify.idhs-toast--success {
+  background: #18181b;
+  border-color: #3f3f46;
 }

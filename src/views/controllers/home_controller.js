@@ -1,24 +1,29 @@
 import { Controller } from '@hotwired/stimulus';
 
+import { toast } from './helpers';
+
 // Owns the home hero/results layout and the sample-track shortcut. The
-// server renders the starting class from result presence; the submit action
-// compacts the hero before the request so the skeleton lands under the
-// compact header. No htmx event knowledge needed.
+// server renders the starting class from result presence; the layout stays
+// put while a search is in flight (only loading indicators show) and
+// compacts once the swap lands, since the swapped fragment covers only
+// #search-results while the layout classes, subtitle, and sample button
+// live outside it. No other htmx event knowledge needed.
 export default class extends Controller {
   /** @type {string[]} */
-  static targets = ['form', 'link', 'sample'];
+  static targets = ['form', 'link', 'sample', 'subtitle'];
 
   /** @type {string} */
   static values = { sampleLink: String };
 
   compact() {
     const main = document.getElementById('home-main');
-    // Swap both classes: the CSS wins on its own, but leaving a stale
-    // `justify-center` utility behind is a trap for the next reader.
+    // Unlayered CSS owns justification per state; just drop the hero
+    // utility so no stale class lingers for the next reader.
     main?.classList.replace('home-hero', 'has-results');
-    main?.classList.replace('justify-center', 'justify-start');
-    // The sample shortcut belongs to the empty state only.
+    main?.classList.remove('justify-center');
+    // The sample shortcut and subtitle belong to the empty state only.
     if (this.hasSampleTarget) this.sampleTarget.classList.add('hidden');
+    if (this.hasSubtitleTarget) this.subtitleTarget.classList.add('hidden');
   }
 
   connect() {
@@ -30,24 +35,55 @@ export default class extends Controller {
     // Those land here.
     if (document.getElementById('gate-modal')) this.element.inert = true;
     this.element.addEventListener('htmx:error', this.showTransportError);
+    this.element.addEventListener('htmx:response:error', this.showRequestError);
+    this.element.addEventListener('htmx:afterSwap', this.compactAfterSwap);
+    this.element.addEventListener('htmx:after:swap', this.compactAfterSwap);
   }
 
   disconnect() {
     this.element.removeEventListener('htmx:error', this.showTransportError);
+    this.element.removeEventListener('htmx:response:error', this.showRequestError);
+    this.element.removeEventListener('htmx:afterSwap', this.compactAfterSwap);
+    this.element.removeEventListener('htmx:after:swap', this.compactAfterSwap);
   }
 
-  showTransportError = () => {
+  // Results (or an HTTP error fragment) just landed: now move to the
+  // results state. Bound so it can hang off addEventListener. Only a real
+  // result card compacts: error bodies never swap (hx-status) and must
+  // leave the hero untouched.
+  compactAfterSwap = () => {
     const results = document.getElementById('search-results');
-    if (!results) return;
+    if (!results?.querySelector('[data-controller="search-card"]')) return;
     this.compact();
-    results.innerHTML =
-      '<p class="mt-8 text-center" role="alert">The search timed out or the connection dropped. Please try again.</p>';
+  };
+
+  // HTTP error statuses never reach the page (hx-status: swap:none): toast
+  // the fragment text instead. Scoped to the search form; gate forms keep
+  // their inline field errors.
+  showRequestError = event => {
+    if (this.hasFormTarget && event.target !== this.formTarget) return;
+    let message = 'Something went wrong, please try again later.';
+    const text = event?.detail?.ctx?.text ?? '';
+    if (text) {
+      try {
+        const parsed = new DOMParser()
+          .parseFromString(text, 'text/html')
+          .body.textContent?.trim();
+        if (parsed) message = parsed;
+      } catch {
+        // Keep the generic message.
+      }
+    }
+    toast().error(message);
+  };
+
+  showTransportError = () => {
+    toast().error('The search timed out or the connection dropped. Please try again.');
   };
 
   trySample(event) {
     event.preventDefault();
     if (this.hasLinkTarget) this.linkTarget.value = this.sampleLinkValue;
-    this.compact();
     if (this.hasFormTarget) this.formTarget.requestSubmit();
   }
 }

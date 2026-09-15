@@ -56,6 +56,11 @@ describe('Page router', () => {
       expect(html).toContain('home-hero');
       expect(html).toContain('Try a sample track');
 
+      // Search errors never swap into the page: they toast instead, so the
+      // hero stays untouched.
+      expect(html).toContain('hx-status:4xx="swap:none"');
+      expect(html).toContain('hx-status:5xx="swap:none"');
+
       const footerText = doc('footer').text();
 
       expect(footerText).not.toContain('@sjdonado');
