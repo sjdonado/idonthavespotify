@@ -5,7 +5,6 @@ import { getPandoraLink } from '~/adapters/pandora';
 import { getQobuzLink } from '~/adapters/qobuz';
 import { getSoundCloudLink } from '~/adapters/sound-cloud';
 import { getSpotifyLink } from '~/adapters/spotify';
-import { getTidalLink } from '~/adapters/tidal';
 import { getYouTubeLink } from '~/adapters/youtube';
 import { Adapter, MetadataType, Parser, type StreamingServiceType } from '~/config/enum';
 import { ENV } from '~/config/env';
@@ -26,6 +25,7 @@ import {
 import { getSpotifyMetadata, getSpotifyQueryFromMetadata } from '~/parsers/spotify';
 import { getTidalMetadata, getTidalQueryFromMetadata } from '~/parsers/tidal';
 import { getYouTubeMetadata, getYouTubeQueryFromMetadata } from '~/parsers/youtube';
+import { resolveMusicBrainzLinks } from '~/services/musicbrainz';
 import { generateId } from '~/utils/encoding';
 import { logger } from '~/utils/logger';
 import { cleanSearchQuery } from '~/utils/query';
@@ -44,6 +44,14 @@ export type SearchResultLink = {
   isVerified?: boolean;
   notAvailable?: boolean;
 };
+
+// Partial: parse-only services (Google, Tidal) have no outbound search.
+export type LinkGetter = (
+  query: string,
+  metadata: SearchMetadata,
+  sourceParser: Parser,
+  sourceId: string
+) => Promise<SearchResultLink | null>;
 
 export type SearchResult = {
   id: string;
@@ -123,13 +131,12 @@ export const search = async <T extends SearchProps>({
     [Parser.Pandora]: getPandoraQueryFromMetadata,
   };
 
-  const linkGettersMap = {
+  const linkGettersMap: Partial<Record<Adapter, LinkGetter>> = {
     [Adapter.Spotify]: getSpotifyLink,
     [Adapter.YouTube]: getYouTubeLink,
     [Adapter.AppleMusic]: getAppleMusicLink,
     [Adapter.Deezer]: getDeezerLink,
     [Adapter.SoundCloud]: getSoundCloudLink,
-    [Adapter.Tidal]: getTidalLink,
     [Adapter.Qobuz]: getQobuzLink,
     [Adapter.Bandcamp]: getBandcampLink,
     [Adapter.Pandora]: getPandoraLink,
@@ -226,6 +233,27 @@ export const search = async <T extends SearchProps>({
       })
       .filter(Boolean)
   );
+
+  // Global fallback: MusicBrainz streaming relations fill adapters that
+  // missed (including Tidal, which has no outbound adapter). Cached and
+  // verified-only; playlists/shows unsupported.
+  const present = new Set(
+    links.filter(link => !link.notAvailable).map(link => link.type)
+  );
+  const missing = searchAdapters.filter(
+    adapter => adapter !== parserType && !present.has(adapter)
+  );
+  if (missing.length > 0) {
+    const fallback = await resolveMusicBrainzLinks({ query, metadata, missing });
+    // Replace unavailable placeholders instead of duplicating the card.
+    for (const link of fallback) {
+      const unavailableIndex = links.findIndex(
+        existing => existing.type === link.type && existing.notAvailable
+      );
+      if (unavailableIndex >= 0) links[unavailableIndex] = link;
+      else links.push(link);
+    }
+  }
 
   const parsedLinks = links
     .filter(link => searchAdapters.includes(link.type))

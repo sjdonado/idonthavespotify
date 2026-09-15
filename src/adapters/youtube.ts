@@ -1,7 +1,8 @@
 import { Adapter, MetadataType, Parser } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { cacheSearchResultLink, getCachedSearchResultLink } from '~/services/cache';
-import type { SearchMetadata, SearchResultLink } from '~/services/search';
+import type { SearchMetadata } from '~/services/search';
+import { findBestMatch, type MatchCandidate } from '~/utils/compare';
 import HttpClient from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { getServiceGuard } from '~/utils/service-guard';
@@ -24,6 +25,10 @@ interface YoutubeSearchResponse {
       playlistId?: string;
       channelId?: string;
     };
+    snippet?: {
+      title?: string;
+      channelTitle?: string;
+    };
   }>;
 }
 
@@ -35,15 +40,6 @@ export const YOUTUBE_SEARCH_TYPES = {
   [MetadataType.Podcast]: 'video',
   [MetadataType.Show]: undefined,
 };
-
-const YOUTUBE_SEARCH_LINK_TYPE = (item: YoutubeSearchResponse['items'][number]) => ({
-  [MetadataType.Song]: `watch?v=${item.id.videoId}`,
-  [MetadataType.Album]: `playlist?list=${item.id.playlistId}`,
-  [MetadataType.Playlist]: `playlist?list=${item.id.playlistId}`,
-  [MetadataType.Artist]: `channel/${item.id.channelId}`,
-  [MetadataType.Podcast]: `podcast/${item.id.videoId}`,
-  [MetadataType.Show]: undefined,
-});
 
 export async function getYouTubeLink(
   query: string,
@@ -58,7 +54,7 @@ export async function getYouTubeLink(
     type: searchType,
     regionCode: 'US',
     q: query,
-    part: 'id',
+    part: 'id,snippet',
     safeSearch: 'none',
     key: ENV.adapters.youTube.apiKey,
   });
@@ -87,22 +83,53 @@ export async function getYouTubeLink(
       throw new Error(`No results found: ${JSON.stringify(response)}`);
     }
 
-    const link = `${ENV.adapters.youTube.musicBaseUrl}/${YOUTUBE_SEARCH_LINK_TYPE(items[0])[metadata.type]}`;
+    const candidates: MatchCandidate[] = [];
+    for (const item of items) {
+      const ids = item.id;
+      let path: string | undefined;
+      switch (metadata.type) {
+        case MetadataType.Song:
+          path = ids.videoId ? `watch?v=${ids.videoId}` : undefined;
+          break;
+        case MetadataType.Album:
+        case MetadataType.Playlist:
+          path = ids.playlistId ? `playlist?list=${ids.playlistId}` : undefined;
+          break;
+        case MetadataType.Artist:
+          path = ids.channelId ? `channel/${ids.channelId}` : undefined;
+          break;
+        case MetadataType.Podcast:
+          path = ids.videoId ? `podcast/${ids.videoId}` : undefined;
+          break;
+        default:
+          path = undefined;
+      }
+      if (!path) continue;
+      candidates.push({
+        title: item.snippet?.title ?? '',
+        artist: item.snippet?.channelTitle,
+        url: `${ENV.adapters.youTube.musicBaseUrl}/${path}`,
+      });
+    }
 
-    const searchResultLink = {
-      type: Adapter.YouTube,
-      url: link,
-      isVerified: false,
-    } as SearchResultLink;
+    const { bestMatch, highestScore } = findBestMatch(candidates, query, Adapter.YouTube);
+
+    if (!bestMatch) {
+      throw new Error('No valid matches found.');
+    }
+
+    logger.info(
+      `[YouTube] Best match score: ${highestScore.toFixed(3)} (verified: ${bestMatch.isVerified ? 'yes' : 'no'}, available: ${!bestMatch.notAvailable ? 'yes' : 'no'})`
+    );
 
     await cacheSearchResultLink(
       Adapter.YouTube,
       sourceParser,
       sourceId,
-      searchResultLink
+      bestMatch
     );
 
-    return searchResultLink;
+    return bestMatch;
   } catch (error) {
     guard.recordFailure();
     logger.error(`[YouTube] (${url}) ${error}`);

@@ -121,7 +121,7 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
                 <li
                   data-controller="search-link"
                   data-search-link-url-value={url}
-                  class={`flex min-h-[56px] items-center gap-1 rounded-xl bg-zinc-900 py-1 pl-3 pr-1 ${notAvailable ? 'pointer-events-none opacity-60' : ''}`}
+                  class={`flex min-h-[56px] items-center gap-1 rounded-xl border bg-zinc-900 py-1 pl-3 pr-1 ${isVerified ? 'border-transparent' : 'border-dotted border-zinc-500'} ${notAvailable ? 'pointer-events-none opacity-60' : ''}`}
                 >
                   {notAvailable ? (
                     <span
@@ -137,20 +137,12 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
                       href={url}
                       target="_blank"
                       rel="noreferrer"
-                      aria-label={searchResult.label}
+                      aria-label={isVerified ? `${searchResult.label} (verified)` : `${searchResult.label} (unverified)`}
                       title={shortLabel}
                       class="flex min-w-0 flex-1 items-center"
                     >
                       <i class={`${searchResult.icon} shrink-0 text-xl`} />
                       <span class="ml-2 truncate text-sm">{shortLabel}</span>
-                      {isVerified && (
-                        <span
-                          class="ml-1 inline-flex shrink-0 items-center justify-center rounded-full bg-green-500 p-1 text-[0.56rem] text-black"
-                          aria-label="Verified"
-                        >
-                          <i class="ti ti-check" />
-                        </span>
-                      )}
                     </a>
                   )}
                   {notAvailable ? (

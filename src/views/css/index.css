@@ -83,9 +83,20 @@ html {
   justify-content: center;
 }
 
-#home-main.home-hero .home-title {
-  font-size: clamp(2.75rem, 9vw, 4.75rem);
-  line-height: 1.05;
+/* One title rule for hero and results: the results size everywhere, never
+   wrapping. nowrap (not smaller text) is what keeps link/no-link states
+   identical. Unlayered so it beats the text-4xl utility like the old hero
+   rule did. */
+#home-main .home-title {
+  white-space: nowrap;
+}
+
+/* Only below 380px the fixed title would overflow: scale it to fit instead
+   of wrapping or scrolling. Wider phones keep the exact approved size. */
+@media (max-width: 380px) {
+  #home-main .home-title {
+    font-size: 8.3vw;
+  }
 }
 
 #home-main.has-results {

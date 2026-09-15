@@ -48,8 +48,6 @@ describe('GET /search', () => {
   beforeEach(() => {
     cacheStore.reset();
     httpMock.reset();
-
-    httpMock.onPost(ENV.adapters.tidal.authUrl).reply(200, {});
   });
 
   afterEach(() => {
@@ -101,7 +99,6 @@ describe('GET /search', () => {
         return [404, {}];
       });
 
-      httpMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
       httpMock.onGet(/youtube\.googleapis\.com/).reply(200, { items: [] });
 
       const response = await nodeFetch(searchEndpointUrl, {
@@ -213,7 +210,6 @@ describe('GET /search', () => {
         return [404, {}];
       });
 
-      httpMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
@@ -325,7 +321,6 @@ describe('GET /search', () => {
         return [404, {}];
       });
 
-      httpMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
@@ -438,7 +433,6 @@ describe('GET /search', () => {
         return [404, {}];
       });
 
-      httpMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
@@ -545,7 +539,6 @@ describe('GET /search', () => {
         return [404, {}];
       });
 
-      httpMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
@@ -635,7 +628,6 @@ describe('GET /search', () => {
         .onGet(soundCloudSearchUrl)
         .reply(200, searchSnapshots.soundCloudThisIsBadBunny);
 
-      httpMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
@@ -702,7 +694,6 @@ describe('GET /search', () => {
       httpMock
         .onGet(soundCloudSearchUrl)
         .reply(200, searchSnapshots.soundCloudTerceraVuelta);
-      httpMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',
@@ -753,7 +744,6 @@ describe('GET /search', () => {
       httpMock
         .onGet(soundCloudSearchUrl)
         .reply(200, searchSnapshots.soundCloudWaveformEndOfTwitter);
-      httpMock.onGet(/openapi\.tidal\.com.*searchresults/).reply(404);
 
       const response = await nodeFetch(searchEndpointUrl, {
         method: 'POST',

@@ -38,7 +38,7 @@ export default function Home({
         class={`flex flex-1 flex-col items-center ${isHero ? 'home-hero justify-center' : 'has-results justify-start'}`}
       >
         <div
-          class={`flex flex-col gap-4 p-2 text-center ${isHero ? 'mb-2 mt-0' : 'mb-4 mt-8 sm:mt-12'}`}
+          class={`flex flex-col gap-4 p-2 text-center ${isHero ? 'my-2' : 'mb-4 mt-8 sm:mt-12'}`}
         >
           <a href="/">
             <h1 class="home-title text-4xl uppercase md:text-5xl lg:text-6xl">

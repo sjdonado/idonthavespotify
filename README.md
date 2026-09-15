@@ -15,7 +15,7 @@ Then adapters take that query and search each destination platform for the best 
 | Adapter          | Inverted Search | Official API           | Verified Links |
 | ---------------- | --------------- | ---------------------- | -------------- |
 | Spotify          | Yes             | No                     | Yes            |
-| Tidal            | Yes             | Yes                    | Yes            |
+| Tidal            | Yes (fallback)  | No                     | Yes            |
 | YouTube Music    | Yes             | No                     | Yes            |
 | Apple Music      | Yes             | No                     | Yes            |
 | Deezer           | Yes             | Yes                    | Yes            |
@@ -24,7 +24,7 @@ Then adapters take that query and search each destination platform for the best 
 | Bandcamp         | Yes             | No                     | Yes            |
 | Pandora          | Yes             | No                     | Yes            |
 
-"Inverted search" means the adapter can be a search target. A few notes on the ones that behave unusually: Spotify has no usable official API for this project, so search runs through the same internal GraphQL API the Spotify web player uses, with an anonymous access token minted by a TOTP flow (more on that below). Tidal does have an official API, and it works from self-hosted instances; from Cloudflare Workers egress its search endpoint currently answers 400, which the adapter surfaces as an ordinary miss while the cause is being diagnosed, so self-host results are unaffected. Apple Music on the edge resolves through its catalog pages with no audio preview.
+"Inverted search" means the adapter can be a search target. A few notes on the ones that behave unusually: Spotify has no usable official API for this project, so search runs through the same internal GraphQL API the Spotify web player uses, with an anonymous access token minted by a TOTP flow (more on that below). Tidal has no usable search of its own for this project (its API needs a portal-granted entitlement that was refused, and its pages sit behind a bot wall), so it resolves through a MusicBrainz fallback instead: the work is matched by title and artist, and its curated streaming links fill whichever adapters missed, Tidal included. Apple Music on the edge resolves through its catalog pages with no audio preview.
 
 ## The web app and the Raycast extension
 
@@ -44,7 +44,7 @@ The extension talks to a self-hosted instance, where search stays open. It does 
 
 ## Running it locally
 
-You need Bun 1.4.2 or newer; check with `bun --version`. The full list of environment variable names lives in `.env.test`, and only real values go in your own `.env`, which is never committed. Two of them need accounts elsewhere: `TIDAL_CLIENT_ID` and `TIDAL_CLIENT_SECRET` come from the [TIDAL Developer Portal](https://developer.tidal.com/), and `YOUTUBE_API_KEY` comes from the [Google Developers Console](https://console.developers.google.com/).
+You need Bun 1.4.2 or newer; check with `bun --version`. The full list of environment variable names lives in `.env.test`, and only real values go in your own `.env`, which is never committed. One of them needs an account elsewhere: `YOUTUBE_API_KEY` comes from the [Google Developers Console](https://console.developers.google.com/).
 
 A note on Spotify, since it surprises people: as of March 2026, Spotify [restricted its Web API](https://www.reddit.com/r/webdev/comments/1rflyiz/changes_to_spotify_api/) to require a Premium account for Development Mode and cut down the available endpoints. This project has no premium account, so instead of the official API it uses the web player's own internal API with an automatically refreshed anonymous token, which needs no developer account and expires after about an hour. That is why the Spotify adapter scrapes the player bundle for its TOTP secret at token time.
 

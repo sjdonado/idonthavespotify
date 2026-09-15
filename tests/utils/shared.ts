@@ -1,4 +1,3 @@
-import { TIDAL_SEARCH_TYPES } from '~/adapters/tidal';
 import { YOUTUBE_SEARCH_TYPES } from '~/adapters/youtube';
 import { MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
@@ -54,7 +53,7 @@ export const getYouTubeSearchLink = (query: string, type: MetadataType) => {
     type: searchType,
     regionCode: 'US',
     q: query,
-    part: 'id',
+    part: 'id,snippet',
     safeSearch: 'none',
     key: ENV.adapters.youTube.apiKey,
   });
@@ -92,22 +91,6 @@ export const getSoundCloudSearchLink = (query: string) => {
   });
 
   const url = new URL(`${ENV.adapters.soundCloud.baseUrl}/search`);
-  url.search = params.toString();
-
-  return url.toString();
-};
-
-export const getTidalSearchLink = (query: string, type: MetadataType) => {
-  const searchType = TIDAL_SEARCH_TYPES[type]!;
-
-  const params = new URLSearchParams({
-    countryCode: 'US',
-    include: searchType,
-  });
-
-  const url = new URL(
-    `${ENV.adapters.tidal.apiUrl}/${encodeURIComponent(query)}/relationships/${searchType}`
-  );
   url.search = params.toString();
 
   return url.toString();

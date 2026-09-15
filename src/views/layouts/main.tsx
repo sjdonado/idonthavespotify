@@ -67,7 +67,7 @@ const MainLayout = ({ title, description, image, children }: MainLayoutProps) =>
       <body class="h-screen bg-black font-light text-white">{children}</body>
 
       <Helmet footer>
-        <script src="assets/index.js" />
+        <script type="module" src="assets/index.js" />
       </Helmet>
     </div>
   );
