@@ -137,13 +137,12 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
                       href={url}
                       target="_blank"
                       rel="noreferrer"
-                      aria-label={isVerified ? searchResult.label : `${searchResult.label} (unverified)`}
+                      aria-label={isVerified ? `${searchResult.label} (verified)` : `${searchResult.label} (unverified)`}
                       title={shortLabel}
                       class="flex min-w-0 flex-1 items-center"
                     >
                       <i class={`${searchResult.icon} shrink-0 text-xl`} />
                       <span class="ml-2 truncate text-sm">{shortLabel}</span>
-                      {isVerified && <span class="sr-only"> (verified)</span>}
                     </a>
                   )}
                   {notAvailable ? (
