@@ -11,7 +11,7 @@ Pushes to `master` SHALL build the edge bundle, audit it for native imports, and
 #### Scenario: Green push ships
 
 - **WHEN** a commit lands on master with typecheck, lint, tests, and the edge audit green
-- **THEN** the worker serves the new bundle, verified by a post-deploy smoke of `/`, `/api/status`, and an unauthenticated invalid-link search returning 401 with the `email-otp` hint (proof the gate is armed on the demo)
+- **THEN** the worker serves the new bundle
 
 ### Requirement: Dokku remains a documented self-host path
 
