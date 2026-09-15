@@ -79,7 +79,7 @@ Your address is used for abuse decisions only. It is never used for marketing, a
 
 ### Operating the public instance
 
-Deployments happen automatically: every push to `master` typechecks, lints, builds the edge bundle, audits it for native imports, deploys it with Wrangler, and then smokes `/`, `/api/status`, and an unauthenticated search that must answer 401 with the email-otp hint, proving the gate is armed. A failed check blocks the deploy. The GitHub secrets that make this work are `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, with an optional `DEMO_URL` overriding the default smoke target.
+Deployments happen automatically: every push to `master` typechecks, lints, builds the edge bundle, audits it for native imports, and deploys it with Wrangler. A failed check blocks the deploy. The GitHub secrets that make this work are `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
 
 Before the gate can run on a fresh Cloudflare account, three values have to exist as worker secrets, set with `bunx wrangler secret put` and never written into the repo: `PLUNK_API_KEY` for sending mail, which is also the switch that arms the gate, `SESSION_SECRET` which signs both the one-time codes and the session tokens, and `PLUNK_TEMPLATE_ID` pointing at the dashboard template that defines the sender, subject, and body (the code arrives as one-shot template data). Plunk also needs a verified sender domain, which you arrange in the Plunk dashboard. The edge worker guide, including the WAF rule and the Durable Object details, lives in AGENTS.md.
 
