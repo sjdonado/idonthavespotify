@@ -3,7 +3,6 @@ import Nano, { Fragment } from 'nano-jsx';
 import { ghostButtonClass, primaryButtonClass } from '../components/button';
 import Footer from '../components/footer';
 import GateModal from '../components/gate';
-import LoadingIndicator from '../components/loading-indicator';
 
 const SAMPLE_LINK = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
 
@@ -30,7 +29,6 @@ export default function Home({
   const isHero = hero ?? !hasContent;
   return (
     <div class="flex min-h-svh flex-col gap-2 p-2">
-      <LoadingIndicator />
       <main
         id="home-main"
         data-controller="home"
@@ -58,7 +56,7 @@ export default function Home({
             hx-post="/search"
             hx-target="#search-results"
             hx-swap="innerHTML"
-            hx-indicator="#loading-indicator, #search-skeleton"
+            hx-indicator="#search-skeleton"
             {...{ 'hx-status:4xx': 'swap:none', 'hx-status:5xx': 'swap:none' }}
             hx-config='{"timeout":6000}'
             class="flex w-full max-w-3xl items-center justify-center px-2"
