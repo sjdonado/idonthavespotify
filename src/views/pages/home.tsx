@@ -20,8 +20,8 @@ export default function Home({
 }) {
   const gated = gate?.enabled === true && gate.authenticated !== true;
   // Google pattern: centered hero until there is something to show, then a
-  // compact top header. The server owns the starting state; a submit action
-  // compacts the hero before the request lands.
+  // compact top header. The server owns the starting state; the client
+  // compacts once a result swap lands (the swap covers only results).
   // nano-jsx hands empty children as a truthy empty array, so test for
   // rendered content, not mere presence.
   const hasContent = Array.isArray(children)
@@ -35,7 +35,7 @@ export default function Home({
         id="home-main"
         data-controller="home"
         data-home-sample-link-value={SAMPLE_LINK}
-        class={`flex flex-1 flex-col items-center ${isHero ? 'home-hero justify-center' : 'has-results justify-start'}`}
+        class={`flex flex-1 flex-col items-center ${isHero ? 'home-hero justify-center' : 'has-results'}`}
       >
         <div
           class={`flex flex-col gap-4 p-2 text-center ${isHero ? 'my-2' : 'mb-4 mt-8 sm:mt-12'}`}
@@ -45,19 +45,21 @@ export default function Home({
               I Don't Have Spotify
             </h1>
           </a>
-          <p class="mx-auto max-w-2xl text-center text-sm text-zinc-400 lg:text-base">
+          {isHero && (
+          <p data-home-target="subtitle" class="mx-auto max-w-2xl text-center text-sm text-zinc-400 lg:text-base">
             Paste a link from Spotify, YouTube Music, Apple Music, Deezer, SoundCloud, Qobuz, Bandcamp, Pandora, or Tidal to start.
           </p>
+          )}
         </div>
         <div class="my-4 flex w-full flex-col items-center gap-4">
           {!gated && (
           <form
             data-home-target="form"
-            data-action="submit->home#compact"
             hx-post="/search"
             hx-target="#search-results"
             hx-swap="innerHTML"
             hx-indicator="#loading-indicator, #search-skeleton"
+            {...{ 'hx-status:4xx': 'swap:none', 'hx-status:5xx': 'swap:none' }}
             hx-config='{"timeout":6000}'
             class="flex w-full max-w-3xl items-center justify-center px-2"
           >
@@ -95,17 +97,12 @@ export default function Home({
           <div id="search-results">{children}</div>
           <div
             id="search-skeleton"
-            aria-hidden="true"
-            class="hidden w-full max-w-3xl flex-col gap-4 p-2"
+            role="status"
+            aria-label="Searching"
+            class="hidden min-h-[40vh] w-full max-w-3xl flex-col items-center justify-center gap-4 p-2"
           >
-            <div class="flex items-center gap-4">
-              <div class="h-24 w-24 rounded-lg bg-zinc-800 motion-safe:animate-pulse md:h-28 md:w-28" />
-              <div class="flex flex-1 flex-col gap-2">
-                <div class="h-5 w-3/4 rounded bg-zinc-800 motion-safe:animate-pulse" />
-                <div class="h-4 w-1/2 rounded bg-zinc-800 motion-safe:animate-pulse" />
-                <div class="mt-1 h-8 w-32 rounded-lg bg-zinc-800 motion-safe:animate-pulse" />
-              </div>
-            </div>
+            <div class="h-10 w-10 animate-spin rounded-full border-2 border-zinc-700 border-t-green-500 motion-reduce:animate-none" />
+            <span class="sr-only">Searching…</span>
           </div>
         </div>
       </main>
