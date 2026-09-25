@@ -27,38 +27,10 @@ html {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23fff' stroke-width='2' viewBox='0 0 24 24'%3E %3Ccircle cx='12' cy='12' r='10'/%3E %3Ccircle cx='12' cy='12' r='2' stroke-width='2.5'/%3E %3Cline x1='16.5' x2='19' y1='16.5' y2='19' stroke-linecap='round'/%3E %3Cline x1='19' x2='22' y1='19' y2='22'/%3E %3C/svg%3E");
   }
 
-  .htmx-indicator {
-    transition: opacity 100ms ease-in !important;
-  }
-
   /* In-flight forms go quiet instead of double-submitting. */
   form.htmx-request {
     opacity: 0.7;
     pointer-events: none;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .htmx-indicator {
-      transition: none !important;
-    }
-
-    .animate-loading-bar {
-      animation: none;
-    }
-  }
-
-  .animate-loading-bar {
-    animation: loading 2s linear infinite;
-  }
-
-  @keyframes loading {
-    0% {
-      left: -100%;
-    }
-
-    100% {
-      left: 100%;
-    }
   }
 
 }

@@ -31,7 +31,7 @@ Then adapters take that query and search each destination platform for the best 
 The web app is the main interface, a single page with a search bar, instant result cards, and shareable universal links in the form `APP_URL?id=<id>`. Anyone opening your universal link sees the same result card without searching again.
 
 <div align="center">
-<img width="1831" height="969" alt="image" src="https://github.com/user-attachments/assets/98d6f3ca-3627-49ea-ad2b-0c2b64668b14" />
+  <img width="1712" height="933" alt="image" src="https://github.com/user-attachments/assets/a1a0ee33-ba0f-49aa-ab29-19da69dd955d" />
 </div>
 
 ### Raycast
