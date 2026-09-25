@@ -472,6 +472,12 @@ describe('GET /search', () => {
             notAvailable: false,
           },
           {
+            type: 'soundCloud',
+            url: 'https://soundcloud.com/afterhereofficial/sets/the-true-stories-of-avicii',
+            isVerified: true,
+            notAvailable: false,
+          },
+          {
             type: 'spotify',
             url: 'https://open.spotify.com/album/7dqftJ3kas6D0VAdmt3k3V',
             isVerified: true,
@@ -487,12 +493,6 @@ describe('GET /search', () => {
             url: 'https://bubblesexrecords.bandcamp.com/album/alicia-the-cap-dagde-stories',
             isVerified: false,
             notAvailable: true,
-          },
-          {
-            type: 'soundCloud',
-            url: 'https://soundcloud.com/aviciiofficial/sets/stories-253',
-            isVerified: false,
-            notAvailable: false,
           },
         ],
       });
@@ -656,6 +656,12 @@ describe('GET /search', () => {
           },
           {
             isVerified: true,
+            notAvailable: false,
+            type: 'soundCloud',
+            url: 'https://soundcloud.com/renata-salazar-340925260/sets/this-is-bad-bunny',
+          },
+          {
+            isVerified: true,
             type: 'spotify',
             url: 'https://open.spotify.com/playlist/37i9dQZF1DX2apWzyECwyZ',
           },
@@ -664,12 +670,6 @@ describe('GET /search', () => {
             notAvailable: false,
             type: 'appleMusic',
             url: 'https://geo.music.apple.com/ca/playlist/bad-bunny-essentials/pl.1c35ac10cfe848aaa19f68ebe62ea46e',
-          },
-          {
-            isVerified: false,
-            notAvailable: false,
-            type: 'soundCloud',
-            url: 'https://soundcloud.com/diego-689346786/sets/las-mejores-canciones-de-bad',
           },
         ],
       });
