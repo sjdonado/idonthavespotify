@@ -1,6 +1,6 @@
 # API Documentation
 
-Base URL: `https://idonthavespotify.sjdonado.com`
+Base URL: `https://idonthavespotify.sjdonado.com` (public instance: web UI, shared links, and status; programmatic `/api/search` there is disabled, so the search examples below use a self-hosted instance at `http://localhost:3000`).
 
 ## Endpoints
 

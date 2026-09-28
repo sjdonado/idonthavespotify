@@ -238,7 +238,7 @@ curl -X POST "http://localhost:3000/api/search?v=1" \
   }'
 ```
 
-### Convert to specific platforms only (self-hosted instance):
+### Convert to specific platforms only (self-hosted instance; the public instance answers 403):
 
 ```bash
 curl -X POST "http://localhost:3000/api/search?v=1" \

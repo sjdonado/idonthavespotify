@@ -40,9 +40,9 @@ Known edge differences SHALL be documented in the change: fetch-based HTTP inste
 - **WHEN** an operator reads the Workers deploy docs
 - **THEN** each delta above is listed with its user-visible consequence and the abuse controls required for the public instance (Bot Fight Mode plus a WAF Managed Challenge rule in front; service-guard circuits stay the final fuse for upstream quotas)
 
-### Requirement: Public instance sits behind the edge challenge
+### Requirement: Public instance sits behind Bot Fight Mode and a WAF Managed Challenge rule
 
-The public instance deployment SHALL be guarded by Bot Fight Mode plus one Cloudflare WAF Managed Challenge rule matching `(http.request.uri.path in {"/" "/search" "/api/search"})`. Suspicious visitors SHALL get an interactive challenge automatically while humans pass through. Self-hosted instances SHALL NOT require any Cloudflare rule, but MUST be exposed publicly only behind Cloudflare (with the rule above) or a rate-limiting reverse proxy, since the app itself ships no per-IP limiter.
+The public instance deployment SHALL be guarded by Bot Fight Mode plus one Cloudflare WAF Managed Challenge rule matching `(http.request.uri.path in {"/" "/search" "/api/search"})`. Suspicious visitors SHALL get an interactive challenge automatically while humans pass through. Self-hosted instances SHALL NOT require any Cloudflare rule, but MUST be exposed publicly only behind Cloudflare (with the challenge rule for browser-facing use, or rate limiting alone where programmatic clients call `/api/search`) or a rate-limiting reverse proxy, since the app itself ships no per-IP limiter.
 
 #### Scenario: Flood challenged before the Worker runs
 

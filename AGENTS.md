@@ -63,7 +63,7 @@ CI: PRs run `tests.yml` (loads `.env.test` into env, then `test:ci`, plus asset/
 - Edge abuse protection is Bot Fight Mode plus one WAF Managed Challenge rule (the Free plan allows five custom rules; this deployment uses one), because only the edge can judge all isolates together. Create it under Security > WAF > custom rules:
   - Rule name: `idhs-search-challenge`
   - Expression: `(http.request.uri.path in {"/" "/search" "/api/search"})`
-  - Action: Managed Challenge (suspicious visitors get an interactive challenge automatically; humans pass through, and plain homepage loads without an `id` stay cheap enough to ignore)
+  - Action: Managed Challenge (suspicious visitors get an interactive challenge automatically; humans pass through. `/` is included because `?id=` share loads run full searches; plain homepage loads without an `id` stay cheap enough to ignore)
 - Floods die at the edge before consuming worker quota or subrequests; per-service circuit breakers stay the final fuse for upstream quotas. Keep Bot Fight Mode on (free) for known-bot junk, and tighten or add Under Attack Mode only as incident response.
 
 ## Abuse-gate decisions (do not re-derive without new evidence)
