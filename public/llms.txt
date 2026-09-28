@@ -228,20 +228,20 @@ The API supports these content types:
 
 ## Example Usage
 
-### Convert a Spotify track to all platforms:
+### Convert a Spotify track to all platforms (self-hosted instance; the public instance answers 403):
 
 ```bash
-curl -X POST "https://idonthavespotify.sjdonado.com/api/search?v=1" \
+curl -X POST "http://localhost:3000/api/search?v=1" \
   -H "Content-Type: application/json" \
   -d '{
     "link": "https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh"
   }'
 ```
 
-### Convert to specific platforms only:
+### Convert to specific platforms only (self-hosted instance):
 
 ```bash
-curl -X POST "https://idonthavespotify.sjdonado.com/api/search?v=1" \
+curl -X POST "http://localhost:3000/api/search?v=1" \
   -H "Content-Type: application/json" \
   -d '{
     "link": "https://music.apple.com/us/album/bohemian-rhapsody/1440650428?i=1440650450",

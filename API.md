@@ -52,9 +52,9 @@ Convert music links across streaming platforms.
 
 On the public instance, programmatic search is disabled: `/api/search` answers 403 without touching any upstream service, and it stays that way until API keys land. Programmatic clients such as the Raycast extension target self-hosted instances, where search stays open.
 
-**Example:**
+**Example** (self-hosted instance; the public instance answers 403):
 ```bash
-curl -X POST "https://idonthavespotify.sjdonado.com/api/search?v=1" \
+curl -X POST "http://localhost:3000/api/search?v=1" \
   -H "Content-Type: application/json" \
   -d '{
     "link": "https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc",
