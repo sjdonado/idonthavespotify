@@ -35,7 +35,7 @@ Bun + TypeScript server that converts a streaming-service link into links on oth
 | `bun run test` | `NODE_ENV=test bun test` (offline via `HttpMock` + local snapshots) | verified passing |
 | `bun run test:ci` | regenerates snapshots from live URLs, then tests | defined, not run here (needs network; snapshots are gitignored but present in a set-up tree) |
 
-CI: PRs run `tests.yml` (loads `.env.test` into env, then `test:ci`, plus asset/binary/edge build, native-import audit, and binary smoke); pushes to `master` run `deploy.yml` (typecheck, lint, edge build + audit, `wrangler deploy`).
+CI: PRs run `tests.yml` (loads `.env.test` into env, then `test:ci`, plus asset/binary/edge build, native-import audit, and binary smoke); pushes to `main` run `deploy.yml` (typecheck, lint, edge build + audit, `wrangler deploy`).
 
 ## Conventions and easy-to-miss constraints
 
@@ -56,7 +56,7 @@ CI: PRs run `tests.yml` (loads `.env.test` into env, then `test:ci`, plus asset/
 
 ## Workers operations (public instance only)
 
-- Deploy is CI-owned (`deploy.yml` on push to `master`); manual equivalent is `bun run build:workers` then `bunx wrangler deploy` from a logged-in account. `wrangler.toml` pins `nodejs_compat`, a compatibility date, Workers Assets for `public/`, and the `QUOTA_DO` Durable Object binding plus its `v1` migration.
+- Deploy is CI-owned (`deploy.yml` on push to `main`); manual equivalent is `bun run build:workers` then `bunx wrangler deploy` from a logged-in account. `wrangler.toml` pins `nodejs_compat`, a compatibility date, Workers Assets for `public/`, and the `QUOTA_DO` Durable Object binding plus its `v1` migration.
 - Worker secrets (names only, values never in repo; set with `bunx wrangler secret put`): `PLUNK_API_KEY` (its presence arms the gate), `SESSION_SECRET`, `PLUNK_TEMPLATE_ID` (required when the gate is on; the template defines sender, subject, and body). Plunk also needs a verified sender domain in its dashboard. Kill-switch is blanking or deleting the `PLUNK_API_KEY` secret: open access without redeploy.
 - GitHub deploy secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
 - Edge deltas vs self-host: platform `fetch` instead of TLS impersonation (guarded sources may answer differently; Spotify metadata resolves via `__NEXT_DATA__` embed pages on both runtimes; Apple Music resolves via the same-host catalog chain with no audio preview), per-isolate in-memory cache (service-guard budgets stay the shared quota protection), no URL shortener (share links are always plain app URLs), no per-IP limiting in the app, and platform CPU and memory limits.
