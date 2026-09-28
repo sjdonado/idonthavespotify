@@ -1,6 +1,6 @@
 ## Purpose
 
-Makes the live deployment target (Cloudflare Workers) what CI ships, replacing the Dokku push that no longer matches where the public demo runs.
+Makes the live deployment target (Cloudflare Workers) what CI ships. Dokku is fully retired (remote removed); self-hosting is the single binary, bare or in Docker.
 
 ## Requirements
 
@@ -13,9 +13,9 @@ Pushes to `main` SHALL build the edge bundle, audit it for native imports, and d
 - **WHEN** a commit lands on main with typecheck, lint, tests, and the edge audit green
 - **THEN** the worker serves the new bundle
 
-### Requirement: Dokku remains a documented self-host path
+### Requirement: Dokku stays retired
 
-The Dokku workflow SHALL be removed from CI; self-hosting via the single binary (Docker or bare) SHALL stay documented in README.
+No CI job, document, or remote SHALL reference a Dokku deploy path; self-hosting via the single binary (Docker or bare) SHALL stay documented in README.
 
 #### Scenario: No dead deploy path
 

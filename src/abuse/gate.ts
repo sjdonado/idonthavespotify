@@ -15,7 +15,9 @@ interface QuotaNamespace {
   get(id: unknown): QuotaStub;
 }
 
-export const isGateEnabled = (): boolean => ENV.abuse.gateEnabled === true;
+// Public-instance signal (a non-blank Plunk key). It no longer arms an
+// email wall; it only disables `/api/search` until API keys land.
+export const isPublicInstance = (): boolean => ENV.abuse.publicInstance === true;
 
 const sessionSecret = (): string | undefined => ENV.abuse.sessionSecret;
 
@@ -63,7 +65,7 @@ export async function requireGateIdentity(
   req: Request,
   json: boolean
 ): Promise<string | Response | null> {
-  if (!isGateEnabled()) return null;
+  if (!isPublicInstance()) return null;
   if (!sessionSecret()) return gateMisconfiguredResponse(json);
   const email = await getVerifiedEmail(req);
   if (!email) return unauthenticatedResponse(json);

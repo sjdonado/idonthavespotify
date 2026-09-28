@@ -2,8 +2,7 @@ import Nano from 'nano-jsx';
 
 import { ENV } from '~/config/env';
 
-// Single source for the footer content: the page footer and the gate modal
-// render exactly this, so one edit updates both. One row, one size, one
+// Single source for the page footer content. One row, one size, one
 // gray (the subtitle gray), no byline.
 export default function FooterContent() {
   return (

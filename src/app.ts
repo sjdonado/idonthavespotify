@@ -1,20 +1,7 @@
 import { h, Helmet, renderSSR } from 'nano-jsx';
 
-import {
-  checkSearchQuota,
-  consumeQuota,
-  getVerifiedEmail,
-  isGateEnabled,
-  peekQuotaFor,
-  quotaExceededResponse,
-  quotaUnavailableResponse,
-  requireGateIdentity,
-  wantsJson,
-} from './abuse/gate';
-import { QUOTA_COOLDOWN_SEC, QUOTA_LIMIT, QUOTA_WINDOW_SEC } from './abuse/quota';
-import { requestCodeHandler, verifyCodeHandler } from './abuse/routes';
+import { isPublicInstance, wantsJson } from './abuse/gate';
 import { Adapter } from './config/enum';
-import { ENV } from './config/env';
 import { apiRouteSchema } from './schemas/api.schema';
 import { indexRouteSchema, searchRouteSchema } from './schemas/web.schema';
 import { search, type SearchResult } from './services/search';
@@ -28,9 +15,10 @@ import Home from './views/pages/home';
 
 // Dynamic routes shared by every runtime (Bun.serve, edge fetch handler).
 // Static assets are NOT here: each runtime serves them its own way.
-// Abuse protection: the public instance gate (email OTP + per-email quota) wraps the
-// search handlers below when a Plunk key arms it; the WAF rule and service
-// guards stay the outer layers. /api/status and assets stay open.
+// Abuse protection: web search is open; only the edge (Bot Fight Mode plus
+// a WAF Managed Challenge rule) and the per-service guards stand in front
+// of it. /api/search stays disabled on the public instance until API keys
+// land; /api/status and assets stay open.
 export const createRoutes = () => ({
   '/': {
     GET: async function (req: Request) {
@@ -45,16 +33,10 @@ export const createRoutes = () => ({
         if (!result.success) throw validationError(result.error);
         const { id } = result.data.query;
 
-        const gateEnabled = isGateEnabled();
-        const email = gateEnabled ? await getVerifiedEmail(req) : null;
-        const gate = gateEnabled
-          ? { enabled: true, authenticated: email !== null }
-          : undefined;
-
         const render = (searchResult: SearchResult | null, status = 200) => {
           const content = h(
             Home,
-            { source: searchResult?.source, gate },
+            { source: searchResult?.source },
             searchResult ? h(SearchCard, { searchResult }) : null
           );
 
@@ -88,21 +70,6 @@ export const createRoutes = () => ({
           );
         };
 
-        if (id && gateEnabled) {
-          if (!ENV.abuse.sessionSecret) return render(null, 503);
-          if (!email) {
-            // Machine-readable hint for page loads: the JSON search
-            // endpoints carry `auth: "email-otp"` in the body instead.
-            const denied = render(null, 401);
-            denied.headers.set('X-Auth-Required', 'email-otp');
-            return denied;
-          }
-          const quota = await consumeQuota(email);
-          if ('doError' in quota) return quotaUnavailableResponse(false);
-          if (!quota.verdict.allowed)
-            return quotaExceededResponse(quota.verdict, false);
-        }
-
         const searchResult = id
           ? await search({ searchId: id, headless: false })
           : null;
@@ -130,11 +97,6 @@ export const createRoutes = () => ({
   '/search': {
     POST: async function (req: Request) {
       try {
-        // Identity before validation (no validity oracle for strangers),
-        // quota after (invalid links burn nothing).
-        const identity = await requireGateIdentity(req, false);
-        if (identity instanceof Response) return identity;
-
         const body = req.body ? Object.fromEntries(await req.formData()) : null;
 
         const result = searchRouteSchema.safeParse({
@@ -143,11 +105,6 @@ export const createRoutes = () => ({
 
         if (!result.success) throw validationError(result.error);
         const { link } = result.data.body;
-
-        if (identity !== null) {
-          const quotaDeny = await checkSearchQuota(identity, false);
-          if (quotaDeny) return quotaDeny;
-        }
 
         const searchResult = await search({ link, headless: false });
         const html = renderSSR(h(SearchCard, { searchResult }));
@@ -180,7 +137,7 @@ export const createRoutes = () => ({
 
         // htmx 4 swaps error bodies into the target: web failures must be
         // fragments, never JSON. (API clients use /api/search instead.)
-        if (statusCode === 400 || statusCode === 401 || statusCode === 429) {
+        if (statusCode === 400) {
           if (wantsJson(req)) {
             return Response.json({ message }, { status: statusCode });
           }
@@ -202,9 +159,16 @@ export const createRoutes = () => ({
   '/api/search': {
     POST: async function (req: Request) {
       try {
-        // Identity before validation, quota after: see /search above.
-        const identity = await requireGateIdentity(req, true);
-        if (identity instanceof Response) return identity;
+        // Disabled on the public instance until API keys land. The Plunk
+        // key is the public-instance signal, same as before; self-host
+        // (no key) keeps serving programmatic clients like the Raycast
+        // extension.
+        if (isPublicInstance()) {
+          return Response.json(
+            { error: 'API search is disabled on the public instance.', auth: 'api-key' },
+            { status: 403 }
+          );
+        }
 
         const url = new URL(req.url);
         const queryParams = Object.fromEntries(url.searchParams);
@@ -217,11 +181,6 @@ export const createRoutes = () => ({
 
         if (!result.success) throw validationError(result.error);
         const { link, adapters } = result.data.body;
-
-        if (identity !== null) {
-          const quotaDeny = await checkSearchQuota(identity, true);
-          if (quotaDeny) return quotaDeny;
-        }
 
         const searchResult = await search({
           link,
@@ -251,58 +210,28 @@ export const createRoutes = () => ({
     },
   },
   '/api/auth/request-code': {
-    POST: async function (req: Request) {
-      try {
-        return await requestCodeHandler(req);
-      } catch (err) {
-        logger.error(`[route /api/auth/request-code]: ${err}`);
-        return Response.json({ error: 'Something went wrong, please try again later.' }, { status: 500 });
-      }
+    POST: async function () {
+      return Response.json(
+        { error: 'Email login is retired.' },
+        { status: 410 }
+      );
     },
   },
   '/api/auth/verify-code': {
-    POST: async function (req: Request) {
-      try {
-        return await verifyCodeHandler(req);
-      } catch (err) {
-        logger.error(`[route /api/auth/verify-code]: ${err}`);
-        return Response.json({ error: 'Something went wrong, please try again later.' }, { status: 500 });
-      }
+    POST: async function () {
+      return Response.json(
+        { error: 'Email login is retired.' },
+        { status: 410 }
+      );
     },
   },
   '/api/status': {
-    GET: async function (req: Request) {
+    GET: async function () {
       try {
-        const gate = {
-          enabled: isGateEnabled(),
-          quota: {
-            limit: QUOTA_LIMIT,
-            windowSec: QUOTA_WINDOW_SEC,
-            cooldownSec: QUOTA_COOLDOWN_SEC,
-          },
-        };
-        let identity: { remaining: number; resetInSec: number } | undefined;
-        if (gate.enabled) {
-          try {
-            const email = await getVerifiedEmail(req);
-            if (email) {
-              const verdict = await peekQuotaFor(email);
-              if (verdict) {
-                identity = {
-                  remaining: verdict.remaining,
-                  resetInSec: verdict.resetInSec,
-                };
-              }
-            }
-          } catch {
-            // Quota visibility is best-effort; status stays open.
-          }
-        }
         return Response.json({
           serviceGuards: getAllServiceGuardStatuses(),
           timestamp: new Date().toISOString(),
-          gate,
-          ...(identity ? { identity } : {}),
+          gate: { enabled: false },
         });
       } catch (err) {
         logger.error(`[route /api/status]: ${err}`);

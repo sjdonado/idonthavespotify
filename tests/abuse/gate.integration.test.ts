@@ -1,17 +1,7 @@
 import type { Server } from 'bun';
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test';
+import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 
-import { issueOtp } from '~/abuse/otp';
-import { resetResendThrottle } from '~/abuse/plunk';
-import { resetLocalQuota } from '~/abuse/quota';
-import { ENV } from '~/config/env';
-import { cacheStore } from '~/services/cache';
-
-// Gate on for this file only (bun test --isolate keeps it per-file): the
-// gate arms on a non-blank Plunk key, no separate flag exists.
-process.env['SESSION_SECRET'] ||= 'test-gate-secret';
-process.env['PLUNK_API_KEY'] ||= 'test-plunk-key';
-process.env['PLUNK_TEMPLATE_ID'] ||= 'test-template-id';
+import { generateId } from '~/utils/encoding';
 
 import { loadHeadSnapshots } from '../mocks/snapshots';
 import { HttpMock } from '../utils/http-mock';
@@ -21,14 +11,19 @@ import { createTestApp, formDataFromObject, nodeFetch } from '../utils/request';
 // which would freeze config before the per-file env assignment above runs.
 const apiSearchEndpoint = (baseUrl: URL) => `${baseUrl}api/search?v=1`;
 
-const headSnapshots = loadHeadSnapshots();
-const SECRET = process.env['SESSION_SECRET'] as string;
 const LINK = 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc';
 
-describe('Email OTP gate', () => {
+// Gate on for this file only (bun test --isolate keeps it per-file): the
+// Plunk key is the public-instance signal. Web search stays open on it;
+// only /api/search is disabled until API keys land.
+process.env['PLUNK_API_KEY'] ||= 'test-plunk-key';
+
+describe('Public instance without the email wall', () => {
   let app: Server<undefined>;
   let searchEndpointUrl: string;
   let httpMock: HttpMock;
+
+  const headSnapshots = loadHeadSnapshots();
 
   beforeAll(() => {
     app = createTestApp();
@@ -41,163 +36,114 @@ describe('Email OTP gate', () => {
     httpMock.restore();
   });
 
-  beforeEach(() => {
-    cacheStore.reset();
-    resetLocalQuota();
-    resetResendThrottle();
-    httpMock.reset();
-
-    httpMock
-      .onPost(`${ENV.abuse.plunkApiUrl}/v1/verify`)
-      .reply(200, { success: true, data: { valid: true, hasMxRecords: true } });
-    httpMock
-      .onPost(`${ENV.abuse.plunkApiUrl}/v1/send`)
-      .reply(200, { success: true });
-  });
-
-  it('rejects unauthenticated API search with a machine-readable hint', async () => {
+  it('disables API search with a machine-readable hint', async () => {
     const response = await nodeFetch(searchEndpointUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ link: LINK }),
     });
-    expect(response.status).toBe(401);
+    expect(response.status).toBe(403);
     expect(await response.json()).toEqual({
       error: expect.any(String),
-      auth: 'email-otp',
+      auth: 'api-key',
     });
   });
 
-  it('rejects unauthenticated web search and gated share pages', async () => {
-    const web = await nodeFetch(`${app.url}search`, {
-      method: 'POST',
-      body: formDataFromObject({ link: LINK }),
-    });
-    expect(web.status).toBe(401);
-    expect(web.headers.get('content-type')).toContain('text/html');
-    expect(await web.text()).toContain('Verify your email');
-
-    // Gate runs before validation: no validity oracle for strangers.
+  it('disables API search before validation', async () => {
     const invalid = await nodeFetch(searchEndpointUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ link: 'https://open.spotify.com/invalid' }),
     });
-    expect(invalid.status).toBe(401);
-    expect(await invalid.json()).toEqual({
-      error: expect.any(String),
-      auth: 'email-otp',
-    });
-
-    const page = await nodeFetch(`${app.url}?id=whatever`);
-    expect(page.status).toBe(401);
-    expect(page.headers.get('x-auth-required')).toBe('email-otp');
-    const pageHtml = await page.text();
-    expect(pageHtml).toContain('gate-modal');
-    expect(pageHtml).toContain('gate-panel');
-    // Modal card carries its own welcome + footer: the page footer sits
-    // under the backdrop.
-    expect(pageHtml).toContain('Welcome');
-    expect(pageHtml).toContain('Source');
+    expect(invalid.status).toBe(403);
   });
 
-  it('requests, throttles, and verifies codes', async () => {
-    const email = 'Gate.User@gmail.com';
+  it('leaves web search open', async () => {
+    const home = await nodeFetch(`${app.url}`);
+    expect(home.status).toBe(200);
+    const homeHtml = await home.text();
+    expect(homeHtml).toContain('id="song-link"');
+    expect(homeHtml).not.toContain('gate-modal');
 
-    const requested = await nodeFetch(`${app.url}api/auth/request-code`, {
+    // Invalid links fail validation without touching upstream.
+    const invalid = await nodeFetch(`${app.url}search`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: formDataFromObject({ link: 'https://open.spotify.com/invalid' }),
     });
-    expect(requested.status).toBe(200);
-    expect(await requested.json()).toEqual({ ok: true });
-
-    const throttled = await nodeFetch(`${app.url}api/auth/request-code`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-    expect(throttled.status).toBe(429);
-
-    const wrong = await nodeFetch(`${app.url}api/auth/verify-code`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, code: '000000' }),
-    });
-    expect(wrong.status).toBe(400);
-
-    const code = await issueOtp('gateuser@gmail.com', SECRET);
-    const verified = await nodeFetch(`${app.url}api/auth/verify-code`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, code }),
-    });
-    expect(verified.status).toBe(200);
-    // No bearer tokens: the login cookie is the only credential.
-    expect(await verified.json()).toEqual({ ok: true });
-    expect(verified.headers.get('set-cookie')).toMatch(/^idhs_session=/);
+    expect(invalid.status).toBe(400);
+    expect(invalid.headers.get('content-type')).toContain('text/html');
   });
 
-  it('rejects aliases and unknown providers before any send', async () => {
-    for (const email of ['name+tag@gmail.com', 'user@evil.example']) {
-      const response = await nodeFetch(`${app.url}api/auth/request-code`, {
+  it('serves a real web search with no identity', async () => {
+    // Only metadata is stubbed; every other adapter misses its mock and
+    // degrades to an unverified link, so 200 proves the open path runs.
+    httpMock
+      .onGet('https://open.spotify.com/embed/track/3AhXZa8sUQht0UEdBJgpGc')
+      .reply(200, headSnapshots.spotifyTrackRollingStone);
+
+    const search = await nodeFetch(`${app.url}search`, {
+      method: 'POST',
+      body: formDataFromObject({ link: LINK }),
+    });
+    expect(search.status).toBe(200);
+    expect(search.headers.get('hx-replace-url')).toMatch(/^\/?\?id=.+/);
+    expect(await search.text()).toContain('search-card');
+    httpMock.reset();
+  });
+
+  it('leaves share pages ungated', async () => {
+    // Garbage id reaches search (and fails there) instead of hitting a wall.
+    const denied = await nodeFetch(`${app.url}?id=whatever`);
+    expect(denied.status).not.toBe(401);
+    expect(denied.headers.get('x-auth-required')).toBeNull();
+
+    // A real id renders the result card with no identity.
+    httpMock
+      .onGet('https://open.spotify.com/embed/track/3AhXZa8sUQht0UEdBJgpGc')
+      .reply(200, headSnapshots.spotifyTrackRollingStone);
+
+    const page = await nodeFetch(`${app.url}?id=${generateId(LINK)}`);
+    expect(page.status).toBe(200);
+    expect(await page.text()).toContain('search-card');
+    httpMock.reset();
+  });
+
+  it('retires the email auth endpoints', async () => {
+    for (const endpoint of ['request-code', 'verify-code']) {
+      const json = await nodeFetch(`${app.url}api/auth/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: 'user@gmail.com', code: '000000' }),
       });
-      expect(response.status).toBe(400);
+      expect(json.status).toBe(410);
+
+      const form = await nodeFetch(`${app.url}api/auth/${endpoint}`, {
+        method: 'POST',
+        body: formDataFromObject({ email: 'user@gmail.com', code: '000000' }),
+      });
+      expect(form.status).toBe(410);
     }
   });
 
-  it('returns the email form with an inline error for web failures', async () => {
-    const response = await nodeFetch(`${app.url}api/auth/request-code`, {
-      method: 'POST',
-      body: formDataFromObject({ email: 'name+tag@gmail.com' }),
-    });
-    expect(response.status).toBe(400);
-    expect(response.headers.get('content-type')).toContain('text/html');
-
-    const data = await response.text();
-    // Form survives with the value retained, error renders inline.
-    // (The footer lives outside the swap target, so it is asserted on the
-    // initial gate page instead.)
-    expect(data).toContain('id="gate-email"');
-    expect(data).toContain('name+tag@gmail.com');
-    expect(data).toContain('role="alert"');
-    expect(data).toContain('Plus-aliases');
-    expect(data).toContain('Welcome');
-  });
-
-  it('returns the code form with an inline error for a wrong web code', async () => {
-    const email = 'web.user@gmail.com';
-    const requested = await nodeFetch(`${app.url}api/auth/request-code`, {
-      method: 'POST',
-      body: formDataFromObject({ email }),
-    });
-    expect(requested.status).toBe(200);
-
-    const wrong = await nodeFetch(`${app.url}api/auth/verify-code`, {
-      method: 'POST',
-      body: formDataFromObject({ email, code: '000000' }),
-    });
-    expect(wrong.status).toBe(400);
-    expect(wrong.headers.get('content-type')).toContain('text/html');
-
-    const data = await wrong.text();
-    // 6-box code form survives, error renders inline.
-    expect(data).toContain('data-gate-target="box"');
-    expect(data).toContain('name="code"');
-    expect(data).toContain('role="alert"');
-    expect(data).toContain('Invalid or expired code.');
+  it('reports an open gate on status', async () => {
+    const status = await nodeFetch(`${app.url}api/status`);
+    expect(status.status).toBe(200);
+    const data = (await status.json()) as {
+      gate: { enabled: boolean };
+      identity?: unknown;
+    };
+    expect(data.gate.enabled).toBe(false);
+    expect(data.identity).toBeUndefined();
   });
 
   it('keeps exactly one submittable code field in gate fragments', async () => {
-    // htmx parses swap responses inside a <template> element, where
-    // scripting is disabled and <noscript> content parses as live,
-    // submittable controls. A fallback code input there double-submits
-    // alongside the hidden field and the server keeps the last (empty)
-    // value, so every verify fails. Cheerio cannot model the scripting
-    // flag, so this guards the raw markup instead.
+    // Dormant email modules stay for the future API-key feature: htmx
+    // parses swap responses inside a <template> element, where scripting
+    // is disabled and <noscript> content parses as live, submittable
+    // controls. A fallback code input there double-submits alongside the
+    // hidden field and the server keeps the last (empty) value, so every
+    // verify fails. Cheerio cannot model the scripting flag, so this
+    // guards the raw markup instead.
     const { codeSentFragment, emailFormFragment } = await import(
       '~/abuse/routes'
     );
@@ -209,75 +155,5 @@ describe('Email OTP gate', () => {
         /<noscript[^>]*>.*?(input|select|textarea|button)/s
       );
     }
-  });
-
-  it('enforces the per-email quota and surfaces it on status', async () => {
-    const email = 'quota.user@yahoo.com';
-    await nodeFetch(`${app.url}api/auth/request-code`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-    const code = await issueOtp('quota.user@yahoo.com', SECRET);
-    const verified = await nodeFetch(`${app.url}api/auth/verify-code`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, code }),
-    });
-    expect(verified.status).toBe(200);
-    // Replay the login cookie like the first-party frontend would.
-    const sessionCookie = verified.headers.get('set-cookie')?.split(';')[0] as string;
-    expect(sessionCookie).toMatch(/^idhs_session=/);
-    const auth = {
-      'Content-Type': 'application/json',
-      Cookie: sessionCookie,
-    };
-
-    const status = await nodeFetch(`${app.url}api/status`, { headers: auth });
-    const statusData = (await status.json()) as {
-      gate: { enabled: boolean; quota: { limit: number } };
-      identity?: { remaining: number };
-    };
-    expect(statusData.gate.enabled).toBe(true);
-    expect(statusData.gate.quota.limit).toBe(6);
-    expect(statusData.identity?.remaining).toBe(6);
-
-    httpMock
-      .onGet('https://open.spotify.com/embed/track/3AhXZa8sUQht0UEdBJgpGc')
-      .reply(200, headSnapshots.spotifyTrackRollingStone);
-    httpMock.onGet(/youtube/).reply(500);
-    httpMock.onGet(/music\.apple\.com/).reply(500);
-    httpMock.onGet(/deezer/).reply(500);
-    httpMock.onGet(/soundcloud/).reply(500);
-
-    // Invalid links fail validation without burning quota.
-    const invalid = await nodeFetch(searchEndpointUrl, {
-      method: 'POST',
-      headers: auth,
-      body: JSON.stringify({ link: 'https://open.spotify.com/invalid' }),
-    });
-    expect(invalid.status).toBe(400);
-
-    for (let i = 0; i < 6; i++) {
-      const res = await nodeFetch(searchEndpointUrl, {
-        method: 'POST',
-        headers: auth,
-        body: JSON.stringify({ link: LINK }),
-      });
-      expect(res.status).toBe(200);
-    }
-
-    // No upstream mocks left: a 429 proves the gate denied before any call.
-    httpMock.reset();
-    const exhausted = await nodeFetch(searchEndpointUrl, {
-      method: 'POST',
-      headers: auth,
-      body: JSON.stringify({ link: LINK }),
-    });
-    expect(exhausted.status).toBe(429);
-    expect(await exhausted.json()).toEqual({
-      error: expect.stringMatching(/quota/i),
-      retryAfter: expect.any(Number),
-    });
   });
 });

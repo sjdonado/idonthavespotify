@@ -13,13 +13,12 @@ Local Development: http://localhost:3000
 
 ## Authentication
 
-The public instance requires a browser login: logging in with an email code mints a session cookie, and that cookie is the only credential search accepts. There are no API tokens. Programmatic clients must target a self-hosted instance, where the gate is off and search stays open.
+The public instance needs no login: web search and shared links are open to everyone. Programmatic `/api/search` calls are disabled there until API keys land, and they answer 403 with `auth: "api-key"`. Programmatic clients must target a self-hosted instance today, where search stays open.
 
 ## Abuse Protection
 
-- The public instance gates search behind an email-code login (session cookie, no API tokens); programmatic clients must use a self-hosted instance
-- Verified emails get 6 searches per rolling 4 minutes; past that the API answers 429 with a retry delay, without touching upstream services
-- No per-IP rate limiting in the app; floods die at the Cloudflare edge rule
+- The public instance leaves web search and shared links open; only `/api/search` is disabled there (403 with `auth: "api-key"`), without touching upstream services
+- No per-IP rate limiting in the app; floods die at the Cloudflare edge (Bot Fight Mode plus a Managed Challenge rule)
 - Upstream service quotas are shared: prefer specific adapters to reduce load
 
 ## API Endpoints
@@ -148,7 +147,7 @@ Convert a streaming service link to equivalent links on other platforms.
 
 ### GET /api/status
 
-Check service quota usage and system health. When the gate is on, the response also names the quota policy, and authenticated callers (login cookie) see their remaining searches.
+Check service health. The response names the per-service upstream budgets plus a timestamp; `gate.enabled` stays false while web search is open.
 
 **Response:**
 ```json
@@ -164,25 +163,18 @@ Check service quota usage and system health. When the gate is on, the response a
   },
   "timestamp": "2024-01-01T00:00:00.000Z",
   "gate": {
-    "enabled": "boolean",
-    "quota": { "limit": "number", "windowSec": "number", "cooldownSec": "number" }
-  },
-  "identity": {
-    "remaining": "number",
-    "resetInSec": "number"
+    "enabled": false
   }
 }
 ```
 
-`identity` is present only on authenticated calls.
-
 ### POST /api/auth/request-code
 
-Send a 6-digit login code to an email address (popular providers only, no `+` aliases). Response: `{ "ok": true }`.
+Retired: answers 410. Email login is gone from the public instance.
 
 ### POST /api/auth/verify-code
 
-Exchange email plus code for a session. Answers `{ "ok": true }` plus a `Set-Cookie: idhs_session=...` header (30-day TTL). No tokens are issued.
+Retired: answers 410. Email login is gone from the public instance.
 
 ## Error Responses
 
@@ -200,26 +192,18 @@ Exchange email plus code for a session. Answers `{ "ok": true }` plus a `Set-Coo
 }
 ```
 
-**401 Unauthorized (public instance, login required):**
+**403 Forbidden (public instance, API disabled):**
 ```json
 {
-  "error": "Verify your email to use the public instance.",
-  "auth": "email-otp"
+  "error": "API search is disabled on the public instance.",
+  "auth": "api-key"
 }
 ```
 
-**429 Too Many Requests (per-email quota reached):**
+**410 Gone (email login retired):**
 ```json
 {
-  "error": "Public instance quota reached. Try again in 120s.",
-  "retryAfter": 120
-}
-```
-
-**503 Service Unavailable (quota check or gate temporarily unavailable):**
-```json
-{
-  "error": "Quota check unavailable, try again shortly."
+  "error": "Email login is retired."
 }
 ```
 
@@ -281,8 +265,8 @@ curl "https://idonthavespotify.sjdonado.com/api/status"
 6. **Check isVerified field**: Prioritize verified links in your responses
 7. **Handle missing audio**: Not all content has preview audio available
 8. **Universal links**: Use the `universalLink` field for shareable links that work across platforms
-9. **Public instance login**: `/api/search` needs the `idhs_session` login cookie there; a 401 with `auth: "email-otp"` means log in through the web UI first
-10. **Honor 429s**: Back off for `retryAfter` seconds instead of retrying immediately; no upstream call is made while over quota
+9. **Public instance API**: `/api/search` there answers 403 with `auth: "api-key"`; use a self-hosted instance for programmatic calls
+10. **Web search is open**: no login, no cookies, no quota headers to honor
 
 ## Web Interface
 
