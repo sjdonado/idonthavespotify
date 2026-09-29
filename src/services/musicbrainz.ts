@@ -116,7 +116,8 @@ async function searchMbids(
   );
   const items = data[kind.list] ?? [];
   // Verified hits only, best first; relations are checked in order until the
-  // missing platforms are filled (the top hit is not always the linked one).
+  // missing platforms are filled (the top hit is not always the linked one:
+  // identical titles score ties, so check every returned hit).
   const mbids = items
     .map(item => ({
       id: item.id,
@@ -127,7 +128,7 @@ async function searchMbids(
     }))
     .filter(hit => hit.score >= RESPONSE_COMPARE_MIN_SCORE)
     .sort((a, b) => b.score - a.score)
-    .slice(0, 3)
+    .slice(0, 5)
     .map(hit => hit.id);
   // Cache empty results briefly too: weak matches re-hit on every search.
   const hit = { entity: kind.entity, mbids, cached: false };
