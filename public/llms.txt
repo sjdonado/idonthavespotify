@@ -228,7 +228,7 @@ The API supports these content types:
 
 ## Example Usage
 
-### Convert a Spotify track to all platforms (self-hosted instance; the public instance answers 403):
+### Convert a Spotify track to all platforms (self-hosted instance; the public instance returns a Worker 403 after passing the edge challenge, while suspicious requests may receive a Managed Challenge):
 
 ```bash
 curl -X POST "http://localhost:3000/api/search?v=1" \
@@ -238,7 +238,7 @@ curl -X POST "http://localhost:3000/api/search?v=1" \
   }'
 ```
 
-### Convert to specific platforms only (self-hosted instance; the public instance answers 403):
+### Convert to specific platforms only (self-hosted instance; the public instance returns a Worker 403 after passing the edge challenge, while suspicious requests may receive a Managed Challenge):
 
 ```bash
 curl -X POST "http://localhost:3000/api/search?v=1" \
