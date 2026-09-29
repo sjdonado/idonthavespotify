@@ -66,7 +66,7 @@ describe('Page router', () => {
       expect(footerText).not.toContain('@sjdonado');
       expect(footerText).not.toContain('Status');
       expect(footerText).toContain('Source');
-      expect(footerText).toContain('Planning Tool');
+      expect(footerText).toContain('Planning Poker');
     });
   });
 
