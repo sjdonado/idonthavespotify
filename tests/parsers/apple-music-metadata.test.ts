@@ -53,6 +53,40 @@ describe('Apple Music metadata catalog fallback', () => {
     });
   });
 
+  it('resolves songs from non-English storefronts by song ID', async () => {
+    const link =
+      'https://music.apple.com/de/album/complicated/315025768?i=315025823&l=en-GB';
+    httpMock
+      .onGet(link)
+      .reply(
+        200,
+        '<html><head><meta property="og:title" content="Apple&#160;Music Web Player" /></head></html>'
+      );
+    httpMock.onGet('music.apple.com/de/search').reply(
+      200,
+      `<div data-testid="top-search-result" aria-label="Losing Grip · Titel · Avril Lavigne">
+         <a data-testid="click-action" href="https://music.apple.com/de/album/losing-grip/315025768?i=315025793"></a>
+       </div>
+       <div data-testid="top-search-result" aria-label="Complicated · Titel · Avril Lavigne">
+         <a data-testid="click-action" href="https://music.apple.com/de/album/complicated/315025768?i=315025823"></a>
+         <picture><source srcset="https://example.com/complicated-110.jpg 110w, https://example.com/complicated-220.jpg 220w" /></picture>
+       </div>
+       <div data-testid="top-search-result" aria-label="Let Go · Album · Avril Lavigne">
+         <a data-testid="click-action" href="https://music.apple.com/de/album/let-go/315025768"></a>
+       </div>`
+    );
+
+    const metadata = await getAppleMusicMetadata('catalog-song-de', link);
+
+    expect(metadata).toEqual({
+      title: 'Complicated',
+      description: 'Complicated Avril Lavigne',
+      type: MetadataType.Song,
+      image: 'https://example.com/complicated-220.jpg',
+      audio: undefined,
+    });
+  });
+
   it('resolves artists by ID match, not name', async () => {
     const link = 'https://music.apple.com/us/artist/j-cole/73705833';
     httpMock
