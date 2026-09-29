@@ -26,7 +26,7 @@ export default function FooterContent() {
         rel="noreferrer"
       >
         <i class="ti ti-ghost-2 mr-1" />
-        <span>Planning Tool</span>
+        <span>Planning Poker</span>
       </a>
       <span aria-hidden="true">|</span>
       <a
