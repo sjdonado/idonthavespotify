@@ -67,7 +67,7 @@ export const getDeezerMetadata = async (id: string, link: string) => {
 export const getDeezerQueryFromMetadata = (metadata: SearchMetadata) => {
   let query = metadata.title;
 
-  const artists = metadata.description.match(/^([^ -]+(?: [^ -]+)*)/)?.[1];
+  const artists = metadata.description?.match(/^([^ -]+(?: [^ -]+)*)/)?.[1];
 
   if (
     metadata.type === MetadataType.Song ||

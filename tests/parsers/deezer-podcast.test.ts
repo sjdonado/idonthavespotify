@@ -69,4 +69,14 @@ describe('Deezer podcast input', () => {
     expect(getDeezerQueryFromMetadata(metadata)).toContain('This American Life');
     httpMock.reset();
   });
+
+  it('builds a query without a description', () => {
+    const query = getDeezerQueryFromMetadata({
+      title: '732: Secrets',
+      description: undefined as unknown as string,
+      type: MetadataType.Podcast,
+    });
+
+    expect(query).toContain('732: Secrets');
+  });
 });
