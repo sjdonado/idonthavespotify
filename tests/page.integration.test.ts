@@ -49,7 +49,7 @@ describe('Page router', () => {
 
       expect(doc('h1').text()).toEqual("I Don't Have Spotify");
       expect(doc('p').text()).toContain(
-        'Paste a link from Spotify, YouTube Music, Apple Music, Deezer, SoundCloud, Qobuz, Bandcamp, Pandora, or Tidal to start.'
+        'Paste a link from Spotify, YouTube Music, Apple Music, Deezer, SoundCloud, Qobuz, Bandcamp, Pandora, Tidal, or JioSaavn to start.'
       );
 
       // Google pattern: hero on landing, sample-track shortcut present.
@@ -66,7 +66,7 @@ describe('Page router', () => {
       expect(footerText).not.toContain('@sjdonado');
       expect(footerText).not.toContain('Status');
       expect(footerText).toContain('Source');
-      expect(footerText).toContain('Planning Tool');
+      expect(footerText).toContain('Planning Poker');
     });
   });
 
@@ -238,7 +238,7 @@ describe('Page router', () => {
       const data = await response.text();
       const doc = getCheerioDoc(data);
       expect(doc('p').text()).toContain(
-        'Invalid link, please try with Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal, Qobuz, Bandcamp, Pandora, or Google Music Share links.'
+        'Invalid link, please try with Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal, Qobuz, Bandcamp, Pandora, JioSaavn, or Google Music Share links.'
       );
     });
 

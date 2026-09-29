@@ -150,4 +150,46 @@ describe('MusicBrainz fallback', () => {
 
     expect(links).toEqual([]);
   });
+
+  it('checks every returned hit for relations', async () => {
+    // Same-title hits score ties, so the linked recording can sit deep
+    // in the list; only the first three used to be checked.
+    httpMock.onGet('musicbrainz.org/ws/2/recording/?query=').reply(200, {
+      recordings: [
+        { id: 'bare-1', title: 'Wake Me Up', 'artist-credit': [{ name: 'Avicii' }] },
+        { id: 'bare-2', title: 'Wake Me Up', 'artist-credit': [{ name: 'Avicii' }] },
+        { id: 'bare-3', title: 'Wake Me Up', 'artist-credit': [{ name: 'Avicii' }] },
+        { id: 'bare-4', title: 'Wake Me Up', 'artist-credit': [{ name: 'Avicii' }] },
+        {
+          id: 'rich-mbid',
+          title: 'Wake Me Up',
+          'artist-credit': [{ name: 'Avicii' }],
+        },
+      ],
+    });
+    httpMock.onGet('rich-mbid?inc=url-rels').reply(200, {
+      relations: [
+        { type: 'streaming', url: { resource: 'https://tidal.com/track/182603678' } },
+      ],
+    });
+    httpMock.onGet('inc=url-rels').reply(200, { relations: [] });
+
+    const links = await resolveMusicBrainzLinks({
+      query: 'Wake Me Up Avicii',
+      metadata: {
+        title: 'Wake Me Up',
+        description: 'Avicii · Song · 2013',
+        type: MetadataType.Song,
+      },
+      missing: [Adapter.Tidal],
+    });
+
+    expect(links).toEqual([
+      {
+        type: Adapter.Tidal,
+        url: 'https://tidal.com/browse/track/182603678',
+        isVerified: true,
+      },
+    ]);
+  });
 });

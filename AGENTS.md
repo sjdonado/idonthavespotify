@@ -45,6 +45,7 @@ CI: PRs run `tests.yml` (loads `.env.test` into env, then `test:ci`, plus asset/
 - `public/assets/*.js|css` are build artifacts and gitignored; never edit them, rebuild instead.
 - `tests/mocks/**/*.html|json` are gitignored snapshots: if tests fail with missing-mock errors on a fresh clone, run `bun run test:mocks:fetch` (live network) before `bun run test`.
 - Always run tests through `bun run test`, not bare `bun test`.
+- The sample track (`SAMPLE_LINK` in `src/views/pages/home.tsx`) is always a Spotify URL, and the README screenshot (`docs/screenshot.png`) is always that sample track's result card. Change both together when the sample changes.
 - Outbound HTTP must go through `HttpClient` so tests can stub it; no direct `fetch`/`impit` calls in adapters or parsers.
 - Upstream error bodies must reach the logs: `HttpClientError` carries a 500-char `body` snippet, and adapters log it. Never swallow a non-2xx without its body.
 - Tidal has no outbound adapter: its search API needs a portal-granted entitlement that was refused (`invalid_scope` on the token, `INVALID_RESOURCE_ID` on every query), and its search pages sit behind a bot wall. Tidal links resolve through the MusicBrainz fallback instead (`src/services/musicbrainz.ts`, polite UA plus ~1s pacing per its rate rules); do not re-add a Tidal adapter without portal access.

@@ -40,6 +40,10 @@ const SEARCH_LINK_DICT = {
     icon: 'custom-svg svg-brand-pandora',
     label: 'Listen on Pandora',
   },
+  [Adapter.Jiosaavn]: {
+    icon: 'ti ti-music',
+    label: 'Listen on JioSaavn',
+  },
 };
 
 export default function SearchCard(props: { searchResult: SearchResult }) {

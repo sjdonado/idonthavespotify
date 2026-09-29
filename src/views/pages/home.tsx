@@ -3,7 +3,7 @@ import Nano, { Fragment } from 'nano-jsx';
 import { ghostButtonClass, primaryButtonClass } from '../components/button';
 import Footer from '../components/footer';
 
-const SAMPLE_LINK = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
+const SAMPLE_LINK = 'https://open.spotify.com/track/0nrRP2bk19rLc0orkWPQk2';
 
 export default function Home({
   source,
@@ -41,7 +41,7 @@ export default function Home({
           </a>
           {isHero && (
           <p data-home-target="subtitle" class="mx-auto max-w-2xl text-center text-sm text-zinc-400 lg:text-base">
-            Paste a link from Spotify, YouTube Music, Apple Music, Deezer, SoundCloud, Qobuz, Bandcamp, Pandora, or Tidal to start.
+            Paste a link from Spotify, YouTube Music, Apple Music, Deezer, SoundCloud, Qobuz, Bandcamp, Pandora, Tidal, or JioSaavn to start.
           </p>
           )}
         </div>
