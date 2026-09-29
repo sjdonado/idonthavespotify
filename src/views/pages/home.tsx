@@ -3,7 +3,7 @@ import Nano, { Fragment } from 'nano-jsx';
 import { ghostButtonClass, primaryButtonClass } from '../components/button';
 import Footer from '../components/footer';
 
-const SAMPLE_LINK = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
+const SAMPLE_LINK = 'https://open.spotify.com/track/0nrRP2bk19rLc0orkWPQk2';
 
 export default function Home({
   source,
