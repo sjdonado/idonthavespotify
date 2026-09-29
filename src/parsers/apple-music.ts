@@ -55,13 +55,11 @@ const splitLabel = (label: string): [string, string, string] => {
 const lastSrcsetUrl = (srcset?: string) =>
   srcset?.split(',').pop()?.trim().split(' ')[0] || undefined;
 
-const normalizeWords = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, '');
-
 const upscaleArtwork = (url?: string) => url?.replace('300x300', '600x600');
 
 // Same-host resolution chain (never touches the iTunes host): oEmbed for
-// exact album/playlist metadata, search-page scrape for songs (slug plus
-// album match) and artists (ID match). Only reached for bot-walled or
+// exact album/playlist metadata, search-page scrape for songs (song ID
+// match) and artists (ID match). Only reached for bot-walled or
 // empty pages, which never happens with the impit backend.
 const getAppleMusicMetadataFromCatalog = async (id: string, link: string) => {
   const fail = (): never => {
@@ -87,18 +85,16 @@ const getAppleMusicMetadataFromCatalog = async (id: string, link: string) => {
     const html = await searchAppleMusic(storefront, slug.replace(/-/g, ' '));
     if (html) {
       const doc = getCheerioDoc(html);
-      const wantTitle = normalizeWords(slug.replace(/-/g, ' '));
       let pick: { title: string; artist: string; artwork?: string } | undefined;
       doc('[data-testid="top-search-result"]').each((_, element) => {
         const block = doc(element);
-        const [title, kind, artist] = splitLabel(block.attr('aria-label') ?? '');
-        if (kind !== 'Song' || !title) return;
-        const href = block.find('a[data-testid="click-action"]').attr('href') ?? '';
-        if (!href.includes('/album/') || !href.includes(`/${pathId}`)) return;
-        const normalizedTitle = normalizeWords(title);
-        if (normalizedTitle !== wantTitle && !normalizedTitle.startsWith(wantTitle)) {
-          return;
-        }
+        const [title, , artist] = splitLabel(block.attr('aria-label') ?? '');
+        if (!title) return;
+        const href = block.find('a[data-testid="click-action"]').attr('href');
+        if (!href) return;
+        // Match the exact song ID: the kind label is localized per
+        // storefront ("Song", "Titel", "Canción", ...).
+        if (new URL(href, link).searchParams.get('i') !== songId) return;
         pick = {
           title,
           artist,
