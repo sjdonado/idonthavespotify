@@ -41,7 +41,7 @@ export default function Home({
           </a>
           {isHero && (
           <p data-home-target="subtitle" class="mx-auto max-w-2xl text-center text-sm text-zinc-400 lg:text-base">
-            Paste a link from Spotify, YouTube Music, Apple Music, Deezer, SoundCloud, Qobuz, Bandcamp, Pandora, or Tidal to start.
+            Paste a link from Spotify, YouTube Music, Apple Music, Deezer, SoundCloud, Qobuz, Bandcamp, Pandora, Tidal, or JioSaavn to start.
           </p>
           )}
         </div>

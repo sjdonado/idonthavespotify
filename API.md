@@ -21,7 +21,7 @@ Convert music links across streaming platforms.
 
 - `link`: Valid music link from any supported platform
 - `adapters`: Target platforms (default: all platforms)
-  - Available: `spotify`, `youTube`, `appleMusic`, `deezer`, `soundCloud`, `tidal`, `qobuz`, `bandcamp`, `pandora` (Tidal resolves via the MusicBrainz fallback)
+  - Available: `spotify`, `youTube`, `appleMusic`, `deezer`, `soundCloud`, `tidal`, `qobuz`, `bandcamp`, `pandora`, `jiosaavn` (Tidal resolves via the MusicBrainz fallback)
 
 **Response (200):**
 ```json
@@ -107,10 +107,11 @@ curl "https://idonthavespotify.sjdonado.com/api/status"
 - Deezer: `https://www.deezer.com/*/*`
 - SoundCloud: `https://soundcloud.com/*/*`, `https://on.soundcloud.com/*`
 - Tidal: `https://tidal.com/browse/*/*`
+- JioSaavn: `https://www.jiosaavn.com/song|album|artist|featured|playlist/*`
 - Google Music Share: `https://www.google.com/gasearch*`, `https://share.google/*`
 
 **Output (searchable):**
-- Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal, Qobuz, Bandcamp, Pandora
+- Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal, Qobuz, Bandcamp, Pandora, JioSaavn
 
 ## Error Responses
 

@@ -176,6 +176,7 @@ function platformFromHost(host: string): Adapter | null {
   }
   if (h.endsWith('.bandcamp.com')) return Adapter.Bandcamp;
   if (h === 'pandora.com' || h === 'www.pandora.com') return Adapter.Pandora;
+  if (h === 'jiosaavn.com' || h === 'www.jiosaavn.com') return Adapter.Jiosaavn;
   return null;
 }
 

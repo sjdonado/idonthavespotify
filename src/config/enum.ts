@@ -9,6 +9,7 @@ export enum StreamingService {
   Qobuz = 'qobuz',
   Bandcamp = 'bandcamp',
   Pandora = 'pandora',
+  Jiosaavn = 'jiosaavn',
 }
 
 export enum Adapter {
@@ -21,6 +22,7 @@ export enum Adapter {
   Qobuz = StreamingService.Qobuz,
   Bandcamp = StreamingService.Bandcamp,
   Pandora = StreamingService.Pandora,
+  Jiosaavn = StreamingService.Jiosaavn,
 }
 
 export enum Parser {
@@ -34,6 +36,7 @@ export enum Parser {
   Qobuz = StreamingService.Qobuz,
   Bandcamp = StreamingService.Bandcamp,
   Pandora = StreamingService.Pandora,
+  Jiosaavn = StreamingService.Jiosaavn,
 }
 
 export type StreamingServiceType = Adapter & Parser;

@@ -23,6 +23,7 @@ Then adapters take that query and search each destination platform for the best 
 | Qobuz            | Yes             | No                     | Yes            |
 | Bandcamp         | Yes             | No                     | Yes            |
 | Pandora          | Yes             | No                     | Yes            |
+| JioSaavn         | Yes             | No                     | Yes            |
 
 "Inverted search" means the adapter can be a search target. A few notes on the ones that behave unusually: Spotify has no usable official API for this project, so search runs through the same internal GraphQL API the Spotify web player uses, with an anonymous access token minted by a TOTP flow (more on that below). Tidal has no usable search of its own for this project (its API needs a portal-granted entitlement that was refused, and its pages sit behind a bot wall), so it resolves through a MusicBrainz fallback instead: the work is matched by title and artist, and its curated streaming links fill whichever adapters missed, Tidal included. Apple Music on the edge resolves through its catalog pages with no audio preview.
 
@@ -31,7 +32,7 @@ Then adapters take that query and search each destination platform for the best 
 The web app is the main interface, a single page with a search bar, instant result cards, and shareable universal links in the form `APP_URL?id=<id>`. Anyone opening your universal link sees the same result card without searching again.
 
 <div align="center">
-  <img width="1712" height="933" alt="image" src="https://github.com/user-attachments/assets/a1a0ee33-ba0f-49aa-ab29-19da69dd955d" />
+  <img width="1712" height="829" alt="Search result card for a JioSaavn track, with a JioSaavn row first" src="docs/screenshot.png" />
 </div>
 
 ### Raycast

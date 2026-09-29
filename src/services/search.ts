@@ -1,6 +1,7 @@
 import { getAppleMusicLink } from '~/adapters/apple-music';
 import { getBandcampLink } from '~/adapters/bandcamp';
 import { getDeezerLink } from '~/adapters/deezer';
+import { getJiosaavnLink } from '~/adapters/jiosaavn';
 import { getPandoraLink } from '~/adapters/pandora';
 import { getQobuzLink } from '~/adapters/qobuz';
 import { getSoundCloudLink } from '~/adapters/sound-cloud';
@@ -15,6 +16,7 @@ import {
 import { getBandcampMetadata, getBandcampQueryFromMetadata } from '~/parsers/bandcamp';
 import { getDeezerMetadata, getDeezerQueryFromMetadata } from '~/parsers/deezer';
 import { getGoogleMetadata, getGoogleQueryFromMetadata } from '~/parsers/google';
+import { getJiosaavnMetadata, getJiosaavnQueryFromMetadata } from '~/parsers/jiosaavn';
 import { getSearchParser } from '~/parsers/link';
 import { getPandoraMetadata, getPandoraQueryFromMetadata } from '~/parsers/pandora';
 import { getQobuzMetadata, getQobuzQueryFromMetadata } from '~/parsers/qobuz';
@@ -101,6 +103,7 @@ export const search = async <T extends SearchProps>({
     Adapter.Qobuz,
     Adapter.Bandcamp,
     Adapter.Pandora,
+    Adapter.Jiosaavn,
   ];
 
   logger.info(`[search] (searchAdapters) ${searchAdapters}`);
@@ -116,6 +119,7 @@ export const search = async <T extends SearchProps>({
     [Parser.Qobuz]: getQobuzMetadata,
     [Parser.Bandcamp]: getBandcampMetadata,
     [Parser.Pandora]: getPandoraMetadata,
+    [Parser.Jiosaavn]: getJiosaavnMetadata,
   };
 
   const queryExtractorsMap = {
@@ -129,6 +133,7 @@ export const search = async <T extends SearchProps>({
     [Parser.Qobuz]: getQobuzQueryFromMetadata,
     [Parser.Bandcamp]: getBandcampQueryFromMetadata,
     [Parser.Pandora]: getPandoraQueryFromMetadata,
+    [Parser.Jiosaavn]: getJiosaavnQueryFromMetadata,
   };
 
   const linkGettersMap: Partial<Record<Adapter, LinkGetter>> = {
@@ -140,6 +145,7 @@ export const search = async <T extends SearchProps>({
     [Adapter.Qobuz]: getQobuzLink,
     [Adapter.Bandcamp]: getBandcampLink,
     [Adapter.Pandora]: getPandoraLink,
+    [Adapter.Jiosaavn]: getJiosaavnLink,
   };
 
   const metadataFetcher = metadataFetchersMap[searchParser.type];

@@ -33,6 +33,9 @@ const buildEnv = () => ({
     pandora: {
       apiUrl: readEnv('PANDORA_API_URL')!,
     },
+    jiosaavn: {
+      apiUrl: readEnv('JIOSAAVN_API_URL')!,
+    },
   },
   services: {},
   abuse: {
