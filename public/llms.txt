@@ -2,7 +2,7 @@
 
 ## Overview
 
-I Don't Have Spotify is a service that converts music streaming links between different platforms. It accepts a link from one streaming service (Spotify, Apple Music, YouTube Music, Tidal, Deezer, SoundCloud, Qobuz, Bandcamp, Pandora, JioSaavn) and returns equivalent links for all other supported platforms.
+I Don't Have Spotify is a service that converts music streaming links between different platforms. It accepts a link from one streaming service (Spotify, Apple Music, YouTube Music, Tidal, Deezer, SoundCloud, Qobuz, Bandcamp, Pandora, JioSaavn, Apple Podcasts) and returns equivalent links for all other supported platforms.
 
 **Important Limitation**: Playlists are out of scope. Only individual tracks, albums, artists, and podcasts are supported.
 
@@ -53,6 +53,8 @@ Convert a streaming service link to equivalent links on other platforms.
 - `bandcamp`: Bandcamp
 - `pandora`: Pandora
 - `jiosaavn`: JioSaavn
+- `applePodcasts`: Apple Podcasts (podcast and show searches)
+- `podcastFeed`: RSS feed URL (podcast and show searches only)
 
 **Supported URL Patterns:**
 
@@ -101,6 +103,10 @@ Convert a streaming service link to equivalent links on other platforms.
 - https://www.pandora.com/artist/[name]/[id]
 - https://www.pandora.com/playlist/[name]/[id]
 - https://www.pandora.com/podcast/[name]/[id]
+
+**Apple Podcasts:**
+- https://podcasts.apple.com/[country]/podcast/[name]/id[id]
+- https://podcasts.apple.com/[country]/podcast/[name]/id[id]?i=[episode-id]
 
 **JioSaavn:**
 - https://www.jiosaavn.com/song/[name]/[id]

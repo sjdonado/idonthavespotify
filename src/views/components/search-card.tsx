@@ -44,6 +44,14 @@ const SEARCH_LINK_DICT = {
     icon: 'ti ti-music',
     label: 'Listen on JioSaavn',
   },
+  [Adapter.ApplePodcasts]: {
+    icon: 'ti ti-podcast',
+    label: 'Listen on Apple Podcasts',
+  },
+  [Adapter.PodcastFeed]: {
+    icon: 'ti ti-rss',
+    label: 'RSS Feed',
+  },
 };
 
 export default function SearchCard(props: { searchResult: SearchResult }) {

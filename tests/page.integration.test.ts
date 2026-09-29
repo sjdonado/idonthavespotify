@@ -49,7 +49,7 @@ describe('Page router', () => {
 
       expect(doc('h1').text()).toEqual("I Don't Have Spotify");
       expect(doc('p').text()).toContain(
-        'Paste a link from Spotify, YouTube Music, Apple Music, Deezer, SoundCloud, Qobuz, Bandcamp, Pandora, Tidal, or JioSaavn to start.'
+        'Paste a link from Spotify, YouTube Music, Apple Music, Deezer, SoundCloud, Qobuz, Bandcamp, Pandora, Tidal, JioSaavn, or Apple Podcasts to start.'
       );
 
       // Google pattern: hero on landing, sample-track shortcut present.
@@ -238,7 +238,7 @@ describe('Page router', () => {
       const data = await response.text();
       const doc = getCheerioDoc(data);
       expect(doc('p').text()).toContain(
-        'Invalid link, please try with Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal, Qobuz, Bandcamp, Pandora, JioSaavn, or Google Music Share links.'
+        'Invalid link, please try with Spotify, YouTube, Apple Music, Deezer, SoundCloud, Tidal, Qobuz, Bandcamp, Pandora, JioSaavn, Apple Podcasts, or Google Music Share links.'
       );
     });
 

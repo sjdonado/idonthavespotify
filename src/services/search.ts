@@ -1,4 +1,5 @@
 import { getAppleMusicLink } from '~/adapters/apple-music';
+import { getApplePodcastsLink, getPodcastFeedLink } from '~/adapters/apple-podcasts';
 import { getBandcampLink } from '~/adapters/bandcamp';
 import { getDeezerLink } from '~/adapters/deezer';
 import { getJiosaavnLink } from '~/adapters/jiosaavn';
@@ -9,10 +10,11 @@ import { getSpotifyLink } from '~/adapters/spotify';
 import { getYouTubeLink } from '~/adapters/youtube';
 import { Adapter, MetadataType, Parser, type StreamingServiceType } from '~/config/enum';
 import { ENV } from '~/config/env';
+import { getAppleMusicMetadata, getAppleMusicQueryFromMetadata } from '~/parsers/apple-music';
 import {
-  getAppleMusicMetadata,
-  getAppleMusicQueryFromMetadata,
-} from '~/parsers/apple-music';
+  getApplePodcastsMetadata,
+  getApplePodcastsQueryFromMetadata,
+} from '~/parsers/apple-podcasts';
 import { getBandcampMetadata, getBandcampQueryFromMetadata } from '~/parsers/bandcamp';
 import { getDeezerMetadata, getDeezerQueryFromMetadata } from '~/parsers/deezer';
 import { getGoogleMetadata, getGoogleQueryFromMetadata } from '~/parsers/google';
@@ -104,6 +106,8 @@ export const search = async <T extends SearchProps>({
     Adapter.Bandcamp,
     Adapter.Pandora,
     Adapter.Jiosaavn,
+    Adapter.ApplePodcasts,
+    Adapter.PodcastFeed,
   ];
 
   logger.info(`[search] (searchAdapters) ${searchAdapters}`);
@@ -120,6 +124,7 @@ export const search = async <T extends SearchProps>({
     [Parser.Bandcamp]: getBandcampMetadata,
     [Parser.Pandora]: getPandoraMetadata,
     [Parser.Jiosaavn]: getJiosaavnMetadata,
+    [Parser.ApplePodcasts]: getApplePodcastsMetadata,
   };
 
   const queryExtractorsMap = {
@@ -134,6 +139,7 @@ export const search = async <T extends SearchProps>({
     [Parser.Bandcamp]: getBandcampQueryFromMetadata,
     [Parser.Pandora]: getPandoraQueryFromMetadata,
     [Parser.Jiosaavn]: getJiosaavnQueryFromMetadata,
+    [Parser.ApplePodcasts]: getApplePodcastsQueryFromMetadata,
   };
 
   const linkGettersMap: Partial<Record<Adapter, LinkGetter>> = {
@@ -146,6 +152,8 @@ export const search = async <T extends SearchProps>({
     [Adapter.Bandcamp]: getBandcampLink,
     [Adapter.Pandora]: getPandoraLink,
     [Adapter.Jiosaavn]: getJiosaavnLink,
+    [Adapter.ApplePodcasts]: getApplePodcastsLink,
+    [Adapter.PodcastFeed]: getPodcastFeedLink,
   };
 
   const metadataFetcher = metadataFetchersMap[searchParser.type];

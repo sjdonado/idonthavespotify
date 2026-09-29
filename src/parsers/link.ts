@@ -1,5 +1,6 @@
 import {
   APPLE_MUSIC_LINK_REGEX,
+  APPLE_PODCASTS_LINK_REGEX,
   BANDCAMP_LINK_REGEX,
   DEEZER_LINK_REGEX,
   GOOGLE_LINK_REGEX,
@@ -103,6 +104,14 @@ export const getSearchParser = (link?: string, searchId?: string) => {
   if (jiosaavnId) {
     id = jiosaavnId;
     type = Parser.Jiosaavn;
+  }
+
+  const applePodcastsMatch = source.match(APPLE_PODCASTS_LINK_REGEX);
+  if (applePodcastsMatch) {
+    // Episode links carry the episode id in ?i=; show links resolve by
+    // the collection id. The parser re-reads the full source anyway.
+    id = applePodcastsMatch[2].match(/[?&]i=(\d+)/)?.[1] ?? applePodcastsMatch[1];
+    type = Parser.ApplePodcasts;
   }
 
   const googleMatch = source.match(GOOGLE_LINK_REGEX);

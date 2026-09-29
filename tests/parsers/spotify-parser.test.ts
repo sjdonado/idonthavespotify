@@ -125,5 +125,24 @@ describe('Spotify Parser', () => {
       expect(metadata.type).toBe(MetadataType.Song);
       expect(metadata.audio).toBe('https://example.com/preview.mp3');
     });
+
+    it('resolves episode art from relatedEntityCoverArt', async () => {
+      httpMock
+        .onGet('https://open.spotify.com/embed/episode/6IlLXh2N2aHXJpW1DVzTwz')
+        .reply(
+          200,
+          '<script id="__NEXT_DATA__" type="application/json">{"name":"How to Love Criticism","uri":"spotify:episode:6IlLXh2N2aHXJpW1DVzTwz","type":"episode","subtitle":"Worklife with Molly Graham","visualIdentity":{"backgroundBase":{"red":32}},"coverArt":null,"relatedEntityCoverArt":[{"url":"https://example.com/ep640.jpg","maxWidth":640},{"url":"https://example.com/ep300.jpg","maxWidth":300}],"audioPreview":{"url":"https://example.com/clip.mp3"}}</script>'
+        );
+
+      const metadata = await getSpotifyMetadata(
+        'episode-id',
+        'https://open.spotify.com/episode/6IlLXh2N2aHXJpW1DVzTwz'
+      );
+
+      expect(metadata.title).toBe('How to Love Criticism');
+      expect(metadata.type).toBe(MetadataType.Podcast);
+      expect(metadata.image).toBe('https://example.com/ep640.jpg');
+      expect(metadata.audio).toBe('https://example.com/clip.mp3');
+    });
   });
 });

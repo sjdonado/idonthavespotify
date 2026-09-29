@@ -36,6 +36,9 @@ const buildEnv = () => ({
     jiosaavn: {
       apiUrl: readEnv('JIOSAAVN_API_URL')!,
     },
+    applePodcasts: {
+      apiUrl: readEnv('ITUNES_API_URL')!,
+    },
   },
   services: {},
   abuse: {

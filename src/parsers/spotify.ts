@@ -31,6 +31,8 @@ interface SpotifyEntity {
   releaseDate?: { isoString?: string };
   visualIdentity?: { image?: Array<{ url?: string; maxWidth?: number }> };
   coverArt?: { sources?: Array<{ url?: string }> };
+  // Episodes carry no visualIdentity.image; their art lives here instead.
+  relatedEntityCoverArt?: Array<{ url?: string; maxWidth?: number }>;
   audioPreview?: { url?: string };
   type?: string;
   uri?: string;
@@ -142,7 +144,19 @@ export const getSpotifyMetadata = async (id: string, link: string) => {
         !best || (img.maxWidth ?? 0) > (best.maxWidth ?? 0) ? img : best,
       null
     );
-    const image = largest?.url ?? entity.coverArt?.sources?.[0]?.url;
+    const relatedImages = Array.isArray(entity.relatedEntityCoverArt)
+      ? entity.relatedEntityCoverArt
+      : [];
+    const largestRelated = relatedImages.reduce<{
+      url?: string;
+      maxWidth?: number;
+    } | null>(
+      (best, img) =>
+        !best || (img.maxWidth ?? 0) > (best.maxWidth ?? 0) ? img : best,
+      null
+    );
+    const image =
+      largest?.url ?? entity.coverArt?.sources?.[0]?.url ?? largestRelated?.url;
 
     const audio = entity.audioPreview?.url ?? undefined;
 

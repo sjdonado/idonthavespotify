@@ -167,6 +167,7 @@ function platformFromHost(host: string): Adapter | null {
     return Adapter.YouTube;
   }
   if (h === 'music.apple.com' || h === 'geo.music.apple.com') return Adapter.AppleMusic;
+  if (h === 'podcasts.apple.com') return Adapter.ApplePodcasts;
   if (h === 'deezer.com' || h === 'www.deezer.com') return Adapter.Deezer;
   if (h === 'soundcloud.com' || h === 'on.soundcloud.com') return Adapter.SoundCloud;
   if (h === 'tidal.com' || h === 'www.tidal.com' || h === 'listen.tidal.com') {

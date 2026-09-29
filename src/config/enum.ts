@@ -10,6 +10,8 @@ export enum StreamingService {
   Bandcamp = 'bandcamp',
   Pandora = 'pandora',
   Jiosaavn = 'jiosaavn',
+  ApplePodcasts = 'applePodcasts',
+  PodcastFeed = 'podcastFeed',
 }
 
 export enum Adapter {
@@ -23,6 +25,8 @@ export enum Adapter {
   Bandcamp = StreamingService.Bandcamp,
   Pandora = StreamingService.Pandora,
   Jiosaavn = StreamingService.Jiosaavn,
+  ApplePodcasts = StreamingService.ApplePodcasts,
+  PodcastFeed = StreamingService.PodcastFeed,
 }
 
 export enum Parser {
@@ -37,6 +41,7 @@ export enum Parser {
   Bandcamp = StreamingService.Bandcamp,
   Pandora = StreamingService.Pandora,
   Jiosaavn = StreamingService.Jiosaavn,
+  ApplePodcasts = StreamingService.ApplePodcasts,
 }
 
 export type StreamingServiceType = Adapter & Parser;

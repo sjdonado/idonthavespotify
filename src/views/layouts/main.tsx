@@ -23,11 +23,11 @@ const MainLayout = ({ title, description, image, children }: MainLayoutProps) =>
 
         <meta
           name="description"
-          content="Turn any Spotify, Apple Music, YouTube, Deezer, Tidal, SoundCloud, Qobuz, Pandora, Bandcamp, or JioSaavn link into a shareable preview across the streaming services your friends use."
+          content="Turn any Spotify, Apple Music, YouTube, Deezer, Tidal, SoundCloud, Qobuz, Pandora, Bandcamp, JioSaavn, or Apple Podcasts link into a shareable preview across the streaming services your friends use."
         />
         <meta
           name="keywords"
-          content="Spotify,YouTube,Deezer,Apple Music,Tidal,SoundCloud,converter,search,listen,JioSaavn"
+          content="Spotify,YouTube,Deezer,Apple Music,Tidal,SoundCloud,converter,search,listen,JioSaavn,Apple Podcasts"
         />
 
         <meta property="og:type" content="website" />
