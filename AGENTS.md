@@ -62,7 +62,7 @@ CI: PRs run `tests.yml` (loads `.env.test` into env, then `test:ci`, plus asset/
 - Edge deltas vs self-host: platform `fetch` instead of TLS impersonation (guarded sources may answer differently; Spotify metadata resolves via `__NEXT_DATA__` embed pages on both runtimes; Apple Music resolves via the same-host catalog chain with no audio preview), per-isolate in-memory cache (service-guard budgets stay the shared quota protection), no URL shortener (share links are always plain app URLs), no per-IP limiting in the app, and platform CPU and memory limits.
 - Edge abuse protection is Bot Fight Mode plus one WAF Managed Challenge rule (the Free plan allows five custom rules; this deployment uses one), because only the edge can judge all isolates together. Create it under Security > WAF > custom rules:
   - Rule name: `idhs-search-challenge`
-  - Expression: `(http.request.uri.path in {"/" "/search" "/api/search"})`
+  - Expression: `(http.host eq "idonthavespotify.sjdonado.com" and http.request.uri.path in {"/" "/search" "/api/search"})` (host-scoped so other hostnames in the zone stay untouched)
   - Action: Managed Challenge (suspicious visitors get an interactive challenge automatically; humans pass through. `/` is included because `?id=` share loads run full searches; plain homepage loads without an `id` stay cheap enough to ignore)
 - Floods die at the edge before consuming worker quota or subrequests; per-service circuit breakers stay the final fuse for upstream quotas. Keep Bot Fight Mode on (free) for known-bot junk, and tighten or add Under Attack Mode only as incident response.
 

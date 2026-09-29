@@ -42,7 +42,7 @@ Known edge differences SHALL be documented in the change: fetch-based HTTP inste
 
 ### Requirement: Public instance sits behind Bot Fight Mode and a WAF Managed Challenge rule
 
-The public instance deployment SHALL be guarded by Bot Fight Mode plus one Cloudflare WAF Managed Challenge rule matching `(http.request.uri.path in {"/" "/search" "/api/search"})`. Suspicious visitors SHALL get an interactive challenge automatically while humans pass through. Self-hosted instances SHALL NOT require any Cloudflare rule, but MUST be exposed publicly only behind Cloudflare (with the challenge rule for browser-facing use, or rate limiting alone where programmatic clients call `/api/search`) or a rate-limiting reverse proxy, since the app itself ships no per-IP limiter.
+The public instance deployment SHALL be guarded by Bot Fight Mode plus one Cloudflare WAF Managed Challenge rule matching `(http.host eq "idonthavespotify.sjdonado.com" and http.request.uri.path in {"/" "/search" "/api/search"})`. Suspicious visitors SHALL get an interactive challenge automatically while humans pass through. Self-hosted instances SHALL NOT require any Cloudflare rule, but MUST be exposed publicly only behind Cloudflare (with the challenge rule for browser-facing use, or rate limiting alone where programmatic clients call `/api/search`) or a rate-limiting reverse proxy, since the app itself ships no per-IP limiter.
 
 #### Scenario: Flood challenged before the Worker runs
 
