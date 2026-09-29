@@ -40,7 +40,7 @@ The web app is the main interface, a single page with a search bar, instant resu
 
 Source code: https://github.com/raycast/extensions/tree/main/extensions/idonthavespotify
 
-The extension talks to a self-hosted instance, where search stays open. It does not work against the public instance, which needs a browser login (see below) and issues no API tokens.
+The extension talks to a self-hosted instance, where search stays open. It does not work against the public instance, where programmatic search is disabled until API keys land.
 
 ## Running it locally
 
@@ -65,23 +65,19 @@ bun run build:prod
 ./dist/idonthavespotify # serves everything, no sidecars, no `public/` copy needed
 ```
 
-`PORT` and `NODE_ENV` configure the binary, and it reads `.env` from the working directory. Self-hosted instances leave the public instance gate off by default, so search stays open exactly like it always was; the one thing the app deliberately does not ship is a per-IP rate limiter, so only expose your instance publicly behind Cloudflare (with a rate limiting rule like the public instance's, described in AGENTS.md) or a rate-limiting reverse proxy.
+`PORT` and `NODE_ENV` configure the binary, and it reads `.env` from the working directory. Self-hosted instances keep search open for pages and API alike; the one thing the app deliberately does not ship is a per-IP rate limiter, so only expose your instance publicly behind Cloudflare (with Bot Fight Mode and a Managed Challenge rule like the public instance's, described in AGENTS.md) or a rate-limiting reverse proxy.
 
 ## The public instance and its abuse protection
 
-The public instance runs on Cloudflare Workers, and because it sits on shared upstream quotas, it asks who you are before it searches. There are no accounts, no passwords, and no signup page, just an email address that proves you can receive mail.
+The public instance runs on Cloudflare Workers, and because it sits on shared upstream quotas, it leans on the edge to stay usable. Web search and shared links are open to everyone with no login; only programmatic `/api/search` calls are disabled there, answering 403 without touching any upstream service, until API keys land.
 
-On the web the flow happens inline, right where the search bar lives. You type your email, receive a six-digit code, type the code, and a session cookie is minted that unlocks search immediately, in the browser and for its API calls alike. The cookie lasts 30 days and is the only credential the public instance accepts: there are no API tokens, so anything programmatic, including the Raycast extension, runs against a self-hosted instance instead. Only popular mailbox providers are accepted, addresses with `+` aliases are rejected before anything is sent, and Plunk's verifier double-checks disposables, mail records, and typos. Gmail-style dot variations are normalized first, so `first.last` and `firstlast` count as the same address.
-
-Every verified address gets 6 searches per rolling 4 minutes. Past that the API answers 429 with a retry hint and a 2-minute cooldown, without touching any upstream service. Unauthenticated search answers 401 with an `auth: "email-otp"` hint, also without touching upstream. The counters live in a Durable Object keyed by email hash, deliberate because an identity key makes each counter small and meaningful, and quota checks fail closed: if the counter store is unreachable, searches wait rather than running unlimited. The Cloudflare WAF rule and the per-service circuit breakers stay on as the outer layers, unchanged.
-
-Your address is used for abuse decisions only. It is never used for marketing, and the code is delivered with non-persistent template data so it is never stored on your contact record. If the gate ever misbehaves, blanking the Plunk key restores fully open access without a redeploy, since the gate only arms when a key is set.
+Abuse protection lives in two places. At the edge, Bot Fight Mode stays on for known-bot junk and a WAF Managed Challenge rule fronts the search routes, so suspicious visitors face an automatic challenge (interactive or not, by signal) while humans pass through untouched. In the app, the per-service circuit breakers stay the final fuse for upstream quotas. The email-code wall is gone: its modules remain in `src/abuse` for a future API-key feature, and the old auth endpoints answer 410.
 
 ### Operating the public instance
 
 Deployments happen automatically: every push to `main` typechecks, lints, builds the edge bundle, audits it for native imports, and deploys it with Wrangler. A failed check blocks the deploy. The GitHub secrets that make this work are `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
 
-Before the gate can run on a fresh Cloudflare account, three values have to exist as worker secrets, set with `bunx wrangler secret put` and never written into the repo: `PLUNK_API_KEY` for sending mail, which is also the switch that arms the gate, `SESSION_SECRET` which signs both the one-time codes and the session tokens, and `PLUNK_TEMPLATE_ID` pointing at the dashboard template that defines the sender, subject, and body (the code arrives as one-shot template data). Plunk also needs a verified sender domain, which you arrange in the Plunk dashboard. The edge worker guide, including the WAF rule and the Durable Object details, lives in AGENTS.md.
+The edge protection guide, including the WAF rule and Bot Fight Mode notes, lives in AGENTS.md. A `PLUNK_API_KEY` worker secret is still the signal the code uses to tell the public instance apart from a self-host; it no longer sends any mail.
 
 ## More info
 

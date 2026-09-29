@@ -1,6 +1,6 @@
 # API Documentation
 
-Base URL: `https://idonthavespotify.sjdonado.com`
+Base URL: `https://idonthavespotify.sjdonado.com` (public instance: web UI, shared links, and status; programmatic `/api/search` there is disabled, so the search examples below use a self-hosted instance at `http://localhost:3000`).
 
 ## Endpoints
 
@@ -47,16 +47,14 @@ Convert music links across streaming platforms.
 
 **Errors:**
 - `400`: Invalid link or missing parameters
-- `401`: Email verification required (public instance only; response carries `auth: "email-otp"`)
-- `429`: Per-email quota reached (response carries `retryAfter` seconds)
+- `403`: API search disabled on the public instance (response carries `auth: "api-key"`)
 - `500`: Processing failed
-- `503`: Quota check or gate temporarily unavailable
 
-On the public instance, search is gated behind a browser login: logging in mints a session cookie, and that cookie is the only credential `/api/search` accepts. There are no API tokens, so programmatic clients such as the Raycast extension target self-hosted instances, where the gate is off and search stays open.
+On the public instance, programmatic search is disabled: `/api/search` answers 403 without touching any upstream service, and it stays that way until API keys land. Programmatic clients such as the Raycast extension target self-hosted instances, where search stays open.
 
-**Example:**
+**Example** (self-hosted instance; the public instance answers 403):
 ```bash
-curl -X POST "https://idonthavespotify.sjdonado.com/api/search?v=1" \
+curl -X POST "http://localhost:3000/api/search?v=1" \
   -H "Content-Type: application/json" \
   -d '{
     "link": "https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc",
@@ -66,51 +64,15 @@ curl -X POST "https://idonthavespotify.sjdonado.com/api/search?v=1" \
 
 ### POST `/api/auth/request-code`
 
-Send a 6-digit code to an email address (public instance only).
-
-**Request Body:**
-```json
-{
-  "email": "string (required, popular providers only, no `+` aliases)"
-}
-```
-
-**Response (200):**
-```json
-{ "ok": true }
-```
-
-**Errors:**
-- `400`: Rejected address (unknown provider, alias, disposable, typo hint)
-- `429`: Code already sent, retry with `retryAfter` seconds
-- `502`: Code could not be sent
+Retired: email login is gone from the public instance, so this endpoint answers 410.
 
 ### POST `/api/auth/verify-code`
 
-Exchange an email plus code for a session. Post a form for a session cookie plus page refresh (web UI); with `Accept: application/json` the same call sets the cookie and answers `{ "ok": true }`. No tokens are issued. Form posts from the web UI receive HTML fragments with the same statuses instead of JSON, so errors render inline where the action happened.
-
-**Request Body:**
-```json
-{
-  "email": "string (required)",
-  "code": "string (required, 6 digits)"
-}
-```
-
-**Response (200, JSON):**
-```json
-{ "ok": true }
-```
-plus a `Set-Cookie: idhs_session=...` header (30-day TTL).
-
-**Errors:**
-- `400`: Invalid or expired code
+Retired: email login is gone from the public instance, so this endpoint answers 410.
 
 ### GET `/api/status`
 
-Service quota and health overview (service-guard budgets plus timestamp).
-When the public instance gate is on, the response also names the quota policy, and
-authenticated callers see their remaining searches.
+Service health overview (service-guard budgets plus timestamp).
 
 **Response (200):**
 ```json
@@ -126,17 +88,10 @@ authenticated callers see their remaining searches.
   },
   "timestamp": "string",
   "gate": {
-    "enabled": "boolean",
-    "quota": { "limit": "number", "windowSec": "number", "cooldownSec": "number" }
-  },
-  "identity": {
-    "remaining": "number",
-    "resetInSec": "number"
+    "enabled": false
   }
 }
 ```
-
-`identity` is present only on authenticated calls.
 
 **Example:**
 ```bash

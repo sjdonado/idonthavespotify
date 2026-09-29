@@ -5,7 +5,7 @@ import { firstValidationMessage } from '~/utils/zod';
 import { primaryButtonFullClass } from '~/views/components/button';
 
 import { checkEmailPolicy } from './email';
-import { esc, isGateEnabled, wantsJson } from './gate';
+import { esc, isPublicInstance, wantsJson } from './gate';
 import { issueOtp, verifyOtp } from './otp';
 import {
   checkResendThrottle,
@@ -96,7 +96,7 @@ export const codeSentFragment = (email: string): string =>
 
 export async function requestCodeHandler(req: Request): Promise<Response> {
   const json = wantsJson(req);
-  if (!isGateEnabled()) {
+  if (!isPublicInstance()) {
     return json
       ? Response.json({ error: 'Gate is disabled.' }, { status: 400 })
       : webFormError(emailFormFragment('', 'Gate is disabled.'), 400);
@@ -186,7 +186,7 @@ export async function requestCodeHandler(req: Request): Promise<Response> {
 
 export async function verifyCodeHandler(req: Request): Promise<Response> {
   const json = wantsJson(req);
-  if (!isGateEnabled()) {
+  if (!isPublicInstance()) {
     return json
       ? Response.json({ error: 'Gate is disabled.' }, { status: 400 })
       : webFormError(emailFormFragment('', 'Gate is disabled.'), 400);

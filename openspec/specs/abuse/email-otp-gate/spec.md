@@ -1,64 +1,41 @@
 ## Purpose
 
-Gates demo usage behind a lightweight email identity so one actor cannot burn shared upstream quotas, without accounts, passwords, or a signup page.
+The email wall is retired. Web search and shared links are open on the public instance; programmatic search stays disabled there until API keys land. The email modules remain dormant for that future feature.
 
 ## Requirements
 
-### Requirement: Search requires a verified email session unless disabled
+### Requirement: Web search and shared links need no identity
 
-Search endpoints (web and API) SHALL reject unauthenticated callers with 401 when the gate is enabled; a blank or unset Plunk key SHALL disable the gate entirely (self-host default, no separate flag).
+`POST /search` and `GET /?id=` SHALL serve unauthenticated callers with no quota checks; no login UI SHALL render.
 
-#### Scenario: Unauthenticated search is rejected
+#### Scenario: Open search
 
-- **WHEN** the gate is enabled and a client posts to `/api/search` without credentials
-- **THEN** the response is 401 with a machine-readable `auth: "email-otp"` hint and no upstream calls are made
+- **WHEN** a visitor posts a link to `/search` or opens a `?id=` share link
+- **THEN** the search runs (or the cached card renders) with no 401 and no challenge in code
 
-#### Scenario: Kill-switch restores open access
+### Requirement: Public API search stays disabled
 
-- **WHEN** no Plunk key is configured
-- **THEN** all search behavior is byte-identical to the pre-gate app
+`POST /api/search` SHALL answer 403 with a machine-readable `auth: "api-key"` hint on the public instance, making no upstream calls; self-hosted instances (no Plunk key) SHALL keep serving it.
 
-### Requirement: Inline OTP flow with no signup page
+#### Scenario: Disabled before validation
 
-The web UI SHALL offer email input in place (where search lives): submitting an address sends a one-time code via Plunk; entering the code mints a session cookie and reveals search. No passwords, no magic links, no separate page.
+- **WHEN** any client posts to `/api/search` on the public instance, even with an invalid link
+- **THEN** the response is 403 with `auth: "api-key"`
 
-#### Scenario: Email to search in two steps
+### Requirement: Email auth endpoints stay retired
 
-- **WHEN** a new visitor enters an allowed email and then the correct code
-- **THEN** they can search immediately, and the email is stored for abuse decisions only
+`POST /api/auth/request-code` and `POST /api/auth/verify-code` SHALL answer 410; the `src/abuse/*` modules (OTP, session, email policy, quota, Plunk client, quota DO) SHALL stay untouched for the future header-key API feature.
 
-### Requirement: Gated search needs the login cookie; no bearer tokens
+#### Scenario: Retired endpoints
 
-Only the session cookie minted by the web login SHALL authorize search on the gated instance; verify-code SHALL NOT issue bearer tokens. Programmatic API clients (e.g. Raycast) stay supported on self-hosted instances, where the gate is off.
+- **WHEN** a client posts to either auth endpoint
+- **THEN** the response is 410
 
-#### Scenario: Cookie replay authorizes, bare API calls do not
+### Requirement: Edge challenge instead of a wall
 
-- **WHEN** a logged-in browser replays its session cookie on `/api/search`
-- **THEN** it searches until the cookie expires; the same call without the cookie is 401
+Suspicious traffic SHALL meet a Cloudflare Managed Challenge (plus Bot Fight Mode) at the edge, covering page loads, searches, and the disabled API alike.
 
-### Requirement: Provider allowlist and no aliases
+#### Scenario: Humans pass, bots prove
 
-Only allowlisted popular providers SHALL be accepted; addresses with `+` aliases SHALL be rejected with a clear message; Plunk `/v1/verify` SHALL backstop disposables, MX, and typos.
-
-#### Scenario: Alias rejected, typo helped
-
-- **WHEN** a visitor enters `name+tag@gmail.com`
-- **THEN** they get an alias rejection, not a code; a typo'd domain gets a did-you-mean style hint where the verifier supports it
-
-### Requirement: Per-email search quota with cooldown
-
-Each verified email SHALL get 6 searches per rolling 4 minutes; past the quota the API SHALL return 429 with a retry hint and enforce a 2-minute cooldown. The hint SHALL name a delay the client can honor: at least the cooldown, longer when the rolling window is still full. Counters live in a Durable Object keyed by email hash with auto-expiring windows; quota checks SHALL fail closed on DO errors.
-
-#### Scenario: Quota exhausted
-
-- **WHEN** a verified email makes a 7th search within 4 minutes
-- **THEN** the response is 429 naming an honest retry delay (2-minute cooldown minimum, rolling-window expiry after burst traffic), no upstream calls are made, and searches succeed again after the window lapses
-
-### Requirement: Stateless codes, minimal email data
-
-OTP codes SHALL be verifiable without server-side storage (HMAC of email plus time window with a session secret); emails SHALL be used only for abuse decisions, never marketing, and Plunk sends SHALL use non-persistent template data.
-
-#### Scenario: Code verifies across isolates
-
-- **WHEN** the code is issued on one isolate and verified on another
-- **THEN** verification succeeds within the window and fails outside it, with no shared state
+- **WHEN** a human searches or opens a share link
+- **THEN** no challenge renders in the app; known-bot and suspicious traffic is challenged at the edge

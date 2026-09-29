@@ -36,8 +36,8 @@ const buildEnv = () => ({
   },
   services: {},
   abuse: {
-    // No separate flag: the gate arms exactly when a Plunk key exists.
-    gateEnabled: (readEnv('PLUNK_API_KEY') ?? '').trim().length > 0,
+    // No separate flag: the public instance is exactly a non-blank Plunk key.
+    publicInstance: (readEnv('PLUNK_API_KEY') ?? '').trim().length > 0,
     sessionSecret: readEnv('SESSION_SECRET'),
     plunkApiKey: readEnv('PLUNK_API_KEY'),
     plunkTemplateId: readEnv('PLUNK_TEMPLATE_ID'),

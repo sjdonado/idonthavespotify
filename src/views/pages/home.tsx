@@ -2,22 +2,18 @@ import Nano, { Fragment } from 'nano-jsx';
 
 import { ghostButtonClass, primaryButtonClass } from '../components/button';
 import Footer from '../components/footer';
-import GateModal from '../components/gate';
 
 const SAMPLE_LINK = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
 
 export default function Home({
   source,
   children,
-  gate,
   hero,
 }: {
   source?: string;
   children?: typeof Fragment;
-  gate?: { enabled: boolean; authenticated: boolean };
   hero?: boolean;
 }) {
-  const gated = gate?.enabled === true && gate.authenticated !== true;
   // Google pattern: centered hero until there is something to show, then a
   // compact top header. The server owns the starting state; the client
   // compacts once a result swap lands (the swap covers only results).
@@ -50,7 +46,6 @@ export default function Home({
           )}
         </div>
         <div class="my-4 flex w-full flex-col items-center gap-4">
-          {!gated && (
           <form
             data-home-target="form"
             hx-post="/search"
@@ -81,8 +76,7 @@ export default function Home({
               <i class="ti ti-search p-1" />
             </button>
           </form>
-          )}
-          {isHero && !gated && (
+          {isHero && (
             <button
               type="button"
               data-home-target="sample"
@@ -105,7 +99,6 @@ export default function Home({
         </div>
       </main>
       <Footer />
-      {gated && <GateModal />}
     </div>
   );
 }

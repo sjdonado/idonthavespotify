@@ -38,13 +38,13 @@ Known edge differences SHALL be documented in the change: fetch-based HTTP inste
 #### Scenario: Deltas visible to the operator
 
 - **WHEN** an operator reads the Workers deploy docs
-- **THEN** each delta above is listed with its user-visible consequence and the abuse controls required for the public instance (a Cloudflare rate limiting rule in front; service-guard circuits stay the final fuse for upstream quotas)
+- **THEN** each delta above is listed with its user-visible consequence and the abuse controls required for the public instance (Bot Fight Mode plus a WAF Managed Challenge rule in front; service-guard circuits stay the final fuse for upstream quotas)
 
-### Requirement: Public instance sits behind the edge rate limiting rule
+### Requirement: Public instance sits behind Bot Fight Mode and a WAF Managed Challenge rule
 
-The public instance deployment SHALL be guarded by exactly one Cloudflare rate limiting rule (the free-plan allowance) matching `(http.request.uri.path in {"/" "/search" "/api/search" "/api/auth/request-code" "/api/auth/verify-code"})`, counted by IP with an abuse-level threshold (4 requests per 10 seconds, Block for 10 seconds — the free-plan-pinned values, verified live; the API rejects any other period or mitigation timeout and requires `cf.colo.id` in characteristics; 4 admits a legit page-load-plus-search burst while capping a paced abuser at ~24/min). Self-hosted instances SHALL NOT require any Cloudflare rule, but MUST be exposed publicly only behind Cloudflare (with the rule above) or a rate-limiting reverse proxy, since the app itself ships no per-IP limiter.
+The public instance deployment SHALL be guarded by Bot Fight Mode plus one Cloudflare WAF Managed Challenge rule matching `(http.host eq "idonthavespotify.sjdonado.com" and http.request.uri.path in {"/" "/search" "/api/search"})`. Suspicious traffic SHALL face an automatic challenge (Cloudflare picks an interactive or non-interactive one by signal) while humans pass through. Self-hosted instances SHALL NOT require any Cloudflare rule, but MUST be exposed publicly only behind Cloudflare (with the challenge rule for browser-facing use, or rate limiting alone where programmatic clients call `/api/search`) or a rate-limiting reverse proxy, since the app itself ships no per-IP limiter.
 
-#### Scenario: Flood blocked before the Worker runs
+#### Scenario: Flood challenged before the Worker runs
 
-- **WHEN** one IP exceeds the threshold within a minute
-- **THEN** further matching requests are blocked at the edge without consuming worker quota, subrequests, or isolate state
+- **WHEN** bot or suspicious traffic hits the search routes
+- **THEN** the edge challenges it without consuming worker quota, subrequests, or isolate state
