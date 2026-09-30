@@ -183,7 +183,8 @@ export const search = async <T extends SearchProps>({
     ? null
     : {
         type: parserType,
-        url: link as string,
+        // The decoded source on `?id=` loads, where `link` is undefined.
+        url: searchParser.source,
         isVerified: true,
       };
 
