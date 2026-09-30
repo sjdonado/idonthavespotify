@@ -70,6 +70,24 @@ describe('Static routes and shell', () => {
     expect(html).not.toContain('umami');
   });
 
+  it('redirects /verify back to a same-origin path only', async () => {
+    const back = await nodeFetch(`${app.url}verify?next=%2F%3Fid%3Dabc`, {
+      redirect: 'manual',
+    });
+    expect(back.status).toBe(302);
+    expect(back.headers.get('location')).toBe('/?id=abc');
+
+    const offsite = await nodeFetch(`${app.url}verify?next=%2F%2Fevil.example`, {
+      redirect: 'manual',
+    });
+    expect(offsite.headers.get('location')).toBe('/');
+
+    const backslash = await nodeFetch(`${app.url}verify?next=%2F%5Cevil.example`, {
+      redirect: 'manual',
+    });
+    expect(backslash.headers.get('location')).toBe('/');
+  });
+
   it('reports service-guard budgets from /api/status', async () => {
     const response = await nodeFetch(`${app.url}api/status`);
     const data = await response.json();

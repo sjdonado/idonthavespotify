@@ -18,6 +18,7 @@ The public instance needs no login: web search and shared links are open to ever
 ## Abuse Protection
 
 - The public instance leaves web search and shared links open; only `/api/search` is disabled there (403 with `auth: "api-key"`), without touching upstream services
+- `GET /verify?next=<path>` is a browser-only route on the public instance: Cloudflare's bot check runs there, then it redirects to the same-origin `next` path; it is not an API
 - No per-IP rate limiting in the app; floods die at the Cloudflare edge (Bot Fight Mode plus a Managed Challenge rule)
 - Upstream service quotas are shared: prefer specific adapters to reduce load
 
