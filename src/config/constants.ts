@@ -46,3 +46,7 @@ export const RESPONSE_COMPARE_MIN_SCORE = 0.7;
 export const RESPONSE_COMPARE_MIN_INCLUSION_SCORE = 0.3;
 
 export const DEFAULT_TIMEOUT = 3000;
+
+// Official Invidious redirector: the visitor picks a live instance there, so
+// no instance list lives here to go stale.
+export const INVIDIOUS_REDIRECT_URL = 'https://redirect.invidious.io';

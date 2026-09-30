@@ -56,6 +56,7 @@ Convert a streaming service link to equivalent links on other platforms.
 - `jiosaavn`: JioSaavn
 - `applePodcasts`: Apple Podcasts (podcast and show searches)
 - `podcastFeed`: RSS feed URL (podcast and show searches only)
+- `invidious`: Invidious, a privacy-friendly YouTube front end. The link is `https://redirect.invidious.io` plus the YouTube result's watch, playlist, or channel path, where the visitor picks a live instance. It is derived without an extra request, so it appears only when a YouTube link is present, pasted or found
 
 **Supported URL Patterns:**
 

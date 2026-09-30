@@ -52,6 +52,10 @@ const SEARCH_LINK_DICT = {
     icon: 'ti ti-rss',
     label: 'RSS Feed',
   },
+  [Adapter.Invidious]: {
+    icon: 'ti ti-shield-lock',
+    label: 'Watch on Invidious',
+  },
 };
 
 export default function SearchCard(props: { searchResult: SearchResult }) {

@@ -88,5 +88,48 @@ describe('MusicBrainz fallback replaces unavailable links', () => {
         isVerified: true,
       },
     ]);
+    // Invidious mirrors the fallback link, not the unavailable adapter hit.
+    expect(
+      data.links.filter((entry: { type: string }) => entry.type === 'invidious')
+    ).toEqual([
+      {
+        type: 'invidious',
+        url: 'https://redirect.invidious.io/watch?v=realvideo1',
+        isVerified: true,
+      },
+    ]);
+  });
+
+  it('derives no Invidious link from an unavailable YouTube result', async () => {
+    const link = 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc';
+
+    httpMock
+      .onGet('https://open.spotify.com/embed/track/3AhXZa8sUQht0UEdBJgpGc')
+      .reply(200, headSnapshots.spotifyTrackRollingStone);
+    httpMock.onGet(/youtube\.googleapis\.com/).reply(200, {
+      items: [
+        {
+          kind: 'youtube#searchResult',
+          etag: 'x',
+          id: { kind: 'youtube#video', videoId: 'junk123' },
+          snippet: { title: 'Totally Unrelated Video', channelTitle: 'Someone Else' },
+        },
+      ],
+    });
+    httpMock.onGet('musicbrainz.org/ws/2/recording/?query=').reply(200, { recordings: [] });
+
+    const response = await nodeFetch(searchEndpointUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ link }),
+    });
+    const data = await response.json();
+
+    expect(
+      data.links.filter((entry: { type: string }) => entry.type === 'youTube')
+    ).toEqual([expect.objectContaining({ notAvailable: true })]);
+    expect(data.links.some((entry: { type: string }) => entry.type === 'invidious')).toBe(
+      false
+    );
   });
 });
