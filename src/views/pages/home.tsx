@@ -53,7 +53,7 @@ export default function Home({
             hx-swap="innerHTML"
             hx-indicator="#search-skeleton"
             {...{ 'hx-status:4xx': 'swap:none', 'hx-status:5xx': 'swap:none' }}
-            hx-config='{"timeout":6000}'
+            hx-config='{"timeout":15000}'
             class="flex w-full max-w-3xl items-center justify-center px-2"
           >
             <label for="song-link" class="sr-only">
