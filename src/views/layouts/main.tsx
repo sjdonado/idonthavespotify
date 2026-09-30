@@ -64,7 +64,7 @@ const MainLayout = ({ title, description, image, children }: MainLayoutProps) =>
         <link href="/assets/index.min.css" rel="stylesheet" />
       </Helmet>
 
-      <body class="h-screen bg-black font-light text-white">{children}</body>
+      <body class="bg-black font-light text-white">{children}</body>
 
       <Helmet footer>
         <script type="module" src="assets/index.js" />

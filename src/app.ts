@@ -225,6 +225,16 @@ export const createRoutes = () => ({
       );
     },
   },
+  // Challenge landing: the WAF rule challenges this GET, so a visitor whose
+  // htmx search got a challenge page can solve it here, then comes back with
+  // clearance. A redirect keeps the resulting history entry a plain GET.
+  '/verify': {
+    GET: function (req: Request) {
+      const next = new URL(req.url).searchParams.get('next') ?? '/';
+      const safe = /^\/(?![/\\])/.test(next) ? next : '/';
+      return new Response(null, { status: 302, headers: { Location: safe } });
+    },
+  },
   '/api/status': {
     GET: async function () {
       try {

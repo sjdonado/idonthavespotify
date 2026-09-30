@@ -56,7 +56,14 @@ export default class extends Controller {
   showRequestError = event => {
     if (this.hasFormTarget && event?.target !== this.formTarget) return;
     let message = 'Something went wrong, please try again later.';
-    const text = event?.detail?.ctx?.text ?? '';
+    const ctx = event?.detail?.ctx;
+    // The edge challenges /search itself, and a challenge page cannot be
+    // solved inside an htmx request: solve it on /verify, which comes back.
+    if (ctx?.response?.headers?.get?.('cf-mitigated') === 'challenge') {
+      location.assign(`/verify?next=${encodeURIComponent(location.pathname + location.search)}`);
+      return;
+    }
+    const text = ctx?.text ?? '';
     if (text) {
       try {
         const parsed = new DOMParser()

@@ -4,7 +4,7 @@ Bun + TypeScript server that converts a streaming-service link into links on oth
 
 ## Directory map
 
-- `src/index.ts` — HTTP server (`Bun.serve` with `routes`): `GET /`, `POST /search` (htmx HTML fragment), `POST /api/search`, `POST /api/auth/request-code`, `POST /api/auth/verify-code`, `GET /api/status`, static fallback for `public/`.
+- `src/index.ts` — HTTP server (`Bun.serve` with `routes`): `GET /`, `POST /search` (htmx HTML fragment), `POST /api/search`, `POST /api/auth/request-code`, `POST /api/auth/verify-code`, `GET /api/status`, `GET /verify` (Cloudflare challenge landing that redirects back), static fallback for `public/`.
 - `src/parsers/` — identify the incoming link's platform, extract normalized metadata + search query.
 - `src/adapters/` — turn the query into outbound links per destination platform.
 - `src/abuse/` — public instance gate: stateless OTP (`otp.ts`), email policy (`email.ts`), Plunk client (`plunk.ts`), session tokens (`session.ts`, cookie-only, no bearers), per-email quota (`quota.ts`), Durable Object (`quota-do.ts`), gate checks + auth route handlers (`gate.ts`, `routes.ts`).
@@ -59,12 +59,15 @@ CI: PRs run `tests.yml` (loads `.env.test` into env, then `test:ci`, plus asset/
 
 - Deploy is CI-owned (`deploy.yml` on push to `main`); manual equivalent is `bun run build:workers` then `bunx wrangler deploy` from a logged-in account. `wrangler.toml` pins `nodejs_compat`, a compatibility date, Workers Assets for `public/`, and the dormant `QUOTA_DO` Durable Object binding plus its `v1` migration.
 - Worker secrets (names only, values never in repo; set with `bunx wrangler secret put`): `PLUNK_API_KEY` (its presence marks the public instance and disables `/api/search`; it no longer sends mail). `SESSION_SECRET` and `PLUNK_TEMPLATE_ID` are dormant, kept for the future API-key feature. Kill-switch is blanking or deleting the `PLUNK_API_KEY` secret: open API access without redeploy (self-host posture).
+- Every non-optional `readEnv` key in `src/config/env.ts` (base URLs, API keys, app IDs) must also exist as a worker secret or var; a missing base URL makes that adapter request `undefined/...` on the edge. `APP_URL` must be the custom domain (`https://idonthavespotify.sjdonado.com`), never the `workers.dev` host, because share links are built from it. List names with `bunx wrangler secret list`.
 - GitHub deploy secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
 - Edge deltas vs self-host: platform `fetch` instead of TLS impersonation (guarded sources may answer differently; Spotify metadata resolves via `__NEXT_DATA__` embed pages on both runtimes; Apple Music resolves via the same-host catalog chain with no audio preview), per-isolate in-memory cache (service-guard budgets stay the shared quota protection), no URL shortener (share links are always plain app URLs), no per-IP limiting in the app, and platform CPU and memory limits.
 - Edge abuse protection is Bot Fight Mode plus one WAF Managed Challenge rule (the Free plan allows five custom rules; this deployment uses one), because only the edge can judge all isolates together. Create it under Security > WAF > custom rules:
   - Rule name: `idhs-search-challenge`
-  - Expression: `(http.host eq "idonthavespotify.sjdonado.com" and http.request.uri.path in {"/" "/search" "/api/search"})` (host-scoped so other hostnames in the zone stay untouched)
-  - Action: Managed Challenge (suspicious traffic faces an automatic challenge, interactive or not by signal; humans pass through. `/` is included because `?id=` share loads run full searches; plain homepage loads without an `id` stay cheap enough to ignore)
+  - Expression: `(http.host eq "idonthavespotify.sjdonado.com" and http.request.uri.path in {"/search" "/api/search" "/verify"})` (host-scoped so other hostnames in the zone stay untouched)
+  - Action: Managed Challenge (suspicious traffic faces an automatic challenge, interactive or not by signal; humans pass through)
+  - `/` is deliberately not challenged, even though `?id=` share loads run full searches. Observed on iOS Safari (2026-09-30): after a challenged load of `/`, a reload following a search prompts to resubmit a form, and the resubmission reached the worker as `GET /` without `?id=` (seen in `wrangler tail`), so the page came back empty. A local reproduction with a POST-loaded page re-POSTed on reload after both `history.replaceState` and `pushState`, so switching the htmx URL header does not help.
+  - `/verify` exists for flagged visitors: a challenge page cannot be solved inside an htmx request, so on a `cf-mitigated: challenge` response to `/search` the page navigates to `/verify?next=<current path>`. The WAF rule challenges that GET, and the route redirects back to the same-origin `next`, which keeps the history entry a plain GET.
 - Floods die at the edge before consuming worker quota or subrequests; per-service circuit breakers stay the final fuse for upstream quotas. Keep Bot Fight Mode on (free) for known-bot junk, and tighten or add Under Attack Mode only as incident response.
 
 ## Abuse-gate decisions (do not re-derive without new evidence)
