@@ -137,6 +137,9 @@ export default class HttpClient {
   ): Promise<T> {
     const timeout = options?.timeout ?? DEFAULT_TIMEOUT;
     const retries = options?.retries ?? 2;
+    // A malformed URL (e.g. an unset base URL env var) is a config error:
+    // fail now, not after retries the fetch backend would treat as transport.
+    new URL(url);
 
     return withRetry(async () => {
       const response = await backend.request(url, {
