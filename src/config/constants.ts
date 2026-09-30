@@ -36,7 +36,10 @@ export const PANDORA_LINK_REGEX =
 export const JIOSAAVN_LINK_REGEX =
   /^https:\/\/(?:www\.)?jiosaavn\.com\/(song|album|artist|featured|playlist)\/([^/?#]+)\/([^/?#]+)\/?(?:[?#].*)?$/;
 
-export const ALLOWED_LINKS_REGEX = `${SPOTIFY_LINK_REGEX.source}|${YOUTUBE_LINK_REGEX.source}|${APPLE_MUSIC_LINK_REGEX.source}|${DEEZER_LINK_REGEX.source}|${SOUNDCLOUD_LINK_REGEX.source}|${TIDAL_LINK_REGEX.source}|${QOBUZ_LINK_REGEX.source}|${BANDCAMP_LINK_REGEX.source}|${PANDORA_LINK_REGEX.source}|${JIOSAAVN_LINK_REGEX.source}|${GOOGLE_LINK_REGEX.source}`;
+export const APPLE_PODCASTS_LINK_REGEX =
+  /^https:\/\/podcasts\.apple\.com\/(?:[a-z]{2}\/)?podcast(?:\/[^/?#]+)?\/id(\d+)\/?((?:[?#].*)?)$/;
+
+export const ALLOWED_LINKS_REGEX = `${SPOTIFY_LINK_REGEX.source}|${YOUTUBE_LINK_REGEX.source}|${APPLE_MUSIC_LINK_REGEX.source}|${DEEZER_LINK_REGEX.source}|${SOUNDCLOUD_LINK_REGEX.source}|${TIDAL_LINK_REGEX.source}|${QOBUZ_LINK_REGEX.source}|${BANDCAMP_LINK_REGEX.source}|${PANDORA_LINK_REGEX.source}|${JIOSAAVN_LINK_REGEX.source}|${APPLE_PODCASTS_LINK_REGEX.source}|${GOOGLE_LINK_REGEX.source}`;
 
 export const ADAPTERS_QUERY_LIMIT = 4;
 export const RESPONSE_COMPARE_MIN_SCORE = 0.7;

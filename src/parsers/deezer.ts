@@ -10,6 +10,8 @@ enum DeezerMetadataType {
   Album = 'music.album',
   Playlist = 'music.playlist',
   Artist = 'music.musician',
+  Show = 'show',
+  Episode = 'episode',
 }
 
 const DEEZER_METADATA_TO_METADATA_TYPE = {
@@ -17,6 +19,8 @@ const DEEZER_METADATA_TO_METADATA_TYPE = {
   [DeezerMetadataType.Album]: MetadataType.Album,
   [DeezerMetadataType.Playlist]: MetadataType.Playlist,
   [DeezerMetadataType.Artist]: MetadataType.Artist,
+  [DeezerMetadataType.Show]: MetadataType.Show,
+  [DeezerMetadataType.Episode]: MetadataType.Podcast,
 };
 
 export const getDeezerMetadata = async (id: string, link: string) => {
@@ -63,13 +67,13 @@ export const getDeezerMetadata = async (id: string, link: string) => {
 export const getDeezerQueryFromMetadata = (metadata: SearchMetadata) => {
   let query = metadata.title;
 
-  const artists = metadata.description.match(/^([^ -]+(?: [^ -]+)*)/)?.[1];
+  const artists = metadata.description?.match(/^([^ -]+(?: [^ -]+)*)/)?.[1];
 
-  if (metadata.type === MetadataType.Song) {
-    query = [query, artists].join(' ');
-  }
-
-  if (metadata.type === MetadataType.Album) {
+  if (
+    metadata.type === MetadataType.Song ||
+    metadata.type === MetadataType.Album ||
+    metadata.type === MetadataType.Podcast
+  ) {
     query = [query, artists].join(' ');
   }
 
