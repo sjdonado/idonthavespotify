@@ -14,6 +14,7 @@ interface DeezerSearchResponse {
     title?: string;
     name?: string;
     link: string;
+    isrc?: string;
     artist?: { name: string };
   }>;
 }
@@ -70,7 +71,11 @@ export async function getDeezerLink(
       url: item.link,
     }));
 
-    const { bestMatch, highestScore } = findBestMatch(candidates, query, Adapter.Deezer);
+    const { bestMatch, highestScore, matchedIndex } = findBestMatch(
+      candidates,
+      query,
+      Adapter.Deezer
+    );
 
     if (!bestMatch) {
       throw new Error('No valid matches found.');
@@ -80,9 +85,16 @@ export async function getDeezerLink(
       `[Deezer] Best match score: ${highestScore.toFixed(3)} (verified: ${bestMatch.isVerified ? 'yes' : 'no'}, available: ${!bestMatch.notAvailable ? 'yes' : 'no'})`
     );
 
-    await cacheSearchResultLink(Adapter.Deezer, sourceParser, sourceId, bestMatch);
+    // A verified song hit hands its ISRC to the MusicBrainz fallback.
+    const isrc =
+      metadata.type === MetadataType.Song && bestMatch.isVerified
+        ? response.data[matchedIndex]?.isrc
+        : undefined;
+    const link = isrc ? { ...bestMatch, isrc } : bestMatch;
 
-    return bestMatch;
+    await cacheSearchResultLink(Adapter.Deezer, sourceParser, sourceId, link);
+
+    return link;
   } catch (error) {
     guard.recordFailure();
     logger.error(`[Deezer] (${url}) ${error}`);
