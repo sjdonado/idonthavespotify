@@ -2,6 +2,7 @@ import { getAppleMusicLink } from '~/adapters/apple-music';
 import { getApplePodcastsLink, getPodcastFeedLink } from '~/adapters/apple-podcasts';
 import { getBandcampLink } from '~/adapters/bandcamp';
 import { getDeezerLink } from '~/adapters/deezer';
+import { toInvidiousLink } from '~/adapters/invidious';
 import { getJiosaavnLink } from '~/adapters/jiosaavn';
 import { getPandoraLink } from '~/adapters/pandora';
 import { getQobuzLink } from '~/adapters/qobuz';
@@ -108,6 +109,7 @@ export const search = async <T extends SearchProps>({
     Adapter.Jiosaavn,
     Adapter.ApplePodcasts,
     Adapter.PodcastFeed,
+    Adapter.Invidious,
   ];
 
   logger.info(`[search] (searchAdapters) ${searchAdapters}`);
@@ -183,7 +185,8 @@ export const search = async <T extends SearchProps>({
     ? null
     : {
         type: parserType,
-        url: link as string,
+        // The decoded source on `?id=` loads, where `link` is undefined.
+        url: searchParser.source,
         isVerified: true,
       };
 
@@ -255,7 +258,8 @@ export const search = async <T extends SearchProps>({
     links.filter(link => !link.notAvailable).map(link => link.type)
   );
   const missing = searchAdapters.filter(
-    adapter => adapter !== parserType && !present.has(adapter)
+    adapter =>
+      adapter !== parserType && adapter !== Adapter.Invidious && !present.has(adapter)
   );
   if (missing.length > 0) {
     const fallback = await resolveMusicBrainzLinks({ query, metadata, missing });
@@ -268,6 +272,17 @@ export const search = async <T extends SearchProps>({
       else links.push(link);
     }
   }
+
+  // Invidious mirrors whichever YouTube link survived (parser, adapter, or
+  // fallback); derived, so it never costs an upstream call.
+  const youTubeLink = links.find(
+    link => link.type === Adapter.YouTube && !link.notAvailable
+  );
+  const invidiousLink =
+    searchAdapters.includes(Adapter.Invidious) && youTubeLink
+      ? toInvidiousLink(youTubeLink)
+      : null;
+  if (invidiousLink) links.push(invidiousLink);
 
   const parsedLinks = links
     .filter(link => searchAdapters.includes(link.type))

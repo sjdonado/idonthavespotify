@@ -12,6 +12,8 @@ import {
 import { Adapter, MetadataType } from '~/config/enum';
 import { ENV } from '~/config/env';
 import { cacheStore } from '~/services/cache';
+import { search } from '~/services/search';
+import { generateId } from '~/utils/encoding';
 
 import { loadHeadSnapshots, loadSearchSnapshots } from './mocks/snapshots';
 import { HttpMock } from './utils/http-mock';
@@ -197,6 +199,21 @@ describe('Api router', () => {
       });
     });
 
+
+    it('keeps the source link on universal-link (?id=) searches', async () => {
+      httpMock
+        .onGet('https://open.spotify.com/embed/track/3AhXZa8sUQht0UEdBJgpGc')
+        .reply(200, headSnapshots.spotifyTrackRollingStone);
+
+      const link = 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc';
+      const result = await search({
+        searchId: generateId(link),
+        adapters: [Adapter.Spotify],
+        headless: false,
+      });
+
+      expect(result.links).toEqual([{ type: Adapter.Spotify, url: link, isVerified: true }]);
+    });
     it('should return unknown error - could not parse Spotify metadata', async () => {
       const link = 'https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384';
       httpMock

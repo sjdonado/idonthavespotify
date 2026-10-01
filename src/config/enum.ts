@@ -12,6 +12,7 @@ export enum StreamingService {
   Jiosaavn = 'jiosaavn',
   ApplePodcasts = 'applePodcasts',
   PodcastFeed = 'podcastFeed',
+  Invidious = 'invidious',
 }
 
 export enum Adapter {
@@ -27,6 +28,7 @@ export enum Adapter {
   Jiosaavn = StreamingService.Jiosaavn,
   ApplePodcasts = StreamingService.ApplePodcasts,
   PodcastFeed = StreamingService.PodcastFeed,
+  Invidious = StreamingService.Invidious,
 }
 
 export enum Parser {

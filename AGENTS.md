@@ -6,7 +6,7 @@ Bun + TypeScript server that converts a streaming-service link into links on oth
 
 - `src/index.ts` — HTTP server (`Bun.serve` with `routes`): `GET /`, `POST /search` (htmx HTML fragment), `POST /api/search`, `POST /api/auth/request-code`, `POST /api/auth/verify-code`, `GET /api/status`, `GET /verify` (Cloudflare challenge landing that redirects back), static fallback for `public/`.
 - `src/parsers/` — identify the incoming link's platform, extract normalized metadata + search query.
-- `src/adapters/` — turn the query into outbound links per destination platform.
+- `src/adapters/` — turn the query into outbound links per destination platform. `invidious.ts` is the exception: it derives a `redirect.invidious.io` link from the YouTube result and makes no upstream call.
 - `src/abuse/` — public instance gate: stateless OTP (`otp.ts`), email policy (`email.ts`), Plunk client (`plunk.ts`), session tokens (`session.ts`, cookie-only, no bearers), per-email quota (`quota.ts`), Durable Object (`quota-do.ts`), gate checks + auth route handlers (`gate.ts`, `routes.ts`).
 - `src/services/` — `search.ts` orchestration, in-memory `cache.ts`, `metadata.ts` helpers, `musicbrainz.ts` fallback (fills missed adapters from curated streaming relations).
 - `src/schemas/` — zod route schemas (`auth.schema.ts` covers the gate endpoints); `src/config/` — enums, constants, env.
