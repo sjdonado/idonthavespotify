@@ -34,7 +34,7 @@ Then adapters take that query and search each destination platform for the best 
 The web app is the main interface, a single page with a search bar, instant result cards, and shareable universal links in the form `APP_URL?id=<id>`. Anyone opening your universal link sees the same result card without searching again.
 
 <div align="center">
-  <img width="1712" height="829" alt="Search result card for Wake Me Up with all ten services" src="docs/screenshot.png" />
+  <img width="1712" height="829" alt="Search result card for Wake Me Up with all eleven services" src="docs/screenshot.png" />
 </div>
 
 ### Raycast
