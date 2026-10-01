@@ -4,7 +4,7 @@ import { ENV } from '~/config/env';
 import { cacheStore } from '~/services/cache';
 import type { SearchMetadata, SearchResultLink } from '~/services/search';
 import { scoreMatch } from '~/utils/compare';
-import HttpClient from '~/utils/http-client';
+import HttpClient, { HttpClientError } from '~/utils/http-client';
 import { logger } from '~/utils/logger';
 import { getServiceGuard } from '~/utils/service-guard';
 
@@ -14,6 +14,9 @@ import { getServiceGuard } from '~/utils/service-guard';
 // match resolves nothing. Playlists/shows have no MusicBrainz entity.
 const MB_API = 'https://musicbrainz.org/ws/2';
 const MB_MIN_INTERVAL_MS = 1100;
+// Soft cap on title-search relation lookups (each paced ~1.1 s): no new
+// lookup starts once this much time has passed since the first one.
+const MB_BUDGET_MS = 3000;
 
 interface MbCredit {
   name?: string;
@@ -136,6 +139,32 @@ async function searchMbids(
   return mbids.length === 0 ? null : hit;
 }
 
+// Recordings sharing an ISRC, with their URL relations, in one request. An
+// unknown ISRC answers 404: that is an empty result, not a failure.
+async function fetchIsrcRelations(
+  isrc: string
+): Promise<{ rels: Array<{ type: string; url: string }>; cached: boolean }> {
+  const key = `mb:isrc:${isrc}`;
+  const cached = await cacheStore.get<Array<{ type: string; url: string }>>(key);
+  if (cached) return { rels: cached, cached: true };
+
+  let data: { recordings?: Array<{ relations?: MbRelation[] }> };
+  try {
+    data = await mbGet(`${MB_API}/isrc/${encodeURIComponent(isrc)}?inc=url-rels&fmt=json`);
+  } catch (error) {
+    if (!(error instanceof HttpClientError && error.status === 404)) throw error;
+    logger.info(`[MusicBrainz] unknown ISRC ${isrc}: ${error.body ?? ''}`);
+    data = {};
+  }
+  const rels = (data.recordings ?? [])
+    .flatMap(recording => recording.relations ?? [])
+    .map(rel => ({ type: rel.type ?? '', url: rel.url?.resource ?? '' }))
+    .filter(rel => rel.url.length > 0);
+  // Unknown ISRCs are cached briefly: MusicBrainz keeps gaining them.
+  await cacheStore.set(key, rels, rels.length === 0 ? 3600 : undefined);
+  return { rels, cached: false };
+}
+
 async function fetchRelations(
   entity: string,
   mbid: string
@@ -239,10 +268,14 @@ export async function resolveMusicBrainzLinks({
   query,
   metadata,
   missing,
+  isrc,
+  budgetMs = MB_BUDGET_MS,
 }: {
   query: string;
   metadata: SearchMetadata;
   missing: Adapter[];
+  isrc?: string;
+  budgetMs?: number;
 }): Promise<SearchResultLink[]> {
   if (missing.length === 0 || !MB_ENTITY[metadata.type]) return [];
 
@@ -252,42 +285,89 @@ export async function resolveMusicBrainzLinks({
     return [];
   }
 
+  // Only adapters a relation can fill count toward "done": podcast rows never
+  // come from a song, and the RSS feed never comes from MusicBrainz.
+  const fillable = missing.filter(
+    adapter =>
+      adapter !== Adapter.PodcastFeed &&
+      (adapter !== Adapter.ApplePodcasts || metadata.type === MetadataType.Podcast)
+  );
+  if (fillable.length === 0) return [];
+  const startedAt = Date.now();
+  const resolved: SearchResultLink[] = [];
+  const done = () =>
+    fillable.every(adapter => resolved.some(link => link.type === adapter));
+  const collect = (rels: Array<{ type: string; url: string }>) => {
+    for (const rel of rels) {
+      // Only playback relations become links: lyrics pages, social
+      // profiles, and the like must never certify as verified results.
+      if (!/stream|download|purchase/i.test(rel.type)) continue;
+      const link = mapRelationToLink(rel.url);
+      if (!link || !missing.includes(link.type)) continue;
+      if (resolved.some(existing => existing.type === link.type)) continue;
+      resolved.push(link);
+    }
+  };
+  const report = () =>
+    logger.info(
+      `[MusicBrainz] fallback filled: ${resolved.map(link => link.type).join(',') || 'none'} (${Date.now() - startedAt}ms)`
+    );
+
   try {
+    let probed = false;
+
+    // ISRC first: one request, every recording sharing the ISRC, no ranking
+    // ties (title searches return an arbitrary slice of equal-score hits).
+    if (isrc && metadata.type === MetadataType.Song) {
+      try {
+        const { rels, cached } = await fetchIsrcRelations(isrc);
+        if (!cached) probed = true;
+        collect(rels);
+      } catch (error) {
+        // An ISRC outage must not cost the title-search backup.
+        guard.recordFailure();
+        logger.error(`[MusicBrainz] ISRC ${isrc}: ${error}`);
+      }
+      if (done()) {
+        if (probed) guard.recordSuccess();
+        report();
+        return resolved;
+      }
+    }
+
     const hit = await searchMbids(metadata, query);
     // A clean no-match is a healthy response, not a failure — but only when
     // the service was actually probed. Silent cache hits touch nothing, so
     // they neither reset failures nor record them.
     if (!hit) {
       guard.recordSuccess();
-      return [];
+      report();
+      return resolved;
     }
-    if (hit.mbids.length === 0) return [];
+    if (!hit.cached) probed = true;
 
-    const resolved: SearchResultLink[] = [];
-    let probed = !hit.cached;
-    for (const mbid of hit.mbids) {
+    const lookupsStartedAt = Date.now();
+    for (const [index, mbid] of hit.mbids.entries()) {
+      // Paced lookups cost ~1.1 s each: past the budget, keep what we have.
+      if (Date.now() - lookupsStartedAt >= budgetMs) {
+        logger.info(
+          `[MusicBrainz] budget spent, skipped ${hit.mbids.length - index} candidate(s)`
+        );
+        break;
+      }
       const { rels, cached } = await fetchRelations(hit.entity, mbid);
       if (!cached) probed = true;
-      for (const rel of rels) {
-        // Only playback relations become links: lyrics pages, social
-        // profiles, and the like must never certify as verified results.
-        if (!/stream|download|purchase/i.test(rel.type)) continue;
-        const link = mapRelationToLink(rel.url);
-        if (!link || !missing.includes(link.type)) continue;
-        if (resolved.some(existing => existing.type === link.type)) continue;
-        resolved.push(link);
-      }
-      if (missing.every(adapter => resolved.some(link => link.type === adapter))) break;
+      collect(rels);
+      if (done()) break;
     }
     if (probed) guard.recordSuccess();
 
-    logger.info(
-      `[MusicBrainz] fallback filled: ${resolved.map(link => link.type).join(',') || 'none'}`
-    );
+    report();
     return resolved;
   } catch (error) {
     guard.recordFailure();
     logger.error(`[MusicBrainz] ${error}`);
-    return [];
+    // Links found before the failure are still verified relations.
+    return resolved;
   }
 }

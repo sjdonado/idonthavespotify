@@ -48,6 +48,9 @@ export type SearchResultLink = {
   url: string;
   isVerified?: boolean;
   notAvailable?: boolean;
+  // Internal: the Deezer hit's ISRC for the MusicBrainz fallback; responses
+  // copy only the fields above.
+  isrc?: string;
 };
 
 // Partial: parse-only services (Google, Tidal) have no outbound search.
@@ -218,6 +221,7 @@ export const search = async <T extends SearchProps>({
   }
 
   const links: SearchResultLink[] = linkSearchResult ? [linkSearchResult] : [];
+  let isrc: string | undefined;
 
   // Prepare promises for all adapters except the parser type
   const remainingAdapters = searchAdapters.filter(adapter => parserType !== adapter);
@@ -230,6 +234,7 @@ export const search = async <T extends SearchProps>({
 
         return linkGetter(query, metadata, searchParser.type, searchParser.id).then(
           link => {
+            if (link?.isrc && adapter === Adapter.Deezer) isrc = link.isrc;
             if (link) {
               logger.info(
                 `[${search.name}] Found ${adapter} link: ${link.url}, isVerified: ${link.isVerified}, notAvailable: ${link.notAvailable || false}`
@@ -262,7 +267,7 @@ export const search = async <T extends SearchProps>({
       adapter !== parserType && adapter !== Adapter.Invidious && !present.has(adapter)
   );
   if (missing.length > 0) {
-    const fallback = await resolveMusicBrainzLinks({ query, metadata, missing });
+    const fallback = await resolveMusicBrainzLinks({ query, metadata, missing, isrc });
     // Replace unavailable placeholders instead of duplicating the card.
     for (const link of fallback) {
       const unavailableIndex = links.findIndex(

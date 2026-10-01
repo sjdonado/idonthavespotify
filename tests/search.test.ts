@@ -11,6 +11,7 @@ import {
 
 import { ENV } from '~/config/env';
 import { cacheStore } from '~/services/cache';
+import HttpClient from '~/utils/http-client';
 
 import { loadHeadSnapshots, loadSearchSnapshots } from './mocks/snapshots';
 import { HttpMock } from './utils/http-mock';
@@ -164,6 +165,12 @@ describe('GET /search', () => {
           },
         ],
       });
+      // The verified Deezer hit's ISRC drives the MusicBrainz fallback, and
+      // the exact link shapes above prove it never reaches the response.
+      const requested = (
+        HttpClient.get as unknown as { mock: { calls: unknown[][] } }
+      ).mock.calls.map(call => call[0] as string);
+      expect(requested.some(url => url.includes('/ws/2/isrc/USSM19922509'))).toBe(true);
     });
 
     it('should return 200 - Mobile link', async () => {
