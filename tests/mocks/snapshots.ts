@@ -60,7 +60,7 @@ export const searchSnapshotTargets = {
     file: 'tests/mocks/search/soundcloud-donde-estabas-1985.html',
   },
   soundCloudWaveformEndOfTwitter: {
-    url: 'https://soundcloud.com/search?q=The%20End%20of%20Twitter%20as%20We%20Know%20It',
+    url: 'https://soundcloud.com/search?q=The%20End%20of%20Twitter%20as%20We%20Know%20It%20Waveform%3A%20The%20MKBHD%20Podcast',
     file: 'tests/mocks/search/soundcloud-the-end-of-twitter-as-we-know-it.html',
   },
   appleMusicRollingStone: {

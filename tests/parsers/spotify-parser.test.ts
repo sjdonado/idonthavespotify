@@ -9,88 +9,43 @@ import { HttpMock } from '../utils/http-mock';
 
 describe('Spotify Parser', () => {
   describe('getSpotifyQueryFromMetadata', () => {
-    it('should parse title with "Album by Artist"', () => {
-      const metadata: SearchMetadata = {
+    // Metadata comes from the embed JSON: plain titles and our own
+    // "<artists> · <Type> · <year>" description, in any locale.
+    const query = (title: string, description: string, type: MetadataType) =>
+      getSpotifyQueryFromMetadata({ title, description, type, image: '' } as SearchMetadata);
 
-        title: 'Light hit my face like a straight right - Album by Mallrat | Spotify',
-        description: 'Mallrat · Song · 2022',
-        type: MetadataType.Song,
-        image: '',
-      };
-      const query = getSpotifyQueryFromMetadata(metadata);
-      expect(query).toBe('Light hit my face like a straight right Mallrat');
+    it('appends the artists for songs and albums', () => {
+      expect(query('Like a Rolling Stone', 'Bob Dylan · Song · 1965', MetadataType.Song)).toBe(
+        'Like a Rolling Stone Bob Dylan'
+      );
+      expect(
+        query('La Plena - W Sound 05', 'W Sound, Beéle, Ovy On The Drums · Album', MetadataType.Album)
+      ).toBe('La Plena - W Sound 05 W Sound, Beéle, Ovy On The Drums');
     });
 
-    it('should parse title with "song and lyrics by Artist"', () => {
-      const metadata: SearchMetadata = {
-
-        title: 'Like a Rolling Stone - song and lyrics by Bob Dylan | Spotify',
-        description: 'Bob Dylan · Song · 1965',
-        type: MetadataType.Song,
-        image: '',
-      };
-      const query = getSpotifyQueryFromMetadata(metadata);
-      expect(query).toBe('Like a Rolling Stone Bob Dylan');
+    it('appends the show for episodes', () => {
+      expect(
+        query(
+          'The End of Twitter as We Know It',
+          'Waveform: The MKBHD Podcast · Episode · 2023',
+          MetadataType.Podcast
+        )
+      ).toBe('The End of Twitter as We Know It Waveform: The MKBHD Podcast');
     });
 
-    it('should parse title with multiple artists and dashes in title', () => {
-      const metadata: SearchMetadata = {
-
-        title: 'La Plena - W Sound 05 - song and lyrics by W Sound, Beéle, Ovy On The Drums | Spotify',
-        description: 'W Sound, Beéle, Ovy On The Drums · Song',
-        type: MetadataType.Song,
-        image: '',
-      };
-      const query = getSpotifyQueryFromMetadata(metadata);
-      expect(query).toBe('La Plena W Sound, Beéle, Ovy On The Drums');
+    it('keeps the title alone for playlists and artists', () => {
+      expect(query('This Is Bad Bunny', 'Spotify · Playlist', MetadataType.Playlist)).toBe(
+        'This Is Bad Bunny'
+      );
+      expect(query('J. Cole', 'Top tracks · Artist', MetadataType.Artist)).toBe('J. Cole');
     });
 
-    it('should parse German title with "Album von Artist"', () => {
-      const metadata: SearchMetadata = {
-
-        title: 'Light hit my face like a straight right – Album von Mallrat | Spotify',
-        description: 'Mallrat · Song · 2022',
-        type: MetadataType.Song,
-        image: '',
-      };
-      const query = getSpotifyQueryFromMetadata(metadata);
-      expect(query).toBe('Light hit my face like a straight right Mallrat');
+    it('leaves the type word out when there are no artists', () => {
+      expect(query('Untitled', 'Song · 2023', MetadataType.Song)).toBe('Untitled');
     });
 
-    it('should parse Spanish title with "de Artist"', () => {
-      const metadata: SearchMetadata = {
-
-        title: 'Canción Animal - Remasterizado 2007 de Soda Stereo | Spotify',
-        description: 'Soda Stereo · Album',
-        type: MetadataType.Album,
-        image: '',
-      };
-      const query = getSpotifyQueryFromMetadata(metadata);
-      expect(query).toBe('Canción Animal Soda Stereo');
-    });
-
-    it('should handle titles with no artist information', () => {
-      const metadata: SearchMetadata = {
-
-        title: 'lofi beats | Spotify',
-        description: 'A lofi playlist',
-        type: MetadataType.Playlist,
-        image: '',
-      };
-      const query = getSpotifyQueryFromMetadata(metadata);
-      expect(query).toBe('lofi beats');
-    });
-
-    it('should extract artist from description when not in title', () => {
-      const metadata: SearchMetadata = {
-
-        title: 'My Awesome Song | Spotify',
-        description: 'My Artist · Song · 2023',
-        type: MetadataType.Song,
-        image: '',
-      };
-      const query = getSpotifyQueryFromMetadata(metadata);
-      expect(query).toBe('My Awesome Song My Artist');
+    it('strips emoji from titles', () => {
+      expect(query('lofi beats 🎧', 'Spotify · Playlist', MetadataType.Playlist)).toBe('lofi beats');
     });
   });
 
@@ -143,6 +98,43 @@ describe('Spotify Parser', () => {
       expect(metadata.type).toBe(MetadataType.Podcast);
       expect(metadata.image).toBe('https://example.com/ep640.jpg');
       expect(metadata.audio).toBe('https://example.com/clip.mp3');
+    });
+
+    it('titles a show by the show, not its latest episode', async () => {
+      httpMock
+        .onGet('https://open.spotify.com/embed/show/6o81QuW22s5m2nfcXWjucc')
+        .reply(
+          200,
+          '<script id="__NEXT_DATA__" type="application/json">{"name":"The Xiaomi Fold and New Meta VR Glasses","uri":"spotify:episode:3hwHvUW8sMcl0vGWHutIR8","type":"episode","subtitle":"Waveform: The MKBHD Podcast","visualIdentity":{"image":[{"url":"https://example.com/latest-episode.jpg","maxWidth":640}]},"relatedEntityCoverArt":[{"url":"https://example.com/show640.jpg","maxWidth":640}],"releaseDate":{"isoString":"2026-09-30T00:00:00.000Z"}}</script>'
+        );
+
+      const metadata = await getSpotifyMetadata(
+        'show-id',
+        'https://open.spotify.com/show/6o81QuW22s5m2nfcXWjucc'
+      );
+
+      expect(metadata).toMatchObject({
+        title: 'Waveform: The MKBHD Podcast',
+        description: 'Show',
+        type: MetadataType.Show,
+        image: 'https://example.com/show640.jpg',
+      });
+    });
+
+    it('falls back to the episode name when a show embed has no subtitle', async () => {
+      httpMock
+        .onGet('https://open.spotify.com/embed/show/noSubtitleShow')
+        .reply(
+          200,
+          '<script id="__NEXT_DATA__" type="application/json">{"name":"Latest Episode","uri":"spotify:episode:x","type":"episode","relatedEntityCoverArt":[{"url":"https://example.com/show640.jpg","maxWidth":640}]}</script>'
+        );
+
+      const metadata = await getSpotifyMetadata(
+        'show-no-subtitle',
+        'https://open.spotify.com/show/noSubtitleShow'
+      );
+
+      expect(metadata.title).toBe('Latest Episode');
     });
   });
 });
