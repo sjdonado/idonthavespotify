@@ -686,7 +686,8 @@ describe('GET /search', () => {
             isVerified: true,
             notAvailable: false,
             type: 'soundCloud',
-            url: 'https://soundcloud.com/renata-salazar-340925260/sets/this-is-bad-bunny',
+            // Live snapshot: whichever user's set ranks first changes over time.
+            url: expect.stringMatching(/^https:\/\/soundcloud\.com\/[^/]+\/sets\/this-is-bad-bunny$/),
           },
           {
             isVerified: true,

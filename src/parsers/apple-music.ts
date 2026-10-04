@@ -57,6 +57,18 @@ const lastSrcsetUrl = (srcset?: string) =>
 
 const upscaleArtwork = (url?: string) => url?.replace('300x300', '600x600');
 
+const TYPE_WORD: Partial<Record<MetadataType, string>> = {
+  [MetadataType.Song]: 'Song',
+  [MetadataType.Album]: 'Album',
+  [MetadataType.Playlist]: 'Playlist',
+  [MetadataType.Artist]: 'Artist',
+};
+
+// The card subtitle, in Spotify's "Artist · Type" shape. The query extractor
+// below recovers the artist from it, so keep the " · " separator last.
+const describe = (artist: string | undefined, type: MetadataType) =>
+  [artist, TYPE_WORD[type]].filter(Boolean).join(' · ');
+
 // Same-host resolution chain (never touches the iTunes host): oEmbed for
 // exact album/playlist metadata, search-page scrape for songs (song ID
 // match) and artists (ID match). Only reached for bot-walled or
@@ -105,7 +117,7 @@ const getAppleMusicMetadataFromCatalog = async (id: string, link: string) => {
       if (pick) {
         const metadata = {
           title: pick.title,
-          description: pick.artist ? `${pick.title} ${pick.artist}` : pick.title,
+          description: describe(pick.artist, MetadataType.Song),
           type: APPLE_MUSIC_METADATA_TO_METADATA_TYPE[type],
           image: pick.artwork,
           audio: undefined,
@@ -141,7 +153,7 @@ const getAppleMusicMetadataFromCatalog = async (id: string, link: string) => {
       if (pick) {
         const metadata = {
           title: pick.title,
-          description: pick.title,
+          description: describe(undefined, MetadataType.Artist),
           type: APPLE_MUSIC_METADATA_TO_METADATA_TYPE[type],
           image: pick.artwork,
           audio: undefined,
@@ -159,7 +171,7 @@ const getAppleMusicMetadataFromCatalog = async (id: string, link: string) => {
   if (!title) fail();
   const metadata = {
     title,
-    description: artist ? `${title} ${artist}` : title,
+    description: describe(artist, APPLE_MUSIC_METADATA_TO_METADATA_TYPE[type]),
     type: APPLE_MUSIC_METADATA_TO_METADATA_TYPE[type],
     image: upscaleArtwork(embedded?.thumbnail_url),
     audio: undefined,
@@ -229,19 +241,15 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
     // Then match the last occurrence of the separator word (by/von/de/etc.)
     // Using greedy match to capture from the LAST separator (handles titles with "de", "di", etc.)
     const titleRegex = /^(.+)\s+(?:by|von|de|par|di|door|av|af|przez)\s+(.+)$/i;
-    const match = withoutSuffix.match(titleRegex);
+    // Artist pages carry no "by <artist>" part ("Paco de Lucía" is a name).
+    const match =
+      type === AppleMusicMetadataType.Artist ? null : withoutSuffix.match(titleRegex);
 
-    let title: string;
-    let description: string;
-
-    if (match) {
-      title = match[1].trim();
-      description = `${match[1].trim()} ${match[2].trim()}`;
-    } else {
-      // Fallback: use the cleaned string as both title and description
-      title = withoutSuffix.trim();
-      description = title;
-    }
+    const title = (match ? match[1] : withoutSuffix).trim();
+    const description = describe(
+      match?.[2].trim(),
+      APPLE_MUSIC_METADATA_TO_METADATA_TYPE[type]
+    );
 
     const metadata = {
       id,
@@ -261,7 +269,9 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
 };
 
 export const getAppleMusicQueryFromMetadata = (metadata: SearchMetadata) => {
-  let query = metadata.description;
+  const separator = metadata.description.lastIndexOf(' · ');
+  const artist = separator > 0 ? metadata.description.slice(0, separator) : '';
+  let query = artist ? `${metadata.title} ${artist}` : metadata.title;
 
   if (metadata.type === MetadataType.Playlist) {
     query = `${query} playlist`;

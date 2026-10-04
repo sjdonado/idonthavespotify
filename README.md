@@ -72,7 +72,7 @@ bun run build:prod
 
 ## The public instance and its abuse protection
 
-The public instance runs on Cloudflare Workers, and because it sits on shared upstream quotas, it leans on the edge to stay usable. Web search and shared links are open to everyone with no login; only programmatic `/api/search` calls are disabled there, answering 403 without touching any upstream service, until API keys land. When Cloudflare's bot check challenges a web search, the page sends the browser to `/verify`, a plain page where the check can be passed, and then returns to the page it came from.
+The public instance runs on Cloudflare Workers, and because it sits on shared upstream quotas, it leans on the edge to stay usable. Web search and shared links are open to everyone with no login; only programmatic `/api/search` calls are disabled there, answering 403 without touching any upstream service, until API keys land. When Cloudflare's bot check challenges a web search, the page sends the browser to `/verify`, a plain page where the check can be passed, and then returns to the page it came from and runs the search again with the same link.
 
 Abuse protection lives in two places. At the edge, Bot Fight Mode stays on for known-bot junk and a WAF Managed Challenge rule fronts the search routes, so suspicious visitors face an automatic challenge (interactive or not, by signal) while humans pass through untouched. In the app, the per-service circuit breakers stay the final fuse for upstream quotas. The email-code wall is gone: its modules remain in `src/abuse` for a future API-key feature, and the old auth endpoints answer 410.
 
