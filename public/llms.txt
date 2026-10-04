@@ -127,7 +127,7 @@ Convert a streaming service link to equivalent links on other platforms.
   "id": "base64_encoded_id",
   "type": "song|album|artist|podcast|show",
   "title": "Track/Album/Artist Name",
-  "description": "Artist Name · Album Name",
+  "description": "Artist Name · Song · Year",
   "image": "https://image-url.com/cover.jpg",
   "audio": "https://audio-preview-url.com/preview.mp3",
   "source": "https://original-link.com",

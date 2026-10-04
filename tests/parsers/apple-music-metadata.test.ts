@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test';
 
 import { MetadataType } from '~/config/enum';
-import { getAppleMusicMetadata } from '~/parsers/apple-music';
+import { getAppleMusicMetadata, getAppleMusicQueryFromMetadata } from '~/parsers/apple-music';
 import { cacheStore } from '~/services/cache';
 
 import { HttpMock } from '../utils/http-mock';
@@ -46,7 +46,7 @@ describe('Apple Music metadata catalog fallback', () => {
 
     expect(metadata).toEqual({
       title: 'Bohemian Rhapsody',
-      description: 'Bohemian Rhapsody Queen',
+      description: 'Queen · Song',
       type: MetadataType.Song,
       image: 'https://example.com/right-220.jpg',
       audio: undefined,
@@ -80,7 +80,7 @@ describe('Apple Music metadata catalog fallback', () => {
 
     expect(metadata).toEqual({
       title: 'Complicated',
-      description: 'Complicated Avril Lavigne',
+      description: 'Avril Lavigne · Song',
       type: MetadataType.Song,
       image: 'https://example.com/complicated-220.jpg',
       audio: undefined,
@@ -110,7 +110,7 @@ describe('Apple Music metadata catalog fallback', () => {
 
     expect(metadata).toEqual({
       title: 'J. Cole',
-      description: 'J. Cole',
+      description: 'Artist',
       type: MetadataType.Artist,
       image: 'https://example.com/jcole-110.jpg',
       audio: undefined,
@@ -135,7 +135,7 @@ describe('Apple Music metadata catalog fallback', () => {
 
     expect(metadata).toEqual({
       title: 'Nevermind',
-      description: 'Nevermind Nirvana',
+      description: 'Nirvana · Album',
       type: MetadataType.Album,
       image: 'https://example.com/600x600bb.jpg',
       audio: undefined,
@@ -152,3 +152,57 @@ describe('Apple Music metadata catalog fallback', () => {
     );
   });
 });
+
+describe('Apple Music subtitle and query', () => {
+  let httpMock: HttpMock;
+
+  beforeAll(() => {
+    httpMock = new HttpMock();
+  });
+
+  beforeEach(() => {
+    cacheStore.reset();
+    httpMock.reset();
+  });
+
+  afterAll(() => {
+    httpMock.restore();
+  });
+
+  it('shows the artist and type as the subtitle, not the title again', async () => {
+    const link = 'https://music.apple.com/de/album/poem-to-a-horse/1?i=2';
+    httpMock
+      .onGet(link)
+      .reply(
+        200,
+        '<html><head><meta property="og:title" content="Poem to a Horse by Shakira on Apple Music" /><meta property="og:image" content="https://example.com/cover.jpg" /></head></html>'
+      );
+
+    const metadata = await getAppleMusicMetadata('apple-subtitle', link);
+
+    expect(metadata).toMatchObject({
+      title: 'Poem to a Horse',
+      description: 'Shakira · Song',
+      type: MetadataType.Song,
+    });
+    expect(getAppleMusicQueryFromMetadata(metadata)).toBe('Poem to a Horse Shakira');
+  });
+
+  it('builds the query from the title when there is no artist', () => {
+    expect(
+      getAppleMusicQueryFromMetadata({
+        title: 'J. Cole',
+        description: 'Artist',
+        type: MetadataType.Artist,
+      })
+    ).toBe('J. Cole');
+    expect(
+      getAppleMusicQueryFromMetadata({
+        title: 'Chill Hits',
+        description: 'Apple Music · Playlist',
+        type: MetadataType.Playlist,
+      })
+    ).toBe('Chill Hits Apple Music playlist');
+  });
+});
+
