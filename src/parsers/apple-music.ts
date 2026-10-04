@@ -41,7 +41,7 @@ const storefrontOf = (link: string) =>
 
 const searchAppleMusic = (storefront: string, term: string) =>
   HttpClient.get<string>(
-    `https://music.apple.com/${storefront}/search?term=${encodeURIComponent(term)}`
+    `https://music.apple.com/${storefront}/search?term=${encodeURIComponent(term)}&l=${PAGE_LANGUAGE}`
   ).catch(() => null);
 
 const splitLabel = (label: string): [string, string, string] => {
@@ -54,6 +54,19 @@ const splitLabel = (label: string): [string, string, string] => {
 
 const lastSrcsetUrl = (srcset?: string) =>
   srcset?.split(',').pop()?.trim().split(' ')[0] || undefined;
+
+// Every storefront serves an English page for this (checked 2026-10-04 on de,
+// fr, jp, br, mx, it, nl, se, pl, kr, cn, ru; jp normalizes to en-US), so the
+// parser only needs the English og:title shape "<title> by <artist> on Apple
+// Music". Share ids keep only a link's first query param, so the user's own
+// `l` never survives anyway.
+const PAGE_LANGUAGE = 'en-GB';
+
+const withEnglishPage = (link: string) => {
+  const url = new URL(link);
+  url.searchParams.set('l', PAGE_LANGUAGE);
+  return url.toString();
+};
 
 const upscaleArtwork = (url?: string) => url?.replace('300x300', '600x600');
 
@@ -104,8 +117,7 @@ const getAppleMusicMetadataFromCatalog = async (id: string, link: string) => {
         if (!title) return;
         const href = block.find('a[data-testid="click-action"]').attr('href');
         if (!href) return;
-        // Match the exact song ID: the kind label is localized per
-        // storefront ("Song", "Titel", "Canción", ...).
+        // Match the exact song ID, not the kind label or the title.
         if (new URL(href, link).searchParams.get('i') !== songId) return;
         pick = {
           title,
@@ -191,7 +203,7 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
   let html = '';
 
   try {
-    html = await fetchMetadata(actualLink);
+    html = await fetchMetadata(withEnglishPage(actualLink));
 
     const doc = getCheerioDoc(html);
 
@@ -232,19 +244,15 @@ export const getAppleMusicMetadata = async (id: string, link: string) => {
       type = AppleMusicMetadataType.Artist;
     }
 
-    // First, remove "Apple Music" and the preceding word (on/bei/en/sur/etc.)
-    const withoutSuffix = ogTitle.replace(
-      /\s+(?:on|bei|en|sur|su|no|op|på|w)\s+Apple\s+Music$/i,
-      ''
-    );
-
-    // Then match the last occurrence of the separator word (by/von/de/etc.)
-    // Using greedy match to capture from the LAST separator (handles titles with "de", "di", etc.)
-    const titleRegex = /^(.+)\s+(?:by|von|de|par|di|door|av|af|przez)\s+(.+)$/i;
-    // Artist pages carry no "by <artist>" part ("Paco de Lucía" is a name).
+    // English page (see PAGE_LANGUAGE): "<title> by <artist> on Apple Music"
+    // for songs and albums, "<name> on Apple Music" for playlists and artists.
+    const withoutSuffix = ogTitle.replace(/\s+on\s+Apple\s+Music$/i, '');
+    // Greedy: the artist follows the LAST " by " ("Stand by Me by Ben E.
+    // King"). Only songs and albums carry a "by" part.
     const match =
-      type === AppleMusicMetadataType.Artist ? null : withoutSuffix.match(titleRegex);
-
+      type === AppleMusicMetadataType.Song || type === AppleMusicMetadataType.Album
+        ? withoutSuffix.match(/^(.+)\s+by\s+(.+)$/i)
+        : null;
     const title = (match ? match[1] : withoutSuffix).trim();
     const description = describe(
       match?.[2].trim(),
