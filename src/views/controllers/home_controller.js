@@ -78,11 +78,14 @@ export default class extends Controller {
         return;
       }
       try {
-        if (this.hasLinkTarget) {
+        // The link this request carried, not the input's current value:
+        // the input stays editable while the request is in flight.
+        const link = ctx.request?.body?.get?.('link') ?? this.linkTarget?.value;
+        if (link) {
           sessionStorage.setItem(
             RESUME_KEY,
             JSON.stringify({
-              link: this.linkTarget.value,
+              link,
               next: location.pathname + location.search,
               at: Date.now(),
             })
