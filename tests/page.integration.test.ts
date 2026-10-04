@@ -125,7 +125,7 @@ describe('Page router', () => {
       expect(searchCardText).toContain('Do Not Disturb');
       expect(searchCardText).toContain('Drake · Song · 2017');
 
-      const searchLinks = doc('[data-controller="search-link"] > a').toArray();
+      const searchLinks = doc('[data-search-link] > a').toArray();
 
       expect(searchLinks).toHaveLength(6);
       expect(searchLinks[0].attribs['aria-label']).toContain('Listen on Apple Music');
@@ -136,7 +136,7 @@ describe('Page router', () => {
       expect(searchLinks[1].attribs['href']).toBe(
         'https://www.deezer.com/track/144572248'
       );
-      expect(searchLinks[2].attribs['aria-label']).toContain('Watch on Invidious');
+      expect(searchLinks[2].attribs['aria-label']).toContain('Listen on Invidious');
       expect(searchLinks[2].attribs['href']).toBe(
         'https://redirect.invidious.io/watch?v=zhY_0DoQCQs'
       );
@@ -187,7 +187,7 @@ describe('Page router', () => {
       expect(searchCardText).toContain('Do Not Disturb');
       expect(searchCardText).toContain('Drake · Song · 2017');
 
-      const searchLinks = doc('[data-controller="search-link"] > a').toArray();
+      const searchLinks = doc('[data-search-link] > a').toArray();
 
       expect(searchLinks.length).toBeGreaterThanOrEqual(2);
 
