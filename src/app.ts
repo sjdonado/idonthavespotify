@@ -45,6 +45,7 @@ export const createRoutes = () => ({
               title: searchResult?.title,
               description: searchResult?.description,
               image: searchResult?.image,
+              audio: searchResult?.audio,
               children: content,
             })
           );

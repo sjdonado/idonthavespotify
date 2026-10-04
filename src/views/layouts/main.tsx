@@ -4,10 +4,11 @@ interface MainLayoutProps {
   title?: string;
   description?: string;
   image?: string;
+  audio?: string;
   children: typeof Fragment;
 }
 
-const MainLayout = ({ title, description, image, children }: MainLayoutProps) => {
+const MainLayout = ({ title, description, image, audio, children }: MainLayoutProps) => {
   return (
     <div>
       <Helmet>
@@ -49,6 +50,9 @@ const MainLayout = ({ title, description, image, children }: MainLayoutProps) =>
           }
         />
         <meta property="og:image:alt" content="I Don't Have Spotify favicon" />
+        {/* Spec-compliant clients may offer the preview; Discord and WhatsApp
+            ignore og:audio today (checked 2026-10-04). */}
+        {audio && <meta property="og:audio" content={audio} />}
 
         <link
           rel="stylesheet"
