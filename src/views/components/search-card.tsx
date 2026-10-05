@@ -54,7 +54,7 @@ const SEARCH_LINK_DICT = {
   },
   [Adapter.Invidious]: {
     icon: 'ti ti-shield-lock',
-    label: 'Watch on Invidious',
+    label: 'Listen on Invidious',
   },
 };
 
@@ -135,9 +135,8 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
               const shortLabel = searchResult.label.replace('Listen on ', '');
               return (
                 <li
-                  data-controller="search-link"
-                  data-search-link-url-value={url}
-                  class={`flex min-h-[56px] items-center gap-1 rounded-xl border bg-zinc-900 py-1 pl-3 pr-1 ${isVerified ? 'border-transparent' : 'border-dotted border-zinc-500'} ${notAvailable ? 'pointer-events-none opacity-60' : ''}`}
+                  data-search-link
+                  class={`flex min-h-[56px] items-center gap-1 rounded-xl border bg-zinc-900 px-3 py-1 ${isVerified ? 'border-transparent' : 'border-dotted border-zinc-500'} ${notAvailable ? 'pointer-events-none opacity-60' : ''}`}
                 >
                   {notAvailable ? (
                     <span
@@ -155,25 +154,16 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
                       rel="noreferrer"
                       aria-label={isVerified ? `${searchResult.label} (verified)` : `${searchResult.label} (unverified)`}
                       title={shortLabel}
-                      class="flex min-w-0 flex-1 items-center"
+                      class="-my-1 flex min-w-0 flex-1 items-center self-stretch rounded-lg focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
                     >
                       <i class={`${searchResult.icon} shrink-0 text-xl`} />
                       <span class="ml-2 truncate text-sm">{shortLabel}</span>
                     </a>
                   )}
-                  {notAvailable ? (
-                    <span class="mr-2 shrink-0 text-xs text-zinc-400" aria-label="Not available">
+                  {notAvailable && (
+                    <span class="shrink-0 text-xs text-zinc-400" aria-label="Not available">
                       N/A
                     </span>
-                  ) : (
-                    <button
-                      type="button"
-                      data-action="search-link#share"
-                      aria-label={`Copy ${shortLabel} link`}
-                      class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg focus:outline-none focus:ring-1 focus:ring-white"
-                    >
-                      <i class="ti ti-copy" />
-                    </button>
                   )}
                 </li>
               );

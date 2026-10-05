@@ -114,13 +114,23 @@ export const getSpotifyMetadata = async (id: string, link: string) => {
     const entity = await getSpotifyEntityFromEmbed(embedURL);
     if (!entity) throw new Error('Spotify metadata not found');
 
-    const title = (entity.name ?? entity.title ?? '').trim();
+    // A show's embed carries no show entity, only its latest episode, with
+    // the show name as `subtitle` and the show's art as `relatedEntityCoverArt`.
+    const showViaEpisode = resource.type === 'show' && entity.type === 'episode';
+    const title = (
+      (showViaEpisode ? entity.subtitle : undefined) ??
+      entity.name ??
+      entity.title ??
+      ''
+    ).trim();
     // Tracks have an `artists[]` array; albums/artists/etc. expose
     // the artist as `subtitle` instead.
-    const artists = Array.isArray(entity.artists) && entity.artists.length > 0
-      ? entity.artists.map(a => a.name).filter(Boolean).join(', ')
-      : (entity.subtitle ?? '');
-    const year = entity.releaseDate?.isoString
+    const artists = showViaEpisode
+      ? ''
+      : Array.isArray(entity.artists) && entity.artists.length > 0
+        ? entity.artists.map(a => a.name).filter(Boolean).join(', ')
+        : (entity.subtitle ?? '');
+    const year = !showViaEpisode && entity.releaseDate?.isoString
       ? new Date(entity.releaseDate.isoString).getUTCFullYear().toString()
       : '';
 
@@ -155,9 +165,12 @@ export const getSpotifyMetadata = async (id: string, link: string) => {
         !best || (img.maxWidth ?? 0) > (best.maxWidth ?? 0) ? img : best,
       null
     );
-    const image =
-      largest?.url ?? entity.coverArt?.sources?.[0]?.url ?? largestRelated?.url;
+    const image = showViaEpisode
+      ? (largestRelated?.url ?? largest?.url)
+      : (largest?.url ?? entity.coverArt?.sources?.[0]?.url ?? largestRelated?.url);
 
+    // For a show this is its latest episode's clip, the only preview the
+    // embed offers (accepted in review).
     const audio = entity.audioPreview?.url ?? undefined;
 
     const spotifyType = SPOTIFY_TYPE_TO_METADATA_TYPE[resource.type];
@@ -183,11 +196,9 @@ export const getSpotifyMetadata = async (id: string, link: string) => {
 };
 
 export const getSpotifyQueryFromMetadata = (metadata: SearchMetadata) => {
+  // Titles come from the embed JSON, never a localized "<title> by <artist> |
+  // Spotify" page title, so only emoji and separators need stripping.
   const parsedTitle = metadata.title
-    .replace(
-      /(\s(?:–|-)\s.*?\s(?:by|von|de|par|di|door|av|af|przez)\s.+)?\s\|\sSpotify$/i,
-      ''
-    )
     .replace(
       /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1F1E0}-\u{1F1FF}·]/gu,
       ''
@@ -195,12 +206,17 @@ export const getSpotifyQueryFromMetadata = (metadata: SearchMetadata) => {
     .replace(/\s+/g, ' ')
     .trim();
 
+  // The description is built above as "<artists> · <Type> · <year>"; for an
+  // episode the first part is its show.
   let artist = '';
-
-  if (metadata.type === MetadataType.Song || metadata.type === MetadataType.Album) {
+  if (
+    metadata.type === MetadataType.Song ||
+    metadata.type === MetadataType.Album ||
+    metadata.type === MetadataType.Podcast
+  ) {
     [, artist] = metadata.description.match(/^([^·]+)\s+·/) ?? [];
-  } else if (metadata.type === MetadataType.Podcast) {
-    [, artist] = metadata.description.match(/from\s(.+?)\son\sSpotify\./) ?? [];
+    // No artists: the description starts with the type word ("Song · 2023").
+    if (/^(Song|Album|Episode)$/.test(artist?.trim() ?? '')) artist = '';
   }
 
   const query = artist ? `${parsedTitle} ${artist.trim()}` : parsedTitle;

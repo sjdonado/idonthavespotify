@@ -30,7 +30,7 @@ describe('Apple Music metadata catalog fallback', () => {
         200,
         '<html><head><meta property="og:title" content="Apple&#160;Music Web Player" /></head></html>'
       );
-    httpMock.onGet('music.apple.com/us/search').reply(
+    httpMock.onGet(/music\.apple\.com\/us\/search\?term=.*&l=en-GB$/).reply(
       200,
       `<div data-testid="top-search-result" aria-label="Under Pressure · Song · Queen">
          <a data-testid="click-action" href="https://music.apple.com/us/album/greatest-hits-i-ii-iii/111?i=222"></a>
@@ -186,6 +186,34 @@ describe('Apple Music subtitle and query', () => {
       type: MetadataType.Song,
     });
     expect(getAppleMusicQueryFromMetadata(metadata)).toBe('Poem to a Horse Shakira');
+  });
+
+  it('requests the English page and splits at the last "by"', async () => {
+    const link = 'https://music.apple.com/de/album/stand-by-me/3?i=4&l=de-DE';
+    httpMock
+      .onGet('music.apple.com/de/album/stand-by-me/3?i=4&l=en-GB')
+      .reply(
+        200,
+        '<html><head><meta property="og:title" content="Stand by Me by Ben E. King on Apple Music" /><meta property="og:image" content="https://example.com/cover.jpg" /></head></html>'
+      );
+
+    const metadata = await getAppleMusicMetadata('apple-english', link);
+
+    expect(metadata).toMatchObject({ title: 'Stand by Me', description: 'Ben E. King · Song' });
+  });
+
+  it('keeps a playlist name whole even when it contains "by"', async () => {
+    const link = 'https://music.apple.com/us/playlist/chill-by-the-pool/pl.123';
+    httpMock
+      .onGet(link)
+      .reply(
+        200,
+        '<html><head><meta property="og:title" content="Chill by the Pool on Apple Music" /><meta property="og:image" content="https://example.com/cover.jpg" /></head></html>'
+      );
+
+    const metadata = await getAppleMusicMetadata('apple-playlist-by', link);
+
+    expect(metadata).toMatchObject({ title: 'Chill by the Pool', description: 'Playlist' });
   });
 
   it('builds the query from the title when there is no artist', () => {
