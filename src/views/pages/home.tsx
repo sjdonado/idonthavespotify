@@ -86,17 +86,17 @@ export default function Home({
               Try a sample track
             </button>
           )}
-          {/* One grid cell: while searching, the spinner takes the card's
-              place and the hidden card keeps its height, so nothing moves. */}
+          {/* Card and spinner share one grid cell where :has() can hide the
+              card (see index.css); otherwise they stack as before. */}
           <div class="grid w-full justify-items-center">
-            <div id="search-results" class="[grid-area:1/1]">
+            <div id="search-results">
               {children}
             </div>
             <div
               id="search-skeleton"
               role="status"
               aria-label="Searching"
-              class="hidden min-h-[40vh] w-full max-w-3xl flex-col items-center justify-center gap-4 p-2 [grid-area:1/1]"
+              class="hidden min-h-[40vh] w-full max-w-3xl flex-col items-center justify-center gap-4 p-2"
             >
               <div class="h-10 w-10 animate-spin rounded-full border-2 border-zinc-700 border-t-green-500 motion-reduce:animate-none" />
               <span class="sr-only">Searching…</span>
