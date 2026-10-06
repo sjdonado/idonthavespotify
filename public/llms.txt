@@ -286,7 +286,7 @@ curl "https://idonthavespotify.sjdonado.com/api/status"
 
 ## Web Interface
 
-The service also provides a web interface at the base URL where users can paste links directly. The web interface supports the same link types and returns an HTML response with the converted links.
+The service also provides a web interface at the base URL where users can paste links directly. The web interface supports the same link types and returns an HTML response with the converted links. A share page (`/?id=<id>`) loads in two steps: the page itself carries the track's title, description, cover, and audio preview (also as Open Graph tags), and its service links arrive from a second request to `/?id=<id>&rows=1`, which returns only the HTML list of links.
 
 ## Source Code
 

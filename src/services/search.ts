@@ -78,12 +78,16 @@ export type SearchProps =
       link?: string;
       searchId?: string;
       adapters?: Adapter[];
+      // false skips the MusicBrainz fallback (fast metadata-only searches).
+      fallback?: boolean;
       headless: true;
     }
   | {
       link?: string;
       searchId?: string;
       adapters?: Adapter[];
+      // false skips the MusicBrainz fallback (fast metadata-only searches).
+      fallback?: boolean;
       headless: false;
     };
 
@@ -95,6 +99,7 @@ export const search = async <T extends SearchProps>({
   link,
   searchId,
   adapters,
+  fallback = true,
   headless,
 }: T): Promise<SearchReturn<T>> => {
   const searchParser = getSearchParser(link, searchId);
@@ -266,7 +271,7 @@ export const search = async <T extends SearchProps>({
     adapter =>
       adapter !== parserType && adapter !== Adapter.Invidious && !present.has(adapter)
   );
-  if (missing.length > 0) {
+  if (fallback && missing.length > 0) {
     const fallback = await resolveMusicBrainzLinks({ query, metadata, missing, isrc });
     // Replace unavailable placeholders instead of duplicating the card.
     for (const link of fallback) {

@@ -1,4 +1,4 @@
-import Nano from 'nano-jsx';
+import Nano, { Fragment } from 'nano-jsx';
 
 import { Adapter } from '~/config/enum';
 import { type SearchResult } from '~/services/search';
@@ -58,7 +58,7 @@ const SEARCH_LINK_DICT = {
   },
 };
 
-export default function SearchCard(props: { searchResult: SearchResult }) {
+export default function SearchCard(props: { searchResult: SearchResult; pending?: boolean }) {
   return (
     <div
       data-controller="search-card"
@@ -123,14 +123,50 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
         </div>
       </div>
       <div class="mt-2 flex min-h-12 flex-1 flex-col items-start p-2">
-        {props.searchResult.links.length === 0 && (
+        {props.pending ? (
+          <div
+            hx-get={`/?id=${props.searchResult.id}&rows=1`}
+            hx-trigger="load"
+            hx-target="this"
+            hx-swap="outerHTML"
+            hx-config='{"timeout":15000}'
+            {...{ 'hx-status:4xx': 'swap:none', 'hx-status:5xx': 'swap:none' }}
+            data-search-rows-loader
+            role="status"
+            aria-label="Loading links"
+            // Reserve the usual rows' height (about 11 rows: 6 lines of two
+            // on phones, 4 of three from sm up) so the page does not jump.
+            class="flex min-h-[23.5rem] w-full items-center justify-center sm:min-h-[15.5rem]"
+          >
+            <div class="h-10 w-10 animate-spin rounded-full border-2 border-zinc-700 border-t-green-500 motion-reduce:animate-none" />
+            <span class="sr-only">Loading links…</span>
+            <noscript>
+              <a href={`/?id=${props.searchResult.id}&rows=1`} class="text-sm underline">
+                Show the other platforms
+              </a>
+            </noscript>
+          </div>
+        ) : (
+          <SearchLinks links={props.searchResult.links} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// The service rows, also served alone (`/?id=<id>&rows=1`) to the share
+// page's loader.
+export function SearchLinks(props: { links: SearchResult['links'] }) {
+  return (
+    <Fragment>
+        {props.links.length === 0 && (
           <p class="w-full text-center text-sm md:text-start text-zinc-400">
             Not available on other platforms.
           </p>
         )}
-        {props.searchResult.links.length > 0 && (
+        {props.links.length > 0 && (
           <ul class="grid w-full grid-cols-2 gap-2 sm:grid-cols-3">
-            {props.searchResult.links.map(({ type, url, isVerified, notAvailable }) => {
+            {props.links.map(({ type, url, isVerified, notAvailable }) => {
               const searchResult = SEARCH_LINK_DICT[type];
               const shortLabel = searchResult.label.replace('Listen on ', '');
               return (
@@ -170,7 +206,6 @@ export default function SearchCard(props: { searchResult: SearchResult }) {
             })}
           </ul>
         )}
-      </div>
-    </div>
+    </Fragment>
   );
 }

@@ -1,7 +1,8 @@
 import { h, Helmet, renderSSR } from 'nano-jsx';
 
 import { isPublicInstance, wantsJson } from './abuse/gate';
-import { Adapter } from './config/enum';
+import { Adapter, Parser } from './config/enum';
+import { getSearchParser } from './parsers/link';
 import { apiRouteSchema } from './schemas/api.schema';
 import { indexRouteSchema, searchRouteSchema } from './schemas/web.schema';
 import { search, type SearchResult } from './services/search';
@@ -9,7 +10,7 @@ import { logger } from './utils/logger';
 import { getAllServiceGuardStatuses } from './utils/service-guard';
 import { ValidationError, validationError } from './utils/zod';
 import ErrorMessage from './views/components/error-message';
-import SearchCard from './views/components/search-card';
+import SearchCard, { SearchLinks } from './views/components/search-card';
 import MainLayout from './views/layouts/main';
 import Home from './views/pages/home';
 
@@ -31,13 +32,13 @@ export const createRoutes = () => ({
         });
 
         if (!result.success) throw validationError(result.error);
-        const { id } = result.data.query;
+        const { id, rows } = result.data.query;
 
         const render = (searchResult: SearchResult | null, status = 200) => {
           const content = h(
             Home,
             { source: searchResult?.source },
-            searchResult ? h(SearchCard, { searchResult }) : null
+            searchResult ? h(SearchCard, { searchResult, pending: true }) : null
           );
 
           const html = renderSSR(
@@ -71,8 +72,29 @@ export const createRoutes = () => ({
           );
         };
 
+        // Share links load in two phases. The card's loader asks for
+        // `?rows=1` and gets only the service rows, from the full search.
+        if (id && rows === '1') {
+          const searchResult = await search({ searchId: id, headless: false });
+          return new Response(
+            renderSSR(h(SearchLinks, { links: searchResult.links })),
+            { headers: { 'Content-Type': 'text/html' } }
+          );
+        }
+
+        // The page itself needs only the source metadata (meta tags for link
+        // previews, the card header). Non-Spotify sources also run the
+        // Spotify adapter, which fills a missing cover or audio preview.
+        const sourceType = id ? getSearchParser(undefined, id).type : undefined;
         const searchResult = id
-          ? await search({ searchId: id, headless: false })
+          ? await search({
+              searchId: id,
+              adapters: sourceType === Parser.Spotify ? [] : [Adapter.Spotify],
+              // A title-search fallback could pick the wrong recording's
+              // cover and preview for the meta tags; phase 2 runs it.
+              fallback: false,
+              headless: false,
+            })
           : null;
 
         return render(searchResult);

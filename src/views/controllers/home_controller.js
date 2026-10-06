@@ -61,6 +61,7 @@ export default class extends Controller {
   // the fragment text instead. Prior results stay put: a failed search must
   // not nuke good state.
   showRequestError = event => {
+    if (this.failRowsLoader(event)) return;
     if (this.hasFormTarget && event?.target !== this.formTarget) return;
     let message = 'Something went wrong, please try again later.';
     // The resumed search settles here or in compactAfterSwap: either way,
@@ -113,10 +114,30 @@ export default class extends Controller {
   };
 
   showTransportError = event => {
+    if (this.failRowsLoader(event)) return;
     if (this.hasFormTarget && event?.target !== this.formTarget) return;
     this.resuming = false;
     toast().error('The search timed out or the connection dropped. Please try again.');
   };
+
+  // A share page's rows failed to load (error status, timeout, offline):
+  // keep the card header, swap the spinner for a message.
+  failRowsLoader(event) {
+    const loader = event?.target;
+    if (!(loader instanceof Element) || !loader.matches('[data-search-rows-loader]')) {
+      return false;
+    }
+    const message = document.createElement('p');
+    message.className = 'w-full text-center text-sm text-zinc-400';
+    message.textContent = 'Could not load the other platforms. Reload to try again.';
+    loader.replaceWith(message);
+    toast().error(
+      event.type === 'htmx:response:error'
+        ? 'Something went wrong, please try again later.'
+        : 'The search timed out or the connection dropped. Please try again.'
+    );
+    return true;
+  }
 
   resumeAfterVerify() {
     let saved = null;
