@@ -48,7 +48,24 @@ export default class extends Controller {
     this.soundPlayer.on('pause', () => {
       this.stopProgressUpdate();
     });
+
+    // A new search hides this card: stop the preview with it.
+    document.addEventListener('htmx:before:request', this.pauseForSearch);
   }
+
+  disconnect() {
+    document.removeEventListener('htmx:before:request', this.pauseForSearch);
+    this.stopProgressUpdate();
+    this.soundPlayer?.unload();
+  }
+
+  pauseForSearch = () => {
+    // `playing()` is false while a play is queued on a loading preview.
+    const player = this.soundPlayer;
+    if (!player || (!player.playing() && player.state() !== 'loading')) return;
+    player.stop();
+    this.updateAudioPreviewIcon(true);
+  };
 
   /**
    * Shares the universal link using the Web Share API or copies it to the clipboard.

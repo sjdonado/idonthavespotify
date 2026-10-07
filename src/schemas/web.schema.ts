@@ -5,6 +5,7 @@ import { ALLOWED_LINKS_REGEX } from '~/config/constants';
 export const indexRouteSchema = z.object({
   query: z.object({
     id: z.string().min(1, { message: 'Invalid search id' }).optional(),
+    rows: z.string().optional(),
   }),
 });
 

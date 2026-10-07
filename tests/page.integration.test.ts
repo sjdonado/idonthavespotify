@@ -3,11 +3,13 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, spyOn } from 'bu
 
 import { Adapter, MetadataType, Parser } from '~/config/enum';
 import * as linkParser from '~/parsers/link';
+import { getSearchParser } from '~/parsers/link';
 import {
   cacheSearchMetadata,
   cacheSearchResultLink,
   cacheStore,
 } from '~/services/cache';
+import HttpClient from '~/utils/http-client';
 import { getCheerioDoc } from '~/utils/scraper';
 
 import { HttpMock } from './utils/http-mock';
@@ -266,6 +268,81 @@ describe('Page router', () => {
       const errorMessage = doc('p').text();
       expect(errorMessage).toContain('Something went wrong, please try again later.');
       expect(getSearchParserMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('GET /?id= (share link)', () => {
+    const id = Buffer.from('open.spotify.com/track/2KvHC9z14GSl4YpkNMX384').toString(
+      'base64url'
+    );
+
+    it('sends the page from the source metadata with a loader for the rows', async () => {
+      const response = await nodeFetch(`${app.url}?id=${id}`);
+      const html = await response.text();
+      const doc = getCheerioDoc(html);
+
+      expect(response.status).toBe(200);
+      expect(doc('meta[property="og:title"]').attr('content')).toBe('Do Not Disturb');
+      expect(doc('meta[property="og:audio"]').attr('content')).toContain('p.scdn.co');
+      expect(doc('[data-controller="search-card"] h3').text()).toContain('Do Not Disturb');
+      const loader = doc('[data-search-rows-loader]');
+      expect(loader.attr('hx-get')).toBe(`/?id=${id}&rows=1`);
+      expect(loader.attr('hx-trigger')).toBe('load');
+      expect(loader.attr('hx-target')).toBe('this');
+      expect(loader.attr('hx-swap')).toBe('outerHTML');
+      expect(doc('[data-search-link]')).toHaveLength(0);
+    });
+
+    it('answers the loader with only the rows, source row included', async () => {
+      await cacheSearchResultLink(Adapter.Deezer, Parser.Spotify, '2KvHC9z14GSl4YpkNMX384', {
+        type: Adapter.Deezer,
+        url: 'https://www.deezer.com/track/144572248',
+        isVerified: true,
+      });
+
+      const response = await nodeFetch(`${app.url}?id=${id}&rows=1`);
+      const html = await response.text();
+      const doc = getCheerioDoc(html);
+      const hrefs = doc('[data-search-link] a')
+        .toArray()
+        .map(a => a.attribs['href']);
+
+      expect(html).not.toContain('<html');
+      expect(doc('[data-controller="search-card"]')).toHaveLength(0);
+      expect(hrefs).toContain('https://www.deezer.com/track/144572248');
+      expect(hrefs).toContain('https://open.spotify.com/track/2KvHC9z14GSl4YpkNMX384');
+    });
+
+    const requested = () =>
+      (HttpClient.get as unknown as { mock: { calls: unknown[][] } }).mock.calls.map(
+        call => call[0] as string
+      );
+
+    it('makes no service request in phase 1 for a Spotify source', async () => {
+      const before = requested().length;
+      await nodeFetch(`${app.url}?id=${id}`);
+      expect(requested().slice(before)).toEqual([]);
+    });
+
+    it('never runs the MusicBrainz fallback in phase 1', async () => {
+      const link = 'https://soundcloud.com/bobdylan/like-a-rolling-stone-1';
+      const { id: sourceId } = getSearchParser(link);
+      await cacheSearchMetadata(sourceId, Parser.SoundCloud, {
+        title: 'Like a Rolling Stone',
+        description: 'Bob Dylan',
+        type: MetadataType.Song,
+        image: 'https://example.com/cover.jpg',
+      });
+
+      const before = requested().length;
+      const response = await nodeFetch(
+        `${app.url}?id=${Buffer.from('soundcloud.com/bobdylan/like-a-rolling-stone-1').toString('base64url')}`
+      );
+
+      expect(response.status).toBe(200);
+      // The Spotify lookup fails here (no mocks), which would trigger the
+      // fallback in a full search.
+      expect(requested().slice(before).some(url => url.includes('musicbrainz'))).toBe(false);
     });
   });
 });

@@ -76,6 +76,27 @@ html {
   display: flex;
 }
 
+/* While a search runs, the spinner is the only thing under the search bar:
+   the previous card turns invisible but keeps its height (it shares a grid
+   cell with the spinner), so the search bar does not move. A failed search
+   drops the class and the card comes back. Browsers without :has() skip this
+   block entirely: card and spinner stack as before. */
+@supports selector(:has(*)) {
+  #search-results,
+  #search-skeleton {
+    grid-area: 1 / 1;
+  }
+
+  #home-main:has(#search-skeleton.htmx-request) #search-results {
+    visibility: hidden;
+  }
+
+  /* With a card on screen the spinner fills the card's cell, no taller. */
+  #home-main.has-results #search-skeleton {
+    min-height: 0;
+  }
+}
+
 /* Toast theme, UNLAYERED on purpose like the overrides above: toastify's
    own stylesheet is unlayered, and unlayered beats layered, so a layered
    theme would lose to its blue default. Every toast we fire is an error,
