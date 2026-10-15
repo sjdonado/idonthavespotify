@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "~/http-backend": ["./http-backend.ts"],
+      "~/logger": ["../src/utils/logger-impl-console.ts"],
+      "~/*": ["../src/*"]
+    }
+  },
+  "include": ["../src/**/*", "./**/*", "../e2e.config.ts"]
+}

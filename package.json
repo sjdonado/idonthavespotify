@@ -2,18 +2,24 @@
   "name": "idonthavespotify",
   "version": "1.10.0",
   "type": "module",
+  "engines": {
+    "bun": ">=1.4.3"
+  },
   "scripts": {
     "dev": "bun run --parallel watch:assets watch:server",
     "watch:assets": "bun run build.config.ts --watch",
     "watch:server": "bun run --watch src/index.ts | bunx pino-pretty",
     "build": "bun run build.config.ts --minify",
-    "build:prod": "bun build src/index.ts --compile --minify --sourcemap=linked --asset ./public --outfile ./dist/idonthavespotify",
+    "build:prod": "bun build src/index.ts --compile --bytecode --format=esm --minify --sourcemap=linked --asset ./public --outfile ./dist/idonthavespotify",
     "build:workers": "bun build --tsconfig-override ./tsconfig.workers.json --target=browser --outfile ./dist/workers.js ./src/workers.ts",
     "test": "NODE_ENV=test bun test --isolate",
     "test:mocks:fetch": "bun run scripts/fetch-snapshots.ts",
+    "test:e2e": "bun run build && E2E_TELEMETRY_DISABLED=1 node node_modules/e2e/dist/cli/bin.js run",
+    "test:e2e:list": "E2E_TELEMETRY_DISABLED=1 node node_modules/e2e/dist/cli/bin.js list",
     "test:ci": "bun run test:mocks:fetch && bun run build && NODE_ENV=test bun test --isolate",
-    "lint": "eslint 'src/**/*.{ts,tsx}' 'tests/**/*.ts'",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.workers.json"
+    "lint": "eslint 'src/**/*.{ts,tsx}' 'tests/**/*.ts' 'e2e/**/*.ts' e2e.config.ts build.config.ts",
+    "typecheck": "bun check && bun check -p tsconfig.workers.json && bun check -p e2e/tsconfig.json",
+    "typecheck:tsc": "tsc --noEmit && tsc --noEmit -p tsconfig.workers.json && tsc --noEmit -p e2e/tsconfig.json"
   },
   "dependencies": {
     "@hotwired/stimulus": "^3.2.2",
@@ -29,14 +35,17 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@e2e-dev/web": "0.14.0",
     "@eslint/js": "^9.39.5",
     "@tailwindcss/cli": "4.3.3",
-    "@types/bun": "1.4.2",
+    "@types/bun": "1.4.3",
     "@types/howler": "^2.2.13",
     "@types/string-similarity": "^4.0.2",
     "@typescript-eslint/eslint-plugin": "^8.70.0",
     "@typescript-eslint/parser": "^8.70.0",
+    "@typescript/native": "npm:typescript@7.0.2",
     "domhandler": "^5.0.3",
+    "e2e": "0.20.0",
     "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
@@ -44,10 +53,11 @@
     "eslint-plugin-prettier": "^5.5.6",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "globals": "^17.12.0",
+    "htmx.org": "4.0.0",
     "postcss": "^8.5.28",
     "prettier": "^3.9.6",
     "tailwindcss": "4.3.3",
-    "typescript": "^5.9.3",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
     "typescript-eslint": "^8.70.0"
   }
 }

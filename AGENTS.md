@@ -19,7 +19,7 @@ Bun + TypeScript server that converts a streaming-service link into links on oth
 
 ## Prerequisites
 
-- Bun 1.4.2 is the locally installed runtime (`bun --version`). Note the toolchain floats: Dockerfile builds on `oven/bun:1-alpine` and CI uses `oven-sh/setup-bun@v1` with no version input, so CI may run a newer Bun than local.
+- Bun 1.4.3 is the minimum runtime. Docker and CI pin 1.4.3. TypeScript 7.0.2 supplies `tsc` through the `@typescript/native` alias; the `typescript` alias supplies Microsoft's TypeScript 6 API compatibility package for ESLint.
 - `bun install` before anything else (Dockerfile uses `--frozen-lockfile`). Never read `.env` values; the variable *names* are listed in `.env.test`, and README links the portals that issue the real values.
 
 ## Commands (run from repo root)
@@ -27,11 +27,14 @@ Bun + TypeScript server that converts a streaming-service link into links on oth
 | Command | What it does | Status |
 |---|---|---|
 | `bun run dev` | asset watcher + `bun run --watch src/index.ts` (port `PORT` or 3000) | defined, not run here |
-| `bun run build` | production CSS + browser JS into `public/assets/` | defined, not run here |
-| `bun run build:prod` | `--compile` single binary at `dist/idonthavespotify` | defined, not run here |
-| `bun run build:workers` | edge bundle at `dist/workers.js` (fetch backend, console logger) | defined, not run here |
-| `bun run typecheck` | `tsc --noEmit` (self-host) + workers tsconfig | verified passing |
-| `bun run lint` | eslint over `src` and `tests` | verified passing |
+| `bun run build` | production CSS + browser JS into `public/assets/` | verified passing |
+| `bun run build:prod` | `--compile --bytecode` single binary at `dist/idonthavespotify` | verified passing |
+| `bun run build:workers` | edge bundle at `dist/workers.js` (fetch backend, console logger) | verified passing |
+| `bun run typecheck` | `bun check` (self-host, browser journeys, and build tooling) + workers tsconfig | verified passing |
+| `bun run typecheck:tsc` | TypeScript 7.0.2 cross-check for self-host, Worker, and e2e transport configurations | run when changing compiler configuration |
+| `bun run test:e2e:list` | lists declared user journeys and targets without running them | see `docs/verification.md` |
+| `bun run test:e2e` | builds assets and runs declarative desktop and phone-sized Chromium journeys | requires Node.js 24.8+ or 22.22.3+ on Node.js 22 |
+| `bun run lint` | eslint over `src`, `tests`, `e2e`, and build/verification configuration | verified passing |
 | `bun run test` | `NODE_ENV=test bun test` (offline via `HttpMock` + local snapshots) | verified passing |
 | `bun run test:ci` | regenerates snapshots from live URLs, then tests | defined, not run here (needs network; snapshots are gitignored but present in a set-up tree) |
 
@@ -51,9 +54,15 @@ CI: PRs run `tests.yml` (loads `.env.test` into env, then `test:ci`, plus asset/
 - Tidal has no outbound adapter: its search API needs a portal-granted entitlement that was refused (`invalid_scope` on the token, `INVALID_RESOURCE_ID` on every query), and its search pages sit behind a bot wall. Tidal links resolve through the MusicBrainz fallback instead (`src/services/musicbrainz.ts`, polite UA plus ~1s pacing per its rate rules); do not re-add a Tidal adapter without portal access. For songs the fallback looks up `/ws/2/isrc/<isrc>?inc=url-rels` first, with the ISRC taken from the verified Deezer hit (`isrc` on `SearchResultLink` is internal and never reaches responses): title searches return an arbitrary slice of equal-score recordings (71 matches, 28 tied, for the sample track on 2026-10-01). The title search remains the backup, and its relation lookups stop after `MB_BUDGET_MS` (3 s).
 - Env access is centralized in `src/config/env.ts` (lazy proxy over edge bindings, `Bun.env`, `process.env`); read new vars there, not inline. Never read `ENV` at module scope in `src`: the first read freezes the lazy cache, which breaks per-file test env assignments the same way `tests/utils/shared.ts` does. Read it per request instead. Abuse vars: `PLUNK_API_KEY` (non-blank marks the public instance, which disables `/api/search`; it no longer sends mail), `SESSION_SECRET`, `PLUNK_TEMPLATE_ID` (both dormant, kept for the future API-key feature), `PLUNK_API_URL` (optional, defaults to `https://next-api.useplunk.com`). `IDHS_API_KEY_BETA` stays dormant (read, never used); do not build auth logic on it.
 - `tests/utils/shared.ts` reads `ENV` at module-eval time, which freezes the lazy env cache for the whole test file. Any test file that sets `process.env` per-file (e.g. the gate suite) must not import it; inline the endpoint builder instead. Use `||=`, not `??=`, for per-file keys: `.env.test` declares some vars blank, and blank is not nullish.
-- Production image (`Dockerfile`) ships the compiled binary plus a `public/` copy; static assets resolve from disk at runtime, not from inside the binary.
+- Production image (`Dockerfile`) ships the compiled binary with static assets embedded by `--asset ./public`; no separate `public/` copy is needed.
 - `public/llms.txt` is a public contract read by external agents: any change to routes, auth, URLs, adapters, or response shapes must update it in the same commit as `API.md`/`README.md`. It rots silently because nothing executes it.
 - Markdown voice rule: `.md` files guide a stranger, so they use full explanatory prose. Terse style stays in code, comments, commit messages, and PR text. Never write terse checklist-style markdown.
+
+## Browser verification contract
+
+User journeys are declared in `e2e/search.e2e.ts`; targets and evidence are configured in `e2e.config.ts`. Follow `docs/verification.md` before final verification. The yolo ladder is typecheck, lint, existing tests, asset/binary/Worker builds, then `bun run test:e2e`, followed by the remote required checks. The full browser gate must pass all declared journeys on both targets without skips or filters. Inspect the current command's exit status and `.e2e/report.json`; a stale report left by a setup failure is not acceptance evidence. Keep reports and traces under the ignored `.e2e/` directory.
+
+The required browser gate uses no model and no production credentials. The e2e app runs with `--no-env-file`, explicit fixture configuration, and an alternate third-party HTTP backend selected by `e2e/tsconfig.json`. Do not stub internal modules or silently replace this with a live-provider test. Phone-sized Chromium does not establish iOS Safari coverage. Live upstream availability, audio, sharing, Cloudflare challenges, and Worker-runtime behavior are separate checks when relevant to the change.
 
 ## Workers operations (public instance only)
 

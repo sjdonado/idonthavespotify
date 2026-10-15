@@ -17,8 +17,8 @@ async function buildCSS(options: BuildOptions = {}) {
   await ensureDir('./public/assets');
 
   const tailwindCmd = [
-    'bunx',
-    '@tailwindcss/cli',
+    process.execPath,
+    './node_modules/.bin/tailwindcss',
     '-i',
     './src/views/css/index.css',
     '-o',
@@ -102,7 +102,7 @@ async function watchJS(options: BuildOptions) {
   console.log('👀 Starting JS watcher...');
 
   const jsWatchCmd = [
-    'bun',
+    process.execPath,
     'build',
     './src/views/controllers/index.js',
     '--outdir',
