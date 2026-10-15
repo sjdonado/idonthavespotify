@@ -50,7 +50,7 @@ Convert music links across streaming platforms.
 - `403`: API search disabled on the public instance (response carries `auth: "api-key"`)
 - `500`: Processing failed
 
-On the public instance, programmatic search is disabled: `/api/search` answers 403 without touching any upstream service, and it stays that way until API keys land. Programmatic clients such as the Raycast extension target self-hosted instances, where search stays open.
+`DISABLE_API_SEARCH=true` disables programmatic search: `/api/search` answers 403 before input validation and without touching any upstream service. The public Worker's Wrangler configuration enables this setting explicitly. Self-hosted instances leave it unset by default, so programmatic clients such as the Raycast extension can use them. The existing `auth: "api-key"` response field is retained for compatibility; API-key authentication is not implemented.
 
 **Example** (self-hosted instance; the public instance answers 403):
 ```bash

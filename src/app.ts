@@ -1,7 +1,7 @@
 import { h, Helmet, renderSSR } from 'nano-jsx';
 
-import { isPublicInstance, wantsJson } from './abuse/gate';
 import { Adapter, Parser } from './config/enum';
+import { ENV } from './config/env';
 import { getSearchParser } from './parsers/link';
 import { apiRouteSchema } from './schemas/api.schema';
 import { indexRouteSchema, searchRouteSchema } from './schemas/web.schema';
@@ -14,12 +14,15 @@ import SearchCard, { SearchLinks } from './views/components/search-card';
 import MainLayout from './views/layouts/main';
 import Home from './views/pages/home';
 
+const wantsJson = (req: Request): boolean =>
+  req.headers.get('accept')?.includes('application/json') === true ||
+  req.headers.get('content-type')?.includes('application/json') === true;
+
 // Dynamic routes shared by every runtime (Bun.serve, edge fetch handler).
 // Static assets are NOT here: each runtime serves them its own way.
 // Abuse protection: web search is open; only the edge (Bot Fight Mode plus
 // a WAF Managed Challenge rule) and the per-service guards stand in front
-// of it. /api/search stays disabled on the public instance until API keys
-// land; /api/status and assets stay open.
+// of it. DISABLE_API_SEARCH controls programmatic access; /api/status and assets stay open.
 export const createRoutes = () => ({
   '/': {
     GET: async function (req: Request) {
@@ -182,11 +185,8 @@ export const createRoutes = () => ({
   '/api/search': {
     POST: async function (req: Request) {
       try {
-        // Disabled on the public instance until API keys land. The Plunk
-        // key is the public-instance signal, same as before; self-host
-        // (no key) keeps serving programmatic clients like the Raycast
-        // extension.
-        if (isPublicInstance()) {
+        // The public Worker disables programmatic search explicitly; self-hosted instances leave it open by default.
+        if (ENV.app.disableApiSearch) {
           return Response.json(
             { error: 'API search is disabled on the public instance.', auth: 'api-key' },
             { status: 403 }

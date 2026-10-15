@@ -18,4 +18,4 @@ The server renders pages with nano-jsx. htmx replaces result fragments, and Stim
 
 Cloudflare Workers use platform fetch rather than the self-hosted TLS-impersonating transport. The edge cache is per isolate, share links remain plain app URLs, and Apple Music catalog metadata has no audio preview. Per-service budgets and circuit breakers protect upstream quotas on both runtimes.
 
-The email-code wall is retired. The dormant modules in `src/abuse/` are retained for a future API-key feature, not used for browser search. Legacy auth endpoints return 410. If email verification returns in the future, addresses are abuse-prevention data only, never marketing data.
+The email-code wall and its Plunk, OTP, session, and per-email quota implementation have been removed. Legacy auth endpoints still return 410. Programmatic access is controlled by the explicit `DISABLE_API_SEARCH` setting, enabled for the public Worker and unset by default for self-hosted instances. This setting does not gate browser search or shared links and does not implement API-key authentication.
