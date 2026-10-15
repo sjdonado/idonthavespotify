@@ -1,90 +1,132 @@
-> IDHS (I Don't Have Spotify)
+# I Don't Have Spotify
 
-You get a link on a streaming service you don't use, and you want to hear the song anyway. Copy the link, paste it into the search bar, and the app hands back the same track on every other service it knows about. When the original link comes from Spotify you even get a short audio preview, so you can confirm it found the right song before you tap through.
+IDHS converts a streaming-service link into links to the same content on other platforms. It supports individual tracks, albums, artists, and podcasts, but not playlists. Results include cover art, audio previews when available, and a universal URL that other people can open without choosing a service first.
 
-Playlists are deliberately out of scope. The app converts individual tracks, albums, artists, and podcasts, and it does that one job well instead of many jobs poorly.
+The project is a Bun and TypeScript server with a server-rendered web interface and a search API. You can run it as a standalone executable or Docker container; the public instance runs on Cloudflare Workers.
 
-## How a link becomes links
-
-Every conversion runs through two stages, and keeping them separate is what makes a new service easy to add.
-
-First a parser figures out which platform your link came from and pulls out normalized metadata: the title, the artist, what kind of thing it is, cover art when it can find it. From that metadata it builds one clean search query, the same shape no matter which service the link started on. You can read this stage in `src/parsers`, one file per platform.
-
-Then adapters take that query and search each destination platform for the best match, each in its own way: some have official APIs, others are searched through their public pages. Every adapter answers the same question with the same shape, a URL plus two honest flags. `isVerified` means the platform gave a strong match signal, and `notAvailable` means the score was so low you probably should not trust it. That logic lives in `src/adapters`, again one file per platform.
-
-| Adapter          | Inverted Search | Official API           | Verified Links |
-| ---------------- | --------------- | ---------------------- | -------------- |
-| Spotify          | Yes             | No                     | Yes            |
-| Tidal            | Yes (fallback)  | No                     | Yes            |
-| YouTube Music    | Yes             | No                     | Yes            |
-| Apple Music      | Yes             | No                     | Yes            |
-| Deezer           | Yes             | Yes                    | Yes            |
-| SoundCloud       | Yes             | No                     | Yes            |
-| Qobuz            | Yes             | No                     | Yes            |
-| Bandcamp         | Yes             | No                     | Yes            |
-| Pandora          | Yes             | No                     | Yes            |
-| JioSaavn         | Yes             | No                     | Yes            |
-| Apple Podcasts   | Yes             | Yes                    | Yes            |
-| Invidious        | Yes (derived)   | No                     | Yes            |
-
-"Inverted search" means the adapter can be a search target. A few notes on the ones that behave unusually: Spotify has no usable official API for this project, so search runs through the same internal GraphQL API the Spotify web player uses, with an anonymous access token minted by a TOTP flow (more on that below). Tidal has no usable search of its own for this project (its API needs a portal-granted entitlement that was refused, and its pages sit behind a bot wall), so it resolves through a MusicBrainz fallback instead, and the curated streaming links found there fill whichever adapters missed, Tidal included. For songs the fallback first looks up the recording by its ISRC, taken from the verified Deezer match, because a title search can return any slice of many equally scored recordings and only some of them carry streaming links. When there is no ISRC, or the ISRC recordings do not cover every missing adapter, the work is matched by title and artist, and those lookups stop after about three seconds so a search stays responsive. Apple Music on the edge resolves through its catalog pages with no audio preview. Invidious is not searched at all: whenever a YouTube result exists, its watch, playlist, or channel path is mirrored onto `https://redirect.invidious.io`, the official Invidious redirector, where the visitor picks a live instance. This offers a privacy-friendly way to watch without an extra request or an instance list that could go stale.
-
-## The web app and the Raycast extension
-
-The web app is the main interface, a single page with a search bar, instant result cards, and shareable universal links in the form `APP_URL?id=<id>`. Anyone opening your universal link sees the same result card without searching again.
+Public instance: https://idonthavespotify.sjdonado.com
 
 <div align="center">
-  <img width="1712" height="829" alt="Search result card for Wake Me Up with all eleven services" src="docs/screenshot.png" />
+  <img width="1712" height="829" alt="Search result card for Wake Me Up" src="docs/screenshot.png" />
 </div>
 
-### Raycast
+## Architecture
 
-<a title="Install idonthavespotify Raycast Extension" href="https://www.raycast.com/sjdonado/idonthavespotify"><img src="https://www.raycast.com/sjdonado/idonthavespotify/install_button@2x.png?v=1.1" height="64" style="height: 64px;" alt=""></a>
+Link conversion separates source parsing from destination search:
 
-Source code: https://github.com/raycast/extensions/tree/main/extensions/idonthavespotify
+```text
+Source link → parser → metadata and search query → adapters → destination links
+```
 
-The extension talks to a self-hosted instance, where search stays open. It does not work against the public instance, where programmatic search is disabled until API keys land.
+**Parsers** in `src/parsers/` identify the source platform and extract normalized metadata: title, artist, content type, cover art, and any audio preview. Each parser builds a query from that metadata, so adapters do not need to understand the original link format.
 
-## Running it locally
+**Adapters** in `src/adapters/` search destination services and score candidate matches. A result contains a URL and two flags: `isVerified` indicates a strong match signal; `notAvailable` disables a result whose score is too low to trust. MusicBrainz can fill destinations that did not return a match. Service and content-type support vary, so a conversion does not guarantee a result on every platform.
 
-You need Bun 1.4.2 or newer; check with `bun --version`. The full list of environment variable names lives in `.env.test`, and only real values go in your own `.env`, which is never committed. One of them needs an account elsewhere: `YOUTUBE_API_KEY` comes from the [Google Developers Console](https://console.developers.google.com/).
+The web interface uses nano-jsx for server-rendered HTML, htmx for result-fragment updates, and Stimulus for previews, sharing, and error handling. Universal links use `APP_URL?id=<id>`. Shared pages return source metadata first for link-preview crawlers, then load destination links into the card in a second request.
 
-A note on Spotify, since it surprises people: as of March 2026, Spotify [restricted its Web API](https://www.reddit.com/r/webdev/comments/1rflyiz/changes_to_spotify_api/) to require a Premium account for Development Mode and cut down the available endpoints. This project has no premium account, so instead of the official API it uses the web player's own internal API with an automatically refreshed anonymous token, which needs no developer account and expires after about an hour. That is why the Spotify adapter scrapes the player bundle for its TOTP secret at token time.
+## Supported services
 
-Once the values are in place, starting the app is two commands:
+All services below except Invidious accept source links. Invidious is an additional destination derived from a YouTube result.
+
+| Destination | Lookup method |
+| --- | --- |
+| Spotify | Web player GraphQL API |
+| YouTube Music | YouTube search |
+| Apple Music | Catalog search |
+| Deezer | Official API |
+| SoundCloud | Public search pages |
+| Qobuz | Search API |
+| Bandcamp | Search API |
+| Pandora | Search API |
+| JioSaavn | Search API |
+| Apple Podcasts | Official API |
+| Tidal | MusicBrainz fallback |
+| Invidious | Derived from YouTube results |
+
+### Service constraints
+
+**Spotify** source metadata comes from embed pages. Destination search uses the web player's internal GraphQL API rather than the official Web API. An anonymous access token refreshes automatically through a TOTP flow that reads the player bundle's secret; no Spotify developer account is required.
+
+**Tidal** has no direct search adapter: the required API entitlement is unavailable to this project, and its public pages have a bot wall. MusicBrainz supplies curated streaming relations instead. For songs, the fallback first looks up the ISRC from a verified Deezer match to identify the recording. Title-and-artist search is the backup, with relation lookups limited to about three seconds.
+
+**Invidious** needs no upstream search. The adapter mirrors a YouTube watch, playlist, or channel path onto https://redirect.invidious.io, where the visitor selects a live instance. **Apple Music on Workers** resolves through catalog pages without an audio preview.
+
+See `docs/architecture.md` for the conversion pipeline, fallback behavior, and runtime differences.
+
+## Local development
+
+Install **Bun 1.4.3 or newer**, then install the dependencies:
 
 ```sh
 bun install
-bun dev
 ```
+
+Configure a local `.env` using the endpoint settings in `.env.test` and the variable reference in `docs/self-hosting.md`. Supply your own credentials and never commit them. The YouTube adapter needs `YOUTUBE_API_KEY`, available from https://console.developers.google.com/. Set `APP_URL=http://localhost:3000` for local share links.
+
+```sh
+bun run dev
+```
+
+Open http://localhost:3000. The development command watches both server code and browser assets.
 
 ## Self-hosting
 
-The supported self-host path is the single compiled binary, bare or inside Docker. It serves everything on its own: pages, API, and static assets, with no sidecars and no separate asset copy to manage.
+The supported self-hosting path is a single compiled executable, directly or inside Docker. It serves HTML, API responses, and embedded static assets without sidecars or a separate `public/` directory. Build the browser assets before compiling the server:
 
 ```sh
 bun run build
 bun run build:prod
-./dist/idonthavespotify # serves everything, no sidecars, no `public/` copy needed
+NODE_ENV=production ./dist/idonthavespotify
 ```
 
-`PORT` and `NODE_ENV` configure the binary, and it reads `.env` from the working directory. Self-hosted instances keep search open for pages and API alike; the one thing the app deliberately does not ship is a per-IP rate limiter, so only expose your instance publicly behind Cloudflare (with Bot Fight Mode and a Managed Challenge rule like the public instance's, described in AGENTS.md) or a rate-limiting reverse proxy.
+The executable reads `.env` from its working directory. `PORT` changes the listening port, which defaults to 3000. Self-hosted instances keep browser and API search open; leave `PLUNK_API_KEY` unset to retain that behavior. Despite its name, this variable now selects public-instance restrictions and does not send email.
 
-## The public instance and its abuse protection
+The app has no per-IP rate limiter. Protect publicly exposed instances with a rate-limiting reverse proxy or Cloudflare Bot Fight Mode and a Managed Challenge rule. Per-service budgets and circuit breakers limit upstream requests, but are not a substitute for edge protection.
 
-The public instance runs on Cloudflare Workers, and because it sits on shared upstream quotas, it leans on the edge to stay usable. Web search and shared links are open to everyone with no login; only programmatic `/api/search` calls are disabled there, answering 403 without touching any upstream service, until API keys land. When Cloudflare's bot check challenges a web search, the page sends the browser to `/verify`, a plain page where the check can be passed, and then returns to the page it came from and runs the search again with the same link.
+`docs/self-hosting.md` covers environment settings, Docker builds, and deployment configuration. Before a Docker build, exclude environment-secret files from the build context; the current `.dockerignore` excludes only the local variants.
 
-Abuse protection lives in two places. At the edge, Bot Fight Mode stays on for known-bot junk and a WAF Managed Challenge rule fronts the search routes, so suspicious visitors face an automatic challenge (interactive or not, by signal) while humans pass through untouched. In the app, the per-service circuit breakers stay the final fuse for upstream quotas. The email-code wall is gone: its modules remain in `src/abuse` for a future API-key feature, and the old auth endpoints answer 410.
+### API and Raycast
 
-### Operating the public instance
+`API.md` documents the search endpoints and response formats. The Raycast extension connects to a self-hosted instance because the public site's programmatic search is disabled.
 
-Deployments happen automatically: every push to `main` typechecks, lints, builds the edge bundle, audits it for native imports, and deploys it with Wrangler. A failed check blocks the deploy. The GitHub secrets that make this work are `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+Install: https://www.raycast.com/sjdonado/idonthavespotify
 
-The edge protection guide, including the WAF rule and Bot Fight Mode notes, lives in AGENTS.md. A `PLUNK_API_KEY` worker secret is still the signal the code uses to tell the public instance apart from a self-host; it no longer sends any mail.
+<a title="Install idonthavespotify Raycast Extension" href="https://www.raycast.com/sjdonado/idonthavespotify"><img src="https://www.raycast.com/sjdonado/idonthavespotify/install_button@2x.png?v=1.1" height="64" style="height: 64px;" alt=""></a>
 
-## More info
+Extension source: https://github.com/raycast/extensions/tree/main/extensions/idonthavespotify
 
-Contributions are more than welcome, just open a PR and I'll review it promptly.
+## Public instance and Workers deployment
 
-<img width=50 src="https://user-images.githubusercontent.com/27580836/227801051-a71d389e-2510-4965-a23e-d7478fe28f13.jpeg"/>
-Icon Generated by https://deepai.org/machine-learning-model/text2img
+The public site permits browser searches and shared links without login. `/api/search` returns 403 without calling upstream services; programmatic clients must use a self-hosted instance until API keys are available. The previous email-code wall is retired, and its auth endpoints return 410.
+
+Cloudflare Bot Fight Mode filters known bots, while a host-scoped WAF Managed Challenge rule protects search routes. A challenge cannot be completed inside an htmx request, so the app navigates to `/verify`, returns to the original page, and resumes the search once.
+
+Workers use platform fetch instead of the self-hosted TLS-impersonating HTTP transport, and their in-memory cache is per isolate. Pushes to `main` typecheck, lint, build the Worker bundle, audit native imports, and deploy with Wrangler. GitHub needs `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`; Worker bindings must also provide the app's required environment settings. The exact WAF rule and operational constraints are maintained in `AGENTS.md`.
+
+## Verification
+
+```sh
+bun run typecheck
+bun run lint
+bun run test
+bun run test:e2e
+```
+
+`typecheck` uses Bun's native checker for the self-host, Worker, and e2e transport configurations. `typecheck:tsc` provides a TypeScript 7 compatibility cross-check. The package aliases keep TypeScript 7's compiler alongside Microsoft's TypeScript 6 API compatibility package, which ESLint still requires.
+
+Existing tests exercise parsers, adapters, API routes, and other server behavior with local snapshots. The browser layer uses https://github.com/tester-army/e2e to declare conversion, universal-link reload, and error-handling journeys on desktop and phone-sized Chromium. It runs the real app with third-party HTTP fixtures, without AI credentials or live music-provider requests. The runner needs Node.js 24.8 or newer, or Node.js 22.22.3 or newer on the 22.x line; phone-sized Chromium does not establish iOS Safari coverage.
+
+## Documentation
+
+| Guide | Detailed coverage |
+| --- | --- |
+| `docs/architecture.md` | Conversion stages, service-specific behavior, shared-page loading, and runtime differences. |
+| `docs/self-hosting.md` | Environment configuration, standalone and Docker setup, build-context safety, and Cloudflare operations. |
+| `API.md` | Endpoints, request and response formats, and public-instance restrictions. |
+| `docs/verification.md` | Journey coverage, test isolation, reports and traces, and the final verification sequence for agents. |
+
+Contributions are welcome. Include the reason for the change and its verification results in your pull request.
+
+<img width="50" src="https://user-images.githubusercontent.com/27580836/227801051-a71d389e-2510-4965-a23e-d7478fe28f13.jpeg" alt="App icon" />
+
+Icon generated by https://deepai.org/machine-learning-model/text2img.
