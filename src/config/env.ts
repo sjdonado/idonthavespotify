@@ -41,18 +41,10 @@ const buildEnv = () => ({
     },
   },
   services: {},
-  abuse: {
-    // No separate flag: the public instance is exactly a non-blank Plunk key.
-    publicInstance: (readEnv('PLUNK_API_KEY') ?? '').trim().length > 0,
-    sessionSecret: readEnv('SESSION_SECRET'),
-    plunkApiKey: readEnv('PLUNK_API_KEY'),
-    plunkTemplateId: readEnv('PLUNK_TEMPLATE_ID'),
-    plunkApiUrl: readEnv('PLUNK_API_URL') ?? 'https://next-api.useplunk.com',
-  },
   app: {
     url: readEnv('APP_URL')!,
     version: version,
-    apiKeyBeta: readEnv('IDHS_API_KEY_BETA')!,
+    disableApiSearch: readEnv('DISABLE_API_SEARCH')?.trim().toLowerCase() === 'true',
   },
   cache: {
     expTime: 60 * 60 * 24 * 7 * 4, // 4 weeks in seconds

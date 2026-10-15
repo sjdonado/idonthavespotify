@@ -79,7 +79,7 @@ bun run build:prod
 NODE_ENV=production ./dist/idonthavespotify
 ```
 
-The executable reads `.env` from its working directory. `PORT` changes the listening port, which defaults to 3000. Self-hosted instances keep browser and API search open; leave `PLUNK_API_KEY` unset to retain that behavior. Despite its name, this variable now selects public-instance restrictions and does not send email.
+The executable reads `.env` from its working directory. `PORT` changes the listening port, which defaults to 3000. Self-hosted instances keep browser and API search open by default. Set `DISABLE_API_SEARCH=true` to deny programmatic search without affecting browser searches or shared links. The public Worker's Wrangler configuration enables this setting explicitly.
 
 The app has no per-IP rate limiter. Protect publicly exposed instances with a rate-limiting reverse proxy or Cloudflare Bot Fight Mode and a Managed Challenge rule. Per-service budgets and circuit breakers limit upstream requests, but are not a substitute for edge protection.
 
@@ -97,7 +97,7 @@ Extension source: https://github.com/raycast/extensions/tree/main/extensions/ido
 
 ## Public instance and Workers deployment
 
-The public site permits browser searches and shared links without login. `/api/search` returns 403 without calling upstream services; programmatic clients must use a self-hosted instance until API keys are available. The previous email-code wall is retired, and its auth endpoints return 410.
+The public site permits browser searches and shared links without login. With `DISABLE_API_SEARCH=true`, `/api/search` returns 403 without calling upstream services; programmatic clients must use a self-hosted instance. The retired email-login endpoints still return 410 for compatibility, but their implementation and quota storage have been removed.
 
 Cloudflare Bot Fight Mode filters known bots, while a host-scoped WAF Managed Challenge rule protects search routes. A challenge cannot be completed inside an htmx request, so the app navigates to `/verify`, returns to the original page, and resumes the search once.
 

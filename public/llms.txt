@@ -13,7 +13,7 @@ Local Development: http://localhost:3000
 
 ## Authentication
 
-The public instance needs no login: web search and shared links are open to everyone. Programmatic `/api/search` calls are disabled there until API keys land, and they answer 403 with `auth: "api-key"`. Programmatic clients must target a self-hosted instance today, where search stays open.
+The public instance needs no login: web search and shared links are open to everyone. Its Wrangler configuration sets `DISABLE_API_SEARCH="true"`, so programmatic `/api/search` calls answer 403 with the existing compatibility field `auth: "api-key"`. API-key authentication is not implemented. Programmatic clients must target a self-hosted instance, where search stays open unless the operator enables the same setting. The retired email-login implementation, Plunk integration, and email-quota Durable Object have been removed; legacy auth endpoints still return 410.
 
 ## Abuse Protection
 

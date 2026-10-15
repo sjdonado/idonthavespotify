@@ -3,20 +3,17 @@ import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 
 import { generateId } from '~/utils/encoding';
 
-import { loadHeadSnapshots } from '../mocks/snapshots';
-import { HttpMock } from '../utils/http-mock';
-import { createTestApp, formDataFromObject, nodeFetch } from '../utils/request';
+import { loadHeadSnapshots } from './mocks/snapshots';
+import { HttpMock } from './utils/http-mock';
+import { createTestApp, formDataFromObject, nodeFetch } from './utils/request';
 
-// NOTE: no ../utils/shared import here — it reads ENV at module-eval time,
-// which would freeze config before the per-file env assignment above runs.
+// Do not import ./utils/shared: its module-level ENV read would freeze configuration before the per-file setting below.
 const apiSearchEndpoint = (baseUrl: URL) => `${baseUrl}api/search?v=1`;
 
 const LINK = 'https://open.spotify.com/track/3AhXZa8sUQht0UEdBJgpGc';
 
-// Gate on for this file only (bun test --isolate keeps it per-file): the
-// Plunk key is the public-instance signal. Web search stays open on it;
-// only /api/search is disabled until API keys land.
-process.env['PLUNK_API_KEY'] ||= 'test-plunk-key';
+// Match the public Worker's setting; bun test --isolate keeps it per-file.
+process.env['DISABLE_API_SEARCH'] = 'true';
 
 describe('Public instance without the email wall', () => {
   let app: Server<undefined>;
@@ -136,24 +133,4 @@ describe('Public instance without the email wall', () => {
     expect(data.identity).toBeUndefined();
   });
 
-  it('keeps exactly one submittable code field in gate fragments', async () => {
-    // Dormant email modules stay for the future API-key feature: htmx
-    // parses swap responses inside a <template> element, where scripting
-    // is disabled and <noscript> content parses as live, submittable
-    // controls. A fallback code input there double-submits alongside the
-    // hidden field and the server keeps the last (empty) value, so every
-    // verify fails. Cheerio cannot model the scripting flag, so this
-    // guards the raw markup instead.
-    const { codeSentFragment, emailFormFragment } = await import(
-      '~/abuse/routes'
-    );
-    for (const html of [
-      codeSentFragment('web.user@gmail.com'),
-      emailFormFragment('web.user@gmail.com', 'Some error'),
-    ]) {
-      expect(html).not.toMatch(
-        /<noscript[^>]*>.*?(input|select|textarea|button)/s
-      );
-    }
-  });
 });

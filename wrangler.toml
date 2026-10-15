@@ -8,12 +8,13 @@ compatibility_flags = ["nodejs_compat"]
 [assets]
 directory = "./public"
 
-# Per-email search quota (demo abuse gate). One DO subrequest per search;
-# rows hold only email-hash window counters and self-expire via alarms.
-[[durable_objects.bindings]]
-name = "QUOTA_DO"
-class_name = "QuotaDO"
+[vars]
+DISABLE_API_SEARCH = "true"
 
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["QuotaDO"]
+
+[[migrations]]
+tag = "v2-remove-quota"
+deleted_classes = ["QuotaDO"]
